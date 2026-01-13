@@ -2,30 +2,48 @@ import React, { useState, useEffect, useCallback } from 'react';
 
 // Game constants
 const ZONES = [
-  { id: 0, name: 'Forest Clearing', enemyHp: 20, enemyDmg: 2, goldMin: 3, goldMax: 8, unlockLevel: 1,
-    enemyType: 'Beast', drops: { ore: 0.25, leather: 0.35, enhanceStone: 0.08, blessedOrb: 0, celestialShard: 0 }},
-  { id: 1, name: 'Dark Woods', enemyHp: 50, enemyDmg: 5, goldMin: 8, goldMax: 15, unlockLevel: 5,
-    enemyType: 'Beast', drops: { ore: 0.30, leather: 0.40, enhanceStone: 0.12, blessedOrb: 0.02, celestialShard: 0 }},
-  { id: 2, name: 'Goblin Caves', enemyHp: 120, enemyDmg: 12, goldMin: 15, goldMax: 30, unlockLevel: 10,
-    enemyType: 'Humanoid', drops: { ore: 0.45, leather: 0.30, enhanceStone: 0.18, blessedOrb: 0.04, celestialShard: 0 }},
-  { id: 3, name: 'Undead Crypt', enemyHp: 280, enemyDmg: 25, goldMin: 30, goldMax: 60, unlockLevel: 18,
-    enemyType: 'Undead', drops: { ore: 0.35, leather: 0.20, enhanceStone: 0.28, blessedOrb: 0.08, celestialShard: 0.01 }},
-  { id: 4, name: 'Dragon Peak', enemyHp: 600, enemyDmg: 50, goldMin: 60, goldMax: 120, unlockLevel: 28,
-    enemyType: 'Dragon', drops: { ore: 0.50, leather: 0.45, enhanceStone: 0.30, blessedOrb: 0.12, celestialShard: 0.03 }},
-  { id: 5, name: 'Void Realm', enemyHp: 1500, enemyDmg: 100, goldMin: 150, goldMax: 300, unlockLevel: 40,
-    enemyType: 'Demon', drops: { ore: 0.40, leather: 0.35, enhanceStone: 0.40, blessedOrb: 0.18, celestialShard: 0.06 }},
-  { id: 6, name: 'Frozen Wastes', enemyHp: 3500, enemyDmg: 180, goldMin: 300, goldMax: 550, unlockLevel: 55,
-    enemyType: 'Elemental', drops: { ore: 0.60, leather: 0.25, enhanceStone: 0.45, blessedOrb: 0.22, celestialShard: 0.10 }},
-  { id: 7, name: 'Demon Fortress', enemyHp: 7500, enemyDmg: 320, goldMin: 500, goldMax: 900, unlockLevel: 70,
-    enemyType: 'Demon', drops: { ore: 0.55, leather: 0.40, enhanceStone: 0.50, blessedOrb: 0.28, celestialShard: 0.15 }},
-  { id: 8, name: 'Celestial Tower', enemyHp: 15000, enemyDmg: 550, goldMin: 800, goldMax: 1500, unlockLevel: 85,
-    enemyType: 'Celestial', drops: { ore: 0.50, leather: 0.35, enhanceStone: 0.55, blessedOrb: 0.35, celestialShard: 0.22 }},
-  { id: 9, name: 'Abyssal Depths', enemyHp: 35000, enemyDmg: 900, goldMin: 1500, goldMax: 2800, unlockLevel: 100,
-    enemyType: 'Abyssal', drops: { ore: 0.55, leather: 0.45, enhanceStone: 0.60, blessedOrb: 0.40, celestialShard: 0.28 }},
-  { id: 10, name: 'Chaos Realm', enemyHp: 80000, enemyDmg: 1500, goldMin: 3000, goldMax: 5500, unlockLevel: 120,
-    enemyType: 'Chaos', drops: { ore: 0.60, leather: 0.50, enhanceStone: 0.65, blessedOrb: 0.45, celestialShard: 0.35 }},
-  { id: 11, name: 'Eternal Void', enemyHp: 200000, enemyDmg: 2500, goldMin: 6000, goldMax: 12000, unlockLevel: 150,
-    enemyType: 'Void', drops: { ore: 0.70, leather: 0.60, enhanceStone: 0.75, blessedOrb: 0.55, celestialShard: 0.45 }},
+  { id: 0, name: 'Forest Clearing', enemyHp: 30, enemyDmg: 3, goldMin: 3, goldMax: 8, unlockLevel: 1,
+    enemyType: 'Beast', drops: { ore: 0.25, leather: 0.35, enhanceStone: 0.08, blessedOrb: 0, celestialShard: 0 }, isBoss: false },
+  { id: 1, name: 'Dark Woods', enemyHp: 80, enemyDmg: 8, goldMin: 8, goldMax: 15, unlockLevel: 5,
+    enemyType: 'Beast', drops: { ore: 0.30, leather: 0.40, enhanceStone: 0.12, blessedOrb: 0.02, celestialShard: 0 }, isBoss: false },
+  { id: 2, name: '🔥 Forest Guardian', enemyHp: 250, enemyDmg: 15, goldMin: 30, goldMax: 60, unlockLevel: 8,
+    enemyType: 'Boss', drops: { ore: 0.80, leather: 0.80, enhanceStone: 0.40, blessedOrb: 0.15, celestialShard: 0 }, isBoss: true, bossSet: 'guardian' },
+  { id: 3, name: 'Goblin Caves', enemyHp: 200, enemyDmg: 18, goldMin: 15, goldMax: 30, unlockLevel: 10,
+    enemyType: 'Humanoid', drops: { ore: 0.45, leather: 0.30, enhanceStone: 0.18, blessedOrb: 0.04, celestialShard: 0 }, isBoss: false },
+  { id: 4, name: 'Undead Crypt', enemyHp: 450, enemyDmg: 35, goldMin: 30, goldMax: 60, unlockLevel: 18,
+    enemyType: 'Undead', drops: { ore: 0.35, leather: 0.20, enhanceStone: 0.28, blessedOrb: 0.08, celestialShard: 0.01 }, isBoss: false },
+  { id: 5, name: '🔥 Lich King', enemyHp: 1200, enemyDmg: 60, goldMin: 100, goldMax: 200, unlockLevel: 22,
+    enemyType: 'Boss', drops: { ore: 0.70, leather: 0.60, enhanceStone: 0.50, blessedOrb: 0.25, celestialShard: 0.08 }, isBoss: true, bossSet: 'lich' },
+  { id: 6, name: 'Dragon Peak', enemyHp: 1000, enemyDmg: 75, goldMin: 60, goldMax: 120, unlockLevel: 28,
+    enemyType: 'Dragon', drops: { ore: 0.50, leather: 0.45, enhanceStone: 0.30, blessedOrb: 0.12, celestialShard: 0.03 }, isBoss: false },
+  { id: 7, name: '🔥 Ancient Dragon', enemyHp: 2800, enemyDmg: 120, goldMin: 200, goldMax: 400, unlockLevel: 35,
+    enemyType: 'Boss', drops: { ore: 0.85, leather: 0.85, enhanceStone: 0.60, blessedOrb: 0.35, celestialShard: 0.15 }, isBoss: true, bossSet: 'dragon' },
+  { id: 8, name: 'Void Realm', enemyHp: 2500, enemyDmg: 140, goldMin: 150, goldMax: 300, unlockLevel: 40,
+    enemyType: 'Demon', drops: { ore: 0.40, leather: 0.35, enhanceStone: 0.40, blessedOrb: 0.18, celestialShard: 0.06 }, isBoss: false },
+  { id: 9, name: 'Frozen Wastes', enemyHp: 6000, enemyDmg: 260, goldMin: 300, goldMax: 550, unlockLevel: 55,
+    enemyType: 'Elemental', drops: { ore: 0.60, leather: 0.25, enhanceStone: 0.45, blessedOrb: 0.22, celestialShard: 0.10 }, isBoss: false },
+  { id: 10, name: '🔥 Frost Titan', enemyHp: 15000, enemyDmg: 450, goldMin: 800, goldMax: 1500, unlockLevel: 60,
+    enemyType: 'Boss', drops: { ore: 0.90, leather: 0.70, enhanceStone: 0.70, blessedOrb: 0.45, celestialShard: 0.25 }, isBoss: true, bossSet: 'frost' },
+  { id: 11, name: 'Demon Fortress', enemyHp: 12000, enemyDmg: 480, goldMin: 500, goldMax: 900, unlockLevel: 70,
+    enemyType: 'Demon', drops: { ore: 0.55, leather: 0.40, enhanceStone: 0.50, blessedOrb: 0.28, celestialShard: 0.15 }, isBoss: false },
+  { id: 12, name: '🔥 Demon Lord', enemyHp: 28000, enemyDmg: 750, goldMin: 1500, goldMax: 2800, unlockLevel: 78,
+    enemyType: 'Boss', drops: { ore: 0.85, leather: 0.80, enhanceStone: 0.75, blessedOrb: 0.55, celestialShard: 0.35 }, isBoss: true, bossSet: 'demon' },
+  { id: 13, name: 'Celestial Tower', enemyHp: 25000, enemyDmg: 850, goldMin: 800, goldMax: 1500, unlockLevel: 85,
+    enemyType: 'Celestial', drops: { ore: 0.50, leather: 0.35, enhanceStone: 0.55, blessedOrb: 0.35, celestialShard: 0.22 }, isBoss: false },
+  { id: 14, name: '🔥 Seraph Commander', enemyHp: 55000, enemyDmg: 1300, goldMin: 2500, goldMax: 4500, unlockLevel: 92,
+    enemyType: 'Boss', drops: { ore: 0.90, leather: 0.75, enhanceStone: 0.80, blessedOrb: 0.65, celestialShard: 0.45 }, isBoss: true, bossSet: 'seraph' },
+  { id: 15, name: 'Abyssal Depths', enemyHp: 60000, enemyDmg: 1400, goldMin: 1500, goldMax: 2800, unlockLevel: 100,
+    enemyType: 'Abyssal', drops: { ore: 0.55, leather: 0.45, enhanceStone: 0.60, blessedOrb: 0.40, celestialShard: 0.28 }, isBoss: false },
+  { id: 16, name: '🔥 Void Emperor', enemyHp: 120000, enemyDmg: 2200, goldMin: 4500, goldMax: 8000, unlockLevel: 110,
+    enemyType: 'Boss', drops: { ore: 0.95, leather: 0.85, enhanceStone: 0.85, blessedOrb: 0.75, celestialShard: 0.55 }, isBoss: true, bossSet: 'void' },
+  { id: 17, name: 'Chaos Realm', enemyHp: 150000, enemyDmg: 2500, goldMin: 3000, goldMax: 5500, unlockLevel: 120,
+    enemyType: 'Chaos', drops: { ore: 0.60, leather: 0.50, enhanceStone: 0.65, blessedOrb: 0.45, celestialShard: 0.35 }, isBoss: false },
+  { id: 18, name: '🔥 Chaos God', enemyHp: 280000, enemyDmg: 4000, goldMin: 8000, goldMax: 15000, unlockLevel: 135,
+    enemyType: 'Boss', drops: { ore: 1.0, leather: 0.95, enhanceStone: 0.90, blessedOrb: 0.85, celestialShard: 0.70 }, isBoss: true, bossSet: 'chaos' },
+  { id: 19, name: 'Eternal Void', enemyHp: 350000, enemyDmg: 4500, goldMin: 6000, goldMax: 12000, unlockLevel: 150,
+    enemyType: 'Void', drops: { ore: 0.70, leather: 0.60, enhanceStone: 0.75, blessedOrb: 0.55, celestialShard: 0.45 }, isBoss: false },
+  { id: 20, name: '🔥 Eternal One', enemyHp: 650000, enemyDmg: 7500, goldMin: 15000, goldMax: 28000, unlockLevel: 165,
+    enemyType: 'Boss', drops: { ore: 1.0, leather: 1.0, enhanceStone: 1.0, blessedOrb: 1.0, celestialShard: 0.90 }, isBoss: true, bossSet: 'eternal' },
 ];
 
 const MATERIALS = {
@@ -69,6 +87,146 @@ const GEAR_NAMES = {
   shield: ['Wooden Shield', 'Iron Buckler', 'Steel Kite', 'Tower Shield', 'Dragon Guard', 'Bulwark', 'Aegis of Dawn'],
   gloves: ['Cloth Wraps', 'Leather Gloves', 'Chain Gauntlets', 'Plate Fists', 'Drake Claws', 'Void Grip', 'Hands of Fate'],
   amulet: ['Bead Necklace', 'Bronze Pendant', 'Silver Locket', 'Mystic Amulet', 'Dragon Heart', 'Soul Gem', 'Tear of the Gods'],
+};
+
+// Boss Set Items - Unique gear from boss zones
+const BOSS_SETS = {
+  guardian: {
+    name: "Guardian's", color: '#22c55e',
+    items: {
+      weapon: { name: "Guardian's Greatsword", effect: { id: 'bonusDmg', name: '+DMG', value: 25 } },
+      helmet: { name: "Guardian's Crown", effect: { id: 'bonusHp', name: '+HP', value: 100 } },
+      armor: { name: "Guardian's Plate", effect: { id: 'thorns', name: 'Thorns', value: 15 } },
+      boots: { name: "Guardian's Treads", effect: { id: 'dodge', name: 'Dodge', value: 8 } },
+    },
+    setBonuses: [
+      { pieces: 2, desc: '+15% HP', effect: { hpMult: 0.15 } },
+      { pieces: 4, desc: '+20% DMG, +10% Thorns', effect: { dmgMult: 0.20, thorns: 10 } },
+    ]
+  },
+  lich: {
+    name: "Lich", color: '#8b5cf6',
+    items: {
+      weapon: { name: "Lich's Staff", effect: { id: 'critDamage', name: 'Crit DMG', value: 80 } },
+      helmet: { name: "Lich's Crown", effect: { id: 'lifesteal', name: 'Lifesteal', value: 12 } },
+      armor: { name: "Lich's Robes", effect: { id: 'bonusHp', name: '+HP', value: 150 } },
+      gloves: { name: "Lich's Grasp", effect: { id: 'critChance', name: 'Crit', value: 15 } },
+    },
+    setBonuses: [
+      { pieces: 2, desc: '+10% Lifesteal', effect: { lifesteal: 10 } },
+      { pieces: 4, desc: '+25% Crit DMG, +30% DMG', effect: { critDamage: 25, dmgMult: 0.30 } },
+    ]
+  },
+  dragon: {
+    name: "Dragonborn", color: '#ef4444',
+    items: {
+      weapon: { name: "Dragonborn Blade", effect: { id: 'bonusDmg', name: '+DMG', value: 45 } },
+      helmet: { name: "Dragonborn Horns", effect: { id: 'critChance', name: 'Crit', value: 18 } },
+      armor: { name: "Dragonborn Scales", effect: { id: 'bonusHp', name: '+HP', value: 200 } },
+      shield: { name: "Dragonborn Aegis", effect: { id: 'thorns', name: 'Thorns', value: 25 } },
+    },
+    setBonuses: [
+      { pieces: 2, desc: '+30% DMG', effect: { dmgMult: 0.30 } },
+      { pieces: 4, desc: '+25% HP, +15% Crit Chance', effect: { hpMult: 0.25, critChance: 15 } },
+    ]
+  },
+  frost: {
+    name: "Frostborn", color: '#06b6d4',
+    items: {
+      weapon: { name: "Frostborn Axe", effect: { id: 'bonusDmg', name: '+DMG', value: 60 } },
+      helmet: { name: "Frostborn Helm", effect: { id: 'dodge', name: 'Dodge', value: 12 } },
+      armor: { name: "Frostborn Mail", effect: { id: 'bonusHp', name: '+HP', value: 280 } },
+      boots: { name: "Frostborn Boots", effect: { id: 'xpBonus', name: 'XP%', value: 25 } },
+      amulet: { name: "Frostborn Pendant", effect: { id: 'critChance', name: 'Crit', value: 20 } },
+    },
+    setBonuses: [
+      { pieces: 2, desc: '+20% Dodge', effect: { dodge: 20 } },
+      { pieces: 4, desc: '+40% DMG, +35% HP', effect: { dmgMult: 0.40, hpMult: 0.35 } },
+    ]
+  },
+  demon: {
+    name: "Demonheart", color: '#dc2626',
+    items: {
+      weapon: { name: "Demonheart Scythe", effect: { id: 'lifesteal', name: 'Lifesteal', value: 15 } },
+      helmet: { name: "Demonheart Horns", effect: { id: 'bonusDmg', name: '+DMG', value: 75 } },
+      armor: { name: "Demonheart Plate", effect: { id: 'thorns', name: 'Thorns', value: 30 } },
+      gloves: { name: "Demonheart Claws", effect: { id: 'critDamage', name: 'Crit DMG', value: 100 } },
+      accessory: { name: "Demonheart Ring", effect: { id: 'bonusHp', name: '+HP', value: 350 } },
+    },
+    setBonuses: [
+      { pieces: 2, desc: '+15% Lifesteal', effect: { lifesteal: 15 } },
+      { pieces: 3, desc: '+50% DMG', effect: { dmgMult: 0.50 } },
+      { pieces: 5, desc: '+40% HP, +20% Thorns', effect: { hpMult: 0.40, thorns: 20 } },
+    ]
+  },
+  seraph: {
+    name: "Seraphic", color: '#fbbf24',
+    items: {
+      weapon: { name: "Seraphic Lance", effect: { id: 'bonusDmg', name: '+DMG', value: 95 } },
+      helmet: { name: "Seraphic Halo", effect: { id: 'xpBonus', name: 'XP%', value: 25 } },
+      armor: { name: "Seraphic Wings", effect: { id: 'bonusHp', name: '+HP', value: 450 } },
+      boots: { name: "Seraphic Steps", effect: { id: 'dodge', name: 'Dodge', value: 15 } },
+      shield: { name: "Seraphic Bulwark", effect: { id: 'lifesteal', name: 'Lifesteal', value: 15 } },
+      amulet: { name: "Seraphic Star", effect: { id: 'goldFind', name: 'Gold%', value: 30 } },
+    },
+    setBonuses: [
+      { pieces: 2, desc: '+30% Gold & XP', effect: { goldMult: 0.30, xpBonus: 30 } },
+      { pieces: 4, desc: '+60% DMG, +50% HP', effect: { dmgMult: 0.60, hpMult: 0.50 } },
+      { pieces: 6, desc: '+20% All Stats', effect: { dmgMult: 0.20, hpMult: 0.20, speedMult: 0.20 } },
+    ]
+  },
+  void: {
+    name: "Voidwalker", color: '#7c3aed',
+    items: {
+      weapon: { name: "Voidwalker Reaper", effect: { id: 'critDamage', name: 'Crit DMG', value: 120 } },
+      helmet: { name: "Voidwalker Mask", effect: { id: 'critChance', name: 'Crit', value: 20 } },
+      armor: { name: "Voidwalker Shroud", effect: { id: 'bonusHp', name: '+HP', value: 550 } },
+      boots: { name: "Voidwalker Striders", effect: { id: 'dodge', name: 'Dodge', value: 18 } },
+      gloves: { name: "Voidwalker Grips", effect: { id: 'bonusDmg', name: '+DMG', value: 110 } },
+      accessory: { name: "Voidwalker Band", effect: { id: 'lifesteal', name: 'Lifesteal', value: 15 } },
+    },
+    setBonuses: [
+      { pieces: 2, desc: '+25% Crit Chance', effect: { critChance: 25 } },
+      { pieces: 4, desc: '+75% DMG, +60% HP', effect: { dmgMult: 0.75, hpMult: 0.60 } },
+      { pieces: 6, desc: '+50% Crit DMG, +15% Dodge', effect: { critDamage: 50, dodge: 15 } },
+    ]
+  },
+  chaos: {
+    name: "Chaosborn", color: '#ec4899',
+    items: {
+      weapon: { name: "Chaosborn Destroyer", effect: { id: 'bonusDmg', name: '+DMG', value: 140 } },
+      helmet: { name: "Chaosborn Crown", effect: { id: 'critChance', name: 'Crit', value: 20 } },
+      armor: { name: "Chaosborn Armor", effect: { id: 'bonusHp', name: '+HP', value: 700 } },
+      boots: { name: "Chaosborn Greaves", effect: { id: 'xpBonus', name: 'XP%', value: 25 } },
+      gloves: { name: "Chaosborn Fists", effect: { id: 'critDamage', name: 'Crit DMG', value: 150 } },
+      shield: { name: "Chaosborn Barrier", effect: { id: 'thorns', name: 'Thorns', value: 40 } },
+      amulet: { name: "Chaosborn Essence", effect: { id: 'lifesteal', name: 'Lifesteal', value: 15 } },
+    },
+    setBonuses: [
+      { pieces: 2, desc: '+40% Crit DMG', effect: { critDamage: 40 } },
+      { pieces: 4, desc: '+90% DMG, +70% HP', effect: { dmgMult: 0.90, hpMult: 0.70 } },
+      { pieces: 6, desc: '+30% All Stats', effect: { dmgMult: 0.30, hpMult: 0.30, speedMult: 0.30 } },
+    ]
+  },
+  eternal: {
+    name: "Eternal", color: '#f97316',
+    items: {
+      weapon: { name: "Eternal Annihilator", effect: { id: 'bonusDmg', name: '+DMG', value: 200 } },
+      helmet: { name: "Eternal Diadem", effect: { id: 'critChance', name: 'Crit', value: 25 } },
+      armor: { name: "Eternal Plate", effect: { id: 'bonusHp', name: '+HP', value: 1000 } },
+      boots: { name: "Eternal Walkers", effect: { id: 'dodge', name: 'Dodge', value: 20 } },
+      gloves: { name: "Eternal Gauntlets", effect: { id: 'critDamage', name: 'Crit DMG', value: 200 } },
+      shield: { name: "Eternal Aegis", effect: { id: 'thorns', name: 'Thorns', value: 50 } },
+      accessory: { name: "Eternal Loop", effect: { id: 'lifesteal', name: 'Lifesteal', value: 15 } },
+      amulet: { name: "Eternal Heart", effect: { id: 'goldFind', name: 'Gold%', value: 30 } },
+    },
+    setBonuses: [
+      { pieces: 2, desc: '+50% All Stats', effect: { dmgMult: 0.50, hpMult: 0.50, speedMult: 0.20 } },
+      { pieces: 4, desc: '+120% DMG, +100% HP', effect: { dmgMult: 1.20, hpMult: 1.00 } },
+      { pieces: 6, desc: '+30% Crit Chance, +100% Crit DMG', effect: { critChance: 30, critDamage: 100 } },
+      { pieces: 8, desc: 'Eternal Power: +200% All Stats', effect: { dmgMult: 2.0, hpMult: 2.0, speedMult: 0.50 } },
+    ]
+  },
 };
 
 // Weapon types - different weapons scale with different stats and have unique bonuses
@@ -211,13 +369,14 @@ function GearGrinder() {
     loadGame();
   }, []);
 
+  // Auto-save every 3 seconds
   useEffect(() => {
     if (isLoading) return;
     const interval = setInterval(async () => {
       try {
         await window.storage.set('gear-grinder-save', JSON.stringify({ ...gameState, combatLog: [] }));
       } catch (e) {}
-    }, 30000);
+    }, 3000);
     return () => clearInterval(interval);
   }, [gameState, isLoading]);
 
@@ -300,6 +459,34 @@ function GearGrinder() {
       if (skill.effect.thorns) thorns += skill.effect.thorns;
     });
 
+    // Calculate set bonuses
+    const setBonuses = {};
+    Object.entries(gameState.gear).forEach(([slot, gear]) => {
+      if (gear && gear.bossSet) {
+        setBonuses[gear.bossSet] = (setBonuses[gear.bossSet] || 0) + 1;
+      }
+    });
+
+    Object.entries(setBonuses).forEach(([setName, count]) => {
+      const bossSet = BOSS_SETS[setName];
+      if (bossSet) {
+        bossSet.setBonuses.forEach(bonus => {
+          if (count >= bonus.pieces) {
+            if (bonus.effect.dmgMult) dmgMult += bonus.effect.dmgMult;
+            if (bonus.effect.hpMult) hpMult += bonus.effect.hpMult;
+            if (bonus.effect.speedMult) speedMult += bonus.effect.speedMult;
+            if (bonus.effect.goldMult) goldMult += bonus.effect.goldMult;
+            if (bonus.effect.lifesteal) lifesteal += bonus.effect.lifesteal;
+            if (bonus.effect.critChance) critChance += bonus.effect.critChance;
+            if (bonus.effect.critDamage) critDamage += bonus.effect.critDamage;
+            if (bonus.effect.thorns) thorns += bonus.effect.thorns;
+            if (bonus.effect.dodge) dodge += bonus.effect.dodge;
+            if (bonus.effect.xpBonus) xpBonus += bonus.effect.xpBonus;
+          }
+        });
+      }
+    });
+
     return {
       damage: Math.floor(baseDmg * dmgMult),
       maxHp: Math.floor(baseHp * hpMult),
@@ -364,6 +551,31 @@ function GearGrinder() {
           newState.celestialShard += celestialShardDropped;
           newState.xp += xpEarned;
           newState.kills += 1;
+
+          // Boss loot drops
+          if (zone.isBoss && zone.bossSet) {
+            const bossSet = BOSS_SETS[zone.bossSet];
+            const dropChance = 0.15; // 15% chance to drop a boss item
+            if (Math.random() < dropChance && bossSet) {
+              const availableSlots = Object.keys(bossSet.items);
+              const droppedSlot = availableSlots[Math.floor(Math.random() * availableSlots.length)];
+              const bossItem = bossSet.items[droppedSlot];
+
+              // Create the boss item with tier 5 (Mythic) base stats
+              const newBossItem = {
+                slot: droppedSlot,
+                tier: 5, // Mythic tier
+                id: Date.now(),
+                plus: 0,
+                effects: [bossItem.effect],
+                bossSet: zone.bossSet,
+                isBossItem: true,
+                weaponType: droppedSlot === 'weapon' ? 'sword' : null,
+              };
+              newState.inventory = [...newState.inventory, newBossItem];
+              log.push({ type: 'bossLoot', msg: `⚡ ${bossItem.name} obtained!` });
+            }
+          }
 
           // Trigger death animation and show loot
           setEnemyDying(true);
@@ -511,6 +723,39 @@ function GearGrinder() {
     });
   };
 
+  const salvageGear = (item) => {
+    if (!item) return;
+
+    // Calculate salvage returns (30% of crafting cost for regular gear, 50% for boss items)
+    const tier = TIERS[item.tier];
+    const salvageRate = item.isBossItem ? 0.5 : 0.3;
+    const enhancementBonus = (item.plus || 0) * 0.1; // +10% per enhancement level
+
+    const goldReturn = Math.floor(tier.goldCost * salvageRate * (1 + enhancementBonus));
+    const oreReturn = Math.floor(tier.oreCost * salvageRate * (1 + enhancementBonus));
+    const leatherReturn = Math.floor(tier.leatherCost * salvageRate * (1 + enhancementBonus));
+
+    // Enhanced items also return some enhancement materials
+    const enhanceStoneReturn = item.plus >= 5 ? Math.floor(item.plus * 0.5) : 0;
+    const blessedOrbReturn = item.plus >= 15 ? Math.floor((item.plus - 10) * 0.3) : 0;
+    const celestialShardReturn = item.plus >= 25 ? Math.floor((item.plus - 20) * 0.2) : 0;
+
+    setGameState(prev => ({
+      ...prev,
+      gold: prev.gold + goldReturn,
+      ore: prev.ore + oreReturn,
+      leather: prev.leather + leatherReturn,
+      enhanceStone: prev.enhanceStone + enhanceStoneReturn,
+      blessedOrb: prev.blessedOrb + blessedOrbReturn,
+      celestialShard: prev.celestialShard + celestialShardReturn,
+      inventory: prev.inventory.filter(i => i.id !== item.id),
+      combatLog: [...prev.combatLog.slice(-3), {
+        type: 'salvage',
+        msg: `Salvaged for ${goldReturn}g, ${oreReturn}⛏️, ${leatherReturn}🧶`
+      }],
+    }));
+  };
+
   const changeZone = (zoneId) => {
     if (gameState.level < ZONES[zoneId].unlockLevel) return;
     const zone = ZONES[zoneId];
@@ -551,7 +796,9 @@ function GearGrinder() {
                 </span>
               )}
             </div>
-            <button onClick={saveGame} className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium">Save</button>
+            <div className="px-3 py-1 bg-gray-700/50 rounded-lg text-sm text-gray-400">
+              Auto-saving...
+            </div>
           </div>
 
           {/* Resources with icons and tooltips */}
@@ -882,6 +1129,46 @@ function GearGrinder() {
                   })}
                 </div>
               </div>
+
+              {/* Set Bonuses */}
+              {(() => {
+                const setBonuses = {};
+                Object.entries(gameState.gear).forEach(([slot, gear]) => {
+                  if (gear && gear.bossSet) {
+                    setBonuses[gear.bossSet] = (setBonuses[gear.bossSet] || 0) + 1;
+                  }
+                });
+                const hasSetBonuses = Object.keys(setBonuses).length > 0;
+
+                return hasSetBonuses ? (
+                  <div className="mt-4 pt-4 border-t border-gray-700">
+                    <h3 className="text-sm font-bold text-gray-300 mb-2">⚡ Active Set Bonuses</h3>
+                    <div className="space-y-2">
+                      {Object.entries(setBonuses).map(([setName, count]) => {
+                        const bossSet = BOSS_SETS[setName];
+                        if (!bossSet) return null;
+                        return (
+                          <div key={setName} className="bg-gray-900 rounded p-2">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-bold text-sm" style={{ color: bossSet.color }}>
+                                {bossSet.name} Set
+                              </span>
+                              <span className="text-xs text-gray-400">({count} pieces)</span>
+                            </div>
+                            <div className="space-y-1">
+                              {bossSet.setBonuses.map((bonus, i) => (
+                                <div key={i} className={`text-xs ${count >= bonus.pieces ? 'text-green-400' : 'text-gray-500'}`}>
+                                  ({bonus.pieces}) {bonus.desc}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : null;
+              })()}
             </div>
 
             {/* Inventory */}
@@ -908,9 +1195,14 @@ function GearGrinder() {
                           </div>
                         )}
                       </div>
-                      <button onClick={() => equipGear(item)} className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 rounded text-sm font-medium">
-                        Equip
-                      </button>
+                      <div className="flex gap-2">
+                        <button onClick={() => equipGear(item)} className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 rounded text-sm font-medium">
+                          Equip
+                        </button>
+                        <button onClick={() => salvageGear(item)} className="px-3 py-1.5 bg-orange-600 hover:bg-orange-500 rounded text-sm font-medium" title="Salvage for materials">
+                          Salvage
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -1174,23 +1466,35 @@ function GearName({ item }) {
   const plus = item.plus || 0;
   const glowColor = plus >= 30 ? '#fbbf24' : plus >= 20 ? '#ec4899' : plus >= 10 ? '#3b82f6' : null;
 
-  // Get the named item based on slot, tier, and weapon type
+  // Get the named item - check if it's a boss item first
   let gearName;
-  if (item.slot === 'weapon' && item.weaponType) {
-    gearName = GEAR_NAMES[item.weaponType]?.[item.tier] || `${tier.name} ${item.weaponType}`;
+  let gearColor = tier.color;
+
+  if (item.isBossItem && item.bossSet) {
+    const bossSet = BOSS_SETS[item.bossSet];
+    if (bossSet && bossSet.items[item.slot]) {
+      gearName = bossSet.items[item.slot].name;
+      gearColor = bossSet.color;
+    }
   } else {
-    gearName = GEAR_NAMES[item.slot]?.[item.tier] || `${tier.name} ${GEAR_BASES[item.slot].name}`;
+    // Regular gear naming
+    if (item.slot === 'weapon' && item.weaponType) {
+      gearName = GEAR_NAMES[item.weaponType]?.[item.tier] || `${tier.name} ${item.weaponType}`;
+    } else {
+      gearName = GEAR_NAMES[item.slot]?.[item.tier] || `${tier.name} ${GEAR_BASES[item.slot].name}`;
+    }
   }
 
   return (
     <span
       className="font-medium"
       style={{
-        color: tier.color,
+        color: gearColor,
         textShadow: glowColor ? `0 0 8px ${glowColor}` : 'none',
       }}
     >
       {plus > 0 && <span className="text-white">+{plus} </span>}
+      {item.isBossItem && <span className="text-amber-400">⚡</span>}
       {gearName}
     </span>
   );
