@@ -1,0 +1,1427 @@
+import React, { useState, useEffect, useCallback } from 'react';
+
+// Game constants
+const ZONES = [
+  { id: 0, name: 'Forest Clearing', enemyHp: 20, enemyDmg: 2, goldMin: 3, goldMax: 8, unlockLevel: 1,
+    enemyType: 'Beast', drops: { ore: 0.25, leather: 0.35, enhanceStone: 0.08, blessedOrb: 0, celestialShard: 0 }},
+  { id: 1, name: 'Dark Woods', enemyHp: 50, enemyDmg: 5, goldMin: 8, goldMax: 15, unlockLevel: 5,
+    enemyType: 'Beast', drops: { ore: 0.30, leather: 0.40, enhanceStone: 0.12, blessedOrb: 0.02, celestialShard: 0 }},
+  { id: 2, name: 'Goblin Caves', enemyHp: 120, enemyDmg: 12, goldMin: 15, goldMax: 30, unlockLevel: 10,
+    enemyType: 'Humanoid', drops: { ore: 0.45, leather: 0.30, enhanceStone: 0.18, blessedOrb: 0.04, celestialShard: 0 }},
+  { id: 3, name: 'Undead Crypt', enemyHp: 280, enemyDmg: 25, goldMin: 30, goldMax: 60, unlockLevel: 18,
+    enemyType: 'Undead', drops: { ore: 0.35, leather: 0.20, enhanceStone: 0.28, blessedOrb: 0.08, celestialShard: 0.01 }},
+  { id: 4, name: 'Dragon Peak', enemyHp: 600, enemyDmg: 50, goldMin: 60, goldMax: 120, unlockLevel: 28,
+    enemyType: 'Dragon', drops: { ore: 0.50, leather: 0.45, enhanceStone: 0.30, blessedOrb: 0.12, celestialShard: 0.03 }},
+  { id: 5, name: 'Void Realm', enemyHp: 1500, enemyDmg: 100, goldMin: 150, goldMax: 300, unlockLevel: 40,
+    enemyType: 'Demon', drops: { ore: 0.40, leather: 0.35, enhanceStone: 0.40, blessedOrb: 0.18, celestialShard: 0.06 }},
+  { id: 6, name: 'Frozen Wastes', enemyHp: 3500, enemyDmg: 180, goldMin: 300, goldMax: 550, unlockLevel: 55,
+    enemyType: 'Elemental', drops: { ore: 0.60, leather: 0.25, enhanceStone: 0.45, blessedOrb: 0.22, celestialShard: 0.10 }},
+  { id: 7, name: 'Demon Fortress', enemyHp: 7500, enemyDmg: 320, goldMin: 500, goldMax: 900, unlockLevel: 70,
+    enemyType: 'Demon', drops: { ore: 0.55, leather: 0.40, enhanceStone: 0.50, blessedOrb: 0.28, celestialShard: 0.15 }},
+  { id: 8, name: 'Celestial Tower', enemyHp: 15000, enemyDmg: 550, goldMin: 800, goldMax: 1500, unlockLevel: 85,
+    enemyType: 'Celestial', drops: { ore: 0.50, leather: 0.35, enhanceStone: 0.55, blessedOrb: 0.35, celestialShard: 0.22 }},
+  { id: 9, name: 'Abyssal Depths', enemyHp: 35000, enemyDmg: 900, goldMin: 1500, goldMax: 2800, unlockLevel: 100,
+    enemyType: 'Abyssal', drops: { ore: 0.55, leather: 0.45, enhanceStone: 0.60, blessedOrb: 0.40, celestialShard: 0.28 }},
+  { id: 10, name: 'Chaos Realm', enemyHp: 80000, enemyDmg: 1500, goldMin: 3000, goldMax: 5500, unlockLevel: 120,
+    enemyType: 'Chaos', drops: { ore: 0.60, leather: 0.50, enhanceStone: 0.65, blessedOrb: 0.45, celestialShard: 0.35 }},
+  { id: 11, name: 'Eternal Void', enemyHp: 200000, enemyDmg: 2500, goldMin: 6000, goldMax: 12000, unlockLevel: 150,
+    enemyType: 'Void', drops: { ore: 0.70, leather: 0.60, enhanceStone: 0.75, blessedOrb: 0.55, celestialShard: 0.45 }},
+];
+
+const MATERIALS = {
+  ore: { name: 'Iron Ore', color: '#94a3b8', icon: '⛏️' },
+  leather: { name: 'Leather', color: '#d97706', icon: '🧶' },
+  enhanceStone: { name: 'E.Stone', color: '#60a5fa', icon: '💎' },
+  blessedOrb: { name: 'B.Orb', color: '#c084fc', icon: '🔮' },
+  celestialShard: { name: 'C.Shard', color: '#fbbf24', icon: '✨' },
+};
+
+// Stats system
+const STATS = {
+  str: { name: 'Strength', color: '#ef4444', desc: 'Physical damage, melee weapons' },
+  int: { name: 'Intelligence', color: '#8b5cf6', desc: 'Magic damage, staff/wand power' },
+  vit: { name: 'Vitality', color: '#22c55e', desc: 'Max HP, HP regen' },
+  agi: { name: 'Agility', color: '#f59e0b', desc: 'Crit chance, dodge, attack speed' },
+  lck: { name: 'Luck', color: '#06b6d4', desc: 'Gold find, drop rates, crit damage' },
+};
+
+const GEAR_SLOTS = ['weapon', 'helmet', 'armor', 'boots', 'accessory', 'shield', 'gloves', 'amulet'];
+const TIERS = [
+  { id: 0, name: 'Common', color: '#9ca3af', statMult: 1, oreCost: 3, leatherCost: 2, goldCost: 20 },
+  { id: 1, name: 'Uncommon', color: '#22c55e', statMult: 1.8, oreCost: 8, leatherCost: 7, goldCost: 80 },
+  { id: 2, name: 'Rare', color: '#3b82f6', statMult: 3, oreCost: 20, leatherCost: 20, goldCost: 250 },
+  { id: 3, name: 'Epic', color: '#a855f7', statMult: 5, oreCost: 50, leatherCost: 50, goldCost: 800 },
+  { id: 4, name: 'Legendary', color: '#f97316', statMult: 8, oreCost: 120, leatherCost: 130, goldCost: 2500 },
+  { id: 5, name: 'Mythic', color: '#ec4899', statMult: 12, oreCost: 300, leatherCost: 300, goldCost: 8000 },
+  { id: 6, name: 'Divine', color: '#fbbf24', statMult: 18, oreCost: 750, leatherCost: 750, goldCost: 25000 },
+];
+
+// Named gear for each tier - makes the game feel more immersive
+const GEAR_NAMES = {
+  sword: ['Rusty Blade', 'Iron Sword', 'Steel Saber', 'Crimson Edge', 'Dragonslayer', 'Soul Reaver', 'Excalibur'],
+  staff: ['Wooden Staff', 'Oak Wand', 'Crystal Staff', 'Arcane Focus', 'Void Scepter', 'Starweaver', 'Celestial Rod'],
+  dagger: ['Shiv', 'Stiletto', 'Shadow Fang', 'Viper Strike', 'Assassin Blade', 'Nightfall', 'Eclipse Dagger'],
+  mace: ['Club', 'Flanged Mace', 'War Hammer', 'Skull Crusher', 'Titan Maul', 'Earthshaker', 'Divine Judgment'],
+  helmet: ['Cloth Cap', 'Leather Hood', 'Chain Coif', 'Knight Helm', 'Dragon Visor', 'Phoenix Crown', 'Halo of Light'],
+  armor: ['Cloth Tunic', 'Leather Vest', 'Chainmail', 'Plate Armor', 'Dragon Scale', 'Abyssal Plate', 'Radiant Aegis'],
+  boots: ['Sandals', 'Leather Boots', 'Chain Greaves', 'Plated Boots', 'Dragonskin Treads', 'Voidwalkers', 'Angelic Steps'],
+  accessory: ['Copper Ring', 'Silver Band', 'Sapphire Ring', 'Amethyst Loop', 'Phoenix Signet', 'Chaos Band', 'Ring of Eternity'],
+  shield: ['Wooden Shield', 'Iron Buckler', 'Steel Kite', 'Tower Shield', 'Dragon Guard', 'Bulwark', 'Aegis of Dawn'],
+  gloves: ['Cloth Wraps', 'Leather Gloves', 'Chain Gauntlets', 'Plate Fists', 'Drake Claws', 'Void Grip', 'Hands of Fate'],
+  amulet: ['Bead Necklace', 'Bronze Pendant', 'Silver Locket', 'Mystic Amulet', 'Dragon Heart', 'Soul Gem', 'Tear of the Gods'],
+};
+
+// Weapon types - different weapons scale with different stats and have unique bonuses
+const WEAPON_TYPES = [
+  { id: 'sword', name: 'Sword', baseDmg: 8, baseHp: 0, scaling: 'str', speedBonus: 0, critBonus: 5, desc: 'Balanced, +5% crit' },
+  { id: 'staff', name: 'Staff', baseDmg: 7, baseHp: 15, scaling: 'int', speedBonus: 0, critBonus: 0, desc: 'Magic, +15 HP' },
+  { id: 'dagger', name: 'Dagger', baseDmg: 5, baseHp: 0, scaling: 'agi', speedBonus: 0.4, critBonus: 10, desc: '+40% speed, +10% crit' },
+  { id: 'mace', name: 'Mace', baseDmg: 6, baseHp: 30, scaling: 'vit', speedBonus: -0.1, critBonus: 0, desc: 'Slow but tanky, +30 HP' },
+];
+
+// Gear bases with clear stat contributions
+const GEAR_BASES = {
+  weapon: { name: 'Sword', baseDmg: 8, baseHp: 0, baseArmor: 0, scaling: 'str', desc: '+8 DMG per tier' },
+  helmet: { name: 'Helm', baseDmg: 0, baseHp: 20, baseArmor: 5, scaling: 'vit', desc: '+20 HP, +5 Armor per tier' },
+  armor: { name: 'Plate', baseDmg: 0, baseHp: 40, baseArmor: 12, scaling: 'vit', desc: '+40 HP, +12 Armor per tier' },
+  boots: { name: 'Greaves', baseDmg: 0, baseHp: 15, baseArmor: 4, scaling: 'agi', desc: '+15 HP, +4 Armor per tier' },
+  accessory: { name: 'Ring', baseDmg: 3, baseHp: 10, baseArmor: 0, scaling: 'int', desc: '+3 DMG, +10 HP per tier' },
+  shield: { name: 'Buckler', baseDmg: 0, baseHp: 30, baseArmor: 15, scaling: 'vit', desc: '+30 HP, +15 Armor per tier' },
+  gloves: { name: 'Gauntlets', baseDmg: 4, baseHp: 10, baseArmor: 3, scaling: 'str', desc: '+4 DMG, +10 HP per tier' },
+  amulet: { name: 'Pendant', baseDmg: 2, baseHp: 15, baseArmor: 0, scaling: 'int', desc: '+2 DMG, +15 HP per tier' },
+};
+
+const SPECIAL_EFFECTS = [
+  { id: 'thorns', name: 'Thorns', minVal: 5, maxVal: 25, color: '#f97316' },
+  { id: 'lifesteal', name: 'Lifesteal', minVal: 3, maxVal: 15, color: '#22c55e' },
+  { id: 'critChance', name: 'Crit', minVal: 5, maxVal: 20, color: '#ef4444' },
+  { id: 'critDamage', name: 'Crit DMG', minVal: 25, maxVal: 100, color: '#dc2626' },
+  { id: 'bonusDmg', name: '+DMG', minVal: 2, maxVal: 50, color: '#f59e0b' },
+  { id: 'bonusHp', name: '+HP', minVal: 10, maxVal: 200, color: '#10b981' },
+  { id: 'goldFind', name: 'Gold%', minVal: 5, maxVal: 30, color: '#fbbf24' },
+  { id: 'xpBonus', name: 'XP%', minVal: 5, maxVal: 25, color: '#8b5cf6' },
+  { id: 'dodge', name: 'Dodge', minVal: 2, maxVal: 12, color: '#06b6d4' },
+];
+
+const SKILLS = [
+  { id: 0, name: 'Power Strike', desc: '+15% damage', unlockLevel: 3, effect: { dmgMult: 0.15 } },
+  { id: 1, name: 'Toughness', desc: '+20% HP', unlockLevel: 6, effect: { hpMult: 0.2 } },
+  { id: 2, name: 'Gold Rush', desc: '+25% gold', unlockLevel: 10, effect: { goldMult: 0.25 } },
+  { id: 3, name: 'Swift Blade', desc: '+20% attack speed', unlockLevel: 15, effect: { speedMult: 0.2 } },
+  { id: 4, name: 'Berserker', desc: '+30% damage', unlockLevel: 22, effect: { dmgMult: 0.3 } },
+  { id: 5, name: 'Fortitude', desc: '+35% HP', unlockLevel: 30, effect: { hpMult: 0.35 } },
+  { id: 6, name: 'Lucky Find', desc: '+30% material drop', unlockLevel: 38, effect: { matMult: 0.3 } },
+  { id: 7, name: 'Mastery', desc: '+50% all stats', unlockLevel: 50, effect: { dmgMult: 0.5, hpMult: 0.5 } },
+  { id: 8, name: 'Vampiric', desc: '+5% base lifesteal', unlockLevel: 65, effect: { lifesteal: 5 } },
+  { id: 9, name: 'Critical Eye', desc: '+10% crit chance', unlockLevel: 80, effect: { critChance: 10 } },
+  { id: 10, name: 'Thorny Skin', desc: '10% thorns damage', unlockLevel: 95, effect: { thorns: 10 } },
+  { id: 11, name: 'Transcendence', desc: '+100% all stats', unlockLevel: 120, effect: { dmgMult: 1.0, hpMult: 1.0 } },
+];
+
+const getEnhanceCost = (currentPlus) => ({
+  gold: Math.floor(100 * Math.pow(1.4, currentPlus)),
+  enhanceStone: Math.floor(2 * Math.pow(1.25, currentPlus)),
+  blessedOrb: currentPlus >= 10 ? Math.floor(Math.pow(1.3, currentPlus - 9)) : 0,
+  celestialShard: currentPlus >= 20 ? Math.floor(Math.pow(1.35, currentPlus - 19)) : 0,
+});
+
+const getEnhanceSuccess = (currentPlus) => {
+  if (currentPlus < 10) return 100;
+  if (currentPlus < 20) return Math.max(50, 100 - (currentPlus - 9) * 5);
+  if (currentPlus < 30) return Math.max(20, 50 - (currentPlus - 19) * 3);
+  return 20;
+};
+
+const getEnhanceBonus = (plus) => ({
+  dmgBonus: plus * 2,
+  hpBonus: plus * 5,
+  effectBonus: Math.floor(plus / 5) * 3,
+});
+
+const initialState = {
+  gold: 50, ore: 5, leather: 5, enhanceStone: 3, blessedOrb: 0, celestialShard: 0,
+  level: 1, xp: 0, currentZone: 0,
+  // Base stats - player can allocate points
+  stats: { str: 5, int: 5, vit: 5, agi: 5, lck: 5 },
+  statPoints: 0, // Points available to allocate (3 per level up)
+  gear: { weapon: null, helmet: null, armor: null, boots: null, accessory: null, shield: null, gloves: null, amulet: null },
+  inventory: [], unlockedSkills: [], combatLog: [],
+  enemyHp: 20, enemyMaxHp: 20, playerHp: 100, playerMaxHp: 100,
+  kills: 0, totalGold: 0, enhanceFails: 0,
+};
+
+function GearGrinder() {
+  const [gameState, setGameState] = useState(initialState);
+  const [activeTab, setActiveTab] = useState('combat');
+  const [isLoading, setIsLoading] = useState(true);
+  const [combatTick, setCombatTick] = useState(0);
+  const [selectedEnhanceItem, setSelectedEnhanceItem] = useState(null);
+
+  // Combat visual effects state
+  const [floatingTexts, setFloatingTexts] = useState([]);
+  const [enemyDying, setEnemyDying] = useState(false);
+  const [lootDrops, setLootDrops] = useState([]);
+
+  // Add floating text helper
+  const addFloatingText = useCallback((text, type, target) => {
+    const id = Date.now() + Math.random();
+    setFloatingTexts(prev => [...prev, { id, text, type, target }]);
+    setTimeout(() => {
+      setFloatingTexts(prev => prev.filter(t => t.id !== id));
+    }, 1000);
+  }, []);
+
+  // Add loot drop helper
+  const addLootDrop = useCallback((items) => {
+    const id = Date.now();
+    setLootDrops(prev => [...prev, { id, items }]);
+    setTimeout(() => {
+      setLootDrops(prev => prev.filter(l => l.id !== id));
+    }, 2000);
+  }, []);
+
+  useEffect(() => {
+    async function loadGame() {
+      try {
+        const saved = await window.storage.get('gear-grinder-save');
+        if (saved && saved.value) {
+          const parsed = JSON.parse(saved.value);
+          // Calculate stat points for existing saves (3 per level after 1)
+          const earnedStatPoints = (parsed.level - 1) * 3;
+          const spentPoints = parsed.stats ? Object.values(parsed.stats).reduce((a, b) => a + b, 0) - 25 : 0;
+          const availablePoints = Math.max(0, earnedStatPoints - spentPoints);
+
+          const migratedState = {
+            ...initialState, ...parsed, combatLog: [],
+            ore: parsed.ore ?? parsed.materials ?? 5,
+            leather: parsed.leather ?? parsed.materials ?? 5,
+            enhanceStone: parsed.enhanceStone ?? Math.floor((parsed.materials || 0) / 2) ?? 3,
+            blessedOrb: parsed.blessedOrb ?? parsed.gems ?? 0,
+            celestialShard: parsed.celestialShard ?? parsed.essence ?? 0,
+            enhanceFails: parsed.enhanceFails || 0,
+            stats: parsed.stats || initialState.stats,
+            statPoints: parsed.statPoints ?? availablePoints,
+            gear: { ...initialState.gear, ...parsed.gear },
+          };
+          setGameState(migratedState);
+        }
+      } catch (e) { console.log('No save found:', e); }
+      setIsLoading(false);
+    }
+    loadGame();
+  }, []);
+
+  useEffect(() => {
+    if (isLoading) return;
+    const interval = setInterval(async () => {
+      try {
+        await window.storage.set('gear-grinder-save', JSON.stringify({ ...gameState, combatLog: [] }));
+      } catch (e) {}
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [gameState, isLoading]);
+
+  const getPlayerStats = useCallback(() => {
+    const s = gameState.stats;
+    // Base stats from character stats
+    let baseDmg = 5 + s.str * 2 + s.int * 1; // STR gives more physical dmg
+    let baseHp = 80 + s.vit * 8; // VIT gives HP
+    let armor = s.vit * 1; // Small armor from VIT
+    let dmgMult = 1, hpMult = 1, goldMult = 1 + s.lck * 0.02, speedMult = 1 + s.agi * 0.01, matMult = 1 + s.lck * 0.02;
+    let lifesteal = 0, thorns = 0;
+    let critChance = 3 + s.agi * 0.5; // AGI gives crit
+    let critDamage = 150 + s.lck * 2; // LCK gives crit damage
+    let dodge = s.agi * 0.3; // AGI gives dodge
+    let xpBonus = 0;
+
+    // Gear contributions
+    Object.entries(gameState.gear).forEach(([slot, gear]) => {
+      if (gear) {
+        const tierMult = TIERS[gear.tier].statMult;
+        const enhanceBonus = getEnhanceBonus(gear.plus || 0);
+
+        // For weapons, use the weapon type stats and apply bonuses
+        let gearBase = GEAR_BASES[slot];
+        if (slot === 'weapon' && gear.weaponType) {
+          const weaponDef = WEAPON_TYPES.find(w => w.id === gear.weaponType);
+          if (weaponDef) {
+            gearBase = { ...gearBase, ...weaponDef, baseArmor: 0 };
+            // Apply weapon type bonuses
+            speedMult += weaponDef.speedBonus;
+            critChance += weaponDef.critBonus;
+          }
+        }
+
+        // Add gear stats (scaled by tier)
+        baseDmg += gearBase.baseDmg * tierMult + enhanceBonus.dmgBonus;
+        baseHp += gearBase.baseHp * tierMult + enhanceBonus.hpBonus;
+        armor += (gearBase.baseArmor || 0) * tierMult;
+
+        // Stat scaling bonus: gear is stronger if you have the right stat
+        const scalingStat = s[gearBase.scaling] || 0;
+        const scalingBonus = 1 + scalingStat * 0.02; // +2% per stat point
+        baseDmg += Math.floor(gearBase.baseDmg * tierMult * (scalingBonus - 1));
+        baseHp += Math.floor(gearBase.baseHp * tierMult * (scalingBonus - 1) * 0.5);
+
+        // Special effects from gear
+        if (gear.effects) {
+          gear.effects.forEach(effect => {
+            const effectValue = effect.value * (1 + enhanceBonus.effectBonus / 100);
+            switch (effect.id) {
+              case 'lifesteal': lifesteal += effectValue; break;
+              case 'thorns': thorns += effectValue; break;
+              case 'critChance': critChance += effectValue; break;
+              case 'critDamage': critDamage += effectValue; break;
+              case 'bonusDmg': baseDmg += effectValue; break;
+              case 'bonusHp': baseHp += effectValue; break;
+              case 'goldFind': goldMult += effectValue / 100; break;
+              case 'xpBonus': xpBonus += effectValue; break;
+              case 'dodge': dodge += effectValue; break;
+            }
+          });
+        }
+      }
+    });
+
+    // Level bonus
+    baseDmg += (gameState.level - 1) * 2;
+    baseHp += (gameState.level - 1) * 8;
+
+    // Skills
+    gameState.unlockedSkills.forEach(skillId => {
+      const skill = SKILLS[skillId];
+      if (skill.effect.dmgMult) dmgMult += skill.effect.dmgMult;
+      if (skill.effect.hpMult) hpMult += skill.effect.hpMult;
+      if (skill.effect.goldMult) goldMult += skill.effect.goldMult;
+      if (skill.effect.speedMult) speedMult += skill.effect.speedMult;
+      if (skill.effect.matMult) matMult += skill.effect.matMult;
+      if (skill.effect.lifesteal) lifesteal += skill.effect.lifesteal;
+      if (skill.effect.critChance) critChance += skill.effect.critChance;
+      if (skill.effect.thorns) thorns += skill.effect.thorns;
+    });
+
+    return {
+      damage: Math.floor(baseDmg * dmgMult),
+      maxHp: Math.floor(baseHp * hpMult),
+      armor: Math.floor(armor),
+      goldMult, speedMult, matMult,
+      lifesteal: Math.min(lifesteal, 50),
+      thorns: Math.min(thorns, 100),
+      critChance: Math.min(critChance, 75),
+      critDamage,
+      dodge: Math.min(dodge, 50),
+      xpBonus,
+    };
+  }, [gameState.gear, gameState.level, gameState.unlockedSkills, gameState.stats]);
+
+  const xpForLevel = (level) => Math.floor(50 * Math.pow(1.3, level - 1));
+
+  // Combat loop
+  useEffect(() => {
+    if (isLoading) return;
+    const stats = getPlayerStats();
+    const tickSpeed = Math.max(200, 1000 - (stats.speedMult - 1) * 500);
+
+    const interval = setInterval(() => {
+      setCombatTick(t => t + 1);
+      setGameState(prev => {
+        const zone = ZONES[prev.currentZone];
+        let newState = { ...prev };
+        let log = [...prev.combatLog].slice(-4);
+
+        let playerDmg = stats.damage;
+        let isCrit = Math.random() * 100 < stats.critChance;
+        if (isCrit) playerDmg = Math.floor(playerDmg * stats.critDamage / 100);
+
+        newState.enemyHp -= playerDmg;
+        // Show floating damage on enemy
+        addFloatingText(isCrit ? `CRIT ${playerDmg}!` : `-${playerDmg}`, isCrit ? 'crit' : 'playerDmg', 'enemy');
+
+        if (stats.lifesteal > 0) {
+          const healed = Math.floor(playerDmg * stats.lifesteal / 100);
+          newState.playerHp = Math.min(newState.playerHp + healed, stats.maxHp);
+          if (healed > 0) addFloatingText(`+${healed}`, 'heal', 'player');
+        }
+
+        if (newState.enemyHp <= 0) {
+          const goldEarned = Math.floor((zone.goldMin + Math.random() * (zone.goldMax - zone.goldMin)) * stats.goldMult);
+          const xpEarned = Math.floor(zone.enemyHp / 2 * (1 + stats.xpBonus / 100));
+          const drops = zone.drops;
+          const zoneBonus = Math.floor(prev.currentZone / 2) + 1;
+
+          const oreDropped = Math.random() < drops.ore * stats.matMult ? Math.ceil(Math.random() * zoneBonus) : 0;
+          const leatherDropped = Math.random() < drops.leather * stats.matMult ? Math.ceil(Math.random() * zoneBonus) : 0;
+          const enhanceStoneDropped = Math.random() < drops.enhanceStone ? Math.ceil(Math.random() * Math.max(1, zoneBonus / 2)) : 0;
+          const blessedOrbDropped = Math.random() < drops.blessedOrb ? Math.ceil(Math.random() * Math.max(1, zoneBonus / 3)) : 0;
+          const celestialShardDropped = Math.random() < drops.celestialShard ? Math.ceil(Math.random() * Math.max(1, zoneBonus / 4)) : 0;
+
+          newState.gold += goldEarned;
+          newState.totalGold += goldEarned;
+          newState.ore += oreDropped;
+          newState.leather += leatherDropped;
+          newState.enhanceStone += enhanceStoneDropped;
+          newState.blessedOrb += blessedOrbDropped;
+          newState.celestialShard += celestialShardDropped;
+          newState.xp += xpEarned;
+          newState.kills += 1;
+
+          // Trigger death animation and show loot
+          setEnemyDying(true);
+          const lootItems = [];
+          lootItems.push({ text: `+${goldEarned}g`, color: '#fbbf24' });
+          lootItems.push({ text: `+${xpEarned}xp`, color: '#a855f7' });
+          if (oreDropped) lootItems.push({ text: `+${oreDropped}${MATERIALS.ore.icon}`, color: MATERIALS.ore.color });
+          if (leatherDropped) lootItems.push({ text: `+${leatherDropped}${MATERIALS.leather.icon}`, color: MATERIALS.leather.color });
+          if (enhanceStoneDropped) lootItems.push({ text: `+${enhanceStoneDropped}${MATERIALS.enhanceStone.icon}`, color: MATERIALS.enhanceStone.color });
+          if (blessedOrbDropped) lootItems.push({ text: `+${blessedOrbDropped}${MATERIALS.blessedOrb.icon}`, color: MATERIALS.blessedOrb.color });
+          if (celestialShardDropped) lootItems.push({ text: `+${celestialShardDropped}${MATERIALS.celestialShard.icon}`, color: MATERIALS.celestialShard.color });
+          addLootDrop(lootItems);
+
+          // Reset enemy after death animation
+          setTimeout(() => {
+            setEnemyDying(false);
+          }, 400);
+
+          while (newState.xp >= xpForLevel(newState.level)) {
+            newState.xp -= xpForLevel(newState.level);
+            newState.level += 1;
+            newState.statPoints = (newState.statPoints || 0) + 3;
+            log.push({ type: 'level', msg: `LEVEL UP! Lv.${newState.level} (+3 stat points)` });
+            addFloatingText('LEVEL UP!', 'levelup', 'player');
+            SKILLS.forEach(skill => {
+              if (skill.unlockLevel === newState.level && !newState.unlockedSkills.includes(skill.id)) {
+                newState.unlockedSkills = [...newState.unlockedSkills, skill.id];
+                log.push({ type: 'skill', msg: `Unlocked: ${skill.name}!` });
+              }
+            });
+          }
+
+          newState.enemyHp = zone.enemyHp;
+          newState.enemyMaxHp = zone.enemyHp;
+          newState.playerHp = Math.min(newState.playerHp + Math.floor(stats.maxHp * 0.1), stats.maxHp);
+          newState.playerMaxHp = stats.maxHp;
+        } else {
+          const dodged = Math.random() * 100 < stats.dodge;
+          if (dodged) {
+            addFloatingText('DODGE!', 'dodge', 'player');
+          } else {
+            const damageReduction = stats.armor / (stats.armor + 100);
+            const reducedDmg = Math.max(1, Math.floor(zone.enemyDmg * (1 - damageReduction)));
+            newState.playerHp -= reducedDmg;
+            addFloatingText(`-${reducedDmg}`, 'enemyDmg', 'player');
+            if (stats.thorns > 0) {
+              const thornsDmg = Math.floor(reducedDmg * stats.thorns / 100);
+              newState.enemyHp -= thornsDmg;
+              if (thornsDmg > 0) addFloatingText(`-${thornsDmg}`, 'thorns', 'enemy');
+            }
+          }
+          if (newState.playerHp <= 0) {
+            addFloatingText('DEATH!', 'death', 'player');
+            newState.playerHp = stats.maxHp;
+            newState.enemyHp = zone.enemyHp;
+            newState.enemyMaxHp = zone.enemyHp;
+          }
+        }
+
+        newState.combatLog = log;
+        newState.playerMaxHp = stats.maxHp;
+        return newState;
+      });
+    }, tickSpeed);
+
+    return () => clearInterval(interval);
+  }, [isLoading, getPlayerStats, combatTick, addFloatingText, addLootDrop]);
+
+  const rollEffects = (tier) => {
+    const numEffects = tier >= 4 ? Math.floor(Math.random() * 3) + 1 : tier >= 2 ? Math.floor(Math.random() * 2) + 1 : Math.random() < 0.3 ? 1 : 0;
+    const effects = [];
+    const usedIds = new Set();
+    for (let i = 0; i < numEffects; i++) {
+      const availableEffects = SPECIAL_EFFECTS.filter(e => !usedIds.has(e.id));
+      if (availableEffects.length === 0) break;
+      const effect = availableEffects[Math.floor(Math.random() * availableEffects.length)];
+      usedIds.add(effect.id);
+      const value = Math.floor(effect.minVal + Math.random() * (effect.maxVal - effect.minVal) * (1 + tier * 0.15));
+      effects.push({ id: effect.id, name: effect.name, value });
+    }
+    return effects;
+  };
+
+  const craftGear = (slot, tier, weaponType = null) => {
+    const t = TIERS[tier];
+    if (gameState.gold < t.goldCost || gameState.ore < t.oreCost || gameState.leather < t.leatherCost) return;
+
+    const newItem = {
+      slot,
+      tier,
+      id: Date.now(),
+      plus: 0,
+      effects: rollEffects(tier),
+      weaponType: slot === 'weapon' ? (weaponType || 'sword') : null,
+    };
+
+    setGameState(prev => ({
+      ...prev,
+      gold: prev.gold - t.goldCost,
+      ore: prev.ore - t.oreCost,
+      leather: prev.leather - t.leatherCost,
+      inventory: [...prev.inventory, newItem],
+    }));
+  };
+
+  const enhanceGear = (item, isEquipped = false) => {
+    const cost = getEnhanceCost(item.plus || 0);
+    if (gameState.gold < cost.gold || gameState.enhanceStone < cost.enhanceStone ||
+        gameState.blessedOrb < cost.blessedOrb || gameState.celestialShard < cost.celestialShard) return;
+    if ((item.plus || 0) >= 30) return;
+
+    setGameState(prev => {
+      let newState = {
+        ...prev,
+        gold: prev.gold - cost.gold,
+        enhanceStone: prev.enhanceStone - cost.enhanceStone,
+        blessedOrb: prev.blessedOrb - cost.blessedOrb,
+        celestialShard: prev.celestialShard - cost.celestialShard,
+      };
+
+      const pityBonus = Math.min(prev.enhanceFails * 2, 30);
+      const succeeded = Math.random() * 100 < Math.min(100, getEnhanceSuccess(item.plus || 0) + pityBonus);
+
+      if (succeeded) {
+        const upgradedItem = { ...item, plus: (item.plus || 0) + 1 };
+        if (isEquipped) newState.gear = { ...prev.gear, [item.slot]: upgradedItem };
+        else newState.inventory = prev.inventory.map(i => i.id === item.id ? upgradedItem : i);
+        newState.enhanceFails = 0;
+        newState.combatLog = [...prev.combatLog.slice(-3), { type: 'enhance', msg: `SUCCESS! +${upgradedItem.plus}!` }];
+        setSelectedEnhanceItem({ ...upgradedItem, isEquipped });
+      } else {
+        newState.enhanceFails = prev.enhanceFails + 1;
+        newState.combatLog = [...prev.combatLog.slice(-3), { type: 'enhanceFail', msg: `FAILED (Pity: +${newState.enhanceFails * 2}%)` }];
+      }
+      return newState;
+    });
+  };
+
+  const equipGear = (item) => {
+    setGameState(prev => {
+      const oldGear = prev.gear[item.slot];
+      const newInventory = prev.inventory.filter(i => i.id !== item.id);
+      if (oldGear) newInventory.push(oldGear);
+      return { ...prev, gear: { ...prev.gear, [item.slot]: item }, inventory: newInventory };
+    });
+  };
+
+  const changeZone = (zoneId) => {
+    if (gameState.level < ZONES[zoneId].unlockLevel) return;
+    const zone = ZONES[zoneId];
+    setGameState(prev => ({ ...prev, currentZone: zoneId, enemyHp: zone.enemyHp, enemyMaxHp: zone.enemyHp }));
+  };
+
+  const allocateStat = (statKey) => {
+    if (gameState.statPoints <= 0) return;
+    setGameState(prev => ({
+      ...prev,
+      statPoints: prev.statPoints - 1,
+      stats: { ...prev.stats, [statKey]: prev.stats[statKey] + 1 },
+    }));
+  };
+
+  const saveGame = async () => {
+    await window.storage.set('gear-grinder-save', JSON.stringify({ ...gameState, combatLog: [] }));
+  };
+
+  const stats = getPlayerStats();
+
+  if (isLoading) {
+    return <div className="min-h-screen bg-gray-900 text-gray-100 flex items-center justify-center text-xl">Loading...</div>;
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-900 text-gray-100 p-4 font-sans">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="bg-gray-800 rounded-lg p-4 mb-4">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <h1 className="text-2xl font-bold text-amber-400">Gear Grinder</h1>
+              <span className="px-3 py-1 bg-green-600 rounded-full text-sm font-bold">Lv.{gameState.level}</span>
+              {gameState.statPoints > 0 && (
+                <span className="px-3 py-1 bg-purple-600 rounded-full text-sm font-bold animate-pulse">
+                  +{gameState.statPoints} Points!
+                </span>
+              )}
+            </div>
+            <button onClick={saveGame} className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium">Save</button>
+          </div>
+
+          {/* Resources with icons and tooltips */}
+          <div className="flex flex-wrap gap-3 mt-4 text-sm">
+            <div className="flex items-center gap-1 bg-gray-700/50 px-2 py-1 rounded cursor-help" title="Gold - Used for crafting and enhancing gear">
+              <span>🪙</span>
+              <span className="text-yellow-400 font-bold">{gameState.gold.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center gap-1 bg-gray-700/50 px-2 py-1 rounded cursor-help" title="Iron Ore - Used for crafting gear">
+              <span>{MATERIALS.ore.icon}</span>
+              <span style={{color: MATERIALS.ore.color}} className="font-bold">{gameState.ore}</span>
+            </div>
+            <div className="flex items-center gap-1 bg-gray-700/50 px-2 py-1 rounded cursor-help" title="Leather - Used for crafting gear">
+              <span>{MATERIALS.leather.icon}</span>
+              <span style={{color: MATERIALS.leather.color}} className="font-bold">{gameState.leather}</span>
+            </div>
+            <div className="flex items-center gap-1 bg-gray-700/50 px-2 py-1 rounded cursor-help" title="Enhance Stone - Used for enhancing gear (+1 to +30)">
+              <span>{MATERIALS.enhanceStone.icon}</span>
+              <span style={{color: MATERIALS.enhanceStone.color}} className="font-bold">{gameState.enhanceStone}</span>
+            </div>
+            <div className="flex items-center gap-1 bg-gray-700/50 px-2 py-1 rounded cursor-help" title="Blessed Orb - Required for enhancing gear past +10">
+              <span>{MATERIALS.blessedOrb.icon}</span>
+              <span style={{color: MATERIALS.blessedOrb.color}} className="font-bold">{gameState.blessedOrb}</span>
+            </div>
+            <div className="flex items-center gap-1 bg-gray-700/50 px-2 py-1 rounded cursor-help" title="Celestial Shard - Required for enhancing gear past +20">
+              <span>{MATERIALS.celestialShard.icon}</span>
+              <span style={{color: MATERIALS.celestialShard.color}} className="font-bold">{gameState.celestialShard}</span>
+            </div>
+          </div>
+
+          {/* XP Bar */}
+          <div className="mt-3">
+            <div className="flex justify-between text-xs text-gray-400 mb-1">
+              <span>Experience</span>
+              <span>{gameState.xp.toLocaleString()} / {xpForLevel(gameState.level).toLocaleString()}</span>
+            </div>
+            <div className="h-2.5 bg-gray-700 rounded-full overflow-hidden">
+              <div className="h-full bg-green-500 transition-all" style={{ width: `${(gameState.xp / xpForLevel(gameState.level)) * 100}%` }} />
+            </div>
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-1 mb-4 flex-wrap">
+          {['Combat', 'Stats', 'Gear', 'Craft', 'Enhance', 'Skills'].map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab.toLowerCase())}
+              className={`px-4 py-2 rounded-t-lg font-medium transition-colors ${
+                activeTab === tab.toLowerCase()
+                  ? 'bg-gray-800 text-white'
+                  : 'bg-gray-700/50 text-gray-400 hover:bg-gray-700 hover:text-gray-200'
+              } ${tab === 'Stats' && gameState.statPoints > 0 ? 'ring-2 ring-purple-500' : ''}`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        {/* Combat Tab */}
+        {activeTab === 'combat' && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            {/* Player */}
+            <div className="bg-gray-800 rounded-lg p-4">
+              <h2 className="text-lg font-bold text-center text-gray-300 mb-3">Your Hero</h2>
+              <div className="flex justify-center relative">
+                <CharacterDisplay gear={gameState.gear} />
+                {/* Floating damage on player */}
+                <div className="absolute inset-0 pointer-events-none overflow-visible">
+                  {floatingTexts.filter(t => t.target === 'player').map(ft => (
+                    <FloatingText key={ft.id} text={ft.text} type={ft.type} />
+                  ))}
+                </div>
+              </div>
+              {/* Combat Stats */}
+              <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
+                <div className="bg-gray-900 rounded p-2 flex justify-between">
+                  <span className="text-gray-400">DMG</span>
+                  <span className="text-red-400 font-bold">{stats.damage}</span>
+                </div>
+                <div className="bg-gray-900 rounded p-2 flex justify-between">
+                  <span className="text-gray-400">Speed</span>
+                  <span className="text-yellow-300 font-bold">{Math.floor(stats.speedMult * 100)}%</span>
+                </div>
+                <div className="bg-gray-900 rounded p-2 flex justify-between">
+                  <span className="text-gray-400">Crit%</span>
+                  <span className="text-orange-400 font-bold">{Math.floor(stats.critChance)}%</span>
+                </div>
+                <div className="bg-gray-900 rounded p-2 flex justify-between">
+                  <span className="text-gray-400">Armor</span>
+                  <span className="text-blue-400 font-bold">{stats.armor}</span>
+                </div>
+                <div className="bg-gray-900 rounded p-2 flex justify-between">
+                  <span className="text-gray-400">Dodge%</span>
+                  <span className="text-cyan-400 font-bold">{Math.floor(stats.dodge)}%</span>
+                </div>
+                <div className="bg-gray-900 rounded p-2 flex justify-between">
+                  <span className="text-gray-400">Lifesteal</span>
+                  <span className="text-green-400 font-bold">{Math.floor(stats.lifesteal)}%</span>
+                </div>
+              </div>
+              {/* HP Bar */}
+              <div className="mt-3">
+                <div className="flex justify-between text-xs text-gray-400 mb-1">
+                  <span>HP</span>
+                  <span>{gameState.playerHp.toLocaleString()} / {stats.maxHp.toLocaleString()}</span>
+                </div>
+                <div className="h-4 bg-gray-700 rounded overflow-hidden">
+                  <div className="h-full bg-green-500 transition-all" style={{ width: `${(gameState.playerHp / stats.maxHp) * 100}%` }} />
+                </div>
+              </div>
+            </div>
+
+            {/* Enemy */}
+            <div className="bg-gray-800 rounded-lg p-4">
+              <h2 className="text-lg font-bold text-center text-gray-300 mb-2">{ZONES[gameState.currentZone].name}</h2>
+              <div className="text-center text-xs text-gray-500 mb-2">{ZONES[gameState.currentZone].enemyType}</div>
+              <div className="flex justify-center my-3 relative min-h-[100px]">
+                {/* Enemy with death animation */}
+                <div className={`transition-all duration-300 ${enemyDying ? 'scale-0 opacity-0 rotate-180' : 'scale-100 opacity-100 rotate-0'}`}>
+                  <EnemyDisplay zoneId={gameState.currentZone} />
+                </div>
+                {/* Floating damage on enemy */}
+                <div className="absolute inset-0 pointer-events-none overflow-visible flex justify-center">
+                  {floatingTexts.filter(t => t.target === 'enemy').map(ft => (
+                    <FloatingText key={ft.id} text={ft.text} type={ft.type} />
+                  ))}
+                </div>
+                {/* Loot drops floating up - positioned to the right of enemy */}
+                <div className="absolute top-4 pointer-events-none overflow-visible" style={{ left: '60%' }}>
+                  {lootDrops.slice(-1).map(drop => (
+                    <LootDrop key={drop.id} items={drop.items} />
+                  ))}
+                </div>
+              </div>
+              <div>
+                <div className="flex justify-between text-sm text-gray-400 mb-1">
+                  <span>Enemy HP</span>
+                  <span>{gameState.enemyHp.toLocaleString()} / {gameState.enemyMaxHp.toLocaleString()}</span>
+                </div>
+                <div className="h-4 bg-gray-700 rounded overflow-hidden">
+                  <div className="h-full bg-red-500 transition-all" style={{ width: `${(gameState.enemyHp / gameState.enemyMaxHp) * 100}%` }} />
+                </div>
+              </div>
+              {/* Mini log for level ups and skills only */}
+              {gameState.combatLog.filter(l => l.type === 'level' || l.type === 'skill').length > 0 && (
+                <div className="mt-3 text-center">
+                  {gameState.combatLog.filter(l => l.type === 'level' || l.type === 'skill').slice(-2).map((log, i) => (
+                    <div key={i} className={`text-sm font-bold ${log.type === 'level' ? 'text-green-400' : 'text-purple-400'}`}>
+                      {log.msg}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Zones with drop info */}
+            <div className="bg-gray-800 rounded-lg p-4">
+              <h2 className="text-lg font-bold text-gray-300 mb-3">Zones</h2>
+              <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
+                {ZONES.map(zone => {
+                  const unlocked = gameState.level >= zone.unlockLevel;
+                  const active = gameState.currentZone === zone.id;
+                  return (
+                    <button
+                      key={zone.id}
+                      onClick={() => changeZone(zone.id)}
+                      disabled={!unlocked}
+                      className={`w-full p-2 rounded text-left text-sm transition-colors ${
+                        active ? 'bg-indigo-600 text-white' :
+                        unlocked ? 'bg-gray-700 hover:bg-gray-600 text-gray-200' :
+                        'bg-gray-800 text-gray-600 cursor-not-allowed'
+                      }`}
+                    >
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium">{zone.name}</span>
+                        <span className={`text-xs px-1.5 py-0.5 rounded ${unlocked ? 'bg-black/20' : 'bg-gray-700'}`}>Lv.{zone.unlockLevel}</span>
+                      </div>
+                      {unlocked && (
+                        <div className="flex gap-1 mt-1 text-xs opacity-80">
+                          {zone.drops.ore > 0.3 && <span>{MATERIALS.ore.icon}</span>}
+                          {zone.drops.leather > 0.3 && <span>{MATERIALS.leather.icon}</span>}
+                          {zone.drops.enhanceStone > 0.2 && <span>{MATERIALS.enhanceStone.icon}</span>}
+                          {zone.drops.blessedOrb > 0.1 && <span>{MATERIALS.blessedOrb.icon}</span>}
+                          {zone.drops.celestialShard > 0.05 && <span>{MATERIALS.celestialShard.icon}</span>}
+                          <span className="text-yellow-400 ml-auto">{zone.goldMin}-{zone.goldMax}g</span>
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Stats Tab - NEW */}
+        {activeTab === 'stats' && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Character Stats */}
+            <div className="bg-gray-800 rounded-lg p-4">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-bold text-gray-300">Character Stats</h2>
+                {gameState.statPoints > 0 && (
+                  <span className="px-3 py-1 bg-purple-600 rounded-full text-sm font-bold">
+                    {gameState.statPoints} points
+                  </span>
+                )}
+              </div>
+              <div className="flex justify-center mb-4">
+                <CharacterDisplay gear={gameState.gear} />
+              </div>
+              <div className="space-y-3">
+                {Object.entries(STATS).map(([key, stat]) => (
+                  <div key={key} className="bg-gray-900 rounded p-3">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <span className="font-bold" style={{ color: stat.color }}>{stat.name}</span>
+                        <span className="text-gray-400 ml-2 text-lg font-bold">{gameState.stats[key]}</span>
+                      </div>
+                      <button
+                        onClick={() => allocateStat(key)}
+                        disabled={gameState.statPoints <= 0}
+                        className={`px-4 py-1.5 rounded font-bold text-sm ${
+                          gameState.statPoints > 0
+                            ? 'bg-purple-600 hover:bg-purple-500 text-white'
+                            : 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                        }`}
+                      >
+                        +1
+                      </button>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">{stat.desc}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Derived Stats */}
+            <div className="bg-gray-800 rounded-lg p-4">
+              <h2 className="text-lg font-bold text-gray-300 mb-4">Combat Stats</h2>
+              <div className="space-y-2">
+                <div className="bg-gray-900 rounded p-3 flex justify-between">
+                  <span className="text-gray-400">Damage</span>
+                  <span className="text-red-400 font-bold text-lg">{stats.damage}</span>
+                </div>
+                <div className="bg-gray-900 rounded p-3 flex justify-between">
+                  <span className="text-gray-400">Max HP</span>
+                  <span className="text-green-400 font-bold text-lg">{stats.maxHp.toLocaleString()}</span>
+                </div>
+                <div className="bg-gray-900 rounded p-3 flex justify-between">
+                  <span className="text-gray-400">Attack Speed</span>
+                  <span className="text-yellow-300 font-bold text-lg">{Math.floor(stats.speedMult * 100)}%</span>
+                </div>
+                <div className="bg-gray-900 rounded p-3 flex justify-between">
+                  <span className="text-gray-400">Armor</span>
+                  <span className="text-blue-400 font-bold text-lg">{stats.armor}</span>
+                </div>
+                <div className="bg-gray-900 rounded p-3 flex justify-between">
+                  <span className="text-gray-400">Crit Chance</span>
+                  <span className="text-orange-400 font-bold text-lg">{Math.floor(stats.critChance)}%</span>
+                </div>
+                <div className="bg-gray-900 rounded p-3 flex justify-between">
+                  <span className="text-gray-400">Crit Damage</span>
+                  <span className="text-red-300 font-bold text-lg">{Math.floor(stats.critDamage)}%</span>
+                </div>
+                <div className="bg-gray-900 rounded p-3 flex justify-between">
+                  <span className="text-gray-400">Dodge</span>
+                  <span className="text-cyan-400 font-bold text-lg">{Math.floor(stats.dodge)}%</span>
+                </div>
+                <div className="bg-gray-900 rounded p-3 flex justify-between">
+                  <span className="text-gray-400">Lifesteal</span>
+                  <span className="text-green-300 font-bold text-lg">{Math.floor(stats.lifesteal)}%</span>
+                </div>
+                <div className="bg-gray-900 rounded p-3 flex justify-between">
+                  <span className="text-gray-400">Thorns</span>
+                  <span className="text-amber-400 font-bold text-lg">{Math.floor(stats.thorns)}%</span>
+                </div>
+                <div className="bg-gray-900 rounded p-3 flex justify-between">
+                  <span className="text-gray-400">Gold Find</span>
+                  <span className="text-yellow-400 font-bold text-lg">+{Math.floor((stats.goldMult - 1) * 100)}%</span>
+                </div>
+                <div className="bg-gray-900 rounded p-3 flex justify-between">
+                  <span className="text-gray-400">Drop Rate</span>
+                  <span className="text-purple-400 font-bold text-lg">+{Math.floor((stats.matMult - 1) * 100)}%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Gear Tab */}
+        {activeTab === 'gear' && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Equipped */}
+            <div className="bg-gray-800 rounded-lg p-4">
+              <h2 className="text-lg font-bold text-gray-300 mb-4">Equipped Gear</h2>
+              <div className="flex gap-4">
+                <div className="flex justify-center">
+                  <CharacterDisplay gear={gameState.gear} />
+                </div>
+                <div className="flex-1 space-y-1.5">
+                  {GEAR_SLOTS.map(slot => {
+                    const gear = gameState.gear[slot];
+                    const gearBase = GEAR_BASES[slot];
+                    return (
+                      <div key={slot} className="bg-gray-900 rounded p-2">
+                        <div className="flex justify-between items-center">
+                          <div className="flex items-center gap-2">
+                            <span className="text-gray-500 capitalize text-xs w-16">{slot}</span>
+                            <span className="text-xs px-1 rounded" style={{ backgroundColor: STATS[gearBase.scaling]?.color + '30', color: STATS[gearBase.scaling]?.color }}>
+                              {gearBase.scaling.toUpperCase()}
+                            </span>
+                          </div>
+                          {gear ? <GearName item={gear} /> : <span className="text-gray-600 text-xs">Empty</span>}
+                        </div>
+                        {gear?.effects?.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {gear.effects.map((eff, i) => (
+                              <span key={i} className="text-xs px-1 py-0.5 rounded bg-gray-800" style={{ color: SPECIAL_EFFECTS.find(e => e.id === eff.id)?.color }}>
+                                {eff.name} {eff.value}%
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Inventory */}
+            <div className="bg-gray-800 rounded-lg p-4">
+              <h2 className="text-lg font-bold text-gray-300 mb-4">Inventory ({gameState.inventory.length})</h2>
+              {gameState.inventory.length === 0 ? (
+                <div className="text-center text-gray-500 py-8">No items. Craft some gear!</div>
+              ) : (
+                <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
+                  {gameState.inventory.map(item => (
+                    <div key={item.id} className="bg-gray-900 rounded p-3 flex justify-between items-start gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-500 text-xs capitalize">{item.slot}</span>
+                          <GearName item={item} />
+                        </div>
+                        {item.effects?.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {item.effects.map((eff, i) => (
+                              <span key={i} className="text-xs px-1.5 py-0.5 rounded bg-gray-800" style={{ color: SPECIAL_EFFECTS.find(e => e.id === eff.id)?.color }}>
+                                {eff.name} {eff.value}%
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <button onClick={() => equipGear(item)} className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 rounded text-sm font-medium">
+                        Equip
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Craft Tab */}
+        {activeTab === 'craft' && (
+          <div className="bg-gray-800 rounded-lg p-4">
+            <h2 className="text-lg font-bold text-gray-300 mb-2">Forge</h2>
+            <p className="text-gray-500 text-sm mb-4">
+              Craft gear using {MATERIALS.ore.icon} Iron Ore and {MATERIALS.leather.icon} Leather. Higher tiers = better stats + more effects.
+            </p>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-700">
+                    <th className="text-left py-2 px-2 text-gray-400 font-medium">Tier / Cost</th>
+                    {GEAR_SLOTS.map(slot => {
+                      const equipped = gameState.gear[slot];
+                      return (
+                        <th key={slot} className="py-2 px-1 text-center text-xs">
+                          <div className="capitalize text-gray-400">{slot}</div>
+                          {equipped && (
+                            <div className="text-xs mt-0.5" style={{ color: TIERS[equipped.tier].color }}>
+                              {equipped.plus > 0 ? `+${equipped.plus} ` : ''}{TIERS[equipped.tier].name.slice(0,3)}
+                            </div>
+                          )}
+                        </th>
+                      );
+                    })}
+                  </tr>
+                </thead>
+                <tbody>
+                  {TIERS.map(tier => {
+                    const canAfford = gameState.gold >= tier.goldCost && gameState.ore >= tier.oreCost && gameState.leather >= tier.leatherCost;
+                    return (
+                      <tr key={tier.id} className="border-b border-gray-700/50">
+                        <td className="py-2 px-2">
+                          <div className="font-bold" style={{ color: tier.color }}>{tier.name}</div>
+                          <div className="text-xs flex gap-2 mt-0.5">
+                            <span className="text-yellow-400">🪙{tier.goldCost}</span>
+                            <span style={{color: MATERIALS.ore.color}}>{MATERIALS.ore.icon}{tier.oreCost}</span>
+                            <span style={{color: MATERIALS.leather.color}}>{MATERIALS.leather.icon}{tier.leatherCost}</span>
+                          </div>
+                        </td>
+                        {GEAR_SLOTS.map(slot => (
+                          <td key={slot} className="py-2 px-1 text-center">
+                            {slot === 'weapon' ? (
+                              <div className="flex flex-col gap-1">
+                                {WEAPON_TYPES.map(wt => (
+                                  <button
+                                    key={wt.id}
+                                    onClick={() => craftGear(slot, tier.id, wt.id)}
+                                    disabled={!canAfford}
+                                    title={wt.desc}
+                                    className={`px-1.5 py-0.5 rounded text-xs transition-colors ${
+                                      canAfford ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-800 text-gray-600 cursor-not-allowed'
+                                    }`}
+                                    style={{ color: canAfford ? STATS[wt.scaling]?.color : undefined }}
+                                  >
+                                    {wt.name}
+                                  </button>
+                                ))}
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => craftGear(slot, tier.id)}
+                                disabled={!canAfford}
+                                className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                                  canAfford ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-800 text-gray-600 cursor-not-allowed'
+                                }`}
+                              >
+                                Craft
+                              </button>
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Enhance Tab */}
+        {activeTab === 'enhance' && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Item List */}
+            <div className="bg-gray-800 rounded-lg p-4">
+              <h2 className="text-lg font-bold text-gray-300 mb-3">Select Item to Enhance</h2>
+              <div className="space-y-3">
+                <div className="text-xs text-gray-500 uppercase tracking-wide">Equipped Gear</div>
+                {GEAR_SLOTS.map(slot => {
+                  const gear = gameState.gear[slot];
+                  if (!gear) return null;
+                  const isSelected = selectedEnhanceItem?.id === gear.id && selectedEnhanceItem?.isEquipped;
+                  return (
+                    <button
+                      key={`eq-${slot}`}
+                      onClick={() => setSelectedEnhanceItem({ ...gear, isEquipped: true })}
+                      className={`w-full p-3 rounded text-left transition-colors ${isSelected ? 'bg-indigo-600' : 'bg-gray-700 hover:bg-gray-600'}`}
+                    >
+                      <span className="text-gray-400 text-xs capitalize mr-2">{slot}:</span>
+                      <GearName item={gear} />
+                    </button>
+                  );
+                })}
+
+                {gameState.inventory.length > 0 && (
+                  <>
+                    <div className="text-xs text-gray-500 uppercase tracking-wide mt-4">Inventory</div>
+                    {gameState.inventory.map(item => {
+                      const isSelected = selectedEnhanceItem?.id === item.id && !selectedEnhanceItem?.isEquipped;
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => setSelectedEnhanceItem({ ...item, isEquipped: false })}
+                          className={`w-full p-3 rounded text-left transition-colors ${isSelected ? 'bg-indigo-600' : 'bg-gray-700 hover:bg-gray-600'}`}
+                        >
+                          <span className="text-gray-400 text-xs capitalize mr-2">{item.slot}:</span>
+                          <GearName item={item} />
+                        </button>
+                      );
+                    })}
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Enhancement Panel */}
+            <div className="bg-gray-800 rounded-lg p-4">
+              <h2 className="text-lg font-bold text-gray-300 mb-3">Enhancement</h2>
+              {selectedEnhanceItem ? (
+                <div>
+                  <div className="text-center py-4 bg-gray-900 rounded-lg mb-4">
+                    <div className="text-xl mb-2">
+                      <GearName item={selectedEnhanceItem} />
+                    </div>
+                    <EnhanceGlow plus={selectedEnhanceItem.plus || 0} />
+                  </div>
+
+                  {(selectedEnhanceItem.plus || 0) >= 30 ? (
+                    <div className="text-center text-2xl font-bold text-amber-400 py-8">MAX LEVEL!</div>
+                  ) : (
+                    <>
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div className="bg-gray-900 rounded p-3 text-center">
+                          <div className="text-gray-400 text-sm">Current</div>
+                          <div className="text-2xl font-bold">+{selectedEnhanceItem.plus || 0}</div>
+                        </div>
+                        <div className="bg-gray-900 rounded p-3 text-center">
+                          <div className="text-gray-400 text-sm">Success Rate</div>
+                          <div className="text-2xl font-bold" style={{
+                            color: getEnhanceSuccess(selectedEnhanceItem.plus || 0) >= 80 ? '#22c55e' :
+                                   getEnhanceSuccess(selectedEnhanceItem.plus || 0) >= 50 ? '#eab308' : '#ef4444'
+                          }}>
+                            {getEnhanceSuccess(selectedEnhanceItem.plus || 0)}%
+                          </div>
+                          {gameState.enhanceFails > 0 && (
+                            <div className="text-xs text-cyan-400">+{Math.min(gameState.enhanceFails * 2, 30)}% pity</div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="bg-gray-900 rounded p-3 mb-4">
+                        <div className="text-gray-400 text-sm mb-2">Cost:</div>
+                        {(() => {
+                          const cost = getEnhanceCost(selectedEnhanceItem.plus || 0);
+                          return (
+                            <div className="flex flex-wrap gap-3 text-sm">
+                              <div className={`flex items-center gap-1 ${gameState.gold >= cost.gold ? 'text-yellow-400' : 'text-red-400'}`}>
+                                <span>🪙</span>{cost.gold.toLocaleString()}
+                              </div>
+                              <div className="flex items-center gap-1" style={{ color: gameState.enhanceStone >= cost.enhanceStone ? MATERIALS.enhanceStone.color : '#ef4444' }}>
+                                <span>{MATERIALS.enhanceStone.icon}</span>{cost.enhanceStone}
+                              </div>
+                              {cost.blessedOrb > 0 && (
+                                <div className="flex items-center gap-1" style={{ color: gameState.blessedOrb >= cost.blessedOrb ? MATERIALS.blessedOrb.color : '#ef4444' }}>
+                                  <span>{MATERIALS.blessedOrb.icon}</span>{cost.blessedOrb}
+                                </div>
+                              )}
+                              {cost.celestialShard > 0 && (
+                                <div className="flex items-center gap-1" style={{ color: gameState.celestialShard >= cost.celestialShard ? MATERIALS.celestialShard.color : '#ef4444' }}>
+                                  <span>{MATERIALS.celestialShard.icon}</span>{cost.celestialShard}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
+                      </div>
+
+                      <button
+                        onClick={() => enhanceGear(selectedEnhanceItem, selectedEnhanceItem.isEquipped)}
+                        disabled={(() => {
+                          const cost = getEnhanceCost(selectedEnhanceItem.plus || 0);
+                          return gameState.gold < cost.gold || gameState.enhanceStone < cost.enhanceStone ||
+                                 gameState.blessedOrb < cost.blessedOrb || gameState.celestialShard < cost.celestialShard;
+                        })()}
+                        className="w-full py-4 rounded-lg font-bold text-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 disabled:from-gray-700 disabled:to-gray-700 disabled:cursor-not-allowed transition-all"
+                      >
+                        ENHANCE
+                      </button>
+                    </>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center text-gray-500 py-12">Select an item to enhance</div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Skills Tab */}
+        {activeTab === 'skills' && (
+          <div className="bg-gray-800 rounded-lg p-4">
+            <h2 className="text-lg font-bold text-gray-300 mb-4">Skills</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {SKILLS.map(skill => {
+                const unlocked = gameState.unlockedSkills.includes(skill.id);
+                const canUnlock = gameState.level >= skill.unlockLevel;
+                return (
+                  <div
+                    key={skill.id}
+                    className={`p-4 rounded-lg ${
+                      unlocked ? 'bg-purple-900/30 border border-purple-500' :
+                      canUnlock ? 'bg-gray-700' : 'bg-gray-800 opacity-50'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start">
+                      <span className={`font-bold ${unlocked ? 'text-purple-400' : canUnlock ? 'text-white' : 'text-gray-500'}`}>
+                        {skill.name}
+                      </span>
+                      <span className="text-xs text-gray-500 bg-gray-800 px-2 py-0.5 rounded">Lv.{skill.unlockLevel}</span>
+                    </div>
+                    <div className={`text-sm mt-1 ${unlocked ? 'text-purple-300' : 'text-gray-400'}`}>{skill.desc}</div>
+                    {unlocked && <div className="text-xs text-green-400 mt-2 font-medium">Active</div>}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Footer */}
+        <div className="text-center text-xs text-gray-600 mt-4">
+          Kills: {gameState.kills.toLocaleString()} | Total Gold: {gameState.totalGold.toLocaleString()}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Gear name with enhancement and tier color
+function GearName({ item }) {
+  const tier = TIERS[item.tier];
+  const plus = item.plus || 0;
+  const glowColor = plus >= 30 ? '#fbbf24' : plus >= 20 ? '#ec4899' : plus >= 10 ? '#3b82f6' : null;
+
+  // Get the named item based on slot, tier, and weapon type
+  let gearName;
+  if (item.slot === 'weapon' && item.weaponType) {
+    gearName = GEAR_NAMES[item.weaponType]?.[item.tier] || `${tier.name} ${item.weaponType}`;
+  } else {
+    gearName = GEAR_NAMES[item.slot]?.[item.tier] || `${tier.name} ${GEAR_BASES[item.slot].name}`;
+  }
+
+  return (
+    <span
+      className="font-medium"
+      style={{
+        color: tier.color,
+        textShadow: glowColor ? `0 0 8px ${glowColor}` : 'none',
+      }}
+    >
+      {plus > 0 && <span className="text-white">+{plus} </span>}
+      {gearName}
+    </span>
+  );
+}
+
+// Enhancement glow indicators
+function EnhanceGlow({ plus }) {
+  if (plus < 10) return <div className="h-4" />;
+  const level = plus >= 30 ? 3 : plus >= 20 ? 2 : 1;
+  const colors = ['#3b82f6', '#ec4899', '#fbbf24'];
+  return (
+    <div className="flex justify-center gap-2">
+      {[...Array(level)].map((_, i) => (
+        <div key={i} className="w-3 h-3 rounded-full animate-pulse" style={{ backgroundColor: colors[i], boxShadow: `0 0 8px ${colors[i]}` }} />
+      ))}
+    </div>
+  );
+}
+
+// Floating damage text component
+function FloatingText({ text, type }) {
+  const getStyle = () => {
+    switch (type) {
+      case 'crit':
+        return { color: '#f97316', fontSize: '1.5rem', fontWeight: 'bold' };
+      case 'playerDmg':
+        return { color: '#3b82f6', fontSize: '1.1rem', fontWeight: 'bold' };
+      case 'enemyDmg':
+        return { color: '#ef4444', fontSize: '1.1rem', fontWeight: 'bold' };
+      case 'heal':
+        return { color: '#22c55e', fontSize: '1rem', fontWeight: 'bold' };
+      case 'dodge':
+        return { color: '#06b6d4', fontSize: '1.1rem', fontWeight: 'bold' };
+      case 'thorns':
+        return { color: '#f59e0b', fontSize: '0.9rem', fontWeight: 'bold' };
+      case 'levelup':
+        return { color: '#fbbf24', fontSize: '1.3rem', fontWeight: 'bold' };
+      case 'death':
+        return { color: '#dc2626', fontSize: '1.4rem', fontWeight: 'bold' };
+      default:
+        return { color: '#fff', fontSize: '1rem' };
+    }
+  };
+
+  return (
+    <div
+      className="absolute top-1/2 left-1/2 transform -translate-x-1/2 animate-float-up whitespace-nowrap"
+      style={{
+        ...getStyle(),
+        textShadow: '0 0 4px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.5)',
+        animation: 'floatUp 1s ease-out forwards',
+      }}
+    >
+      {text}
+    </div>
+  );
+}
+
+// Loot drop display component
+function LootDrop({ items }) {
+  return (
+    <div
+      className="flex flex-col items-start gap-0.5"
+      style={{ animation: 'lootFloat 2s ease-out forwards' }}
+    >
+      {items.map((item, i) => (
+        <div
+          key={i}
+          className="text-sm font-bold whitespace-nowrap px-1 rounded"
+          style={{
+            color: item.color,
+            textShadow: '0 0 4px rgba(0,0,0,0.9)',
+          }}
+        >
+          {item.text}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Full character SVG display
+function CharacterDisplay({ gear }) {
+  const getColor = (slot) => gear[slot] ? TIERS[gear[slot].tier].color : '#374151';
+  const getGlow = (slot) => {
+    if (!gear[slot]) return '';
+    const plus = gear[slot].plus || 0;
+    if (plus >= 30) return 'url(#glow-gold)';
+    if (plus >= 20) return 'url(#glow-pink)';
+    if (plus >= 10) return 'url(#glow-blue)';
+    return '';
+  };
+
+  const weaponType = gear.weapon?.weaponType || 'sword';
+  const weaponColor = getColor('weapon');
+  const weaponGlow = getGlow('weapon');
+
+  // Different weapon SVG shapes based on weapon type
+  const renderWeapon = () => {
+    switch (weaponType) {
+      case 'staff':
+        return (
+          <g filter={weaponGlow}>
+            {/* Staff - long wooden pole with crystal on top */}
+            <rect x="13" y="30" width="4" height="60" rx="2" fill="#8B4513" />
+            <circle cx="15" cy="28" r="6" fill={weaponColor} />
+            <circle cx="15" cy="28" r="3" fill="#ffffff" fillOpacity="0.6" />
+          </g>
+        );
+      case 'dagger':
+        return (
+          <g filter={weaponGlow}>
+            {/* Dagger - short curved blade */}
+            <rect x="14" y="70" width="4" height="15" rx="1" fill="#4a4a4a" />
+            <rect x="10" y="68" width="12" height="4" rx="1" fill={weaponColor} />
+            <polygon points="16,68 12,50 20,50" fill={weaponColor} />
+          </g>
+        );
+      case 'mace':
+        return (
+          <g filter={weaponGlow}>
+            {/* Mace - handle with heavy head */}
+            <rect x="13" y="55" width="4" height="35" rx="1" fill="#6b7280" />
+            <ellipse cx="15" cy="50" rx="10" ry="8" fill={weaponColor} />
+            <circle cx="10" cy="48" r="3" fill={weaponColor} />
+            <circle cx="20" cy="48" r="3" fill={weaponColor} />
+            <circle cx="15" cy="43" r="3" fill={weaponColor} />
+          </g>
+        );
+      default: // sword
+        return (
+          <g filter={weaponGlow}>
+            {/* Sword - classic blade with hilt */}
+            <rect x="12" y="45" width="6" height="50" rx="1" fill={weaponColor} />
+            <polygon points="15,40 10,50 20,50" fill={weaponColor} />
+            <rect x="8" y="90" width="14" height="4" rx="1" fill="#6b7280" />
+          </g>
+        );
+    }
+  };
+
+  return (
+    <svg viewBox="0 0 100 140" className="w-28 h-40 flex-shrink-0">
+      <defs>
+        <filter id="glow-blue" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="2" result="blur" />
+          <feFlood floodColor="#3b82f6" floodOpacity="0.8" />
+          <feComposite in2="blur" operator="in" />
+          <feMerge><feMergeNode /><feMergeNode in="SourceGraphic" /></feMerge>
+        </filter>
+        <filter id="glow-pink" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="3" result="blur" />
+          <feFlood floodColor="#ec4899" floodOpacity="0.9" />
+          <feComposite in2="blur" operator="in" />
+          <feMerge><feMergeNode /><feMergeNode in="SourceGraphic" /></feMerge>
+        </filter>
+        <filter id="glow-gold" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="4" result="blur" />
+          <feFlood floodColor="#fbbf24" floodOpacity="1" />
+          <feComposite in2="blur" operator="in" />
+          <feMerge><feMergeNode /><feMergeNode in="SourceGraphic" /></feMerge>
+        </filter>
+      </defs>
+
+      {/* Body */}
+      <rect x="35" y="50" width="30" height="50" rx="3" fill="#1f2937" />
+      {/* Armor */}
+      <rect x="33" y="48" width="34" height="55" rx="4" fill={getColor('armor')} fillOpacity="0.9" filter={getGlow('armor')} />
+      <rect x="38" y="53" width="24" height="25" rx="2" fill="#1f2937" fillOpacity="0.3" />
+      {/* Shield */}
+      <ellipse cx="78" cy="70" rx="8" ry="12" fill={getColor('shield')} filter={getGlow('shield')} />
+      {/* Head */}
+      <circle cx="50" cy="30" r="18" fill="#4b5563" />
+      {/* Helmet */}
+      <path d="M32 30 Q32 12 50 12 Q68 12 68 30 L68 35 L32 35 Z" fill={getColor('helmet')} filter={getGlow('helmet')} />
+      <rect x="38" y="28" width="24" height="8" rx="1" fill="#1f2937" fillOpacity="0.5" />
+      {/* Amulet */}
+      <circle cx="50" cy="48" r="4" fill={getColor('amulet')} filter={getGlow('amulet')} />
+      {/* Arms */}
+      <rect x="20" y="52" width="12" height="35" rx="3" fill="#4b5563" />
+      <rect x="68" y="52" width="12" height="35" rx="3" fill="#4b5563" />
+      {/* Gloves */}
+      <rect x="18" y="82" width="14" height="10" rx="2" fill={getColor('gloves')} filter={getGlow('gloves')} />
+      <rect x="68" y="82" width="14" height="10" rx="2" fill={getColor('gloves')} filter={getGlow('gloves')} />
+      {/* Weapon - rendered based on type */}
+      {renderWeapon()}
+      {/* Legs */}
+      <rect x="37" y="100" width="11" height="30" rx="2" fill="#374151" />
+      <rect x="52" y="100" width="11" height="30" rx="2" fill="#374151" />
+      {/* Boots */}
+      <rect x="35" y="120" width="14" height="15" rx="2" fill={getColor('boots')} filter={getGlow('boots')} />
+      <rect x="51" y="120" width="14" height="15" rx="2" fill={getColor('boots')} filter={getGlow('boots')} />
+      {/* Accessory ring */}
+      <circle cx="74" cy="85" r="5" fill={getColor('accessory')} fillOpacity="0.8" filter={getGlow('accessory')} />
+      <circle cx="74" cy="85" r="3" fill="#1f2937" />
+    </svg>
+  );
+}
+
+// Enemy SVG display
+function EnemyDisplay({ zoneId }) {
+  const colors = ['#22c55e', '#6b7280', '#84cc16', '#a855f7', '#ef4444', '#8b5cf6', '#06b6d4', '#dc2626', '#fbbf24', '#1e3a8a', '#f97316', '#4c1d95'];
+
+  const enemies = [
+    // Forest Wolf
+    <g key="0"><ellipse cx="50" cy="55" rx="25" ry="15" fill={colors[0]} /><circle cx="35" cy="45" r="12" fill={colors[0]} /><polygon points="28,35 32,20 38,35" fill={colors[0]} /><polygon points="38,35 42,22 48,35" fill={colors[0]} /><circle cx="32" cy="42" r="2" fill="#111" /><ellipse cx="37" cy="48" rx="3" ry="2" fill="#111" /></g>,
+    // Shadow
+    <g key="1"><ellipse cx="50" cy="50" rx="30" ry="25" fill={colors[1]} fillOpacity="0.8" /><circle cx="40" cy="45" r="4" fill="#dc2626" /><circle cx="60" cy="45" r="4" fill="#dc2626" /><path d="M35 60 Q50 70 65 60" stroke="#111" strokeWidth="3" fill="none" /></g>,
+    // Goblin
+    <g key="2"><ellipse cx="50" cy="60" rx="20" ry="25" fill={colors[2]} /><circle cx="50" cy="40" r="18" fill={colors[2]} /><polygon points="30,35 35,15 42,35" fill={colors[2]} /><polygon points="58,35 65,15 70,35" fill={colors[2]} /><circle cx="43" cy="38" r="4" fill="#fef08a" /><circle cx="57" cy="38" r="4" fill="#fef08a" /><circle cx="43" cy="38" r="2" fill="#111" /><circle cx="57" cy="38" r="2" fill="#111" /></g>,
+    // Skeleton
+    <g key="3"><rect x="35" y="30" width="30" height="45" rx="5" fill={colors[3]} fillOpacity="0.7" /><circle cx="50" cy="30" r="15" fill="#e5e5e5" /><circle cx="44" cy="28" r="5" fill="#111" /><circle cx="56" cy="28" r="5" fill="#111" /></g>,
+    // Dragon
+    <g key="4"><ellipse cx="50" cy="55" rx="35" ry="20" fill={colors[4]} /><circle cx="50" cy="35" r="20" fill={colors[4]} /><polygon points="35,20 40,0 50,20" fill={colors[4]} /><polygon points="50,20 60,0 65,20" fill={colors[4]} /><circle cx="42" cy="32" r="5" fill="#fef08a" /><circle cx="58" cy="32" r="5" fill="#fef08a" /><circle cx="42" cy="32" r="2" fill="#111" /><circle cx="58" cy="32" r="2" fill="#111" /><polygon points="45,50 50,58 55,50" fill="#fef08a" /></g>,
+    // Void Entity
+    <g key="5"><circle cx="50" cy="50" r="30" fill={colors[5]} fillOpacity="0.5" /><circle cx="50" cy="50" r="20" fill={colors[5]} fillOpacity="0.7" /><circle cx="50" cy="50" r="10" fill={colors[5]} /><circle cx="40" cy="45" r="3" fill="#fff" /><circle cx="60" cy="45" r="3" fill="#fff" /></g>,
+    // Ice Elemental
+    <g key="6"><polygon points="50,10 70,40 60,40 75,70 50,50 25,70 40,40 30,40" fill={colors[6]} /><circle cx="45" cy="35" r="3" fill="#fff" /><circle cx="55" cy="35" r="3" fill="#fff" /></g>,
+    // Demon
+    <g key="7"><ellipse cx="50" cy="55" rx="30" ry="25" fill={colors[7]} /><circle cx="50" cy="35" r="18" fill={colors[7]} /><polygon points="30,25 38,5 42,30" fill={colors[7]} /><polygon points="58,30 62,5 70,25" fill={colors[7]} /><circle cx="42" cy="32" r="5" fill="#fef08a" /><circle cx="58" cy="32" r="5" fill="#fef08a" /><circle cx="42" cy="32" r="3" fill="#111" /><circle cx="58" cy="32" r="3" fill="#111" /></g>,
+    // Celestial
+    <g key="8"><circle cx="50" cy="45" r="25" fill="#fef3c7" fillOpacity="0.9" /><circle cx="50" cy="45" r="18" fill={colors[8]} /><circle cx="45" cy="42" r="3" fill="#fff" /><circle cx="55" cy="42" r="3" fill="#fff" /></g>,
+    // Abyssal
+    <g key="9"><ellipse cx="50" cy="50" rx="35" ry="30" fill={colors[9]} fillOpacity="0.8" /><circle cx="42" cy="45" r="6" fill="#0ea5e9" /><circle cx="58" cy="45" r="6" fill="#0ea5e9" /><circle cx="42" cy="45" r="2" fill="#111" /><circle cx="58" cy="45" r="2" fill="#111" /></g>,
+    // Chaos
+    <g key="10"><polygon points="50,15 65,35 80,40 65,50 70,70 50,60 30,70 35,50 20,40 35,35" fill={colors[10]} /><circle cx="50" cy="45" r="12" fill="#f97316" /><circle cx="45" cy="42" r="3" fill="#111" /><circle cx="55" cy="42" r="3" fill="#111" /></g>,
+    // Eternal
+    <g key="11"><circle cx="50" cy="50" r="35" fill="#111" /><circle cx="50" cy="50" r="25" fill={colors[11]} /><circle cx="50" cy="50" r="15" fill="#1f2937" /><circle cx="45" cy="47" r="4" fill="#ef4444" /><circle cx="55" cy="47" r="4" fill="#ef4444" /></g>,
+  ];
+
+  return <svg viewBox="0 0 100 80" className="w-24 h-20">{enemies[zoneId]}</svg>;
+}
+
+export default GearGrinder;
