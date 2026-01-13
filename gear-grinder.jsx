@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from './components/ui/tabs';
 import { Card, CardHeader, CardTitle, CardContent } from './components/ui/card';
 import { Progress } from './components/ui/progress';
@@ -319,11 +319,15 @@ function GearGrinder() {
   const [isLoading, setIsLoading] = useState(true);
   const [combatTick, setCombatTick] = useState(0);
   const [selectedEnhanceItem, setSelectedEnhanceItem] = useState(null);
+  const [lastSaveTime, setLastSaveTime] = useState(null);
 
   // Combat visual effects state
   const [floatingTexts, setFloatingTexts] = useState([]);
   const [enemyDying, setEnemyDying] = useState(false);
   const [lootDrops, setLootDrops] = useState([]);
+
+  // Use ref to track latest gameState for auto-save without causing re-renders
+  const gameStateRef = useRef(gameState);
 
   // Add floating text helper
   const addFloatingText = useCallback((text, type, target) => {
@@ -399,25 +403,48 @@ function GearGrinder() {
     loadGame();
   }, []);
 
+  // Recalculate player HP after loading to ensure it matches current stats/gear
+  useEffect(() => {
+    if (!isLoading && gameState.level > 0) {
+      const stats = getPlayerStats();
+      // Only update if HP values are incorrect
+      if (gameState.playerMaxHp !== stats.maxHp || gameState.playerHp > stats.maxHp) {
+        setGameState(prev => ({
+          ...prev,
+          playerMaxHp: stats.maxHp,
+          playerHp: Math.min(prev.playerHp, stats.maxHp) // Keep current HP but cap at new max
+        }));
+      }
+    }
+  }, [isLoading]); // Only run once after initial load
+
+  // Update ref whenever gameState changes
+  useEffect(() => {
+    gameStateRef.current = gameState;
+  }, [gameState]);
+
   // Auto-save every 3 seconds
   useEffect(() => {
     if (isLoading) return;
     const interval = setInterval(async () => {
       try {
-        const saveData = { ...gameState, combatLog: [] };
+        const saveData = { ...gameStateRef.current, combatLog: [] };
         await window.storage.set('gear-grinder-save', JSON.stringify(saveData));
-        console.log('Game saved:', {
+        setLastSaveTime(new Date().toLocaleTimeString());
+        console.log('Game auto-saved:', {
           level: saveData.level,
           gold: saveData.gold,
+          zone: saveData.currentZone,
           gearCount: Object.values(saveData.gear).filter(g => g !== null).length,
           inventorySize: saveData.inventory.length,
         });
       } catch (e) {
-        console.error('Error saving game:', e);
+        console.error('Error auto-saving game:', e);
+        setLastSaveTime('Error saving!');
       }
     }, 3000);
     return () => clearInterval(interval);
-  }, [gameState, isLoading]);
+  }, [isLoading]);
 
   const getPlayerStats = useCallback(() => {
     const s = gameState.stats;
@@ -807,7 +834,16 @@ function GearGrinder() {
       const prevZoneKills = gameState.zoneKills[zoneId - 1] || 0;
       if (prevZoneKills < zone.killsRequired) return;
     }
-    setGameState(prev => ({ ...prev, currentZone: zoneId, enemyHp: zone.enemyHp, enemyMaxHp: zone.enemyHp }));
+    // Get current player stats to reset HP to full
+    const currentStats = getPlayerStats();
+    setGameState(prev => ({
+      ...prev,
+      currentZone: zoneId,
+      enemyHp: zone.enemyHp,
+      enemyMaxHp: zone.enemyHp,
+      playerHp: currentStats.maxHp,
+      playerMaxHp: currentStats.maxHp
+    }));
   };
 
   const allocateStat = (statKey) => {
@@ -823,11 +859,13 @@ function GearGrinder() {
     try {
       const saveData = { ...gameState, combatLog: [] };
       await window.storage.set('gear-grinder-save', JSON.stringify(saveData));
+      setLastSaveTime(new Date().toLocaleTimeString());
       console.log('Manual save successful:', saveData);
       alert('Game saved successfully!');
     } catch (e) {
       console.error('Error saving game:', e);
-      alert('Error saving game!');
+      setLastSaveTime('Error saving!');
+      alert('Error saving game! Please try again.');
     }
   };
 
@@ -1529,9 +1567,16 @@ function GearGrinder() {
         <div>
           Kills: {gameState.kills.toLocaleString()} | Total Gold: {gameState.totalGold.toLocaleString()}
         </div>
-        <Button onClick={manualSave} size="sm" variant="outline" className="text-xs">
-          💾 Save Game
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button onClick={manualSave} size="sm" variant="outline" className="text-xs">
+            💾 Save Game
+          </Button>
+          {lastSaveTime && (
+            <span className="text-xs text-gray-500">
+              Last saved: {lastSaveTime}
+            </span>
+          )}
+        </div>
       </div>
     </div>
     </div>
