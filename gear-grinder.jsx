@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from './components/ui/tabs';
 import { Card, CardHeader, CardTitle, CardContent } from './components/ui/card';
 import { Progress } from './components/ui/progress';
@@ -319,11 +319,16 @@ function GearGrinder() {
   const [isLoading, setIsLoading] = useState(true);
   const [combatTick, setCombatTick] = useState(0);
   const [selectedEnhanceItem, setSelectedEnhanceItem] = useState(null);
+  const [lastSaveTime, setLastSaveTime] = useState(null);
 
   // Combat visual effects state
   const [floatingTexts, setFloatingTexts] = useState([]);
   const [enemyDying, setEnemyDying] = useState(false);
   const [lootDrops, setLootDrops] = useState([]);
+
+  // Use ref to track latest gameState for auto-save without causing re-renders
+  const gameStateRef = useRef(gameState);
+  const saveTimeoutRef = useRef(null);
 
   // Add floating text helper
   const addFloatingText = useCallback((text, type, target) => {
@@ -341,6 +346,39 @@ function GearGrinder() {
     setTimeout(() => {
       setLootDrops(prev => prev.filter(l => l.id !== id));
     }, 2000);
+  }, []);
+
+  // Debounced save - batches rapid saves into a single save after 100ms of no changes
+  const saveGameDebounced = useCallback(() => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    saveTimeoutRef.current = setTimeout(async () => {
+      try {
+        const saveData = { ...gameStateRef.current, combatLog: [] };
+        await window.storage.set('gear-grinder-save', JSON.stringify(saveData));
+        setLastSaveTime(new Date().toLocaleTimeString());
+      } catch (e) {
+        console.error('Error saving game:', e);
+        setLastSaveTime('Error!');
+      }
+    }, 100);
+  }, []);
+
+  // Immediate save - for critical events that need instant persistence
+  const saveGameImmediate = useCallback(async () => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = null;
+    }
+    try {
+      const saveData = { ...gameStateRef.current, combatLog: [] };
+      await window.storage.set('gear-grinder-save', JSON.stringify(saveData));
+      setLastSaveTime(new Date().toLocaleTimeString());
+    } catch (e) {
+      console.error('Error saving game:', e);
+      setLastSaveTime('Error!');
+    }
   }, []);
 
   useEffect(() => {
@@ -399,25 +437,48 @@ function GearGrinder() {
     loadGame();
   }, []);
 
-  // Auto-save every 3 seconds
+  // Recalculate player HP after loading to ensure it matches current stats/gear
+  useEffect(() => {
+    if (!isLoading && gameState.level > 0) {
+      const stats = getPlayerStats();
+      // Only update if HP values are incorrect
+      if (gameState.playerMaxHp !== stats.maxHp || gameState.playerHp > stats.maxHp) {
+        setGameState(prev => ({
+          ...prev,
+          playerMaxHp: stats.maxHp,
+          playerHp: Math.min(prev.playerHp, stats.maxHp) // Keep current HP but cap at new max
+        }));
+      }
+    }
+  }, [isLoading]); // Only run once after initial load
+
+  // Update ref whenever gameState changes
+  useEffect(() => {
+    gameStateRef.current = gameState;
+  }, [gameState]);
+
+  // Background auto-save every 3 seconds (safety net - main saves happen on state changes)
   useEffect(() => {
     if (isLoading) return;
     const interval = setInterval(async () => {
       try {
-        const saveData = { ...gameState, combatLog: [] };
+        const saveData = { ...gameStateRef.current, combatLog: [] };
         await window.storage.set('gear-grinder-save', JSON.stringify(saveData));
-        console.log('Game saved:', {
+        setLastSaveTime(new Date().toLocaleTimeString());
+        console.log('Game auto-saved:', {
           level: saveData.level,
           gold: saveData.gold,
+          zone: saveData.currentZone,
           gearCount: Object.values(saveData.gear).filter(g => g !== null).length,
           inventorySize: saveData.inventory.length,
         });
       } catch (e) {
-        console.error('Error saving game:', e);
+        console.error('Error auto-saving game:', e);
+        setLastSaveTime('Error saving!');
       }
     }, 3000);
     return () => clearInterval(interval);
-  }, [gameState, isLoading]);
+  }, [isLoading]);
 
   const getPlayerStats = useCallback(() => {
     const s = gameState.stats;
@@ -688,6 +749,13 @@ function GearGrinder() {
     return () => clearInterval(interval);
   }, [isLoading, getPlayerStats, combatTick, addFloatingText, addLootDrop]);
 
+  // Auto-save after combat state changes (kills, level ups, resource gains)
+  useEffect(() => {
+    if (!isLoading) {
+      saveGameDebounced();
+    }
+  }, [gameState.kills, gameState.level, gameState.gold, gameState.currentZone, isLoading, saveGameDebounced]);
+
   const rollEffects = (tier) => {
     const numEffects = tier >= 4 ? Math.floor(Math.random() * 3) + 1 : tier >= 2 ? Math.floor(Math.random() * 2) + 1 : Math.random() < 0.3 ? 1 : 0;
     const effects = [];
@@ -723,6 +791,8 @@ function GearGrinder() {
       leather: prev.leather - t.leatherCost,
       inventory: [...prev.inventory, newItem],
     }));
+    // Save immediately after crafting gear
+    setTimeout(() => saveGameImmediate(), 0);
   };
 
   const enhanceGear = (item, isEquipped = false) => {
@@ -756,6 +826,8 @@ function GearGrinder() {
       }
       return newState;
     });
+    // Save immediately after enhancing gear
+    setTimeout(() => saveGameImmediate(), 0);
   };
 
   const equipGear = (item) => {
@@ -765,6 +837,8 @@ function GearGrinder() {
       if (oldGear) newInventory.push(oldGear);
       return { ...prev, gear: { ...prev.gear, [item.slot]: item }, inventory: newInventory };
     });
+    // Save immediately after equipping gear
+    setTimeout(() => saveGameImmediate(), 0);
   };
 
   const salvageGear = (item) => {
@@ -798,6 +872,8 @@ function GearGrinder() {
         msg: `Salvaged for ${goldReturn}g, ${oreReturn}⛏️, ${leatherReturn}🧶`
       }],
     }));
+    // Save immediately after salvaging gear
+    setTimeout(() => saveGameImmediate(), 0);
   };
 
   const changeZone = (zoneId) => {
@@ -807,7 +883,18 @@ function GearGrinder() {
       const prevZoneKills = gameState.zoneKills[zoneId - 1] || 0;
       if (prevZoneKills < zone.killsRequired) return;
     }
-    setGameState(prev => ({ ...prev, currentZone: zoneId, enemyHp: zone.enemyHp, enemyMaxHp: zone.enemyHp }));
+    // Get current player stats to reset HP to full
+    const currentStats = getPlayerStats();
+    setGameState(prev => ({
+      ...prev,
+      currentZone: zoneId,
+      enemyHp: zone.enemyHp,
+      enemyMaxHp: zone.enemyHp,
+      playerHp: currentStats.maxHp,
+      playerMaxHp: currentStats.maxHp
+    }));
+    // Save immediately after zone change (critical event)
+    setTimeout(() => saveGameImmediate(), 0);
   };
 
   const allocateStat = (statKey) => {
@@ -817,17 +904,21 @@ function GearGrinder() {
       statPoints: prev.statPoints - 1,
       stats: { ...prev.stats, [statKey]: prev.stats[statKey] + 1 },
     }));
+    // Save immediately after stat allocation
+    setTimeout(() => saveGameImmediate(), 0);
   };
 
   const manualSave = async () => {
     try {
       const saveData = { ...gameState, combatLog: [] };
       await window.storage.set('gear-grinder-save', JSON.stringify(saveData));
+      setLastSaveTime(new Date().toLocaleTimeString());
       console.log('Manual save successful:', saveData);
       alert('Game saved successfully!');
     } catch (e) {
       console.error('Error saving game:', e);
-      alert('Error saving game!');
+      setLastSaveTime('Error saving!');
+      alert('Error saving game! Please try again.');
     }
   };
 
@@ -1529,9 +1620,16 @@ function GearGrinder() {
         <div>
           Kills: {gameState.kills.toLocaleString()} | Total Gold: {gameState.totalGold.toLocaleString()}
         </div>
-        <Button onClick={manualSave} size="sm" variant="outline" className="text-xs">
-          💾 Save Game
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button onClick={manualSave} size="sm" variant="outline" className="text-xs">
+            💾 Save Game
+          </Button>
+          {lastSaveTime && (
+            <span className="text-xs text-gray-500">
+              Last saved: {lastSaveTime}
+            </span>
+          )}
+        </div>
       </div>
     </div>
     </div>
