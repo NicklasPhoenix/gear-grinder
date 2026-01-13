@@ -6,47 +6,47 @@ import { Button } from './components/ui/button';
 
 // Game constants
 const ZONES = [
-  { id: 0, name: 'Forest Clearing', enemyHp: 30, enemyDmg: 3, goldMin: 3, goldMax: 8, unlockLevel: 1,
+  { id: 0, name: 'Forest Clearing', enemyHp: 30, enemyDmg: 3, goldMin: 3, goldMax: 8, killsRequired: 0,
     enemyType: 'Beast', drops: { ore: 0.25, leather: 0.35, enhanceStone: 0.08, blessedOrb: 0, celestialShard: 0 }, isBoss: false },
-  { id: 1, name: 'Dark Woods', enemyHp: 80, enemyDmg: 8, goldMin: 8, goldMax: 15, unlockLevel: 5,
+  { id: 1, name: 'Dark Woods', enemyHp: 80, enemyDmg: 8, goldMin: 8, goldMax: 15, killsRequired: 20,
     enemyType: 'Beast', drops: { ore: 0.30, leather: 0.40, enhanceStone: 0.12, blessedOrb: 0.02, celestialShard: 0 }, isBoss: false },
-  { id: 2, name: '🔥 Forest Guardian', enemyHp: 250, enemyDmg: 15, goldMin: 30, goldMax: 60, unlockLevel: 8,
+  { id: 2, name: '🔥 Forest Guardian', enemyHp: 250, enemyDmg: 15, goldMin: 30, goldMax: 60, killsRequired: 30,
     enemyType: 'Boss', drops: { ore: 0.80, leather: 0.80, enhanceStone: 0.40, blessedOrb: 0.15, celestialShard: 0 }, isBoss: true, bossSet: 'guardian' },
-  { id: 3, name: 'Goblin Caves', enemyHp: 200, enemyDmg: 18, goldMin: 15, goldMax: 30, unlockLevel: 10,
+  { id: 3, name: 'Goblin Caves', enemyHp: 200, enemyDmg: 18, goldMin: 15, goldMax: 30, killsRequired: 10,
     enemyType: 'Humanoid', drops: { ore: 0.45, leather: 0.30, enhanceStone: 0.18, blessedOrb: 0.04, celestialShard: 0 }, isBoss: false },
-  { id: 4, name: 'Undead Crypt', enemyHp: 450, enemyDmg: 35, goldMin: 30, goldMax: 60, unlockLevel: 18,
+  { id: 4, name: 'Undead Crypt', enemyHp: 450, enemyDmg: 35, goldMin: 30, goldMax: 60, killsRequired: 40,
     enemyType: 'Undead', drops: { ore: 0.35, leather: 0.20, enhanceStone: 0.28, blessedOrb: 0.08, celestialShard: 0.01 }, isBoss: false },
-  { id: 5, name: '🔥 Lich King', enemyHp: 1200, enemyDmg: 60, goldMin: 100, goldMax: 200, unlockLevel: 22,
+  { id: 5, name: '🔥 Lich King', enemyHp: 1200, enemyDmg: 60, goldMin: 100, goldMax: 200, killsRequired: 50,
     enemyType: 'Boss', drops: { ore: 0.70, leather: 0.60, enhanceStone: 0.50, blessedOrb: 0.25, celestialShard: 0.08 }, isBoss: true, bossSet: 'lich' },
-  { id: 6, name: 'Dragon Peak', enemyHp: 1000, enemyDmg: 75, goldMin: 60, goldMax: 120, unlockLevel: 28,
+  { id: 6, name: 'Dragon Peak', enemyHp: 1000, enemyDmg: 75, goldMin: 60, goldMax: 120, killsRequired: 15,
     enemyType: 'Dragon', drops: { ore: 0.50, leather: 0.45, enhanceStone: 0.30, blessedOrb: 0.12, celestialShard: 0.03 }, isBoss: false },
-  { id: 7, name: '🔥 Ancient Dragon', enemyHp: 2800, enemyDmg: 120, goldMin: 200, goldMax: 400, unlockLevel: 35,
+  { id: 7, name: '🔥 Ancient Dragon', enemyHp: 2800, enemyDmg: 120, goldMin: 200, goldMax: 400, killsRequired: 60,
     enemyType: 'Boss', drops: { ore: 0.85, leather: 0.85, enhanceStone: 0.60, blessedOrb: 0.35, celestialShard: 0.15 }, isBoss: true, bossSet: 'dragon' },
-  { id: 8, name: 'Void Realm', enemyHp: 2500, enemyDmg: 140, goldMin: 150, goldMax: 300, unlockLevel: 40,
+  { id: 8, name: 'Void Realm', enemyHp: 2500, enemyDmg: 140, goldMin: 150, goldMax: 300, killsRequired: 20,
     enemyType: 'Demon', drops: { ore: 0.40, leather: 0.35, enhanceStone: 0.40, blessedOrb: 0.18, celestialShard: 0.06 }, isBoss: false },
-  { id: 9, name: 'Frozen Wastes', enemyHp: 6000, enemyDmg: 260, goldMin: 300, goldMax: 550, unlockLevel: 55,
+  { id: 9, name: 'Frozen Wastes', enemyHp: 6000, enemyDmg: 260, goldMin: 300, goldMax: 550, killsRequired: 80,
     enemyType: 'Elemental', drops: { ore: 0.60, leather: 0.25, enhanceStone: 0.45, blessedOrb: 0.22, celestialShard: 0.10 }, isBoss: false },
-  { id: 10, name: '🔥 Frost Titan', enemyHp: 15000, enemyDmg: 450, goldMin: 800, goldMax: 1500, unlockLevel: 60,
+  { id: 10, name: '🔥 Frost Titan', enemyHp: 15000, enemyDmg: 450, goldMin: 800, goldMax: 1500, killsRequired: 100,
     enemyType: 'Boss', drops: { ore: 0.90, leather: 0.70, enhanceStone: 0.70, blessedOrb: 0.45, celestialShard: 0.25 }, isBoss: true, bossSet: 'frost' },
-  { id: 11, name: 'Demon Fortress', enemyHp: 12000, enemyDmg: 480, goldMin: 500, goldMax: 900, unlockLevel: 70,
+  { id: 11, name: 'Demon Fortress', enemyHp: 12000, enemyDmg: 480, goldMin: 500, goldMax: 900, killsRequired: 30,
     enemyType: 'Demon', drops: { ore: 0.55, leather: 0.40, enhanceStone: 0.50, blessedOrb: 0.28, celestialShard: 0.15 }, isBoss: false },
-  { id: 12, name: '🔥 Demon Lord', enemyHp: 28000, enemyDmg: 750, goldMin: 1500, goldMax: 2800, unlockLevel: 78,
+  { id: 12, name: '🔥 Demon Lord', enemyHp: 28000, enemyDmg: 750, goldMin: 1500, goldMax: 2800, killsRequired: 120,
     enemyType: 'Boss', drops: { ore: 0.85, leather: 0.80, enhanceStone: 0.75, blessedOrb: 0.55, celestialShard: 0.35 }, isBoss: true, bossSet: 'demon' },
-  { id: 13, name: 'Celestial Tower', enemyHp: 25000, enemyDmg: 850, goldMin: 800, goldMax: 1500, unlockLevel: 85,
+  { id: 13, name: 'Celestial Tower', enemyHp: 25000, enemyDmg: 850, goldMin: 800, goldMax: 1500, killsRequired: 40,
     enemyType: 'Celestial', drops: { ore: 0.50, leather: 0.35, enhanceStone: 0.55, blessedOrb: 0.35, celestialShard: 0.22 }, isBoss: false },
-  { id: 14, name: '🔥 Seraph Commander', enemyHp: 55000, enemyDmg: 1300, goldMin: 2500, goldMax: 4500, unlockLevel: 92,
+  { id: 14, name: '🔥 Seraph Commander', enemyHp: 55000, enemyDmg: 1300, goldMin: 2500, goldMax: 4500, killsRequired: 150,
     enemyType: 'Boss', drops: { ore: 0.90, leather: 0.75, enhanceStone: 0.80, blessedOrb: 0.65, celestialShard: 0.45 }, isBoss: true, bossSet: 'seraph' },
-  { id: 15, name: 'Abyssal Depths', enemyHp: 60000, enemyDmg: 1400, goldMin: 1500, goldMax: 2800, unlockLevel: 100,
+  { id: 15, name: 'Abyssal Depths', enemyHp: 60000, enemyDmg: 1400, goldMin: 1500, goldMax: 2800, killsRequired: 50,
     enemyType: 'Abyssal', drops: { ore: 0.55, leather: 0.45, enhanceStone: 0.60, blessedOrb: 0.40, celestialShard: 0.28 }, isBoss: false },
-  { id: 16, name: '🔥 Void Emperor', enemyHp: 120000, enemyDmg: 2200, goldMin: 4500, goldMax: 8000, unlockLevel: 110,
+  { id: 16, name: '🔥 Void Emperor', enemyHp: 120000, enemyDmg: 2200, goldMin: 4500, goldMax: 8000, killsRequired: 180,
     enemyType: 'Boss', drops: { ore: 0.95, leather: 0.85, enhanceStone: 0.85, blessedOrb: 0.75, celestialShard: 0.55 }, isBoss: true, bossSet: 'void' },
-  { id: 17, name: 'Chaos Realm', enemyHp: 150000, enemyDmg: 2500, goldMin: 3000, goldMax: 5500, unlockLevel: 120,
+  { id: 17, name: 'Chaos Realm', enemyHp: 150000, enemyDmg: 2500, goldMin: 3000, goldMax: 5500, killsRequired: 60,
     enemyType: 'Chaos', drops: { ore: 0.60, leather: 0.50, enhanceStone: 0.65, blessedOrb: 0.45, celestialShard: 0.35 }, isBoss: false },
-  { id: 18, name: '🔥 Chaos God', enemyHp: 280000, enemyDmg: 4000, goldMin: 8000, goldMax: 15000, unlockLevel: 135,
+  { id: 18, name: '🔥 Chaos God', enemyHp: 280000, enemyDmg: 4000, goldMin: 8000, goldMax: 15000, killsRequired: 200,
     enemyType: 'Boss', drops: { ore: 1.0, leather: 0.95, enhanceStone: 0.90, blessedOrb: 0.85, celestialShard: 0.70 }, isBoss: true, bossSet: 'chaos' },
-  { id: 19, name: 'Eternal Void', enemyHp: 350000, enemyDmg: 4500, goldMin: 6000, goldMax: 12000, unlockLevel: 150,
+  { id: 19, name: 'Eternal Void', enemyHp: 350000, enemyDmg: 4500, goldMin: 6000, goldMax: 12000, killsRequired: 70,
     enemyType: 'Void', drops: { ore: 0.70, leather: 0.60, enhanceStone: 0.75, blessedOrb: 0.55, celestialShard: 0.45 }, isBoss: false },
-  { id: 20, name: '🔥 Eternal One', enemyHp: 650000, enemyDmg: 7500, goldMin: 15000, goldMax: 28000, unlockLevel: 165,
+  { id: 20, name: '🔥 Eternal One', enemyHp: 650000, enemyDmg: 7500, goldMin: 15000, goldMax: 28000, killsRequired: 250,
     enemyType: 'Boss', drops: { ore: 1.0, leather: 1.0, enhanceStone: 1.0, blessedOrb: 1.0, celestialShard: 0.90 }, isBoss: true, bossSet: 'eternal' },
 ];
 
@@ -310,6 +310,7 @@ const initialState = {
   inventory: [], unlockedSkills: [], combatLog: [],
   enemyHp: 20, enemyMaxHp: 20, playerHp: 100, playerMaxHp: 100,
   kills: 0, totalGold: 0, enhanceFails: 0,
+  zoneKills: {}, // Track kills per zone: { 0: 50, 1: 30, ... }
 };
 
 function GearGrinder() {
@@ -380,6 +381,7 @@ function GearGrinder() {
             kills: parsed.kills ?? initialState.kills,
             totalGold: parsed.totalGold ?? initialState.totalGold,
             enhanceFails: parsed.enhanceFails ?? initialState.enhanceFails,
+            zoneKills: parsed.zoneKills ?? initialState.zoneKills,
             // Gear needs special handling to merge with initial state slots
             gear: parsed.gear ? { ...initialState.gear, ...parsed.gear } : initialState.gear,
             // Always reset combat log on load
@@ -589,6 +591,11 @@ function GearGrinder() {
           newState.xp += xpEarned;
           newState.kills += 1;
 
+          // Track kills per zone
+          const currentZoneId = prev.currentZone;
+          newState.zoneKills = { ...newState.zoneKills };
+          newState.zoneKills[currentZoneId] = (newState.zoneKills[currentZoneId] || 0) + 1;
+
           // Boss loot drops
           if (zone.isBoss && zone.bossSet) {
             const bossSet = BOSS_SETS[zone.bossSet];
@@ -794,8 +801,12 @@ function GearGrinder() {
   };
 
   const changeZone = (zoneId) => {
-    if (gameState.level < ZONES[zoneId].unlockLevel) return;
     const zone = ZONES[zoneId];
+    // Check if zone is unlocked based on kills in previous zone
+    if (zoneId > 0) {
+      const prevZoneKills = gameState.zoneKills[zoneId - 1] || 0;
+      if (prevZoneKills < zone.killsRequired) return;
+    }
     setGameState(prev => ({ ...prev, currentZone: zoneId, enemyHp: zone.enemyHp, enemyMaxHp: zone.enemyHp }));
   };
 
@@ -1006,8 +1017,11 @@ function GearGrinder() {
                 <CardContent>
                   <div className="space-y-2 max-h-[50vh] sm:max-h-[420px] overflow-y-auto pr-1">
                     {ZONES.map(zone => {
-                      const unlocked = gameState.level >= zone.unlockLevel;
+                      // Check if unlocked based on kills in previous zone
+                      const prevZoneKills = zone.id > 0 ? (gameState.zoneKills[zone.id - 1] || 0) : 0;
+                      const unlocked = zone.id === 0 || prevZoneKills >= zone.killsRequired;
                       const active = gameState.currentZone === zone.id;
+                      const currentZoneKills = gameState.zoneKills[zone.id] || 0;
                       return (
                         <Button
                           key={zone.id}
@@ -1020,7 +1034,13 @@ function GearGrinder() {
                         >
                       <div className="flex justify-between items-center">
                         <span className="font-medium">{zone.name}</span>
-                        <span className={`text-xs px-1.5 py-0.5 rounded ${unlocked ? 'bg-black/20' : 'bg-gray-700'}`}>Lv.{zone.unlockLevel}</span>
+                        {zone.id === 0 ? (
+                          <span className="text-xs px-1.5 py-0.5 rounded bg-green-600/80">{currentZoneKills} kills</span>
+                        ) : unlocked ? (
+                          <span className="text-xs px-1.5 py-0.5 rounded bg-black/20">{currentZoneKills} kills</span>
+                        ) : (
+                          <span className="text-xs px-1.5 py-0.5 rounded bg-gray-700">{prevZoneKills}/{zone.killsRequired} kills</span>
+                        )}
                       </div>
                       {unlocked && (
                         <div className="flex gap-1 mt-1 text-xs opacity-80">
