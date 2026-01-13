@@ -348,26 +348,50 @@ function GearGrinder() {
         const saved = await window.storage.get('gear-grinder-save');
         if (saved && saved.value) {
           const parsed = JSON.parse(saved.value);
+          console.log('Loading save:', parsed);
+
           // Calculate stat points for existing saves (3 per level after 1)
           const earnedStatPoints = (parsed.level - 1) * 3;
           const spentPoints = parsed.stats ? Object.values(parsed.stats).reduce((a, b) => a + b, 0) - 25 : 0;
           const availablePoints = Math.max(0, earnedStatPoints - spentPoints);
 
+          // Properly merge saved state with initial state
           const migratedState = {
-            ...initialState, ...parsed, combatLog: [],
-            ore: parsed.ore ?? parsed.materials ?? 5,
-            leather: parsed.leather ?? parsed.materials ?? 5,
-            enhanceStone: parsed.enhanceStone ?? Math.floor((parsed.materials || 0) / 2) ?? 3,
-            blessedOrb: parsed.blessedOrb ?? parsed.gems ?? 0,
-            celestialShard: parsed.celestialShard ?? parsed.essence ?? 0,
-            enhanceFails: parsed.enhanceFails || 0,
-            stats: parsed.stats || initialState.stats,
+            // Start with all initial state values
+            ...initialState,
+            // Override with saved values (excluding gear which needs special handling)
+            gold: parsed.gold ?? initialState.gold,
+            ore: parsed.ore ?? parsed.materials ?? initialState.ore,
+            leather: parsed.leather ?? parsed.materials ?? initialState.leather,
+            enhanceStone: parsed.enhanceStone ?? Math.floor((parsed.materials || 0) / 2) ?? initialState.enhanceStone,
+            blessedOrb: parsed.blessedOrb ?? parsed.gems ?? initialState.blessedOrb,
+            celestialShard: parsed.celestialShard ?? parsed.essence ?? initialState.celestialShard,
+            level: parsed.level ?? initialState.level,
+            xp: parsed.xp ?? initialState.xp,
+            currentZone: parsed.currentZone ?? initialState.currentZone,
+            stats: parsed.stats ?? initialState.stats,
             statPoints: parsed.statPoints ?? availablePoints,
-            gear: { ...initialState.gear, ...parsed.gear },
+            inventory: parsed.inventory ?? initialState.inventory,
+            unlockedSkills: parsed.unlockedSkills ?? initialState.unlockedSkills,
+            enemyHp: parsed.enemyHp ?? initialState.enemyHp,
+            enemyMaxHp: parsed.enemyMaxHp ?? initialState.enemyMaxHp,
+            playerHp: parsed.playerHp ?? initialState.playerHp,
+            playerMaxHp: parsed.playerMaxHp ?? initialState.playerMaxHp,
+            kills: parsed.kills ?? initialState.kills,
+            totalGold: parsed.totalGold ?? initialState.totalGold,
+            enhanceFails: parsed.enhanceFails ?? initialState.enhanceFails,
+            // Gear needs special handling to merge with initial state slots
+            gear: parsed.gear ? { ...initialState.gear, ...parsed.gear } : initialState.gear,
+            // Always reset combat log on load
+            combatLog: [],
           };
+
+          console.log('Loaded state:', migratedState);
           setGameState(migratedState);
         }
-      } catch (e) { console.log('No save found:', e); }
+      } catch (e) {
+        console.error('Error loading save:', e);
+      }
       setIsLoading(false);
     }
     loadGame();
@@ -378,8 +402,17 @@ function GearGrinder() {
     if (isLoading) return;
     const interval = setInterval(async () => {
       try {
-        await window.storage.set('gear-grinder-save', JSON.stringify({ ...gameState, combatLog: [] }));
-      } catch (e) {}
+        const saveData = { ...gameState, combatLog: [] };
+        await window.storage.set('gear-grinder-save', JSON.stringify(saveData));
+        console.log('Game saved:', {
+          level: saveData.level,
+          gold: saveData.gold,
+          gearCount: Object.values(saveData.gear).filter(g => g !== null).length,
+          inventorySize: saveData.inventory.length,
+        });
+      } catch (e) {
+        console.error('Error saving game:', e);
+      }
     }, 3000);
     return () => clearInterval(interval);
   }, [gameState, isLoading]);
@@ -775,8 +808,16 @@ function GearGrinder() {
     }));
   };
 
-  const saveGame = async () => {
-    await window.storage.set('gear-grinder-save', JSON.stringify({ ...gameState, combatLog: [] }));
+  const manualSave = async () => {
+    try {
+      const saveData = { ...gameState, combatLog: [] };
+      await window.storage.set('gear-grinder-save', JSON.stringify(saveData));
+      console.log('Manual save successful:', saveData);
+      alert('Game saved successfully!');
+    } catch (e) {
+      console.error('Error saving game:', e);
+      alert('Error saving game!');
+    }
   };
 
   const stats = getPlayerStats();
@@ -1464,8 +1505,13 @@ function GearGrinder() {
       </Tabs>
 
       {/* Footer */}
-      <div className="text-center text-xs text-gray-600 mt-4">
-        Kills: {gameState.kills.toLocaleString()} | Total Gold: {gameState.totalGold.toLocaleString()}
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-xs text-gray-600 mt-4">
+        <div>
+          Kills: {gameState.kills.toLocaleString()} | Total Gold: {gameState.totalGold.toLocaleString()}
+        </div>
+        <Button onClick={manualSave} size="sm" variant="outline" className="text-xs">
+          💾 Save Game
+        </Button>
       </div>
     </div>
     </div>
