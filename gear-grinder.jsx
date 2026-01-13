@@ -1,4 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from './components/ui/tabs';
+import { Card, CardHeader, CardTitle, CardContent } from './components/ui/card';
+import { Progress } from './components/ui/progress';
+import { Button } from './components/ui/button';
 
 // Game constants
 const ZONES = [
@@ -782,88 +786,85 @@ function GearGrinder() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 p-4 font-sans">
+    <div className="min-h-screen bg-gray-900 text-gray-100 p-2 sm:p-4 font-sans">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="bg-gray-800 rounded-lg p-4 mb-4">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <h1 className="text-2xl font-bold text-amber-400">Gear Grinder</h1>
-              <span className="px-3 py-1 bg-green-600 rounded-full text-sm font-bold">Lv.{gameState.level}</span>
-              {gameState.statPoints > 0 && (
-                <span className="px-3 py-1 bg-purple-600 rounded-full text-sm font-bold animate-pulse">
-                  +{gameState.statPoints} Points!
-                </span>
-              )}
+        <Card className="mb-3 sm:mb-4">
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4">
+              <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
+                <h1 className="text-xl sm:text-2xl font-bold text-amber-400">Gear Grinder</h1>
+                <span className="px-2 sm:px-3 py-1 bg-green-600 rounded-full text-xs sm:text-sm font-bold">Lv.{gameState.level}</span>
+                {gameState.statPoints > 0 && (
+                  <span className="px-2 sm:px-3 py-1 bg-purple-600 rounded-full text-xs sm:text-sm font-bold animate-pulse">
+                    +{gameState.statPoints} Points!
+                  </span>
+                )}
+              </div>
+              <div className="px-2 sm:px-3 py-1 bg-gray-700/50 rounded-lg text-xs sm:text-sm text-gray-400">
+                Auto-saving...
+              </div>
             </div>
-            <div className="px-3 py-1 bg-gray-700/50 rounded-lg text-sm text-gray-400">
-              Auto-saving...
-            </div>
-          </div>
 
-          {/* Resources with icons and tooltips */}
-          <div className="flex flex-wrap gap-3 mt-4 text-sm">
-            <div className="flex items-center gap-1 bg-gray-700/50 px-2 py-1 rounded cursor-help" title="Gold - Used for crafting and enhancing gear">
-              <span>🪙</span>
-              <span className="text-yellow-400 font-bold">{gameState.gold.toLocaleString()}</span>
+            {/* Resources with icons and tooltips */}
+            <div className="flex flex-wrap gap-1.5 sm:gap-3 mt-3 sm:mt-4 text-xs sm:text-sm">
+              <div className="flex items-center gap-1 bg-gray-700/50 px-1.5 sm:px-2 py-1 rounded cursor-help" title="Gold - Used for crafting and enhancing gear">
+                <span>🪙</span>
+                <span className="text-yellow-400 font-bold">{gameState.gold.toLocaleString()}</span>
+              </div>
+              <div className="flex items-center gap-1 bg-gray-700/50 px-1.5 sm:px-2 py-1 rounded cursor-help" title="Iron Ore - Used for crafting gear">
+                <span>{MATERIALS.ore.icon}</span>
+                <span style={{color: MATERIALS.ore.color}} className="font-bold">{gameState.ore}</span>
+              </div>
+              <div className="flex items-center gap-1 bg-gray-700/50 px-1.5 sm:px-2 py-1 rounded cursor-help" title="Leather - Used for crafting gear">
+                <span>{MATERIALS.leather.icon}</span>
+                <span style={{color: MATERIALS.leather.color}} className="font-bold">{gameState.leather}</span>
+              </div>
+              <div className="flex items-center gap-1 bg-gray-700/50 px-1.5 sm:px-2 py-1 rounded cursor-help" title="Enhance Stone - Used for enhancing gear (+1 to +30)">
+                <span>{MATERIALS.enhanceStone.icon}</span>
+                <span style={{color: MATERIALS.enhanceStone.color}} className="font-bold">{gameState.enhanceStone}</span>
+              </div>
+              <div className="flex items-center gap-1 bg-gray-700/50 px-1.5 sm:px-2 py-1 rounded cursor-help" title="Blessed Orb - Required for enhancing gear past +10">
+                <span>{MATERIALS.blessedOrb.icon}</span>
+                <span style={{color: MATERIALS.blessedOrb.color}} className="font-bold">{gameState.blessedOrb}</span>
+              </div>
+              <div className="flex items-center gap-1 bg-gray-700/50 px-1.5 sm:px-2 py-1 rounded cursor-help" title="Celestial Shard - Required for enhancing gear past +20">
+                <span>{MATERIALS.celestialShard.icon}</span>
+                <span style={{color: MATERIALS.celestialShard.color}} className="font-bold">{gameState.celestialShard}</span>
+              </div>
             </div>
-            <div className="flex items-center gap-1 bg-gray-700/50 px-2 py-1 rounded cursor-help" title="Iron Ore - Used for crafting gear">
-              <span>{MATERIALS.ore.icon}</span>
-              <span style={{color: MATERIALS.ore.color}} className="font-bold">{gameState.ore}</span>
-            </div>
-            <div className="flex items-center gap-1 bg-gray-700/50 px-2 py-1 rounded cursor-help" title="Leather - Used for crafting gear">
-              <span>{MATERIALS.leather.icon}</span>
-              <span style={{color: MATERIALS.leather.color}} className="font-bold">{gameState.leather}</span>
-            </div>
-            <div className="flex items-center gap-1 bg-gray-700/50 px-2 py-1 rounded cursor-help" title="Enhance Stone - Used for enhancing gear (+1 to +30)">
-              <span>{MATERIALS.enhanceStone.icon}</span>
-              <span style={{color: MATERIALS.enhanceStone.color}} className="font-bold">{gameState.enhanceStone}</span>
-            </div>
-            <div className="flex items-center gap-1 bg-gray-700/50 px-2 py-1 rounded cursor-help" title="Blessed Orb - Required for enhancing gear past +10">
-              <span>{MATERIALS.blessedOrb.icon}</span>
-              <span style={{color: MATERIALS.blessedOrb.color}} className="font-bold">{gameState.blessedOrb}</span>
-            </div>
-            <div className="flex items-center gap-1 bg-gray-700/50 px-2 py-1 rounded cursor-help" title="Celestial Shard - Required for enhancing gear past +20">
-              <span>{MATERIALS.celestialShard.icon}</span>
-              <span style={{color: MATERIALS.celestialShard.color}} className="font-bold">{gameState.celestialShard}</span>
-            </div>
-          </div>
 
-          {/* XP Bar */}
-          <div className="mt-3">
-            <div className="flex justify-between text-xs text-gray-400 mb-1">
-              <span>Experience</span>
-              <span>{gameState.xp.toLocaleString()} / {xpForLevel(gameState.level).toLocaleString()}</span>
+            {/* XP Bar */}
+            <div className="mt-3">
+              <div className="flex justify-between text-xs text-gray-400 mb-1">
+                <span>Experience</span>
+                <span>{gameState.xp.toLocaleString()} / {xpForLevel(gameState.level).toLocaleString()}</span>
+              </div>
+              <Progress value={(gameState.xp / xpForLevel(gameState.level)) * 100} className="h-2 sm:h-2.5" />
             </div>
-            <div className="h-2.5 bg-gray-700 rounded-full overflow-hidden">
-              <div className="h-full bg-green-500 transition-all" style={{ width: `${(gameState.xp / xpForLevel(gameState.level)) * 100}%` }} />
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-4 flex-wrap">
-          {['Combat', 'Stats', 'Gear', 'Craft', 'Enhance', 'Skills'].map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab.toLowerCase())}
-              className={`px-4 py-2 rounded-t-lg font-medium transition-colors ${
-                activeTab === tab.toLowerCase()
-                  ? 'bg-gray-800 text-white'
-                  : 'bg-gray-700/50 text-gray-400 hover:bg-gray-700 hover:text-gray-200'
-              } ${tab === 'Stats' && gameState.statPoints > 0 ? 'ring-2 ring-purple-500' : ''}`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
+        <Tabs defaultValue="combat" value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="w-full justify-start mb-3 sm:mb-4">
+            <TabsTrigger value="combat">Combat</TabsTrigger>
+            <TabsTrigger value="stats" className={gameState.statPoints > 0 ? 'ring-2 ring-purple-500' : ''}>Stats</TabsTrigger>
+            <TabsTrigger value="gear">Gear</TabsTrigger>
+            <TabsTrigger value="craft">Craft</TabsTrigger>
+            <TabsTrigger value="enhance">Enhance</TabsTrigger>
+            <TabsTrigger value="skills">Skills</TabsTrigger>
+          </TabsList>
 
-        {/* Combat Tab */}
-        {activeTab === 'combat' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            {/* Player */}
-            <div className="bg-gray-800 rounded-lg p-4">
-              <h2 className="text-lg font-bold text-center text-gray-300 mb-3">Your Hero</h2>
+          {/* Combat Tab */}
+          <TabsContent value="combat" className="mt-0">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
+              {/* Player */}
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-center text-gray-300">Your Hero</CardTitle>
+                </CardHeader>
+                <CardContent>
               <div className="flex justify-center relative">
                 <CharacterDisplay gear={gameState.gear} />
                 {/* Floating damage on player */}
@@ -900,22 +901,24 @@ function GearGrinder() {
                   <span className="text-green-400 font-bold">{Math.floor(stats.lifesteal)}%</span>
                 </div>
               </div>
-              {/* HP Bar */}
-              <div className="mt-3">
-                <div className="flex justify-between text-xs text-gray-400 mb-1">
-                  <span>HP</span>
-                  <span>{gameState.playerHp.toLocaleString()} / {stats.maxHp.toLocaleString()}</span>
-                </div>
-                <div className="h-4 bg-gray-700 rounded overflow-hidden">
-                  <div className="h-full bg-green-500 transition-all" style={{ width: `${(gameState.playerHp / stats.maxHp) * 100}%` }} />
-                </div>
-              </div>
-            </div>
+                  {/* HP Bar */}
+                  <div className="mt-3">
+                    <div className="flex justify-between text-xs text-gray-400 mb-1">
+                      <span>HP</span>
+                      <span>{gameState.playerHp.toLocaleString()} / {stats.maxHp.toLocaleString()}</span>
+                    </div>
+                    <Progress value={(gameState.playerHp / stats.maxHp) * 100} className="h-4" />
+                  </div>
+                </CardContent>
+              </Card>
 
-            {/* Enemy */}
-            <div className="bg-gray-800 rounded-lg p-4">
-              <h2 className="text-lg font-bold text-center text-gray-300 mb-2">{ZONES[gameState.currentZone].name}</h2>
-              <div className="text-center text-xs text-gray-500 mb-2">{ZONES[gameState.currentZone].enemyType}</div>
+              {/* Enemy */}
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-center text-gray-300">{ZONES[gameState.currentZone].name}</CardTitle>
+                  <div className="text-center text-xs text-gray-500">{ZONES[gameState.currentZone].enemyType}</div>
+                </CardHeader>
+                <CardContent>
               <div className="flex justify-center my-3 relative min-h-[100px]">
                 {/* Enemy with death animation */}
                 <div className={`transition-all duration-300 ${enemyDying ? 'scale-0 opacity-0 rotate-180' : 'scale-100 opacity-100 rotate-0'}`}>
@@ -934,45 +937,46 @@ function GearGrinder() {
                   ))}
                 </div>
               </div>
-              <div>
-                <div className="flex justify-between text-sm text-gray-400 mb-1">
-                  <span>Enemy HP</span>
-                  <span>{gameState.enemyHp.toLocaleString()} / {gameState.enemyMaxHp.toLocaleString()}</span>
-                </div>
-                <div className="h-4 bg-gray-700 rounded overflow-hidden">
-                  <div className="h-full bg-red-500 transition-all" style={{ width: `${(gameState.enemyHp / gameState.enemyMaxHp) * 100}%` }} />
-                </div>
-              </div>
-              {/* Mini log for level ups and skills only */}
-              {gameState.combatLog.filter(l => l.type === 'level' || l.type === 'skill').length > 0 && (
-                <div className="mt-3 text-center">
-                  {gameState.combatLog.filter(l => l.type === 'level' || l.type === 'skill').slice(-2).map((log, i) => (
-                    <div key={i} className={`text-sm font-bold ${log.type === 'level' ? 'text-green-400' : 'text-purple-400'}`}>
-                      {log.msg}
+                  <div>
+                    <div className="flex justify-between text-sm text-gray-400 mb-1">
+                      <span>Enemy HP</span>
+                      <span>{gameState.enemyHp.toLocaleString()} / {gameState.enemyMaxHp.toLocaleString()}</span>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                    <Progress value={(gameState.enemyHp / gameState.enemyMaxHp) * 100} indicatorClassName="bg-red-500" className="h-4" />
+                  </div>
+                  {/* Mini log for level ups and skills only */}
+                  {gameState.combatLog.filter(l => l.type === 'level' || l.type === 'skill').length > 0 && (
+                    <div className="mt-3 text-center">
+                      {gameState.combatLog.filter(l => l.type === 'level' || l.type === 'skill').slice(-2).map((log, i) => (
+                        <div key={i} className={`text-sm font-bold ${log.type === 'level' ? 'text-green-400' : 'text-purple-400'}`}>
+                          {log.msg}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
-            {/* Zones with drop info */}
-            <div className="bg-gray-800 rounded-lg p-4">
-              <h2 className="text-lg font-bold text-gray-300 mb-3">Zones</h2>
-              <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
-                {ZONES.map(zone => {
-                  const unlocked = gameState.level >= zone.unlockLevel;
-                  const active = gameState.currentZone === zone.id;
-                  return (
-                    <button
-                      key={zone.id}
-                      onClick={() => changeZone(zone.id)}
-                      disabled={!unlocked}
-                      className={`w-full p-2 rounded text-left text-sm transition-colors ${
-                        active ? 'bg-indigo-600 text-white' :
-                        unlocked ? 'bg-gray-700 hover:bg-gray-600 text-gray-200' :
-                        'bg-gray-800 text-gray-600 cursor-not-allowed'
-                      }`}
-                    >
+              {/* Zones with drop info */}
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-gray-300">Zones</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2 max-h-[50vh] sm:max-h-[420px] overflow-y-auto pr-1">
+                    {ZONES.map(zone => {
+                      const unlocked = gameState.level >= zone.unlockLevel;
+                      const active = gameState.currentZone === zone.id;
+                      return (
+                        <Button
+                          key={zone.id}
+                          onClick={() => changeZone(zone.id)}
+                          disabled={!unlocked}
+                          variant={active ? "default" : unlocked ? "secondary" : "outline"}
+                          className={`w-full p-3 text-left text-sm h-auto justify-start ${
+                            active ? 'bg-indigo-600 hover:bg-indigo-700' : ''
+                          } ${!unlocked ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
                       <div className="flex justify-between items-center">
                         <span className="font-medium">{zone.name}</span>
                         <span className={`text-xs px-1.5 py-0.5 rounded ${unlocked ? 'bg-black/20' : 'bg-gray-700'}`}>Lv.{zone.unlockLevel}</span>
@@ -986,60 +990,66 @@ function GearGrinder() {
                           {zone.drops.celestialShard > 0.05 && <span>{MATERIALS.celestialShard.icon}</span>}
                           <span className="text-yellow-400 ml-auto">{zone.goldMin}-{zone.goldMax}g</span>
                         </div>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Stats Tab - NEW */}
-        {activeTab === 'stats' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* Character Stats */}
-            <div className="bg-gray-800 rounded-lg p-4">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-bold text-gray-300">Character Stats</h2>
-                {gameState.statPoints > 0 && (
-                  <span className="px-3 py-1 bg-purple-600 rounded-full text-sm font-bold">
-                    {gameState.statPoints} points
-                  </span>
-                )}
-              </div>
-              <div className="flex justify-center mb-4">
-                <CharacterDisplay gear={gameState.gear} />
-              </div>
-              <div className="space-y-3">
-                {Object.entries(STATS).map(([key, stat]) => (
-                  <div key={key} className="bg-gray-900 rounded p-3">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <span className="font-bold" style={{ color: stat.color }}>{stat.name}</span>
-                        <span className="text-gray-400 ml-2 text-lg font-bold">{gameState.stats[key]}</span>
-                      </div>
-                      <button
-                        onClick={() => allocateStat(key)}
-                        disabled={gameState.statPoints <= 0}
-                        className={`px-4 py-1.5 rounded font-bold text-sm ${
-                          gameState.statPoints > 0
-                            ? 'bg-purple-600 hover:bg-purple-500 text-white'
-                            : 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                        }`}
-                      >
-                        +1
-                      </button>
-                    </div>
-                    <div className="text-xs text-gray-500 mt-1">{stat.desc}</div>
+                          )}
+                        </Button>
+                      );
+                    })}
                   </div>
-                ))}
-              </div>
+                </CardContent>
+              </Card>
             </div>
+          </TabsContent>
 
-            {/* Derived Stats */}
-            <div className="bg-gray-800 rounded-lg p-4">
-              <h2 className="text-lg font-bold text-gray-300 mb-4">Combat Stats</h2>
+          {/* Stats Tab - NEW */}
+          <TabsContent value="stats" className="mt-0">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
+              {/* Character Stats */}
+              <Card>
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-center">
+                    <CardTitle className="text-gray-300">Character Stats</CardTitle>
+                    {gameState.statPoints > 0 && (
+                      <span className="px-3 py-1 bg-purple-600 rounded-full text-sm font-bold">
+                        {gameState.statPoints} points
+                      </span>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex justify-center mb-4">
+                    <CharacterDisplay gear={gameState.gear} />
+                  </div>
+                  <div className="space-y-3">
+                    {Object.entries(STATS).map(([key, stat]) => (
+                      <div key={key} className="bg-gray-900 rounded p-3">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <span className="font-bold" style={{ color: stat.color }}>{stat.name}</span>
+                            <span className="text-gray-400 ml-2 text-lg font-bold">{gameState.stats[key]}</span>
+                          </div>
+                          <Button
+                            onClick={() => allocateStat(key)}
+                            disabled={gameState.statPoints <= 0}
+                            variant={gameState.statPoints > 0 ? "default" : "secondary"}
+                            size="sm"
+                            className={gameState.statPoints > 0 ? 'bg-purple-600 hover:bg-purple-500' : ''}
+                          >
+                            +1
+                          </Button>
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">{stat.desc}</div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+          {/* Derived Stats */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-gray-300">Combat Stats</CardTitle>
+            </CardHeader>
+            <CardContent>
               <div className="space-y-2">
                 <div className="bg-gray-900 rounded p-3 flex justify-between">
                   <span className="text-gray-400">Damage</span>
@@ -1086,12 +1096,13 @@ function GearGrinder() {
                   <span className="text-purple-400 font-bold text-lg">+{Math.floor((stats.matMult - 1) * 100)}%</span>
                 </div>
               </div>
-            </div>
-          </div>
-        )}
+            </CardContent>
+          </Card>
+        </div>
+      </TabsContent>
 
-        {/* Gear Tab */}
-        {activeTab === 'gear' && (
+      {/* Gear Tab */}
+      <TabsContent value="gear" className="mt-0">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Equipped */}
             <div className="bg-gray-800 rounded-lg p-4">
@@ -1209,10 +1220,10 @@ function GearGrinder() {
               )}
             </div>
           </div>
-        )}
+        </TabsContent>
 
         {/* Craft Tab */}
-        {activeTab === 'craft' && (
+        <TabsContent value="craft" className="mt-0">
           <div className="bg-gray-800 rounded-lg p-4">
             <h2 className="text-lg font-bold text-gray-300 mb-2">Forge</h2>
             <p className="text-gray-500 text-sm mb-4">
@@ -1290,10 +1301,10 @@ function GearGrinder() {
               </table>
             </div>
           </div>
-        )}
+        </TabsContent>
 
         {/* Enhance Tab */}
-        {activeTab === 'enhance' && (
+        <TabsContent value="enhance" className="mt-0">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Item List */}
             <div className="bg-gray-800 rounded-lg p-4">
@@ -1418,10 +1429,10 @@ function GearGrinder() {
               )}
             </div>
           </div>
-        )}
+        </TabsContent>
 
         {/* Skills Tab */}
-        {activeTab === 'skills' && (
+        <TabsContent value="skills" className="mt-0">
           <div className="bg-gray-800 rounded-lg p-4">
             <h2 className="text-lg font-bold text-gray-300 mb-4">Skills</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -1449,13 +1460,14 @@ function GearGrinder() {
               })}
             </div>
           </div>
-        )}
+        </TabsContent>
+      </Tabs>
 
-        {/* Footer */}
-        <div className="text-center text-xs text-gray-600 mt-4">
-          Kills: {gameState.kills.toLocaleString()} | Total Gold: {gameState.totalGold.toLocaleString()}
-        </div>
+      {/* Footer */}
+      <div className="text-center text-xs text-gray-600 mt-4">
+        Kills: {gameState.kills.toLocaleString()} | Total Gold: {gameState.totalGold.toLocaleString()}
       </div>
+    </div>
     </div>
   );
 }
@@ -1637,7 +1649,7 @@ function CharacterDisplay({ gear }) {
   };
 
   return (
-    <svg viewBox="0 0 100 140" className="w-28 h-40 flex-shrink-0">
+    <svg viewBox="0 0 100 140" className="w-20 h-28 sm:w-24 sm:h-32 lg:w-28 lg:h-40 flex-shrink-0">
       <defs>
         <filter id="glow-blue" x="-50%" y="-50%" width="200%" height="200%">
           <feGaussianBlur stdDeviation="2" result="blur" />
@@ -1725,7 +1737,7 @@ function EnemyDisplay({ zoneId }) {
     <g key="11"><circle cx="50" cy="50" r="35" fill="#111" /><circle cx="50" cy="50" r="25" fill={colors[11]} /><circle cx="50" cy="50" r="15" fill="#1f2937" /><circle cx="45" cy="47" r="4" fill="#ef4444" /><circle cx="55" cy="47" r="4" fill="#ef4444" /></g>,
   ];
 
-  return <svg viewBox="0 0 100 80" className="w-24 h-20">{enemies[zoneId]}</svg>;
+  return <svg viewBox="0 0 100 80" className="w-16 h-14 sm:w-20 sm:h-16 lg:w-24 lg:h-20">{enemies[zoneId]}</svg>;
 }
 
 export default GearGrinder;
