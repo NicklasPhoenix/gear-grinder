@@ -79,24 +79,29 @@ const TIERS = [
   { id: 4, name: 'Legendary', color: '#f97316', statMult: 8, oreCost: 800, leatherCost: 800, goldCost: 35000, zoneReq: 10 },
   { id: 5, name: 'Mythic', color: '#ec4899', statMult: 12, oreCost: 2500, leatherCost: 2500, goldCost: 150000, zoneReq: 14 },
   { id: 6, name: 'Divine', color: '#fbbf24', statMult: 18, oreCost: 8000, leatherCost: 8000, goldCost: 500000, zoneReq: 18 },
+  // Prestige tiers - require prestige level to unlock
+  { id: 7, name: 'Astral', color: '#38bdf8', statMult: 28, oreCost: 20000, leatherCost: 20000, goldCost: 1500000, zoneReq: 21, prestigeReq: 1 },
+  { id: 8, name: 'Cosmic', color: '#818cf8', statMult: 42, oreCost: 50000, leatherCost: 50000, goldCost: 5000000, zoneReq: 23, prestigeReq: 2 },
+  { id: 9, name: 'Primordial', color: '#f472b6', statMult: 65, oreCost: 120000, leatherCost: 120000, goldCost: 15000000, zoneReq: 25, prestigeReq: 3 },
 ];
 
 // Named gear for each tier - makes the game feel more immersive
+// Tiers: Common, Uncommon, Rare, Epic, Legendary, Mythic, Divine, Astral, Cosmic, Primordial
 const GEAR_NAMES = {
-  sword: ['Rusty Blade', 'Iron Sword', 'Steel Saber', 'Crimson Edge', 'Dragonslayer', 'Soul Reaver', 'Excalibur'],
-  staff: ['Wooden Staff', 'Oak Wand', 'Crystal Staff', 'Arcane Focus', 'Void Scepter', 'Starweaver', 'Celestial Rod'],
-  dagger: ['Shiv', 'Stiletto', 'Shadow Fang', 'Viper Strike', 'Assassin Blade', 'Nightfall', 'Eclipse Dagger'],
-  mace: ['Club', 'Flanged Mace', 'War Hammer', 'Skull Crusher', 'Titan Maul', 'Earthshaker', 'Divine Judgment'],
-  scythe: ['Rusty Scythe', 'Iron Reaper', 'Steel Harvester', 'Crimson Scythe', 'Deathbringer', 'Soul Harvester', 'Eternal Reaper'],
-  katana: ['Bamboo Blade', 'Iron Katana', 'Steel Muramasa', 'Crimson Edge', 'Dragon Fang', 'Void Slash', 'Divine Wind'],
-  greataxe: ['Woodcutter', 'Iron Cleaver', 'Steel Executioner', 'Blood Axe', 'Worldsplitter', 'Chaos Cleaver', 'Godslayer'],
-  helmet: ['Cloth Cap', 'Leather Hood', 'Chain Coif', 'Knight Helm', 'Dragon Visor', 'Phoenix Crown', 'Halo of Light'],
-  armor: ['Cloth Tunic', 'Leather Vest', 'Chainmail', 'Plate Armor', 'Dragon Scale', 'Abyssal Plate', 'Radiant Aegis'],
-  boots: ['Sandals', 'Leather Boots', 'Chain Greaves', 'Plated Boots', 'Dragonskin Treads', 'Voidwalkers', 'Angelic Steps'],
-  accessory: ['Copper Ring', 'Silver Band', 'Sapphire Ring', 'Amethyst Loop', 'Phoenix Signet', 'Chaos Band', 'Ring of Eternity'],
-  shield: ['Wooden Shield', 'Iron Buckler', 'Steel Kite', 'Tower Shield', 'Dragon Guard', 'Bulwark', 'Aegis of Dawn'],
-  gloves: ['Cloth Wraps', 'Leather Gloves', 'Chain Gauntlets', 'Plate Fists', 'Drake Claws', 'Void Grip', 'Hands of Fate'],
-  amulet: ['Bead Necklace', 'Bronze Pendant', 'Silver Locket', 'Mystic Amulet', 'Dragon Heart', 'Soul Gem', 'Tear of the Gods'],
+  sword: ['Rusty Blade', 'Iron Sword', 'Steel Saber', 'Crimson Edge', 'Dragonslayer', 'Soul Reaver', 'Excalibur', 'Starforged Blade', 'Cosmic Cleaver', 'Primordial Edge'],
+  staff: ['Wooden Staff', 'Oak Wand', 'Crystal Staff', 'Arcane Focus', 'Void Scepter', 'Starweaver', 'Celestial Rod', 'Astral Conduit', 'Cosmic Focus', 'Primordial Staff'],
+  dagger: ['Shiv', 'Stiletto', 'Shadow Fang', 'Viper Strike', 'Assassin Blade', 'Nightfall', 'Eclipse Dagger', 'Starlight Fang', 'Cosmic Shiv', 'Primordial Talon'],
+  mace: ['Club', 'Flanged Mace', 'War Hammer', 'Skull Crusher', 'Titan Maul', 'Earthshaker', 'Divine Judgment', 'Astral Crusher', 'Cosmic Hammer', 'Primordial Maul'],
+  scythe: ['Rusty Scythe', 'Iron Reaper', 'Steel Harvester', 'Crimson Scythe', 'Deathbringer', 'Soul Harvester', 'Eternal Reaper', 'Astral Reaper', 'Cosmic Harvester', 'Primordial Scythe'],
+  katana: ['Bamboo Blade', 'Iron Katana', 'Steel Muramasa', 'Crimson Edge', 'Dragon Fang', 'Void Slash', 'Divine Wind', 'Astral Edge', 'Cosmic Blade', 'Primordial Katana'],
+  greataxe: ['Woodcutter', 'Iron Cleaver', 'Steel Executioner', 'Blood Axe', 'Worldsplitter', 'Chaos Cleaver', 'Godslayer', 'Starbreaker', 'Cosmic Cleaver', 'Primordial Axe'],
+  helmet: ['Cloth Cap', 'Leather Hood', 'Chain Coif', 'Knight Helm', 'Dragon Visor', 'Phoenix Crown', 'Halo of Light', 'Astral Circlet', 'Cosmic Crown', 'Primordial Helm'],
+  armor: ['Cloth Tunic', 'Leather Vest', 'Chainmail', 'Plate Armor', 'Dragon Scale', 'Abyssal Plate', 'Radiant Aegis', 'Astral Vestments', 'Cosmic Plate', 'Primordial Armor'],
+  boots: ['Sandals', 'Leather Boots', 'Chain Greaves', 'Plated Boots', 'Dragonskin Treads', 'Voidwalkers', 'Angelic Steps', 'Astral Treads', 'Cosmic Boots', 'Primordial Striders'],
+  accessory: ['Copper Ring', 'Silver Band', 'Sapphire Ring', 'Amethyst Loop', 'Phoenix Signet', 'Chaos Band', 'Ring of Eternity', 'Astral Loop', 'Cosmic Ring', 'Primordial Band'],
+  shield: ['Wooden Shield', 'Iron Buckler', 'Steel Kite', 'Tower Shield', 'Dragon Guard', 'Bulwark', 'Aegis of Dawn', 'Astral Barrier', 'Cosmic Shield', 'Primordial Bulwark'],
+  gloves: ['Cloth Wraps', 'Leather Gloves', 'Chain Gauntlets', 'Plate Fists', 'Drake Claws', 'Void Grip', 'Hands of Fate', 'Astral Grasp', 'Cosmic Gauntlets', 'Primordial Fists'],
+  amulet: ['Bead Necklace', 'Bronze Pendant', 'Silver Locket', 'Mystic Amulet', 'Dragon Heart', 'Soul Gem', 'Tear of the Gods', 'Astral Pendant', 'Cosmic Amulet', 'Primordial Heart'],
 };
 
 // Boss Set Items - Unique gear from boss zones
@@ -451,6 +456,7 @@ function GearGrinder() {
   const [floatingTexts, setFloatingTexts] = useState([]);
   const [enemyDying, setEnemyDying] = useState(false);
   const [lootDrops, setLootDrops] = useState([]);
+  const [gameSpeed, setGameSpeed] = useState(1); // 1x or 5x speed
 
   // Use ref to track latest gameState for auto-save without causing re-renders
   const gameStateRef = useRef(gameState);
@@ -766,7 +772,8 @@ function GearGrinder() {
   useEffect(() => {
     if (isLoading) return;
     const stats = getPlayerStats();
-    const tickSpeed = Math.max(200, 1000 - (stats.speedMult - 1) * 500);
+    const baseTickSpeed = Math.max(200, 1000 - (stats.speedMult - 1) * 500);
+    const tickSpeed = Math.max(40, baseTickSpeed / gameSpeed); // Apply game speed multiplier
 
     const interval = setInterval(() => {
       setCombatTick(t => t + 1);
@@ -919,7 +926,7 @@ function GearGrinder() {
     }, tickSpeed);
 
     return () => clearInterval(interval);
-  }, [isLoading, getPlayerStats, combatTick, addFloatingText, addLootDrop]);
+  }, [isLoading, getPlayerStats, combatTick, addFloatingText, addLootDrop, gameSpeed]);
 
   // Auto-save after combat state changes (kills, level ups, resource gains)
   useEffect(() => {
@@ -1003,6 +1010,81 @@ function GearGrinder() {
     // Save immediately after enhancing gear
     setTimeout(() => saveGameImmediate(), 0);
   };
+
+  // Auto-enhance state
+  const [autoEnhanceEnabled, setAutoEnhanceEnabled] = useState(false);
+  const autoEnhanceRef = useRef(null);
+
+  // Auto-enhance effect - enhances lowest level equipped gear
+  useEffect(() => {
+    if (!autoEnhanceEnabled || isLoading) {
+      if (autoEnhanceRef.current) {
+        clearInterval(autoEnhanceRef.current);
+        autoEnhanceRef.current = null;
+      }
+      return;
+    }
+
+    autoEnhanceRef.current = setInterval(() => {
+      setGameState(prev => {
+        // Find equipped item with lowest enhancement level that's not maxed
+        let lowestItem = null;
+        let lowestSlot = null;
+        let lowestPlus = 31;
+
+        Object.entries(prev.gear).forEach(([slot, item]) => {
+          if (item && (item.plus || 0) < 30 && (item.plus || 0) < lowestPlus) {
+            lowestItem = item;
+            lowestSlot = slot;
+            lowestPlus = item.plus || 0;
+          }
+        });
+
+        if (!lowestItem) {
+          // All gear is maxed or no gear equipped
+          setAutoEnhanceEnabled(false);
+          return prev;
+        }
+
+        const cost = getEnhanceCost(lowestPlus);
+        if (prev.gold < cost.gold || prev.enhanceStone < cost.enhanceStone ||
+            prev.blessedOrb < cost.blessedOrb || prev.celestialShard < cost.celestialShard) {
+          // Can't afford, stop auto-enhance
+          setAutoEnhanceEnabled(false);
+          return prev;
+        }
+
+        let newState = {
+          ...prev,
+          gold: prev.gold - cost.gold,
+          enhanceStone: prev.enhanceStone - cost.enhanceStone,
+          blessedOrb: prev.blessedOrb - cost.blessedOrb,
+          celestialShard: prev.celestialShard - cost.celestialShard,
+        };
+
+        const pityBonus = Math.min(prev.enhanceFails * 2, 30);
+        const succeeded = Math.random() * 100 < Math.min(100, getEnhanceSuccess(lowestPlus) + pityBonus);
+
+        if (succeeded) {
+          const upgradedItem = { ...lowestItem, plus: lowestPlus + 1 };
+          newState.gear = { ...prev.gear, [lowestSlot]: upgradedItem };
+          newState.enhanceFails = 0;
+          newState.combatLog = [...prev.combatLog.slice(-3), { type: 'enhance', msg: `Auto: +${upgradedItem.plus} ${lowestSlot}!` }];
+        } else {
+          newState.enhanceFails = prev.enhanceFails + 1;
+          newState.combatLog = [...prev.combatLog.slice(-3), { type: 'enhanceFail', msg: `Auto: FAIL (Pity: +${newState.enhanceFails * 2}%)` }];
+        }
+        return newState;
+      });
+    }, 200); // Enhance every 200ms when auto-enhance is on
+
+    return () => {
+      if (autoEnhanceRef.current) {
+        clearInterval(autoEnhanceRef.current);
+        autoEnhanceRef.current = null;
+      }
+    };
+  }, [autoEnhanceEnabled, isLoading]);
 
   const equipGear = (item) => {
     setGameState(prev => {
@@ -1177,17 +1259,21 @@ function GearGrinder() {
         // Unequip current item if any
         const currentEquipped = newGear[slot];
         if (currentEquipped) {
-          newInventory.push(currentEquipped);
+          // Remove isEquipped flag if it exists before adding to inventory
+          const { isEquipped: _, ...cleanItem } = currentEquipped;
+          newInventory.push(cleanItem);
         }
 
-        // Equip best item
-        newGear[slot] = bestItem;
+        // Equip best item (remove isEquipped flag)
+        const { isEquipped: __, ...cleanBestItem } = bestItem;
+        newGear[slot] = cleanBestItem;
         const idx = newInventory.findIndex(i => i.id === bestItem.id);
         if (idx !== -1) newInventory.splice(idx, 1);
         changesCount++;
       }
     });
 
+    // Always update state even if no changes (to show message)
     if (changesCount > 0) {
       setGameState(prev => ({
         ...prev,
@@ -1329,6 +1415,20 @@ function GearGrinder() {
 
           {/* Combat Tab */}
           <TabsContent value="combat" className="mt-0">
+            {/* Speed Control */}
+            <div className="flex justify-end mb-2">
+              <Button
+                onClick={() => setGameSpeed(gameSpeed === 1 ? 5 : 1)}
+                size="sm"
+                className={`text-xs font-bold ${
+                  gameSpeed === 5
+                    ? 'bg-yellow-600 hover:bg-yellow-500 text-black'
+                    : 'bg-gray-700 hover:bg-gray-600'
+                }`}
+              >
+                {gameSpeed === 1 ? '1x Speed' : '5x Speed'}
+              </Button>
+            </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
               {/* Player */}
               <Card>
@@ -1754,13 +1854,20 @@ function GearGrinder() {
                 </thead>
                 <tbody>
                   {TIERS.map(tier => {
-                    const meetsZoneReq = gameState.currentZone >= tier.zoneReq;
-                    const canAfford = meetsZoneReq && gameState.gold >= tier.goldCost && gameState.ore >= tier.oreCost && gameState.leather >= tier.leatherCost;
+                    const meetsPrestigeReq = !tier.prestigeReq || gameState.prestigeLevel >= tier.prestigeReq;
+                    const meetsZoneReq = meetsPrestigeReq && gameState.currentZone >= tier.zoneReq;
+                    const isLocked = !meetsPrestigeReq || !meetsZoneReq;
+                    const canAfford = !isLocked && gameState.gold >= tier.goldCost && gameState.ore >= tier.oreCost && gameState.leather >= tier.leatherCost;
                     return (
-                      <tr key={tier.id} className={`border-b border-gray-700/50 ${!meetsZoneReq ? 'opacity-50' : ''}`}>
+                      <tr key={tier.id} className={`border-b border-gray-700/50 ${isLocked ? 'opacity-50' : ''}`}>
                         <td className="py-2 px-2">
-                          <div className="font-bold" style={{ color: tier.color }}>{tier.name}</div>
-                          {!meetsZoneReq ? (
+                          <div className="font-bold flex items-center gap-1" style={{ color: tier.color }}>
+                            {tier.prestigeReq && <span>🌟</span>}
+                            {tier.name}
+                          </div>
+                          {!meetsPrestigeReq ? (
+                            <div className="text-xs text-pink-400">Prestige {tier.prestigeReq}+ required</div>
+                          ) : !meetsZoneReq ? (
                             <div className="text-xs text-red-400">Zone {tier.zoneReq}+ required</div>
                           ) : (
                             <div className="text-xs flex gap-2 mt-0.5">
@@ -1813,6 +1920,20 @@ function GearGrinder() {
 
         {/* Enhance Tab */}
         <TabsContent value="enhance" className="mt-0">
+          {/* Auto-Enhance Control */}
+          <div className="flex justify-end mb-2">
+            <Button
+              onClick={() => setAutoEnhanceEnabled(!autoEnhanceEnabled)}
+              size="sm"
+              className={`text-xs font-bold ${
+                autoEnhanceEnabled
+                  ? 'bg-green-600 hover:bg-green-500 animate-pulse'
+                  : 'bg-gray-700 hover:bg-gray-600'
+              }`}
+            >
+              {autoEnhanceEnabled ? 'Auto-Enhance ON' : 'Auto-Enhance OFF'}
+            </Button>
+          </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Item List */}
             <div className="bg-gray-800 rounded-lg p-4">
