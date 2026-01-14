@@ -1050,6 +1050,158 @@ function GearGrinder() {
     setTimeout(() => saveGameImmediate(), 0);
   };
 
+  const salvageAll = () => {
+    if (gameState.inventory.length === 0) return;
+
+    let totalGold = 0, totalOre = 0, totalLeather = 0;
+    let totalEnhanceStone = 0, totalBlessedOrb = 0, totalCelestialShard = 0;
+
+    gameState.inventory.forEach(item => {
+      const tier = TIERS[item.tier];
+      const salvageRate = item.isBossItem ? 0.5 : 0.3;
+      const enhancementBonus = (item.plus || 0) * 0.1;
+
+      totalGold += Math.floor(tier.goldCost * salvageRate * (1 + enhancementBonus));
+      totalOre += Math.floor(tier.oreCost * salvageRate * (1 + enhancementBonus));
+      totalLeather += Math.floor(tier.leatherCost * salvageRate * (1 + enhancementBonus));
+      totalEnhanceStone += item.plus >= 5 ? Math.floor(item.plus * 0.5) : 0;
+      totalBlessedOrb += item.plus >= 15 ? Math.floor((item.plus - 10) * 0.3) : 0;
+      totalCelestialShard += item.plus >= 25 ? Math.floor((item.plus - 20) * 0.2) : 0;
+    });
+
+    const itemCount = gameState.inventory.length;
+    setGameState(prev => ({
+      ...prev,
+      gold: prev.gold + totalGold,
+      ore: prev.ore + totalOre,
+      leather: prev.leather + totalLeather,
+      enhanceStone: prev.enhanceStone + totalEnhanceStone,
+      blessedOrb: prev.blessedOrb + totalBlessedOrb,
+      celestialShard: prev.celestialShard + totalCelestialShard,
+      inventory: [],
+      combatLog: [...prev.combatLog.slice(-3), {
+        type: 'salvage',
+        msg: `Salvaged ${itemCount} items for ${totalGold}g, ${totalOre}⛏️, ${totalLeather}🧶`
+      }],
+    }));
+    setTimeout(() => saveGameImmediate(), 0);
+  };
+
+  const autoEquipBest = () => {
+    const s = gameState.stats;
+
+    // Calculate item score based on player's stats
+    const getItemScore = (item) => {
+      const tier = TIERS[item.tier];
+      const tierMult = tier.statMult;
+      const enhanceBonus = getEnhanceBonus(item.plus || 0, item.tier);
+      const bossStatBonus = item.isBossItem && item.statBonus ? item.statBonus : 1;
+
+      let gearBase = GEAR_BASES[item.slot];
+      let weaponSpeedBonus = 0, weaponCritBonus = 0;
+
+      if (item.slot === 'weapon' && item.weaponType) {
+        const weaponDef = WEAPON_TYPES.find(w => w.id === item.weaponType) || PRESTIGE_WEAPONS.find(w => w.id === item.weaponType);
+        if (weaponDef) {
+          gearBase = { ...gearBase, ...weaponDef, baseArmor: 0 };
+          weaponSpeedBonus = weaponDef.speedBonus * 100;
+          weaponCritBonus = weaponDef.critBonus;
+        }
+      }
+
+      // Base stats from gear
+      const baseDmg = Math.floor((gearBase.baseDmg * tierMult * bossStatBonus) + enhanceBonus.dmgBonus);
+      const baseHp = Math.floor((gearBase.baseHp * tierMult * bossStatBonus) + enhanceBonus.hpBonus);
+      const baseArmor = Math.floor((gearBase.baseArmor || 0) * tierMult * bossStatBonus) + enhanceBonus.armorBonus;
+
+      // Scaling bonus based on player's stats
+      const scalingStat = s[gearBase.scaling] || 0;
+      const scalingMult = 1 + scalingStat * 0.02;
+
+      // Effect bonuses
+      let effectScore = 0;
+      if (item.effects) {
+        item.effects.forEach(eff => {
+          const effectValue = eff.value * (1 + enhanceBonus.effectBonus / 100);
+          switch (eff.id) {
+            case 'lifesteal': effectScore += effectValue * 10; break;
+            case 'critChance': effectScore += effectValue * 8; break;
+            case 'critDamage': effectScore += effectValue * 3; break;
+            case 'bonusDmg': effectScore += effectValue * 2; break;
+            case 'bonusHp': effectScore += effectValue * 0.5; break;
+            case 'dodge': effectScore += effectValue * 8; break;
+            case 'thorns': effectScore += effectValue * 2; break;
+            case 'goldFind': effectScore += effectValue * 1; break;
+            case 'xpBonus': effectScore += effectValue * 1; break;
+          }
+        });
+      }
+
+      // Weight damage more for STR/AGI builds, HP more for VIT builds
+      const dmgWeight = (s.str + s.agi) > (s.vit + s.int) ? 3 : 2;
+      const hpWeight = s.vit > 10 ? 1 : 0.5;
+
+      return (baseDmg * scalingMult * dmgWeight) + (baseHp * hpWeight) + (baseArmor * 2) + effectScore + weaponSpeedBonus + weaponCritBonus;
+    };
+
+    // Group inventory items by slot
+    const itemsBySlot = {};
+    gameState.inventory.forEach(item => {
+      if (!itemsBySlot[item.slot]) itemsBySlot[item.slot] = [];
+      itemsBySlot[item.slot].push(item);
+    });
+
+    // Also include currently equipped items
+    Object.entries(gameState.gear).forEach(([slot, item]) => {
+      if (item) {
+        if (!itemsBySlot[slot]) itemsBySlot[slot] = [];
+        itemsBySlot[slot].push({ ...item, isEquipped: true });
+      }
+    });
+
+    // Find best item for each slot
+    const newGear = { ...gameState.gear };
+    const newInventory = [...gameState.inventory];
+    let changesCount = 0;
+
+    Object.entries(itemsBySlot).forEach(([slot, items]) => {
+      if (items.length === 0) return;
+
+      // Score all items and find best
+      const scoredItems = items.map(item => ({ item, score: getItemScore(item) }));
+      scoredItems.sort((a, b) => b.score - a.score);
+      const bestItem = scoredItems[0].item;
+
+      // If best item is not currently equipped, equip it
+      if (!bestItem.isEquipped) {
+        // Unequip current item if any
+        const currentEquipped = newGear[slot];
+        if (currentEquipped) {
+          newInventory.push(currentEquipped);
+        }
+
+        // Equip best item
+        newGear[slot] = bestItem;
+        const idx = newInventory.findIndex(i => i.id === bestItem.id);
+        if (idx !== -1) newInventory.splice(idx, 1);
+        changesCount++;
+      }
+    });
+
+    if (changesCount > 0) {
+      setGameState(prev => ({
+        ...prev,
+        gear: newGear,
+        inventory: newInventory,
+        combatLog: [...prev.combatLog.slice(-3), {
+          type: 'equip',
+          msg: `Auto-equipped ${changesCount} best items`
+        }],
+      }));
+      setTimeout(() => saveGameImmediate(), 0);
+    }
+  };
+
   const changeZone = (zoneId) => {
     const zone = getZoneById(zoneId);
     // Check if zone is unlocked based on kills in previous zone and prestige level
@@ -1436,7 +1588,17 @@ function GearGrinder() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Equipped */}
             <div className="bg-gray-800 rounded-lg p-4">
-              <h2 className="text-lg font-bold text-gray-300 mb-4">Equipped Gear</h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-bold text-gray-300">Equipped Gear</h2>
+                <Button
+                  onClick={autoEquipBest}
+                  size="sm"
+                  className="bg-indigo-600 hover:bg-indigo-500 text-xs"
+                  title="Auto-equip best gear based on your stat build"
+                >
+                  Auto-Equip Best
+                </Button>
+              </div>
               <div className="flex gap-4">
                 <div className="flex justify-center">
                   <CharacterDisplay gear={gameState.gear} />
@@ -1514,7 +1676,18 @@ function GearGrinder() {
 
             {/* Inventory */}
             <div className="bg-gray-800 rounded-lg p-4">
-              <h2 className="text-lg font-bold text-gray-300 mb-4">Inventory ({gameState.inventory.length})</h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-bold text-gray-300">Inventory ({gameState.inventory.length})</h2>
+                {gameState.inventory.length > 0 && (
+                  <Button
+                    onClick={salvageAll}
+                    size="sm"
+                    className="bg-orange-600 hover:bg-orange-500 text-xs"
+                  >
+                    Salvage All
+                  </Button>
+                )}
+              </div>
               {gameState.inventory.length === 0 ? (
                 <div className="text-center text-gray-500 py-8">No items. Craft some gear!</div>
               ) : (
