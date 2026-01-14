@@ -6,47 +6,48 @@ import { Button } from './components/ui/button';
 
 // Game constants
 const ZONES = [
-  { id: 0, name: 'Forest Clearing', enemyHp: 30, enemyDmg: 3, goldMin: 3, goldMax: 8, killsRequired: 0,
+  // Enemy damage increased 2.5-3x for more challenging combat
+  { id: 0, name: 'Forest Clearing', enemyHp: 30, enemyDmg: 8, goldMin: 3, goldMax: 8, killsRequired: 0,
     enemyType: 'Beast', drops: { ore: 0.25, leather: 0.35, enhanceStone: 0.08, blessedOrb: 0, celestialShard: 0 }, isBoss: false },
-  { id: 1, name: 'Dark Woods', enemyHp: 80, enemyDmg: 8, goldMin: 8, goldMax: 15, killsRequired: 20,
+  { id: 1, name: 'Dark Woods', enemyHp: 80, enemyDmg: 22, goldMin: 8, goldMax: 15, killsRequired: 20,
     enemyType: 'Beast', drops: { ore: 0.30, leather: 0.40, enhanceStone: 0.12, blessedOrb: 0.02, celestialShard: 0 }, isBoss: false },
-  { id: 2, name: '🔥 Forest Guardian', enemyHp: 250, enemyDmg: 15, goldMin: 30, goldMax: 60, killsRequired: 30,
+  { id: 2, name: '🔥 Forest Guardian', enemyHp: 250, enemyDmg: 40, goldMin: 30, goldMax: 60, killsRequired: 30,
     enemyType: 'Boss', drops: { ore: 0.80, leather: 0.80, enhanceStone: 0.40, blessedOrb: 0.15, celestialShard: 0 }, isBoss: true, bossSet: 'guardian' },
-  { id: 3, name: 'Goblin Caves', enemyHp: 200, enemyDmg: 18, goldMin: 15, goldMax: 30, killsRequired: 10,
+  { id: 3, name: 'Goblin Caves', enemyHp: 200, enemyDmg: 50, goldMin: 15, goldMax: 30, killsRequired: 10,
     enemyType: 'Humanoid', drops: { ore: 0.45, leather: 0.30, enhanceStone: 0.18, blessedOrb: 0.04, celestialShard: 0 }, isBoss: false },
-  { id: 4, name: 'Undead Crypt', enemyHp: 450, enemyDmg: 35, goldMin: 30, goldMax: 60, killsRequired: 40,
+  { id: 4, name: 'Undead Crypt', enemyHp: 450, enemyDmg: 95, goldMin: 30, goldMax: 60, killsRequired: 40,
     enemyType: 'Undead', drops: { ore: 0.35, leather: 0.20, enhanceStone: 0.28, blessedOrb: 0.08, celestialShard: 0.01 }, isBoss: false },
-  { id: 5, name: '🔥 Lich King', enemyHp: 1200, enemyDmg: 60, goldMin: 100, goldMax: 200, killsRequired: 50,
+  { id: 5, name: '🔥 Lich King', enemyHp: 1200, enemyDmg: 165, goldMin: 100, goldMax: 200, killsRequired: 50,
     enemyType: 'Boss', drops: { ore: 0.70, leather: 0.60, enhanceStone: 0.50, blessedOrb: 0.25, celestialShard: 0.08 }, isBoss: true, bossSet: 'lich' },
-  { id: 6, name: 'Dragon Peak', enemyHp: 1000, enemyDmg: 75, goldMin: 60, goldMax: 120, killsRequired: 15,
+  { id: 6, name: 'Dragon Peak', enemyHp: 1000, enemyDmg: 200, goldMin: 60, goldMax: 120, killsRequired: 15,
     enemyType: 'Dragon', drops: { ore: 0.50, leather: 0.45, enhanceStone: 0.30, blessedOrb: 0.12, celestialShard: 0.03 }, isBoss: false },
-  { id: 7, name: '🔥 Ancient Dragon', enemyHp: 2800, enemyDmg: 120, goldMin: 200, goldMax: 400, killsRequired: 60,
+  { id: 7, name: '🔥 Ancient Dragon', enemyHp: 2800, enemyDmg: 320, goldMin: 200, goldMax: 400, killsRequired: 60,
     enemyType: 'Boss', drops: { ore: 0.85, leather: 0.85, enhanceStone: 0.60, blessedOrb: 0.35, celestialShard: 0.15 }, isBoss: true, bossSet: 'dragon' },
-  { id: 8, name: 'Void Realm', enemyHp: 2500, enemyDmg: 140, goldMin: 150, goldMax: 300, killsRequired: 20,
+  { id: 8, name: 'Void Realm', enemyHp: 2500, enemyDmg: 380, goldMin: 150, goldMax: 300, killsRequired: 20,
     enemyType: 'Demon', drops: { ore: 0.40, leather: 0.35, enhanceStone: 0.40, blessedOrb: 0.18, celestialShard: 0.06 }, isBoss: false },
-  { id: 9, name: 'Frozen Wastes', enemyHp: 6000, enemyDmg: 260, goldMin: 300, goldMax: 550, killsRequired: 80,
+  { id: 9, name: 'Frozen Wastes', enemyHp: 6000, enemyDmg: 700, goldMin: 300, goldMax: 550, killsRequired: 80,
     enemyType: 'Elemental', drops: { ore: 0.60, leather: 0.25, enhanceStone: 0.45, blessedOrb: 0.22, celestialShard: 0.10 }, isBoss: false },
-  { id: 10, name: '🔥 Frost Titan', enemyHp: 15000, enemyDmg: 450, goldMin: 800, goldMax: 1500, killsRequired: 100,
+  { id: 10, name: '🔥 Frost Titan', enemyHp: 15000, enemyDmg: 1200, goldMin: 800, goldMax: 1500, killsRequired: 100,
     enemyType: 'Boss', drops: { ore: 0.90, leather: 0.70, enhanceStone: 0.70, blessedOrb: 0.45, celestialShard: 0.25 }, isBoss: true, bossSet: 'frost' },
-  { id: 11, name: 'Demon Fortress', enemyHp: 12000, enemyDmg: 480, goldMin: 500, goldMax: 900, killsRequired: 30,
+  { id: 11, name: 'Demon Fortress', enemyHp: 12000, enemyDmg: 1300, goldMin: 500, goldMax: 900, killsRequired: 30,
     enemyType: 'Demon', drops: { ore: 0.55, leather: 0.40, enhanceStone: 0.50, blessedOrb: 0.28, celestialShard: 0.15 }, isBoss: false },
-  { id: 12, name: '🔥 Demon Lord', enemyHp: 28000, enemyDmg: 750, goldMin: 1500, goldMax: 2800, killsRequired: 120,
+  { id: 12, name: '🔥 Demon Lord', enemyHp: 28000, enemyDmg: 2000, goldMin: 1500, goldMax: 2800, killsRequired: 120,
     enemyType: 'Boss', drops: { ore: 0.85, leather: 0.80, enhanceStone: 0.75, blessedOrb: 0.55, celestialShard: 0.35 }, isBoss: true, bossSet: 'demon' },
-  { id: 13, name: 'Celestial Tower', enemyHp: 25000, enemyDmg: 850, goldMin: 800, goldMax: 1500, killsRequired: 40,
+  { id: 13, name: 'Celestial Tower', enemyHp: 25000, enemyDmg: 2300, goldMin: 800, goldMax: 1500, killsRequired: 40,
     enemyType: 'Celestial', drops: { ore: 0.50, leather: 0.35, enhanceStone: 0.55, blessedOrb: 0.35, celestialShard: 0.22 }, isBoss: false },
-  { id: 14, name: '🔥 Seraph Commander', enemyHp: 55000, enemyDmg: 1300, goldMin: 2500, goldMax: 4500, killsRequired: 150,
+  { id: 14, name: '🔥 Seraph Commander', enemyHp: 55000, enemyDmg: 3500, goldMin: 2500, goldMax: 4500, killsRequired: 150,
     enemyType: 'Boss', drops: { ore: 0.90, leather: 0.75, enhanceStone: 0.80, blessedOrb: 0.65, celestialShard: 0.45 }, isBoss: true, bossSet: 'seraph' },
-  { id: 15, name: 'Abyssal Depths', enemyHp: 60000, enemyDmg: 1400, goldMin: 1500, goldMax: 2800, killsRequired: 50,
+  { id: 15, name: 'Abyssal Depths', enemyHp: 60000, enemyDmg: 3800, goldMin: 1500, goldMax: 2800, killsRequired: 50,
     enemyType: 'Abyssal', drops: { ore: 0.55, leather: 0.45, enhanceStone: 0.60, blessedOrb: 0.40, celestialShard: 0.28 }, isBoss: false },
-  { id: 16, name: '🔥 Void Emperor', enemyHp: 120000, enemyDmg: 2200, goldMin: 4500, goldMax: 8000, killsRequired: 180,
+  { id: 16, name: '🔥 Void Emperor', enemyHp: 120000, enemyDmg: 6000, goldMin: 4500, goldMax: 8000, killsRequired: 180,
     enemyType: 'Boss', drops: { ore: 0.95, leather: 0.85, enhanceStone: 0.85, blessedOrb: 0.75, celestialShard: 0.55 }, isBoss: true, bossSet: 'void' },
-  { id: 17, name: 'Chaos Realm', enemyHp: 150000, enemyDmg: 2500, goldMin: 3000, goldMax: 5500, killsRequired: 60,
+  { id: 17, name: 'Chaos Realm', enemyHp: 150000, enemyDmg: 6800, goldMin: 3000, goldMax: 5500, killsRequired: 60,
     enemyType: 'Chaos', drops: { ore: 0.60, leather: 0.50, enhanceStone: 0.65, blessedOrb: 0.45, celestialShard: 0.35 }, isBoss: false },
-  { id: 18, name: '🔥 Chaos God', enemyHp: 280000, enemyDmg: 4000, goldMin: 8000, goldMax: 15000, killsRequired: 200,
+  { id: 18, name: '🔥 Chaos God', enemyHp: 280000, enemyDmg: 11000, goldMin: 8000, goldMax: 15000, killsRequired: 200,
     enemyType: 'Boss', drops: { ore: 1.0, leather: 0.95, enhanceStone: 0.90, blessedOrb: 0.85, celestialShard: 0.70 }, isBoss: true, bossSet: 'chaos' },
-  { id: 19, name: 'Eternal Void', enemyHp: 350000, enemyDmg: 4500, goldMin: 6000, goldMax: 12000, killsRequired: 70,
+  { id: 19, name: 'Eternal Void', enemyHp: 350000, enemyDmg: 12500, goldMin: 6000, goldMax: 12000, killsRequired: 70,
     enemyType: 'Void', drops: { ore: 0.70, leather: 0.60, enhanceStone: 0.75, blessedOrb: 0.55, celestialShard: 0.45 }, isBoss: false },
-  { id: 20, name: '🔥 Eternal One', enemyHp: 650000, enemyDmg: 7500, goldMin: 15000, goldMax: 28000, killsRequired: 250,
+  { id: 20, name: '🔥 Eternal One', enemyHp: 650000, enemyDmg: 20000, goldMin: 15000, goldMax: 28000, killsRequired: 250,
     enemyType: 'Boss', drops: { ore: 1.0, leather: 1.0, enhanceStone: 1.0, blessedOrb: 1.0, celestialShard: 0.90 }, isBoss: true, bossSet: 'eternal' },
 ];
 
@@ -294,11 +295,27 @@ const getEnhanceSuccess = (currentPlus) => {
   return 20;
 };
 
-const getEnhanceBonus = (plus) => ({
-  dmgBonus: plus * 2,
-  hpBonus: plus * 5,
-  effectBonus: Math.floor(plus / 5) * 3,
-});
+const getEnhanceBonus = (plus, tier = 0) => {
+  // Enhancement bonuses now scale with gear tier for meaningful progression
+  const tierMult = 1 + tier * 0.3; // Higher tier = bigger enhancement bonuses
+  const basePerPlus = {
+    dmg: 3 + tier * 2,      // Base 3-15 dmg per + depending on tier
+    hp: 8 + tier * 4,       // Base 8-32 HP per + depending on tier
+    armor: 1 + tier * 0.5,  // Base 1-4 armor per + depending on tier
+  };
+
+  // Exponential scaling at higher enhancement levels
+  const expBonus = plus >= 10 ? Math.pow(1.08, plus - 9) : 1;
+
+  return {
+    dmgBonus: Math.floor(plus * basePerPlus.dmg * expBonus),
+    hpBonus: Math.floor(plus * basePerPlus.hp * expBonus),
+    armorBonus: Math.floor(plus * basePerPlus.armor * expBonus),
+    effectBonus: Math.floor(plus / 3) * 5, // More frequent, bigger effect boost
+    // Damage multiplier at very high enhancement
+    dmgMult: plus >= 15 ? 1 + (plus - 14) * 0.03 : 1, // +3% per level above +14
+  };
+};
 
 const initialState = {
   gold: 50, ore: 5, leather: 5, enhanceStone: 3, blessedOrb: 0, celestialShard: 0,
@@ -494,10 +511,11 @@ function GearGrinder() {
     let xpBonus = 0;
 
     // Gear contributions
+    let enhanceDmgMult = 1; // Cumulative enhancement damage multiplier
     Object.entries(gameState.gear).forEach(([slot, gear]) => {
       if (gear) {
         const tierMult = TIERS[gear.tier].statMult;
-        const enhanceBonus = getEnhanceBonus(gear.plus || 0);
+        const enhanceBonus = getEnhanceBonus(gear.plus || 0, gear.tier);
 
         // For weapons, use the weapon type stats and apply bonuses
         let gearBase = GEAR_BASES[slot];
@@ -511,10 +529,13 @@ function GearGrinder() {
           }
         }
 
-        // Add gear stats (scaled by tier)
+        // Add gear stats (scaled by tier) with enhanced enhancement bonuses
         baseDmg += gearBase.baseDmg * tierMult + enhanceBonus.dmgBonus;
         baseHp += gearBase.baseHp * tierMult + enhanceBonus.hpBonus;
-        armor += (gearBase.baseArmor || 0) * tierMult;
+        armor += (gearBase.baseArmor || 0) * tierMult + enhanceBonus.armorBonus;
+
+        // Apply enhancement damage multiplier from high-level enhancements
+        enhanceDmgMult *= enhanceBonus.dmgMult;
 
         // Stat scaling bonus: gear is stronger if you have the right stat
         const scalingStat = s[gearBase.scaling] || 0;
@@ -588,15 +609,15 @@ function GearGrinder() {
     });
 
     return {
-      damage: Math.floor(baseDmg * dmgMult),
+      damage: Math.floor(baseDmg * dmgMult * enhanceDmgMult), // Apply enhancement multiplier
       maxHp: Math.floor(baseHp * hpMult),
       armor: Math.floor(armor),
       goldMult, speedMult, matMult,
-      lifesteal: Math.min(lifesteal, 50),
+      lifesteal: Math.min(lifesteal, 25),   // Reduced cap from 50% to 25%
       thorns: Math.min(thorns, 100),
       critChance: Math.min(critChance, 75),
       critDamage,
-      dodge: Math.min(dodge, 50),
+      dodge: Math.min(dodge, 35),           // Reduced cap from 50% to 35%
       xpBonus,
     };
   }, [gameState.gear, gameState.level, gameState.unlockedSkills, gameState.stats]);
@@ -715,14 +736,16 @@ function GearGrinder() {
 
           newState.enemyHp = zone.enemyHp;
           newState.enemyMaxHp = zone.enemyHp;
-          newState.playerHp = Math.min(newState.playerHp + Math.floor(stats.maxHp * 0.1), stats.maxHp);
+          // Reduced post-kill healing from 10% to 3%
+          newState.playerHp = Math.min(newState.playerHp + Math.floor(stats.maxHp * 0.03), stats.maxHp);
           newState.playerMaxHp = stats.maxHp;
         } else {
           const dodged = Math.random() * 100 < stats.dodge;
           if (dodged) {
             addFloatingText('DODGE!', 'dodge', 'player');
           } else {
-            const damageReduction = stats.armor / (stats.armor + 100);
+            // Armor is less effective now - need more armor for same reduction
+            const damageReduction = stats.armor / (stats.armor + 250);
             const reducedDmg = Math.max(1, Math.floor(zone.enemyDmg * (1 - damageReduction)));
             newState.playerHp -= reducedDmg;
             addFloatingText(`-${reducedDmg}`, 'enemyDmg', 'player');
@@ -734,6 +757,12 @@ function GearGrinder() {
           }
           if (newState.playerHp <= 0) {
             addFloatingText('DEATH!', 'death', 'player');
+            // Death penalty: lose 10% of current gold
+            const goldLost = Math.floor(newState.gold * 0.1);
+            if (goldLost > 0) {
+              newState.gold -= goldLost;
+              addFloatingText(`-${goldLost}g`, 'goldLoss', 'player');
+            }
             newState.playerHp = stats.maxHp;
             newState.enemyHp = zone.enemyHp;
             newState.enemyMaxHp = zone.enemyHp;
@@ -1535,6 +1564,41 @@ function GearGrinder() {
                         </div>
                       </div>
 
+                      {/* Enhancement Bonus Display */}
+                      {(() => {
+                        const currentBonus = getEnhanceBonus(selectedEnhanceItem.plus || 0, selectedEnhanceItem.tier);
+                        const nextBonus = getEnhanceBonus((selectedEnhanceItem.plus || 0) + 1, selectedEnhanceItem.tier);
+                        return (
+                          <div className="bg-gray-900 rounded p-3 mb-4">
+                            <div className="text-gray-400 text-sm mb-2">Enhancement Bonuses:</div>
+                            <div className="grid grid-cols-2 gap-2 text-sm">
+                              <div className="flex justify-between">
+                                <span className="text-red-400">DMG:</span>
+                                <span className="text-white">+{currentBonus.dmgBonus} <span className="text-green-400">({`+${nextBonus.dmgBonus - currentBonus.dmgBonus}`})</span></span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-green-400">HP:</span>
+                                <span className="text-white">+{currentBonus.hpBonus} <span className="text-green-400">({`+${nextBonus.hpBonus - currentBonus.hpBonus}`})</span></span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-blue-400">Armor:</span>
+                                <span className="text-white">+{currentBonus.armorBonus} <span className="text-green-400">({`+${nextBonus.armorBonus - currentBonus.armorBonus}`})</span></span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-purple-400">Effect:</span>
+                                <span className="text-white">+{currentBonus.effectBonus}% <span className="text-green-400">({`+${nextBonus.effectBonus - currentBonus.effectBonus}%`})</span></span>
+                              </div>
+                              {currentBonus.dmgMult > 1 && (
+                                <div className="col-span-2 flex justify-between">
+                                  <span className="text-orange-400">DMG Mult:</span>
+                                  <span className="text-white">+{Math.round((currentBonus.dmgMult - 1) * 100)}% <span className="text-green-400">({`+${Math.round((nextBonus.dmgMult - currentBonus.dmgMult) * 100)}%`})</span></span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })()}
+
                       <div className="bg-gray-900 rounded p-3 mb-4">
                         <div className="text-gray-400 text-sm mb-2">Cost:</div>
                         {(() => {
@@ -1710,6 +1774,8 @@ function FloatingText({ text, type }) {
         return { color: '#fbbf24', fontSize: '1.3rem', fontWeight: 'bold' };
       case 'death':
         return { color: '#dc2626', fontSize: '1.4rem', fontWeight: 'bold' };
+      case 'goldLoss':
+        return { color: '#fbbf24', fontSize: '1.1rem', fontWeight: 'bold' };
       default:
         return { color: '#fff', fontSize: '1rem' };
     }
