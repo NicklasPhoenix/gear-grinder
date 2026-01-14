@@ -6,48 +6,48 @@ import { Button } from './components/ui/button';
 
 // Game constants
 const ZONES = [
-  // Drop rates significantly reduced - resources should feel scarce and valuable
-  { id: 0, name: 'Forest Clearing', enemyHp: 30, enemyDmg: 12, goldMin: 1, goldMax: 3, killsRequired: 0,
+  // Enemy damage creates clear progression gates - need boss gear from previous tier to progress
+  { id: 0, name: 'Forest Clearing', enemyHp: 30, enemyDmg: 15, goldMin: 1, goldMax: 3, killsRequired: 0,
     enemyType: 'Beast', drops: { ore: 0.08, leather: 0.12, enhanceStone: 0.02, blessedOrb: 0, celestialShard: 0 }, isBoss: false },
-  { id: 1, name: 'Dark Woods', enemyHp: 80, enemyDmg: 35, goldMin: 2, goldMax: 5, killsRequired: 20,
+  { id: 1, name: 'Dark Woods', enemyHp: 80, enemyDmg: 45, goldMin: 2, goldMax: 5, killsRequired: 20,
     enemyType: 'Beast', drops: { ore: 0.10, leather: 0.15, enhanceStone: 0.03, blessedOrb: 0.005, celestialShard: 0 }, isBoss: false },
-  { id: 2, name: '🔥 Forest Guardian', enemyHp: 250, enemyDmg: 65, goldMin: 15, goldMax: 30, killsRequired: 30,
+  { id: 2, name: '🔥 Forest Guardian', enemyHp: 300, enemyDmg: 85, goldMin: 15, goldMax: 30, killsRequired: 30,
     enemyType: 'Boss', drops: { ore: 0.40, leather: 0.40, enhanceStone: 0.15, blessedOrb: 0.05, celestialShard: 0 }, isBoss: true, bossSet: 'guardian' },
-  { id: 3, name: 'Goblin Caves', enemyHp: 200, enemyDmg: 85, goldMin: 5, goldMax: 12, killsRequired: 10,
+  { id: 3, name: 'Goblin Caves', enemyHp: 250, enemyDmg: 120, goldMin: 5, goldMax: 12, killsRequired: 10,
     enemyType: 'Humanoid', drops: { ore: 0.15, leather: 0.10, enhanceStone: 0.05, blessedOrb: 0.01, celestialShard: 0 }, isBoss: false },
-  { id: 4, name: 'Undead Crypt', enemyHp: 450, enemyDmg: 160, goldMin: 8, goldMax: 20, killsRequired: 40,
+  { id: 4, name: 'Undead Crypt', enemyHp: 500, enemyDmg: 220, goldMin: 8, goldMax: 20, killsRequired: 40,
     enemyType: 'Undead', drops: { ore: 0.12, leather: 0.08, enhanceStone: 0.08, blessedOrb: 0.02, celestialShard: 0.002 }, isBoss: false },
-  { id: 5, name: '🔥 Lich King', enemyHp: 1200, enemyDmg: 280, goldMin: 40, goldMax: 80, killsRequired: 50,
+  { id: 5, name: '🔥 Lich King', enemyHp: 1500, enemyDmg: 400, goldMin: 40, goldMax: 80, killsRequired: 50,
     enemyType: 'Boss', drops: { ore: 0.35, leather: 0.30, enhanceStone: 0.20, blessedOrb: 0.10, celestialShard: 0.02 }, isBoss: true, bossSet: 'lich' },
-  { id: 6, name: 'Dragon Peak', enemyHp: 1000, enemyDmg: 350, goldMin: 15, goldMax: 35, killsRequired: 15,
+  { id: 6, name: 'Dragon Peak', enemyHp: 1200, enemyDmg: 500, goldMin: 15, goldMax: 35, killsRequired: 15,
     enemyType: 'Dragon', drops: { ore: 0.18, leather: 0.15, enhanceStone: 0.10, blessedOrb: 0.04, celestialShard: 0.008 }, isBoss: false },
-  { id: 7, name: '🔥 Ancient Dragon', enemyHp: 2800, enemyDmg: 550, goldMin: 80, goldMax: 160, killsRequired: 60,
+  { id: 7, name: '🔥 Ancient Dragon', enemyHp: 3500, enemyDmg: 800, goldMin: 80, goldMax: 160, killsRequired: 60,
     enemyType: 'Boss', drops: { ore: 0.45, leather: 0.45, enhanceStone: 0.25, blessedOrb: 0.15, celestialShard: 0.05 }, isBoss: true, bossSet: 'dragon' },
-  { id: 8, name: 'Void Realm', enemyHp: 2500, enemyDmg: 650, goldMin: 25, goldMax: 60, killsRequired: 20,
+  { id: 8, name: 'Void Realm', enemyHp: 3000, enemyDmg: 950, goldMin: 25, goldMax: 60, killsRequired: 20,
     enemyType: 'Demon', drops: { ore: 0.15, leather: 0.12, enhanceStone: 0.12, blessedOrb: 0.05, celestialShard: 0.015 }, isBoss: false },
-  { id: 9, name: 'Frozen Wastes', enemyHp: 6000, enemyDmg: 1200, goldMin: 50, goldMax: 120, killsRequired: 80,
+  { id: 9, name: 'Frozen Wastes', enemyHp: 8000, enemyDmg: 1800, goldMin: 50, goldMax: 120, killsRequired: 80,
     enemyType: 'Elemental', drops: { ore: 0.22, leather: 0.10, enhanceStone: 0.15, blessedOrb: 0.08, celestialShard: 0.03 }, isBoss: false },
-  { id: 10, name: '🔥 Frost Titan', enemyHp: 15000, enemyDmg: 2000, goldMin: 200, goldMax: 450, killsRequired: 100,
+  { id: 10, name: '🔥 Frost Titan', enemyHp: 20000, enemyDmg: 3000, goldMin: 200, goldMax: 450, killsRequired: 100,
     enemyType: 'Boss', drops: { ore: 0.50, leather: 0.40, enhanceStone: 0.30, blessedOrb: 0.20, celestialShard: 0.10 }, isBoss: true, bossSet: 'frost' },
-  { id: 11, name: 'Demon Fortress', enemyHp: 12000, enemyDmg: 2200, goldMin: 80, goldMax: 180, killsRequired: 30,
+  { id: 11, name: 'Demon Fortress', enemyHp: 15000, enemyDmg: 3500, goldMin: 80, goldMax: 180, killsRequired: 30,
     enemyType: 'Demon', drops: { ore: 0.20, leather: 0.15, enhanceStone: 0.18, blessedOrb: 0.10, celestialShard: 0.05 }, isBoss: false },
-  { id: 12, name: '🔥 Demon Lord', enemyHp: 28000, enemyDmg: 3500, goldMin: 350, goldMax: 700, killsRequired: 120,
+  { id: 12, name: '🔥 Demon Lord', enemyHp: 40000, enemyDmg: 5500, goldMin: 350, goldMax: 700, killsRequired: 120,
     enemyType: 'Boss', drops: { ore: 0.50, leather: 0.45, enhanceStone: 0.35, blessedOrb: 0.25, celestialShard: 0.15 }, isBoss: true, bossSet: 'demon' },
-  { id: 13, name: 'Celestial Tower', enemyHp: 25000, enemyDmg: 4000, goldMin: 150, goldMax: 350, killsRequired: 40,
+  { id: 13, name: 'Celestial Tower', enemyHp: 35000, enemyDmg: 6500, goldMin: 150, goldMax: 350, killsRequired: 40,
     enemyType: 'Celestial', drops: { ore: 0.18, leather: 0.12, enhanceStone: 0.20, blessedOrb: 0.12, celestialShard: 0.08 }, isBoss: false },
-  { id: 14, name: '🔥 Seraph Commander', enemyHp: 55000, enemyDmg: 6000, goldMin: 600, goldMax: 1200, killsRequired: 150,
+  { id: 14, name: '🔥 Seraph Commander', enemyHp: 80000, enemyDmg: 10000, goldMin: 600, goldMax: 1200, killsRequired: 150,
     enemyType: 'Boss', drops: { ore: 0.55, leather: 0.45, enhanceStone: 0.40, blessedOrb: 0.30, celestialShard: 0.20 }, isBoss: true, bossSet: 'seraph' },
-  { id: 15, name: 'Abyssal Depths', enemyHp: 60000, enemyDmg: 6500, goldMin: 250, goldMax: 550, killsRequired: 50,
+  { id: 15, name: 'Abyssal Depths', enemyHp: 80000, enemyDmg: 11000, goldMin: 250, goldMax: 550, killsRequired: 50,
     enemyType: 'Abyssal', drops: { ore: 0.22, leather: 0.18, enhanceStone: 0.22, blessedOrb: 0.15, celestialShard: 0.10 }, isBoss: false },
-  { id: 16, name: '🔥 Void Emperor', enemyHp: 120000, enemyDmg: 10000, goldMin: 1000, goldMax: 2200, killsRequired: 180,
+  { id: 16, name: '🔥 Void Emperor', enemyHp: 180000, enemyDmg: 18000, goldMin: 1000, goldMax: 2200, killsRequired: 180,
     enemyType: 'Boss', drops: { ore: 0.60, leather: 0.50, enhanceStone: 0.45, blessedOrb: 0.35, celestialShard: 0.25 }, isBoss: true, bossSet: 'void' },
-  { id: 17, name: 'Chaos Realm', enemyHp: 150000, enemyDmg: 12000, goldMin: 400, goldMax: 900, killsRequired: 60,
+  { id: 17, name: 'Chaos Realm', enemyHp: 200000, enemyDmg: 22000, goldMin: 400, goldMax: 900, killsRequired: 60,
     enemyType: 'Chaos', drops: { ore: 0.25, leather: 0.20, enhanceStone: 0.25, blessedOrb: 0.18, celestialShard: 0.12 }, isBoss: false },
-  { id: 18, name: '🔥 Chaos God', enemyHp: 280000, enemyDmg: 18000, goldMin: 1800, goldMax: 4000, killsRequired: 200,
+  { id: 18, name: '🔥 Chaos God', enemyHp: 400000, enemyDmg: 35000, goldMin: 1800, goldMax: 4000, killsRequired: 200,
     enemyType: 'Boss', drops: { ore: 0.65, leather: 0.60, enhanceStone: 0.50, blessedOrb: 0.40, celestialShard: 0.30 }, isBoss: true, bossSet: 'chaos' },
-  { id: 19, name: 'Eternal Void', enemyHp: 350000, enemyDmg: 22000, goldMin: 700, goldMax: 1500, killsRequired: 70,
+  { id: 19, name: 'Eternal Void', enemyHp: 500000, enemyDmg: 45000, goldMin: 700, goldMax: 1500, killsRequired: 70,
     enemyType: 'Void', drops: { ore: 0.30, leather: 0.25, enhanceStone: 0.30, blessedOrb: 0.22, celestialShard: 0.18 }, isBoss: false },
-  { id: 20, name: '🔥 Eternal One', enemyHp: 650000, enemyDmg: 35000, goldMin: 3500, goldMax: 8000, killsRequired: 250,
+  { id: 20, name: '🔥 Eternal One', enemyHp: 1000000, enemyDmg: 75000, goldMin: 3500, goldMax: 8000, killsRequired: 250,
     enemyType: 'Boss', drops: { ore: 0.70, leather: 0.70, enhanceStone: 0.60, blessedOrb: 0.50, celestialShard: 0.40 }, isBoss: true, bossSet: 'eternal' },
 ];
 
@@ -96,141 +96,142 @@ const GEAR_NAMES = {
 };
 
 // Boss Set Items - Unique gear from boss zones
+// Each set has a tier (determines base stats) and statBonus (multiplier over regular gear)
 const BOSS_SETS = {
   guardian: {
-    name: "Guardian's", color: '#22c55e',
+    name: "Guardian's", color: '#22c55e', tier: 2, statBonus: 1.5, // Zone 2 boss - Rare tier, 50% better stats
     items: {
-      weapon: { name: "Guardian's Greatsword", effect: { id: 'bonusDmg', name: '+DMG', value: 25 } },
-      helmet: { name: "Guardian's Crown", effect: { id: 'bonusHp', name: '+HP', value: 100 } },
-      armor: { name: "Guardian's Plate", effect: { id: 'thorns', name: 'Thorns', value: 15 } },
-      boots: { name: "Guardian's Treads", effect: { id: 'dodge', name: 'Dodge', value: 8 } },
+      weapon: { name: "Guardian's Greatsword", effect: { id: 'bonusDmg', name: '+DMG', value: 40 } },
+      helmet: { name: "Guardian's Crown", effect: { id: 'bonusHp', name: '+HP', value: 150 } },
+      armor: { name: "Guardian's Plate", effect: { id: 'thorns', name: 'Thorns', value: 20 } },
+      boots: { name: "Guardian's Treads", effect: { id: 'dodge', name: 'Dodge', value: 10 } },
     },
     setBonuses: [
-      { pieces: 2, desc: '+15% HP', effect: { hpMult: 0.15 } },
-      { pieces: 4, desc: '+20% DMG, +10% Thorns', effect: { dmgMult: 0.20, thorns: 10 } },
+      { pieces: 2, desc: '+25% HP', effect: { hpMult: 0.25 } },
+      { pieces: 4, desc: '+40% DMG, +15% Thorns', effect: { dmgMult: 0.40, thorns: 15 } },
     ]
   },
   lich: {
-    name: "Lich", color: '#8b5cf6',
+    name: "Lich", color: '#8b5cf6', tier: 3, statBonus: 1.5, // Zone 5 boss - Epic tier
     items: {
-      weapon: { name: "Lich's Staff", effect: { id: 'critDamage', name: 'Crit DMG', value: 80 } },
-      helmet: { name: "Lich's Crown", effect: { id: 'lifesteal', name: 'Lifesteal', value: 12 } },
-      armor: { name: "Lich's Robes", effect: { id: 'bonusHp', name: '+HP', value: 150 } },
-      gloves: { name: "Lich's Grasp", effect: { id: 'critChance', name: 'Crit', value: 15 } },
+      weapon: { name: "Lich's Staff", effect: { id: 'critDamage', name: 'Crit DMG', value: 100 } },
+      helmet: { name: "Lich's Crown", effect: { id: 'lifesteal', name: 'Lifesteal', value: 8 } },
+      armor: { name: "Lich's Robes", effect: { id: 'bonusHp', name: '+HP', value: 250 } },
+      gloves: { name: "Lich's Grasp", effect: { id: 'critChance', name: 'Crit', value: 18 } },
     },
     setBonuses: [
-      { pieces: 2, desc: '+10% Lifesteal', effect: { lifesteal: 10 } },
-      { pieces: 4, desc: '+25% Crit DMG, +30% DMG', effect: { critDamage: 25, dmgMult: 0.30 } },
+      { pieces: 2, desc: '+8% Lifesteal', effect: { lifesteal: 8 } },
+      { pieces: 4, desc: '+50% Crit DMG, +50% DMG', effect: { critDamage: 50, dmgMult: 0.50 } },
     ]
   },
   dragon: {
-    name: "Dragonborn", color: '#ef4444',
+    name: "Dragonborn", color: '#ef4444', tier: 3, statBonus: 1.6, // Zone 7 boss - Epic tier, slightly better
     items: {
-      weapon: { name: "Dragonborn Blade", effect: { id: 'bonusDmg', name: '+DMG', value: 45 } },
-      helmet: { name: "Dragonborn Horns", effect: { id: 'critChance', name: 'Crit', value: 18 } },
-      armor: { name: "Dragonborn Scales", effect: { id: 'bonusHp', name: '+HP', value: 200 } },
-      shield: { name: "Dragonborn Aegis", effect: { id: 'thorns', name: 'Thorns', value: 25 } },
+      weapon: { name: "Dragonborn Blade", effect: { id: 'bonusDmg', name: '+DMG', value: 80 } },
+      helmet: { name: "Dragonborn Horns", effect: { id: 'critChance', name: 'Crit', value: 20 } },
+      armor: { name: "Dragonborn Scales", effect: { id: 'bonusHp', name: '+HP', value: 350 } },
+      shield: { name: "Dragonborn Aegis", effect: { id: 'thorns', name: 'Thorns', value: 30 } },
     },
     setBonuses: [
-      { pieces: 2, desc: '+30% DMG', effect: { dmgMult: 0.30 } },
-      { pieces: 4, desc: '+25% HP, +15% Crit Chance', effect: { hpMult: 0.25, critChance: 15 } },
+      { pieces: 2, desc: '+50% DMG', effect: { dmgMult: 0.50 } },
+      { pieces: 4, desc: '+40% HP, +20% Crit Chance', effect: { hpMult: 0.40, critChance: 20 } },
     ]
   },
   frost: {
-    name: "Frostborn", color: '#06b6d4',
+    name: "Frostborn", color: '#06b6d4', tier: 4, statBonus: 1.6, // Zone 10 boss - Legendary tier
     items: {
-      weapon: { name: "Frostborn Axe", effect: { id: 'bonusDmg', name: '+DMG', value: 60 } },
-      helmet: { name: "Frostborn Helm", effect: { id: 'dodge', name: 'Dodge', value: 12 } },
-      armor: { name: "Frostborn Mail", effect: { id: 'bonusHp', name: '+HP', value: 280 } },
-      boots: { name: "Frostborn Boots", effect: { id: 'xpBonus', name: 'XP%', value: 25 } },
-      amulet: { name: "Frostborn Pendant", effect: { id: 'critChance', name: 'Crit', value: 20 } },
+      weapon: { name: "Frostborn Axe", effect: { id: 'bonusDmg', name: '+DMG', value: 120 } },
+      helmet: { name: "Frostborn Helm", effect: { id: 'dodge', name: 'Dodge', value: 15 } },
+      armor: { name: "Frostborn Mail", effect: { id: 'bonusHp', name: '+HP', value: 500 } },
+      boots: { name: "Frostborn Boots", effect: { id: 'dodge', name: 'Dodge', value: 12 } },
+      amulet: { name: "Frostborn Pendant", effect: { id: 'critChance', name: 'Crit', value: 22 } },
     },
     setBonuses: [
       { pieces: 2, desc: '+20% Dodge', effect: { dodge: 20 } },
-      { pieces: 4, desc: '+40% DMG, +35% HP', effect: { dmgMult: 0.40, hpMult: 0.35 } },
+      { pieces: 4, desc: '+70% DMG, +60% HP', effect: { dmgMult: 0.70, hpMult: 0.60 } },
     ]
   },
   demon: {
-    name: "Demonheart", color: '#dc2626',
+    name: "Demonheart", color: '#dc2626', tier: 4, statBonus: 1.7, // Zone 12 boss - Legendary tier
     items: {
-      weapon: { name: "Demonheart Scythe", effect: { id: 'lifesteal', name: 'Lifesteal', value: 15 } },
-      helmet: { name: "Demonheart Horns", effect: { id: 'bonusDmg', name: '+DMG', value: 75 } },
-      armor: { name: "Demonheart Plate", effect: { id: 'thorns', name: 'Thorns', value: 30 } },
-      gloves: { name: "Demonheart Claws", effect: { id: 'critDamage', name: 'Crit DMG', value: 100 } },
-      accessory: { name: "Demonheart Ring", effect: { id: 'bonusHp', name: '+HP', value: 350 } },
+      weapon: { name: "Demonheart Scythe", effect: { id: 'lifesteal', name: 'Lifesteal', value: 10 } },
+      helmet: { name: "Demonheart Horns", effect: { id: 'bonusDmg', name: '+DMG', value: 150 } },
+      armor: { name: "Demonheart Plate", effect: { id: 'thorns', name: 'Thorns', value: 35 } },
+      gloves: { name: "Demonheart Claws", effect: { id: 'critDamage', name: 'Crit DMG', value: 120 } },
+      accessory: { name: "Demonheart Ring", effect: { id: 'bonusHp', name: '+HP', value: 600 } },
     },
     setBonuses: [
-      { pieces: 2, desc: '+15% Lifesteal', effect: { lifesteal: 15 } },
-      { pieces: 3, desc: '+50% DMG', effect: { dmgMult: 0.50 } },
-      { pieces: 5, desc: '+40% HP, +20% Thorns', effect: { hpMult: 0.40, thorns: 20 } },
+      { pieces: 2, desc: '+10% Lifesteal', effect: { lifesteal: 10 } },
+      { pieces: 3, desc: '+80% DMG', effect: { dmgMult: 0.80 } },
+      { pieces: 5, desc: '+70% HP, +25% Thorns', effect: { hpMult: 0.70, thorns: 25 } },
     ]
   },
   seraph: {
-    name: "Seraphic", color: '#fbbf24',
+    name: "Seraphic", color: '#fbbf24', tier: 5, statBonus: 1.7, // Zone 14 boss - Mythic tier
     items: {
-      weapon: { name: "Seraphic Lance", effect: { id: 'bonusDmg', name: '+DMG', value: 95 } },
-      helmet: { name: "Seraphic Halo", effect: { id: 'xpBonus', name: 'XP%', value: 25 } },
-      armor: { name: "Seraphic Wings", effect: { id: 'bonusHp', name: '+HP', value: 450 } },
-      boots: { name: "Seraphic Steps", effect: { id: 'dodge', name: 'Dodge', value: 15 } },
-      shield: { name: "Seraphic Bulwark", effect: { id: 'lifesteal', name: 'Lifesteal', value: 15 } },
-      amulet: { name: "Seraphic Star", effect: { id: 'goldFind', name: 'Gold%', value: 30 } },
-    },
-    setBonuses: [
-      { pieces: 2, desc: '+30% Gold & XP', effect: { goldMult: 0.30, xpBonus: 30 } },
-      { pieces: 4, desc: '+60% DMG, +50% HP', effect: { dmgMult: 0.60, hpMult: 0.50 } },
-      { pieces: 6, desc: '+20% All Stats', effect: { dmgMult: 0.20, hpMult: 0.20, speedMult: 0.20 } },
-    ]
-  },
-  void: {
-    name: "Voidwalker", color: '#7c3aed',
-    items: {
-      weapon: { name: "Voidwalker Reaper", effect: { id: 'critDamage', name: 'Crit DMG', value: 120 } },
-      helmet: { name: "Voidwalker Mask", effect: { id: 'critChance', name: 'Crit', value: 20 } },
-      armor: { name: "Voidwalker Shroud", effect: { id: 'bonusHp', name: '+HP', value: 550 } },
-      boots: { name: "Voidwalker Striders", effect: { id: 'dodge', name: 'Dodge', value: 18 } },
-      gloves: { name: "Voidwalker Grips", effect: { id: 'bonusDmg', name: '+DMG', value: 110 } },
-      accessory: { name: "Voidwalker Band", effect: { id: 'lifesteal', name: 'Lifesteal', value: 15 } },
+      weapon: { name: "Seraphic Lance", effect: { id: 'bonusDmg', name: '+DMG', value: 200 } },
+      helmet: { name: "Seraphic Halo", effect: { id: 'critChance', name: 'Crit', value: 25 } },
+      armor: { name: "Seraphic Wings", effect: { id: 'bonusHp', name: '+HP', value: 800 } },
+      boots: { name: "Seraphic Steps", effect: { id: 'dodge', name: 'Dodge', value: 18 } },
+      shield: { name: "Seraphic Bulwark", effect: { id: 'lifesteal', name: 'Lifesteal', value: 10 } },
+      amulet: { name: "Seraphic Star", effect: { id: 'critDamage', name: 'Crit DMG', value: 150 } },
     },
     setBonuses: [
       { pieces: 2, desc: '+25% Crit Chance', effect: { critChance: 25 } },
-      { pieces: 4, desc: '+75% DMG, +60% HP', effect: { dmgMult: 0.75, hpMult: 0.60 } },
-      { pieces: 6, desc: '+50% Crit DMG, +15% Dodge', effect: { critDamage: 50, dodge: 15 } },
-    ]
-  },
-  chaos: {
-    name: "Chaosborn", color: '#ec4899',
-    items: {
-      weapon: { name: "Chaosborn Destroyer", effect: { id: 'bonusDmg', name: '+DMG', value: 140 } },
-      helmet: { name: "Chaosborn Crown", effect: { id: 'critChance', name: 'Crit', value: 20 } },
-      armor: { name: "Chaosborn Armor", effect: { id: 'bonusHp', name: '+HP', value: 700 } },
-      boots: { name: "Chaosborn Greaves", effect: { id: 'xpBonus', name: 'XP%', value: 25 } },
-      gloves: { name: "Chaosborn Fists", effect: { id: 'critDamage', name: 'Crit DMG', value: 150 } },
-      shield: { name: "Chaosborn Barrier", effect: { id: 'thorns', name: 'Thorns', value: 40 } },
-      amulet: { name: "Chaosborn Essence", effect: { id: 'lifesteal', name: 'Lifesteal', value: 15 } },
-    },
-    setBonuses: [
-      { pieces: 2, desc: '+40% Crit DMG', effect: { critDamage: 40 } },
-      { pieces: 4, desc: '+90% DMG, +70% HP', effect: { dmgMult: 0.90, hpMult: 0.70 } },
+      { pieces: 4, desc: '+100% DMG, +80% HP', effect: { dmgMult: 1.00, hpMult: 0.80 } },
       { pieces: 6, desc: '+30% All Stats', effect: { dmgMult: 0.30, hpMult: 0.30, speedMult: 0.30 } },
     ]
   },
-  eternal: {
-    name: "Eternal", color: '#f97316',
+  void: {
+    name: "Voidwalker", color: '#7c3aed', tier: 5, statBonus: 1.8, // Zone 16 boss - Mythic tier
     items: {
-      weapon: { name: "Eternal Annihilator", effect: { id: 'bonusDmg', name: '+DMG', value: 200 } },
-      helmet: { name: "Eternal Diadem", effect: { id: 'critChance', name: 'Crit', value: 25 } },
-      armor: { name: "Eternal Plate", effect: { id: 'bonusHp', name: '+HP', value: 1000 } },
-      boots: { name: "Eternal Walkers", effect: { id: 'dodge', name: 'Dodge', value: 20 } },
-      gloves: { name: "Eternal Gauntlets", effect: { id: 'critDamage', name: 'Crit DMG', value: 200 } },
-      shield: { name: "Eternal Aegis", effect: { id: 'thorns', name: 'Thorns', value: 50 } },
-      accessory: { name: "Eternal Loop", effect: { id: 'lifesteal', name: 'Lifesteal', value: 15 } },
-      amulet: { name: "Eternal Heart", effect: { id: 'goldFind', name: 'Gold%', value: 30 } },
+      weapon: { name: "Voidwalker Reaper", effect: { id: 'critDamage', name: 'Crit DMG', value: 180 } },
+      helmet: { name: "Voidwalker Mask", effect: { id: 'critChance', name: 'Crit', value: 25 } },
+      armor: { name: "Voidwalker Shroud", effect: { id: 'bonusHp', name: '+HP', value: 1000 } },
+      boots: { name: "Voidwalker Striders", effect: { id: 'dodge', name: 'Dodge', value: 20 } },
+      gloves: { name: "Voidwalker Grips", effect: { id: 'bonusDmg', name: '+DMG', value: 250 } },
+      accessory: { name: "Voidwalker Band", effect: { id: 'lifesteal', name: 'Lifesteal', value: 10 } },
     },
     setBonuses: [
-      { pieces: 2, desc: '+50% All Stats', effect: { dmgMult: 0.50, hpMult: 0.50, speedMult: 0.20 } },
+      { pieces: 2, desc: '+30% Crit Chance', effect: { critChance: 30 } },
       { pieces: 4, desc: '+120% DMG, +100% HP', effect: { dmgMult: 1.20, hpMult: 1.00 } },
-      { pieces: 6, desc: '+30% Crit Chance, +100% Crit DMG', effect: { critChance: 30, critDamage: 100 } },
-      { pieces: 8, desc: 'Eternal Power: +200% All Stats', effect: { dmgMult: 2.0, hpMult: 2.0, speedMult: 0.50 } },
+      { pieces: 6, desc: '+80% Crit DMG, +20% Dodge', effect: { critDamage: 80, dodge: 20 } },
+    ]
+  },
+  chaos: {
+    name: "Chaosborn", color: '#ec4899', tier: 6, statBonus: 1.8, // Zone 18 boss - Divine tier
+    items: {
+      weapon: { name: "Chaosborn Destroyer", effect: { id: 'bonusDmg', name: '+DMG', value: 350 } },
+      helmet: { name: "Chaosborn Crown", effect: { id: 'critChance', name: 'Crit', value: 28 } },
+      armor: { name: "Chaosborn Armor", effect: { id: 'bonusHp', name: '+HP', value: 1400 } },
+      boots: { name: "Chaosborn Greaves", effect: { id: 'dodge', name: 'Dodge', value: 22 } },
+      gloves: { name: "Chaosborn Fists", effect: { id: 'critDamage', name: 'Crit DMG', value: 200 } },
+      shield: { name: "Chaosborn Barrier", effect: { id: 'thorns', name: 'Thorns', value: 45 } },
+      amulet: { name: "Chaosborn Essence", effect: { id: 'lifesteal', name: 'Lifesteal', value: 10 } },
+    },
+    setBonuses: [
+      { pieces: 2, desc: '+60% Crit DMG', effect: { critDamage: 60 } },
+      { pieces: 4, desc: '+150% DMG, +120% HP', effect: { dmgMult: 1.50, hpMult: 1.20 } },
+      { pieces: 6, desc: '+50% All Stats', effect: { dmgMult: 0.50, hpMult: 0.50, speedMult: 0.50 } },
+    ]
+  },
+  eternal: {
+    name: "Eternal", color: '#f97316', tier: 6, statBonus: 2.0, // Zone 20 boss - Divine tier, best in game
+    items: {
+      weapon: { name: "Eternal Annihilator", effect: { id: 'bonusDmg', name: '+DMG', value: 500 } },
+      helmet: { name: "Eternal Diadem", effect: { id: 'critChance', name: 'Crit', value: 30 } },
+      armor: { name: "Eternal Plate", effect: { id: 'bonusHp', name: '+HP', value: 2000 } },
+      boots: { name: "Eternal Walkers", effect: { id: 'dodge', name: 'Dodge', value: 25 } },
+      gloves: { name: "Eternal Gauntlets", effect: { id: 'critDamage', name: 'Crit DMG', value: 250 } },
+      shield: { name: "Eternal Aegis", effect: { id: 'thorns', name: 'Thorns', value: 50 } },
+      accessory: { name: "Eternal Loop", effect: { id: 'lifesteal', name: 'Lifesteal', value: 12 } },
+      amulet: { name: "Eternal Heart", effect: { id: 'bonusDmg', name: '+DMG', value: 300 } },
+    },
+    setBonuses: [
+      { pieces: 2, desc: '+80% All Stats', effect: { dmgMult: 0.80, hpMult: 0.80, speedMult: 0.30 } },
+      { pieces: 4, desc: '+200% DMG, +150% HP', effect: { dmgMult: 2.00, hpMult: 1.50 } },
+      { pieces: 6, desc: '+40% Crit Chance, +150% Crit DMG', effect: { critChance: 40, critDamage: 150 } },
+      { pieces: 8, desc: 'Eternal Power: +300% All Stats', effect: { dmgMult: 3.0, hpMult: 3.0, speedMult: 0.80 } },
     ]
   },
 };
@@ -531,10 +532,13 @@ function GearGrinder() {
           }
         }
 
+        // Boss items get a stat bonus multiplier (1.5x to 2.0x base stats)
+        const bossStatBonus = gear.isBossItem && gear.statBonus ? gear.statBonus : 1;
+
         // Add gear stats (scaled by tier) with enhanced enhancement bonuses
-        baseDmg += gearBase.baseDmg * tierMult + enhanceBonus.dmgBonus;
-        baseHp += gearBase.baseHp * tierMult + enhanceBonus.hpBonus;
-        armor += (gearBase.baseArmor || 0) * tierMult + enhanceBonus.armorBonus;
+        baseDmg += Math.floor((gearBase.baseDmg * tierMult * bossStatBonus) + enhanceBonus.dmgBonus);
+        baseHp += Math.floor((gearBase.baseHp * tierMult * bossStatBonus) + enhanceBonus.hpBonus);
+        armor += Math.floor((gearBase.baseArmor || 0) * tierMult * bossStatBonus) + enhanceBonus.armorBonus;
 
         // Apply enhancement damage multiplier from high-level enhancements
         enhanceDmgMult *= enhanceBonus.dmgMult;
@@ -542,8 +546,8 @@ function GearGrinder() {
         // Stat scaling bonus: gear is stronger if you have the right stat
         const scalingStat = s[gearBase.scaling] || 0;
         const scalingBonus = 1 + scalingStat * 0.02; // +2% per stat point
-        baseDmg += Math.floor(gearBase.baseDmg * tierMult * (scalingBonus - 1));
-        baseHp += Math.floor(gearBase.baseHp * tierMult * (scalingBonus - 1) * 0.5);
+        baseDmg += Math.floor(gearBase.baseDmg * tierMult * bossStatBonus * (scalingBonus - 1));
+        baseHp += Math.floor(gearBase.baseHp * tierMult * bossStatBonus * (scalingBonus - 1) * 0.5);
 
         // Special effects from gear
         if (gear.effects) {
@@ -687,16 +691,17 @@ function GearGrinder() {
           // Boss loot drops
           if (zone.isBoss && zone.bossSet) {
             const bossSet = BOSS_SETS[zone.bossSet];
-            const dropChance = 0.15; // 15% chance to drop a boss item
+            const dropChance = 0.20; // 20% chance to drop a boss item (increased)
             if (Math.random() < dropChance && bossSet) {
               const availableSlots = Object.keys(bossSet.items);
               const droppedSlot = availableSlots[Math.floor(Math.random() * availableSlots.length)];
               const bossItem = bossSet.items[droppedSlot];
 
-              // Create the boss item with tier 5 (Mythic) base stats
+              // Create the boss item with tier and stat bonus from the set definition
               const newBossItem = {
                 slot: droppedSlot,
-                tier: 5, // Mythic tier
+                tier: bossSet.tier, // Use the set's defined tier
+                statBonus: bossSet.statBonus, // Store stat bonus multiplier
                 id: Date.now(),
                 plus: 0,
                 effects: [bossItem.effect],
