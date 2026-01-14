@@ -1792,12 +1792,20 @@ function GearGrinder() {
                 <div className="text-center text-gray-500 py-8">No items. Craft some gear!</div>
               ) : (
                 <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
-                  {gameState.inventory.map(item => (
+                  {gameState.inventory.map(item => {
+                    const itemStats = getItemStats(item);
+                    return (
                     <div key={item.id} className="bg-gray-900 rounded p-3 flex justify-between items-start gap-3">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <span className="text-gray-500 text-xs capitalize">{item.slot}</span>
                           <GearName item={item} />
+                        </div>
+                        <div className="flex flex-wrap gap-2 mt-1 text-xs">
+                          <span className="text-red-400">+{itemStats.baseDmg} DMG</span>
+                          <span className="text-green-400">+{itemStats.baseHp} HP</span>
+                          {itemStats.baseArmor > 0 && <span className="text-blue-400">+{itemStats.baseArmor} Armor</span>}
+                          <span className="text-yellow-400">Score: {Math.floor(itemStats.score)}</span>
                         </div>
                         {item.effects?.length > 0 && (
                           <div className="flex flex-wrap gap-1 mt-1">
@@ -1818,7 +1826,7 @@ function GearGrinder() {
                         </button>
                       </div>
                     </div>
-                  ))}
+                  );})}
                 </div>
               )}
             </div>
@@ -2311,7 +2319,32 @@ function GearGrinder() {
 }
 
 // Gear name with enhancement and tier color
-function GearName({ item }) {
+// Calculate item stats for tooltips
+function getItemStats(item) {
+  const tier = TIERS[item.tier];
+  const tierMult = tier.statMult;
+  const enhanceBonus = getEnhanceBonus(item.plus || 0, item.tier);
+  const bossStatBonus = item.isBossItem && item.statBonus ? item.statBonus : 1;
+
+  let gearBase = GEAR_BASES[item.slot];
+  if (item.slot === 'weapon' && item.weaponType) {
+    const weaponDef = WEAPON_TYPES.find(w => w.id === item.weaponType) || PRESTIGE_WEAPONS.find(w => w.id === item.weaponType);
+    if (weaponDef) {
+      gearBase = { ...gearBase, ...weaponDef, baseArmor: 0 };
+    }
+  }
+
+  const baseDmg = Math.floor((gearBase.baseDmg * tierMult * bossStatBonus) + enhanceBonus.dmgBonus);
+  const baseHp = Math.floor((gearBase.baseHp * tierMult * bossStatBonus) + enhanceBonus.hpBonus);
+  const baseArmor = Math.floor((gearBase.baseArmor || 0) * tierMult * bossStatBonus) + enhanceBonus.armorBonus;
+
+  // Calculate total score for comparison
+  const score = baseDmg * 2 + baseHp * 0.5 + baseArmor * 2;
+
+  return { baseDmg, baseHp, baseArmor, score, tierMult, bossStatBonus, enhanceBonus };
+}
+
+function GearName({ item, showStats = false }) {
   const tier = TIERS[item.tier];
   const plus = item.plus || 0;
   const glowColor = plus >= 30 ? '#fbbf24' : plus >= 20 ? '#ec4899' : plus >= 10 ? '#3b82f6' : null;
@@ -2335,9 +2368,21 @@ function GearName({ item }) {
     }
   }
 
+  // Calculate stats for tooltip
+  const stats = getItemStats(item);
+  const tooltipLines = [
+    `DMG: +${stats.baseDmg}`,
+    `HP: +${stats.baseHp}`,
+    stats.baseArmor > 0 ? `Armor: +${stats.baseArmor}` : null,
+    item.isBossItem ? `Boss Bonus: ${Math.round((stats.bossStatBonus - 1) * 100)}% stats` : null,
+    `Tier: ${tier.name} (${stats.tierMult}x)`,
+    `Score: ${Math.floor(stats.score)}`,
+  ].filter(Boolean).join(' | ');
+
   return (
     <span
-      className="font-medium"
+      className="font-medium cursor-help"
+      title={tooltipLines}
       style={{
         color: gearColor,
         textShadow: glowColor ? `0 0 8px ${glowColor}` : 'none',
@@ -2346,6 +2391,11 @@ function GearName({ item }) {
       {plus > 0 && <span className="text-white">+{plus} </span>}
       {item.isBossItem && <span className="text-amber-400">⚡</span>}
       {gearName}
+      {showStats && (
+        <span className="text-xs text-gray-400 ml-2">
+          ({stats.baseDmg} DMG, {stats.baseHp} HP)
+        </span>
+      )}
     </span>
   );
 }
