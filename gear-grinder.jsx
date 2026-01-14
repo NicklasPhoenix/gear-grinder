@@ -6,49 +6,49 @@ import { Button } from './components/ui/button';
 
 // Game constants
 const ZONES = [
-  // Enemy damage significantly increased - game should be challenging
-  { id: 0, name: 'Forest Clearing', enemyHp: 30, enemyDmg: 12, goldMin: 3, goldMax: 8, killsRequired: 0,
-    enemyType: 'Beast', drops: { ore: 0.25, leather: 0.35, enhanceStone: 0.08, blessedOrb: 0, celestialShard: 0 }, isBoss: false },
-  { id: 1, name: 'Dark Woods', enemyHp: 80, enemyDmg: 35, goldMin: 8, goldMax: 15, killsRequired: 20,
-    enemyType: 'Beast', drops: { ore: 0.30, leather: 0.40, enhanceStone: 0.12, blessedOrb: 0.02, celestialShard: 0 }, isBoss: false },
-  { id: 2, name: '🔥 Forest Guardian', enemyHp: 250, enemyDmg: 65, goldMin: 30, goldMax: 60, killsRequired: 30,
-    enemyType: 'Boss', drops: { ore: 0.80, leather: 0.80, enhanceStone: 0.40, blessedOrb: 0.15, celestialShard: 0 }, isBoss: true, bossSet: 'guardian' },
-  { id: 3, name: 'Goblin Caves', enemyHp: 200, enemyDmg: 85, goldMin: 15, goldMax: 30, killsRequired: 10,
-    enemyType: 'Humanoid', drops: { ore: 0.45, leather: 0.30, enhanceStone: 0.18, blessedOrb: 0.04, celestialShard: 0 }, isBoss: false },
-  { id: 4, name: 'Undead Crypt', enemyHp: 450, enemyDmg: 160, goldMin: 30, goldMax: 60, killsRequired: 40,
-    enemyType: 'Undead', drops: { ore: 0.35, leather: 0.20, enhanceStone: 0.28, blessedOrb: 0.08, celestialShard: 0.01 }, isBoss: false },
-  { id: 5, name: '🔥 Lich King', enemyHp: 1200, enemyDmg: 280, goldMin: 100, goldMax: 200, killsRequired: 50,
-    enemyType: 'Boss', drops: { ore: 0.70, leather: 0.60, enhanceStone: 0.50, blessedOrb: 0.25, celestialShard: 0.08 }, isBoss: true, bossSet: 'lich' },
-  { id: 6, name: 'Dragon Peak', enemyHp: 1000, enemyDmg: 350, goldMin: 60, goldMax: 120, killsRequired: 15,
-    enemyType: 'Dragon', drops: { ore: 0.50, leather: 0.45, enhanceStone: 0.30, blessedOrb: 0.12, celestialShard: 0.03 }, isBoss: false },
-  { id: 7, name: '🔥 Ancient Dragon', enemyHp: 2800, enemyDmg: 550, goldMin: 200, goldMax: 400, killsRequired: 60,
-    enemyType: 'Boss', drops: { ore: 0.85, leather: 0.85, enhanceStone: 0.60, blessedOrb: 0.35, celestialShard: 0.15 }, isBoss: true, bossSet: 'dragon' },
-  { id: 8, name: 'Void Realm', enemyHp: 2500, enemyDmg: 650, goldMin: 150, goldMax: 300, killsRequired: 20,
-    enemyType: 'Demon', drops: { ore: 0.40, leather: 0.35, enhanceStone: 0.40, blessedOrb: 0.18, celestialShard: 0.06 }, isBoss: false },
-  { id: 9, name: 'Frozen Wastes', enemyHp: 6000, enemyDmg: 1200, goldMin: 300, goldMax: 550, killsRequired: 80,
-    enemyType: 'Elemental', drops: { ore: 0.60, leather: 0.25, enhanceStone: 0.45, blessedOrb: 0.22, celestialShard: 0.10 }, isBoss: false },
-  { id: 10, name: '🔥 Frost Titan', enemyHp: 15000, enemyDmg: 2000, goldMin: 800, goldMax: 1500, killsRequired: 100,
-    enemyType: 'Boss', drops: { ore: 0.90, leather: 0.70, enhanceStone: 0.70, blessedOrb: 0.45, celestialShard: 0.25 }, isBoss: true, bossSet: 'frost' },
-  { id: 11, name: 'Demon Fortress', enemyHp: 12000, enemyDmg: 2200, goldMin: 500, goldMax: 900, killsRequired: 30,
-    enemyType: 'Demon', drops: { ore: 0.55, leather: 0.40, enhanceStone: 0.50, blessedOrb: 0.28, celestialShard: 0.15 }, isBoss: false },
-  { id: 12, name: '🔥 Demon Lord', enemyHp: 28000, enemyDmg: 3500, goldMin: 1500, goldMax: 2800, killsRequired: 120,
-    enemyType: 'Boss', drops: { ore: 0.85, leather: 0.80, enhanceStone: 0.75, blessedOrb: 0.55, celestialShard: 0.35 }, isBoss: true, bossSet: 'demon' },
-  { id: 13, name: 'Celestial Tower', enemyHp: 25000, enemyDmg: 4000, goldMin: 800, goldMax: 1500, killsRequired: 40,
-    enemyType: 'Celestial', drops: { ore: 0.50, leather: 0.35, enhanceStone: 0.55, blessedOrb: 0.35, celestialShard: 0.22 }, isBoss: false },
-  { id: 14, name: '🔥 Seraph Commander', enemyHp: 55000, enemyDmg: 6000, goldMin: 2500, goldMax: 4500, killsRequired: 150,
-    enemyType: 'Boss', drops: { ore: 0.90, leather: 0.75, enhanceStone: 0.80, blessedOrb: 0.65, celestialShard: 0.45 }, isBoss: true, bossSet: 'seraph' },
-  { id: 15, name: 'Abyssal Depths', enemyHp: 60000, enemyDmg: 6500, goldMin: 1500, goldMax: 2800, killsRequired: 50,
-    enemyType: 'Abyssal', drops: { ore: 0.55, leather: 0.45, enhanceStone: 0.60, blessedOrb: 0.40, celestialShard: 0.28 }, isBoss: false },
-  { id: 16, name: '🔥 Void Emperor', enemyHp: 120000, enemyDmg: 10000, goldMin: 4500, goldMax: 8000, killsRequired: 180,
-    enemyType: 'Boss', drops: { ore: 0.95, leather: 0.85, enhanceStone: 0.85, blessedOrb: 0.75, celestialShard: 0.55 }, isBoss: true, bossSet: 'void' },
-  { id: 17, name: 'Chaos Realm', enemyHp: 150000, enemyDmg: 12000, goldMin: 3000, goldMax: 5500, killsRequired: 60,
-    enemyType: 'Chaos', drops: { ore: 0.60, leather: 0.50, enhanceStone: 0.65, blessedOrb: 0.45, celestialShard: 0.35 }, isBoss: false },
-  { id: 18, name: '🔥 Chaos God', enemyHp: 280000, enemyDmg: 18000, goldMin: 8000, goldMax: 15000, killsRequired: 200,
-    enemyType: 'Boss', drops: { ore: 1.0, leather: 0.95, enhanceStone: 0.90, blessedOrb: 0.85, celestialShard: 0.70 }, isBoss: true, bossSet: 'chaos' },
-  { id: 19, name: 'Eternal Void', enemyHp: 350000, enemyDmg: 22000, goldMin: 6000, goldMax: 12000, killsRequired: 70,
-    enemyType: 'Void', drops: { ore: 0.70, leather: 0.60, enhanceStone: 0.75, blessedOrb: 0.55, celestialShard: 0.45 }, isBoss: false },
-  { id: 20, name: '🔥 Eternal One', enemyHp: 650000, enemyDmg: 35000, goldMin: 15000, goldMax: 28000, killsRequired: 250,
-    enemyType: 'Boss', drops: { ore: 1.0, leather: 1.0, enhanceStone: 1.0, blessedOrb: 1.0, celestialShard: 0.90 }, isBoss: true, bossSet: 'eternal' },
+  // Drop rates significantly reduced - resources should feel scarce and valuable
+  { id: 0, name: 'Forest Clearing', enemyHp: 30, enemyDmg: 12, goldMin: 1, goldMax: 3, killsRequired: 0,
+    enemyType: 'Beast', drops: { ore: 0.08, leather: 0.12, enhanceStone: 0.02, blessedOrb: 0, celestialShard: 0 }, isBoss: false },
+  { id: 1, name: 'Dark Woods', enemyHp: 80, enemyDmg: 35, goldMin: 2, goldMax: 5, killsRequired: 20,
+    enemyType: 'Beast', drops: { ore: 0.10, leather: 0.15, enhanceStone: 0.03, blessedOrb: 0.005, celestialShard: 0 }, isBoss: false },
+  { id: 2, name: '🔥 Forest Guardian', enemyHp: 250, enemyDmg: 65, goldMin: 15, goldMax: 30, killsRequired: 30,
+    enemyType: 'Boss', drops: { ore: 0.40, leather: 0.40, enhanceStone: 0.15, blessedOrb: 0.05, celestialShard: 0 }, isBoss: true, bossSet: 'guardian' },
+  { id: 3, name: 'Goblin Caves', enemyHp: 200, enemyDmg: 85, goldMin: 5, goldMax: 12, killsRequired: 10,
+    enemyType: 'Humanoid', drops: { ore: 0.15, leather: 0.10, enhanceStone: 0.05, blessedOrb: 0.01, celestialShard: 0 }, isBoss: false },
+  { id: 4, name: 'Undead Crypt', enemyHp: 450, enemyDmg: 160, goldMin: 8, goldMax: 20, killsRequired: 40,
+    enemyType: 'Undead', drops: { ore: 0.12, leather: 0.08, enhanceStone: 0.08, blessedOrb: 0.02, celestialShard: 0.002 }, isBoss: false },
+  { id: 5, name: '🔥 Lich King', enemyHp: 1200, enemyDmg: 280, goldMin: 40, goldMax: 80, killsRequired: 50,
+    enemyType: 'Boss', drops: { ore: 0.35, leather: 0.30, enhanceStone: 0.20, blessedOrb: 0.10, celestialShard: 0.02 }, isBoss: true, bossSet: 'lich' },
+  { id: 6, name: 'Dragon Peak', enemyHp: 1000, enemyDmg: 350, goldMin: 15, goldMax: 35, killsRequired: 15,
+    enemyType: 'Dragon', drops: { ore: 0.18, leather: 0.15, enhanceStone: 0.10, blessedOrb: 0.04, celestialShard: 0.008 }, isBoss: false },
+  { id: 7, name: '🔥 Ancient Dragon', enemyHp: 2800, enemyDmg: 550, goldMin: 80, goldMax: 160, killsRequired: 60,
+    enemyType: 'Boss', drops: { ore: 0.45, leather: 0.45, enhanceStone: 0.25, blessedOrb: 0.15, celestialShard: 0.05 }, isBoss: true, bossSet: 'dragon' },
+  { id: 8, name: 'Void Realm', enemyHp: 2500, enemyDmg: 650, goldMin: 25, goldMax: 60, killsRequired: 20,
+    enemyType: 'Demon', drops: { ore: 0.15, leather: 0.12, enhanceStone: 0.12, blessedOrb: 0.05, celestialShard: 0.015 }, isBoss: false },
+  { id: 9, name: 'Frozen Wastes', enemyHp: 6000, enemyDmg: 1200, goldMin: 50, goldMax: 120, killsRequired: 80,
+    enemyType: 'Elemental', drops: { ore: 0.22, leather: 0.10, enhanceStone: 0.15, blessedOrb: 0.08, celestialShard: 0.03 }, isBoss: false },
+  { id: 10, name: '🔥 Frost Titan', enemyHp: 15000, enemyDmg: 2000, goldMin: 200, goldMax: 450, killsRequired: 100,
+    enemyType: 'Boss', drops: { ore: 0.50, leather: 0.40, enhanceStone: 0.30, blessedOrb: 0.20, celestialShard: 0.10 }, isBoss: true, bossSet: 'frost' },
+  { id: 11, name: 'Demon Fortress', enemyHp: 12000, enemyDmg: 2200, goldMin: 80, goldMax: 180, killsRequired: 30,
+    enemyType: 'Demon', drops: { ore: 0.20, leather: 0.15, enhanceStone: 0.18, blessedOrb: 0.10, celestialShard: 0.05 }, isBoss: false },
+  { id: 12, name: '🔥 Demon Lord', enemyHp: 28000, enemyDmg: 3500, goldMin: 350, goldMax: 700, killsRequired: 120,
+    enemyType: 'Boss', drops: { ore: 0.50, leather: 0.45, enhanceStone: 0.35, blessedOrb: 0.25, celestialShard: 0.15 }, isBoss: true, bossSet: 'demon' },
+  { id: 13, name: 'Celestial Tower', enemyHp: 25000, enemyDmg: 4000, goldMin: 150, goldMax: 350, killsRequired: 40,
+    enemyType: 'Celestial', drops: { ore: 0.18, leather: 0.12, enhanceStone: 0.20, blessedOrb: 0.12, celestialShard: 0.08 }, isBoss: false },
+  { id: 14, name: '🔥 Seraph Commander', enemyHp: 55000, enemyDmg: 6000, goldMin: 600, goldMax: 1200, killsRequired: 150,
+    enemyType: 'Boss', drops: { ore: 0.55, leather: 0.45, enhanceStone: 0.40, blessedOrb: 0.30, celestialShard: 0.20 }, isBoss: true, bossSet: 'seraph' },
+  { id: 15, name: 'Abyssal Depths', enemyHp: 60000, enemyDmg: 6500, goldMin: 250, goldMax: 550, killsRequired: 50,
+    enemyType: 'Abyssal', drops: { ore: 0.22, leather: 0.18, enhanceStone: 0.22, blessedOrb: 0.15, celestialShard: 0.10 }, isBoss: false },
+  { id: 16, name: '🔥 Void Emperor', enemyHp: 120000, enemyDmg: 10000, goldMin: 1000, goldMax: 2200, killsRequired: 180,
+    enemyType: 'Boss', drops: { ore: 0.60, leather: 0.50, enhanceStone: 0.45, blessedOrb: 0.35, celestialShard: 0.25 }, isBoss: true, bossSet: 'void' },
+  { id: 17, name: 'Chaos Realm', enemyHp: 150000, enemyDmg: 12000, goldMin: 400, goldMax: 900, killsRequired: 60,
+    enemyType: 'Chaos', drops: { ore: 0.25, leather: 0.20, enhanceStone: 0.25, blessedOrb: 0.18, celestialShard: 0.12 }, isBoss: false },
+  { id: 18, name: '🔥 Chaos God', enemyHp: 280000, enemyDmg: 18000, goldMin: 1800, goldMax: 4000, killsRequired: 200,
+    enemyType: 'Boss', drops: { ore: 0.65, leather: 0.60, enhanceStone: 0.50, blessedOrb: 0.40, celestialShard: 0.30 }, isBoss: true, bossSet: 'chaos' },
+  { id: 19, name: 'Eternal Void', enemyHp: 350000, enemyDmg: 22000, goldMin: 700, goldMax: 1500, killsRequired: 70,
+    enemyType: 'Void', drops: { ore: 0.30, leather: 0.25, enhanceStone: 0.30, blessedOrb: 0.22, celestialShard: 0.18 }, isBoss: false },
+  { id: 20, name: '🔥 Eternal One', enemyHp: 650000, enemyDmg: 35000, goldMin: 3500, goldMax: 8000, killsRequired: 250,
+    enemyType: 'Boss', drops: { ore: 0.70, leather: 0.70, enhanceStone: 0.60, blessedOrb: 0.50, celestialShard: 0.40 }, isBoss: true, bossSet: 'eternal' },
 ];
 
 const MATERIALS = {
@@ -70,13 +70,14 @@ const STATS = {
 
 const GEAR_SLOTS = ['weapon', 'helmet', 'armor', 'boots', 'accessory', 'shield', 'gloves', 'amulet'];
 const TIERS = [
-  { id: 0, name: 'Common', color: '#9ca3af', statMult: 1, oreCost: 3, leatherCost: 2, goldCost: 20 },
-  { id: 1, name: 'Uncommon', color: '#22c55e', statMult: 1.8, oreCost: 8, leatherCost: 7, goldCost: 80 },
-  { id: 2, name: 'Rare', color: '#3b82f6', statMult: 3, oreCost: 20, leatherCost: 20, goldCost: 250 },
-  { id: 3, name: 'Epic', color: '#a855f7', statMult: 5, oreCost: 50, leatherCost: 50, goldCost: 800 },
-  { id: 4, name: 'Legendary', color: '#f97316', statMult: 8, oreCost: 120, leatherCost: 130, goldCost: 2500 },
-  { id: 5, name: 'Mythic', color: '#ec4899', statMult: 12, oreCost: 300, leatherCost: 300, goldCost: 8000 },
-  { id: 6, name: 'Divine', color: '#fbbf24', statMult: 18, oreCost: 750, leatherCost: 750, goldCost: 25000 },
+  // Costs dramatically increased - high tier gear should be a real achievement
+  { id: 0, name: 'Common', color: '#9ca3af', statMult: 1, oreCost: 5, leatherCost: 5, goldCost: 50, zoneReq: 0 },
+  { id: 1, name: 'Uncommon', color: '#22c55e', statMult: 1.8, oreCost: 25, leatherCost: 25, goldCost: 300, zoneReq: 1 },
+  { id: 2, name: 'Rare', color: '#3b82f6', statMult: 3, oreCost: 80, leatherCost: 80, goldCost: 1500, zoneReq: 3 },
+  { id: 3, name: 'Epic', color: '#a855f7', statMult: 5, oreCost: 250, leatherCost: 250, goldCost: 8000, zoneReq: 6 },
+  { id: 4, name: 'Legendary', color: '#f97316', statMult: 8, oreCost: 800, leatherCost: 800, goldCost: 35000, zoneReq: 10 },
+  { id: 5, name: 'Mythic', color: '#ec4899', statMult: 12, oreCost: 2500, leatherCost: 2500, goldCost: 150000, zoneReq: 14 },
+  { id: 6, name: 'Divine', color: '#fbbf24', statMult: 18, oreCost: 8000, leatherCost: 8000, goldCost: 500000, zoneReq: 18 },
 ];
 
 // Named gear for each tier - makes the game feel more immersive
@@ -256,26 +257,26 @@ const GEAR_BASES = {
 
 const SPECIAL_EFFECTS = [
   { id: 'thorns', name: 'Thorns', minVal: 5, maxVal: 25, color: '#f97316' },
-  { id: 'lifesteal', name: 'Lifesteal', minVal: 3, maxVal: 15, color: '#22c55e' },
-  { id: 'critChance', name: 'Crit', minVal: 5, maxVal: 20, color: '#ef4444' },
-  { id: 'critDamage', name: 'Crit DMG', minVal: 25, maxVal: 100, color: '#dc2626' },
+  { id: 'lifesteal', name: 'Lifesteal', minVal: 1, maxVal: 8, color: '#22c55e' },
+  { id: 'critChance', name: 'Crit', minVal: 3, maxVal: 15, color: '#ef4444' },
+  { id: 'critDamage', name: 'Crit DMG', minVal: 15, maxVal: 60, color: '#dc2626' },
   { id: 'bonusDmg', name: '+DMG', minVal: 2, maxVal: 50, color: '#f59e0b' },
   { id: 'bonusHp', name: '+HP', minVal: 10, maxVal: 200, color: '#10b981' },
-  { id: 'goldFind', name: 'Gold%', minVal: 5, maxVal: 30, color: '#fbbf24' },
-  { id: 'xpBonus', name: 'XP%', minVal: 5, maxVal: 25, color: '#8b5cf6' },
-  { id: 'dodge', name: 'Dodge', minVal: 2, maxVal: 12, color: '#06b6d4' },
+  { id: 'goldFind', name: 'Gold%', minVal: 2, maxVal: 10, color: '#fbbf24' },
+  { id: 'xpBonus', name: 'XP%', minVal: 3, maxVal: 15, color: '#8b5cf6' },
+  { id: 'dodge', name: 'Dodge', minVal: 1, maxVal: 8, color: '#06b6d4' },
 ];
 
 const SKILLS = [
   { id: 0, name: 'Power Strike', desc: '+15% damage', unlockLevel: 3, effect: { dmgMult: 0.15 } },
   { id: 1, name: 'Toughness', desc: '+20% HP', unlockLevel: 6, effect: { hpMult: 0.2 } },
-  { id: 2, name: 'Gold Rush', desc: '+25% gold', unlockLevel: 10, effect: { goldMult: 0.25 } },
+  { id: 2, name: 'Gold Rush', desc: '+10% gold', unlockLevel: 10, effect: { goldMult: 0.10 } },
   { id: 3, name: 'Swift Blade', desc: '+20% attack speed', unlockLevel: 15, effect: { speedMult: 0.2 } },
   { id: 4, name: 'Berserker', desc: '+30% damage', unlockLevel: 22, effect: { dmgMult: 0.3 } },
   { id: 5, name: 'Fortitude', desc: '+35% HP', unlockLevel: 30, effect: { hpMult: 0.35 } },
-  { id: 6, name: 'Lucky Find', desc: '+30% material drop', unlockLevel: 38, effect: { matMult: 0.3 } },
+  { id: 6, name: 'Lucky Find', desc: '+10% material drop', unlockLevel: 38, effect: { matMult: 0.1 } },
   { id: 7, name: 'Mastery', desc: '+50% all stats', unlockLevel: 50, effect: { dmgMult: 0.5, hpMult: 0.5 } },
-  { id: 8, name: 'Vampiric', desc: '+5% base lifesteal', unlockLevel: 65, effect: { lifesteal: 5 } },
+  { id: 8, name: 'Vampiric', desc: '+3% base lifesteal', unlockLevel: 65, effect: { lifesteal: 3 } },
   { id: 9, name: 'Critical Eye', desc: '+10% crit chance', unlockLevel: 80, effect: { critChance: 10 } },
   { id: 10, name: 'Thorny Skin', desc: '10% thorns damage', unlockLevel: 95, effect: { thorns: 10 } },
   { id: 11, name: 'Transcendence', desc: '+100% all stats', unlockLevel: 120, effect: { dmgMult: 1.0, hpMult: 1.0 } },
@@ -503,7 +504,8 @@ function GearGrinder() {
     let baseDmg = 5 + s.str * 2 + s.int * 1; // STR gives more physical dmg
     let baseHp = 80 + s.vit * 8; // VIT gives HP
     let armor = s.vit * 1; // Small armor from VIT
-    let dmgMult = 1, hpMult = 1, goldMult = 1 + s.lck * 0.02, speedMult = 1 + s.agi * 0.01, matMult = 1 + s.lck * 0.02;
+    // Reduced gold/mat multipliers - resources should feel scarce
+    let dmgMult = 1, hpMult = 1, goldMult = 1 + s.lck * 0.005, speedMult = 1 + s.agi * 0.01, matMult = 1 + s.lck * 0.005;
     let lifesteal = 0, thorns = 0;
     let critChance = 3 + s.agi * 0.5; // AGI gives crit
     let critDamage = 150 + s.lck * 2; // LCK gives crit damage
@@ -806,6 +808,8 @@ function GearGrinder() {
 
   const craftGear = (slot, tier, weaponType = null) => {
     const t = TIERS[tier];
+    // Check zone requirement
+    if (gameState.currentZone < t.zoneReq) return;
     if (gameState.gold < t.goldCost || gameState.ore < t.oreCost || gameState.leather < t.leatherCost) return;
 
     const newItem = {
@@ -1436,16 +1440,21 @@ function GearGrinder() {
                 </thead>
                 <tbody>
                   {TIERS.map(tier => {
-                    const canAfford = gameState.gold >= tier.goldCost && gameState.ore >= tier.oreCost && gameState.leather >= tier.leatherCost;
+                    const meetsZoneReq = gameState.currentZone >= tier.zoneReq;
+                    const canAfford = meetsZoneReq && gameState.gold >= tier.goldCost && gameState.ore >= tier.oreCost && gameState.leather >= tier.leatherCost;
                     return (
-                      <tr key={tier.id} className="border-b border-gray-700/50">
+                      <tr key={tier.id} className={`border-b border-gray-700/50 ${!meetsZoneReq ? 'opacity-50' : ''}`}>
                         <td className="py-2 px-2">
                           <div className="font-bold" style={{ color: tier.color }}>{tier.name}</div>
-                          <div className="text-xs flex gap-2 mt-0.5">
-                            <span className="text-yellow-400">🪙{tier.goldCost}</span>
-                            <span style={{color: MATERIALS.ore.color}}>{MATERIALS.ore.icon}{tier.oreCost}</span>
-                            <span style={{color: MATERIALS.leather.color}}>{MATERIALS.leather.icon}{tier.leatherCost}</span>
-                          </div>
+                          {!meetsZoneReq ? (
+                            <div className="text-xs text-red-400">Zone {tier.zoneReq}+ required</div>
+                          ) : (
+                            <div className="text-xs flex gap-2 mt-0.5">
+                              <span className="text-yellow-400">🪙{tier.goldCost.toLocaleString()}</span>
+                              <span style={{color: MATERIALS.ore.color}}>{MATERIALS.ore.icon}{tier.oreCost.toLocaleString()}</span>
+                              <span style={{color: MATERIALS.leather.color}}>{MATERIALS.leather.icon}{tier.leatherCost.toLocaleString()}</span>
+                            </div>
+                          )}
                         </td>
                         {GEAR_SLOTS.map(slot => (
                           <td key={slot} className="py-2 px-1 text-center">
