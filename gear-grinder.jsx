@@ -57,6 +57,7 @@ const MATERIALS = {
   enhanceStone: { name: 'E.Stone', color: '#60a5fa', icon: '💎' },
   blessedOrb: { name: 'B.Orb', color: '#c084fc', icon: '🔮' },
   celestialShard: { name: 'C.Shard', color: '#fbbf24', icon: '✨' },
+  prestigeStone: { name: 'P.Stone', color: '#f472b6', icon: '🌟' },
 };
 
 // Stats system
@@ -86,6 +87,9 @@ const GEAR_NAMES = {
   staff: ['Wooden Staff', 'Oak Wand', 'Crystal Staff', 'Arcane Focus', 'Void Scepter', 'Starweaver', 'Celestial Rod'],
   dagger: ['Shiv', 'Stiletto', 'Shadow Fang', 'Viper Strike', 'Assassin Blade', 'Nightfall', 'Eclipse Dagger'],
   mace: ['Club', 'Flanged Mace', 'War Hammer', 'Skull Crusher', 'Titan Maul', 'Earthshaker', 'Divine Judgment'],
+  scythe: ['Rusty Scythe', 'Iron Reaper', 'Steel Harvester', 'Crimson Scythe', 'Deathbringer', 'Soul Harvester', 'Eternal Reaper'],
+  katana: ['Bamboo Blade', 'Iron Katana', 'Steel Muramasa', 'Crimson Edge', 'Dragon Fang', 'Void Slash', 'Divine Wind'],
+  greataxe: ['Woodcutter', 'Iron Cleaver', 'Steel Executioner', 'Blood Axe', 'Worldsplitter', 'Chaos Cleaver', 'Godslayer'],
   helmet: ['Cloth Cap', 'Leather Hood', 'Chain Coif', 'Knight Helm', 'Dragon Visor', 'Phoenix Crown', 'Halo of Light'],
   armor: ['Cloth Tunic', 'Leather Vest', 'Chainmail', 'Plate Armor', 'Dragon Scale', 'Abyssal Plate', 'Radiant Aegis'],
   boots: ['Sandals', 'Leather Boots', 'Chain Greaves', 'Plated Boots', 'Dragonskin Treads', 'Voidwalkers', 'Angelic Steps'],
@@ -283,6 +287,104 @@ const SKILLS = [
   { id: 11, name: 'Transcendence', desc: '+100% all stats', unlockLevel: 120, effect: { dmgMult: 1.0, hpMult: 1.0 } },
 ];
 
+// ============== PRESTIGE SYSTEM ==============
+
+// Prestige zones - unlocked at certain prestige levels
+const PRESTIGE_ZONES = [
+  { id: 21, name: '🌟 Astral Plane', enemyHp: 2000000, enemyDmg: 100000, goldMin: 5000, goldMax: 12000, killsRequired: 100,
+    enemyType: 'Astral', drops: { ore: 0.35, leather: 0.30, enhanceStone: 0.35, blessedOrb: 0.30, celestialShard: 0.25, prestigeStone: 0.05 }, isBoss: false, prestigeReq: 1 },
+  { id: 22, name: '🔥🌟 Astral Guardian', enemyHp: 5000000, enemyDmg: 180000, goldMin: 15000, goldMax: 35000, killsRequired: 150,
+    enemyType: 'Boss', drops: { ore: 0.80, leather: 0.80, enhanceStone: 0.70, blessedOrb: 0.60, celestialShard: 0.50, prestigeStone: 0.20 }, isBoss: true, prestigeReq: 1, bossSet: 'astral' },
+  { id: 23, name: '🌟🌟 Cosmic Void', enemyHp: 8000000, enemyDmg: 250000, goldMin: 10000, goldMax: 25000, killsRequired: 120,
+    enemyType: 'Cosmic', drops: { ore: 0.40, leather: 0.35, enhanceStone: 0.40, blessedOrb: 0.35, celestialShard: 0.30, prestigeStone: 0.10 }, isBoss: false, prestigeReq: 2 },
+  { id: 24, name: '🔥🌟🌟 Cosmic Titan', enemyHp: 20000000, enemyDmg: 400000, goldMin: 40000, goldMax: 90000, killsRequired: 200,
+    enemyType: 'Boss', drops: { ore: 0.90, leather: 0.90, enhanceStone: 0.80, blessedOrb: 0.70, celestialShard: 0.60, prestigeStone: 0.35 }, isBoss: true, prestigeReq: 2, bossSet: 'cosmic' },
+  { id: 25, name: '🌟🌟🌟 Primordial Realm', enemyHp: 50000000, enemyDmg: 600000, goldMin: 25000, goldMax: 60000, killsRequired: 150,
+    enemyType: 'Primordial', drops: { ore: 0.45, leather: 0.40, enhanceStone: 0.45, blessedOrb: 0.40, celestialShard: 0.35, prestigeStone: 0.15 }, isBoss: false, prestigeReq: 3 },
+  { id: 26, name: '🔥🌟🌟🌟 Primordial God', enemyHp: 100000000, enemyDmg: 1000000, goldMin: 100000, goldMax: 250000, killsRequired: 300,
+    enemyType: 'Boss', drops: { ore: 1.0, leather: 1.0, enhanceStone: 0.90, blessedOrb: 0.85, celestialShard: 0.80, prestigeStone: 0.50 }, isBoss: true, prestigeReq: 3, bossSet: 'primordial' },
+];
+
+// Boss sets for prestige zones
+const PRESTIGE_BOSS_SETS = {
+  astral: {
+    name: "Astral", color: '#38bdf8', tier: 6, statBonus: 2.5,
+    items: {
+      weapon: { name: "Astral Blade", effect: { id: 'bonusDmg', name: '+DMG', value: 800 } },
+      helmet: { name: "Astral Crown", effect: { id: 'critChance', name: 'Crit', value: 35 } },
+      armor: { name: "Astral Vestments", effect: { id: 'bonusHp', name: '+HP', value: 4000 } },
+      boots: { name: "Astral Treads", effect: { id: 'dodge', name: 'Dodge', value: 28 } },
+    },
+    setBonuses: [
+      { pieces: 2, desc: '+150% All Stats', effect: { dmgMult: 1.50, hpMult: 1.50, speedMult: 0.50 } },
+      { pieces: 4, desc: '+400% DMG, +300% HP', effect: { dmgMult: 4.00, hpMult: 3.00 } },
+    ]
+  },
+  cosmic: {
+    name: "Cosmic", color: '#a78bfa', tier: 6, statBonus: 3.0,
+    items: {
+      weapon: { name: "Cosmic Annihilator", effect: { id: 'bonusDmg', name: '+DMG', value: 1500 } },
+      helmet: { name: "Cosmic Diadem", effect: { id: 'critChance', name: 'Crit', value: 40 } },
+      armor: { name: "Cosmic Aegis", effect: { id: 'bonusHp', name: '+HP', value: 8000 } },
+      boots: { name: "Cosmic Striders", effect: { id: 'dodge', name: 'Dodge', value: 32 } },
+      gloves: { name: "Cosmic Gauntlets", effect: { id: 'critDamage', name: 'Crit DMG', value: 350 } },
+      amulet: { name: "Cosmic Heart", effect: { id: 'lifesteal', name: 'Lifesteal', value: 15 } },
+    },
+    setBonuses: [
+      { pieces: 2, desc: '+250% All Stats', effect: { dmgMult: 2.50, hpMult: 2.50, speedMult: 0.80 } },
+      { pieces: 4, desc: '+700% DMG, +500% HP', effect: { dmgMult: 7.00, hpMult: 5.00 } },
+      { pieces: 6, desc: '+50% Crit, +300% Crit DMG', effect: { critChance: 50, critDamage: 300 } },
+    ]
+  },
+  primordial: {
+    name: "Primordial", color: '#f472b6', tier: 6, statBonus: 4.0,
+    items: {
+      weapon: { name: "Primordial Worldbreaker", effect: { id: 'bonusDmg', name: '+DMG', value: 3000 } },
+      helmet: { name: "Primordial Crown", effect: { id: 'critChance', name: 'Crit', value: 50 } },
+      armor: { name: "Primordial Mantle", effect: { id: 'bonusHp', name: '+HP', value: 15000 } },
+      boots: { name: "Primordial Steps", effect: { id: 'dodge', name: 'Dodge', value: 35 } },
+      gloves: { name: "Primordial Fists", effect: { id: 'critDamage', name: 'Crit DMG', value: 500 } },
+      shield: { name: "Primordial Bulwark", effect: { id: 'thorns', name: 'Thorns', value: 100 } },
+      accessory: { name: "Primordial Ring", effect: { id: 'lifesteal', name: 'Lifesteal', value: 20 } },
+      amulet: { name: "Primordial Essence", effect: { id: 'bonusDmg', name: '+DMG', value: 2000 } },
+    },
+    setBonuses: [
+      { pieces: 2, desc: '+500% All Stats', effect: { dmgMult: 5.00, hpMult: 5.00, speedMult: 1.00 } },
+      { pieces: 4, desc: '+1500% DMG, +1000% HP', effect: { dmgMult: 15.00, hpMult: 10.00 } },
+      { pieces: 6, desc: '+75% Crit, +500% Crit DMG', effect: { critChance: 75, critDamage: 500 } },
+      { pieces: 8, desc: 'Primordial Power: +3000% All', effect: { dmgMult: 30.0, hpMult: 30.0, speedMult: 2.0 } },
+    ]
+  },
+};
+
+// Prestige skills - permanent bonuses that persist through resets
+const PRESTIGE_SKILLS = [
+  { id: 0, name: 'Eternal Strength', desc: '+10% base DMG per level', maxLevel: 20, cost: (lvl) => Math.floor(2 * Math.pow(1.5, lvl)), effect: { dmgMult: 0.10 } },
+  { id: 1, name: 'Eternal Vitality', desc: '+10% base HP per level', maxLevel: 20, cost: (lvl) => Math.floor(2 * Math.pow(1.5, lvl)), effect: { hpMult: 0.10 } },
+  { id: 2, name: 'Eternal Fortune', desc: '+5% gold find per level', maxLevel: 15, cost: (lvl) => Math.floor(3 * Math.pow(1.4, lvl)), effect: { goldMult: 0.05 } },
+  { id: 3, name: 'Eternal Haste', desc: '+5% attack speed per level', maxLevel: 10, cost: (lvl) => Math.floor(5 * Math.pow(1.6, lvl)), effect: { speedMult: 0.05 } },
+  { id: 4, name: 'Eternal Precision', desc: '+3% crit chance per level', maxLevel: 15, cost: (lvl) => Math.floor(4 * Math.pow(1.5, lvl)), effect: { critChance: 3 } },
+  { id: 5, name: 'Eternal Fury', desc: '+15% crit damage per level', maxLevel: 20, cost: (lvl) => Math.floor(3 * Math.pow(1.4, lvl)), effect: { critDamage: 15 } },
+  { id: 6, name: 'Eternal Guard', desc: '+5 base armor per level', maxLevel: 25, cost: (lvl) => Math.floor(2 * Math.pow(1.3, lvl)), effect: { armor: 5 } },
+  { id: 7, name: 'Eternal Leech', desc: '+1% lifesteal per level', maxLevel: 10, cost: (lvl) => Math.floor(8 * Math.pow(1.8, lvl)), effect: { lifesteal: 1 } },
+  { id: 8, name: 'Starting Bonus', desc: '+50 gold, +10 ore/leather on prestige per level', maxLevel: 10, cost: (lvl) => Math.floor(5 * Math.pow(1.5, lvl)), effect: { startGold: 50, startOre: 10, startLeather: 10 } },
+  { id: 9, name: 'XP Mastery', desc: '+10% XP gain per level', maxLevel: 15, cost: (lvl) => Math.floor(4 * Math.pow(1.5, lvl)), effect: { xpBonus: 10 } },
+];
+
+// Prestige weapons - unlocked at certain prestige levels
+const PRESTIGE_WEAPONS = [
+  { id: 'scythe', name: 'Scythe', baseDmg: 12, baseHp: 0, scaling: 'str', speedBonus: -0.1, critBonus: 15, desc: 'Slow but deadly, +15% crit', prestigeReq: 1 },
+  { id: 'katana', name: 'Katana', baseDmg: 7, baseHp: 0, scaling: 'agi', speedBonus: 0.3, critBonus: 20, desc: 'Lightning fast, +20% crit', prestigeReq: 2 },
+  { id: 'greataxe', name: 'Greataxe', baseDmg: 15, baseHp: 50, scaling: 'str', speedBonus: -0.2, critBonus: 8, desc: 'Massive damage, +50 HP', prestigeReq: 3 },
+];
+
+// Get zone by ID - searches both regular and prestige zones
+const getZoneById = (zoneId) => {
+  const regularZone = ZONES.find(z => z.id === zoneId);
+  if (regularZone) return regularZone;
+  return PRESTIGE_ZONES.find(z => z.id === zoneId) || ZONES[0];
+};
+
 const getEnhanceCost = (currentPlus) => ({
   gold: Math.floor(100 * Math.pow(1.4, currentPlus)),
   enhanceStone: Math.floor(2 * Math.pow(1.25, currentPlus)),
@@ -330,6 +432,11 @@ const initialState = {
   enemyHp: 20, enemyMaxHp: 20, playerHp: 100, playerMaxHp: 100,
   kills: 0, totalGold: 0, enhanceFails: 0,
   zoneKills: {}, // Track kills per zone: { 0: 50, 1: 30, ... }
+  // Prestige system
+  prestigeLevel: 0,
+  prestigeStones: 0,
+  prestigeSkills: {}, // { skillId: level }
+  totalPrestiges: 0,
 };
 
 function GearGrinder() {
@@ -439,6 +546,11 @@ function GearGrinder() {
             totalGold: parsed.totalGold ?? initialState.totalGold,
             enhanceFails: parsed.enhanceFails ?? initialState.enhanceFails,
             zoneKills: parsed.zoneKills ?? initialState.zoneKills,
+            // Prestige system
+            prestigeLevel: parsed.prestigeLevel ?? initialState.prestigeLevel,
+            prestigeStones: parsed.prestigeStones ?? initialState.prestigeStones,
+            prestigeSkills: parsed.prestigeSkills ?? initialState.prestigeSkills,
+            totalPrestiges: parsed.totalPrestiges ?? initialState.totalPrestiges,
             // Gear needs special handling to merge with initial state slots
             gear: parsed.gear ? { ...initialState.gear, ...parsed.gear } : initialState.gear,
             // Always reset combat log on load
@@ -523,7 +635,7 @@ function GearGrinder() {
         // For weapons, use the weapon type stats and apply bonuses
         let gearBase = GEAR_BASES[slot];
         if (slot === 'weapon' && gear.weaponType) {
-          const weaponDef = WEAPON_TYPES.find(w => w.id === gear.weaponType);
+          const weaponDef = WEAPON_TYPES.find(w => w.id === gear.weaponType) || PRESTIGE_WEAPONS.find(w => w.id === gear.weaponType);
           if (weaponDef) {
             gearBase = { ...gearBase, ...weaponDef, baseArmor: 0 };
             // Apply weapon type bonuses
@@ -595,7 +707,7 @@ function GearGrinder() {
     });
 
     Object.entries(setBonuses).forEach(([setName, count]) => {
-      const bossSet = BOSS_SETS[setName];
+      const bossSet = BOSS_SETS[setName] || PRESTIGE_BOSS_SETS[setName];
       if (bossSet) {
         bossSet.setBonuses.forEach(bonus => {
           if (count >= bonus.pieces) {
@@ -614,6 +726,24 @@ function GearGrinder() {
       }
     });
 
+    // Prestige skills - permanent bonuses that persist through resets
+    Object.entries(gameState.prestigeSkills).forEach(([skillId, level]) => {
+      if (level > 0) {
+        const skill = PRESTIGE_SKILLS[parseInt(skillId)];
+        if (skill && skill.effect) {
+          if (skill.effect.dmgMult) dmgMult += skill.effect.dmgMult * level;
+          if (skill.effect.hpMult) hpMult += skill.effect.hpMult * level;
+          if (skill.effect.goldMult) goldMult += skill.effect.goldMult * level;
+          if (skill.effect.speedMult) speedMult += skill.effect.speedMult * level;
+          if (skill.effect.critChance) critChance += skill.effect.critChance * level;
+          if (skill.effect.critDamage) critDamage += skill.effect.critDamage * level;
+          if (skill.effect.armor) armor += skill.effect.armor * level;
+          if (skill.effect.lifesteal) lifesteal += skill.effect.lifesteal * level;
+          if (skill.effect.xpBonus) xpBonus += skill.effect.xpBonus * level;
+        }
+      }
+    });
+
     const finalMaxHp = Math.floor(baseHp * hpMult);
     return {
       damage: Math.floor(baseDmg * dmgMult * enhanceDmgMult), // Apply enhancement multiplier
@@ -628,7 +758,7 @@ function GearGrinder() {
       dodge: Math.min(dodge, 25),           // Reduced cap to 25%
       xpBonus,
     };
-  }, [gameState.gear, gameState.level, gameState.unlockedSkills, gameState.stats]);
+  }, [gameState.gear, gameState.level, gameState.unlockedSkills, gameState.stats, gameState.prestigeSkills]);
 
   const xpForLevel = (level) => Math.floor(50 * Math.pow(1.3, level - 1));
 
@@ -641,7 +771,7 @@ function GearGrinder() {
     const interval = setInterval(() => {
       setCombatTick(t => t + 1);
       setGameState(prev => {
-        const zone = ZONES[prev.currentZone];
+        const zone = getZoneById(prev.currentZone);
         let newState = { ...prev };
         let log = [...prev.combatLog].slice(-4);
 
@@ -672,6 +802,7 @@ function GearGrinder() {
           const enhanceStoneDropped = Math.random() < drops.enhanceStone ? Math.ceil(Math.random() * Math.max(1, zoneBonus / 2)) : 0;
           const blessedOrbDropped = Math.random() < drops.blessedOrb ? Math.ceil(Math.random() * Math.max(1, zoneBonus / 3)) : 0;
           const celestialShardDropped = Math.random() < drops.celestialShard ? Math.ceil(Math.random() * Math.max(1, zoneBonus / 4)) : 0;
+          const prestigeStoneDropped = drops.prestigeStone && Math.random() < drops.prestigeStone ? Math.ceil(Math.random() * 2) : 0;
 
           newState.gold += goldEarned;
           newState.totalGold += goldEarned;
@@ -680,6 +811,7 @@ function GearGrinder() {
           newState.enhanceStone += enhanceStoneDropped;
           newState.blessedOrb += blessedOrbDropped;
           newState.celestialShard += celestialShardDropped;
+          newState.prestigeStones += prestigeStoneDropped;
           newState.xp += xpEarned;
           newState.kills += 1;
 
@@ -690,7 +822,7 @@ function GearGrinder() {
 
           // Boss loot drops
           if (zone.isBoss && zone.bossSet) {
-            const bossSet = BOSS_SETS[zone.bossSet];
+            const bossSet = BOSS_SETS[zone.bossSet] || PRESTIGE_BOSS_SETS[zone.bossSet];
             const dropChance = 0.20; // 20% chance to drop a boss item (increased)
             if (Math.random() < dropChance && bossSet) {
               const availableSlots = Object.keys(bossSet.items);
@@ -919,8 +1051,9 @@ function GearGrinder() {
   };
 
   const changeZone = (zoneId) => {
-    const zone = ZONES[zoneId];
-    // Check if zone is unlocked based on kills in previous zone
+    const zone = getZoneById(zoneId);
+    // Check if zone is unlocked based on kills in previous zone and prestige level
+    if (zone.prestigeReq && gameState.prestigeLevel < zone.prestigeReq) return;
     if (zoneId > 0) {
       const prevZoneKills = gameState.zoneKills[zoneId - 1] || 0;
       if (prevZoneKills < zone.killsRequired) return;
@@ -1032,13 +1165,14 @@ function GearGrinder() {
 
         {/* Tabs */}
         <Tabs defaultValue="combat" value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="w-full justify-start mb-3 sm:mb-4">
+          <TabsList className="w-full justify-start mb-3 sm:mb-4 flex-wrap gap-1">
             <TabsTrigger value="combat">Combat</TabsTrigger>
             <TabsTrigger value="stats" className={gameState.statPoints > 0 ? 'ring-2 ring-purple-500' : ''}>Stats</TabsTrigger>
             <TabsTrigger value="gear">Gear</TabsTrigger>
             <TabsTrigger value="craft">Craft</TabsTrigger>
             <TabsTrigger value="enhance">Enhance</TabsTrigger>
             <TabsTrigger value="skills">Skills</TabsTrigger>
+            <TabsTrigger value="prestige" className="text-pink-400">Prestige</TabsTrigger>
           </TabsList>
 
           {/* Combat Tab */}
@@ -1149,10 +1283,11 @@ function GearGrinder() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2 max-h-[50vh] sm:max-h-[420px] overflow-y-auto pr-1">
-                    {ZONES.map(zone => {
+                    {[...ZONES, ...PRESTIGE_ZONES.filter(z => z.prestigeReq <= gameState.prestigeLevel)].map(zone => {
                       // Check if unlocked based on kills in previous zone
                       const prevZoneKills = zone.id > 0 ? (gameState.zoneKills[zone.id - 1] || 0) : 0;
-                      const unlocked = zone.id === 0 || prevZoneKills >= zone.killsRequired;
+                      const prestigeUnlocked = !zone.prestigeReq || gameState.prestigeLevel >= zone.prestigeReq;
+                      const unlocked = prestigeUnlocked && (zone.id === 0 || (zone.prestigeReq ? prevZoneKills >= zone.killsRequired : prevZoneKills >= zone.killsRequired));
                       const active = gameState.currentZone === zone.id;
                       const currentZoneKills = gameState.zoneKills[zone.id] || 0;
                       return (
@@ -1182,6 +1317,7 @@ function GearGrinder() {
                           {zone.drops.enhanceStone > 0.2 && <span>{MATERIALS.enhanceStone.icon}</span>}
                           {zone.drops.blessedOrb > 0.1 && <span>{MATERIALS.blessedOrb.icon}</span>}
                           {zone.drops.celestialShard > 0.05 && <span>{MATERIALS.celestialShard.icon}</span>}
+                          {zone.drops.prestigeStone > 0 && <span>{MATERIALS.prestigeStone.icon}</span>}
                           <span className="text-yellow-400 ml-auto">{zone.goldMin}-{zone.goldMax}g</span>
                         </div>
                           )}
@@ -1465,7 +1601,7 @@ function GearGrinder() {
                           <td key={slot} className="py-2 px-1 text-center">
                             {slot === 'weapon' ? (
                               <div className="flex flex-col gap-1">
-                                {WEAPON_TYPES.map(wt => (
+                                {[...WEAPON_TYPES, ...PRESTIGE_WEAPONS.filter(w => gameState.prestigeLevel >= w.prestigeReq)].map(wt => (
                                   <button
                                     key={wt.id}
                                     onClick={() => craftGear(slot, tier.id, wt.id)}
@@ -1473,10 +1609,10 @@ function GearGrinder() {
                                     title={wt.desc}
                                     className={`px-1.5 py-0.5 rounded text-xs transition-colors ${
                                       canAfford ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-800 text-gray-600 cursor-not-allowed'
-                                    }`}
+                                    } ${wt.prestigeReq ? 'border border-pink-500/50' : ''}`}
                                     style={{ color: canAfford ? STATS[wt.scaling]?.color : undefined }}
                                   >
-                                    {wt.name}
+                                    {wt.prestigeReq ? `🌟 ${wt.name}` : wt.name}
                                   </button>
                                 ))}
                               </div>
@@ -1695,6 +1831,168 @@ function GearGrinder() {
             </div>
           </div>
         </TabsContent>
+
+        {/* Prestige Tab */}
+        <TabsContent value="prestige" className="mt-0">
+          <div className="bg-gray-800 rounded-lg p-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+              <div>
+                <h2 className="text-lg font-bold text-pink-400">Prestige System</h2>
+                <p className="text-sm text-gray-400">Reset your progress for permanent bonuses</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="text-center px-3 py-1 bg-pink-900/30 rounded-lg border border-pink-500/50">
+                  <div className="text-xs text-gray-400">Prestige Level</div>
+                  <div className="text-xl font-bold text-pink-400">{gameState.prestigeLevel}</div>
+                </div>
+                <div className="text-center px-3 py-1 bg-gray-700 rounded-lg">
+                  <div className="text-xs text-gray-400">Prestige Stones</div>
+                  <div className="text-xl font-bold text-pink-300">{MATERIALS.prestigeStone.icon} {gameState.prestigeStones}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Prestige Button */}
+            <div className="bg-gray-900 rounded-lg p-4 mb-4">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div>
+                  <h3 className="font-bold text-white">Perform Prestige</h3>
+                  <p className="text-sm text-gray-400">
+                    {gameState.currentZone >= 20
+                      ? `Ready to prestige! Defeat the Eternal One to unlock prestige.`
+                      : `Reach and complete Zone 20 (Eternal One) to unlock prestige.`}
+                  </p>
+                  <p className="text-xs text-pink-300 mt-1">
+                    Rewards: +10 Prestige Stones, unlock new zones, weapons, and keep prestige skills
+                  </p>
+                </div>
+                <Button
+                  onClick={() => {
+                    const lastBossZone = 20; // Eternal One
+                    const hasBeatenLastBoss = (gameState.zoneKills[lastBossZone] || 0) >= 1;
+                    if (!hasBeatenLastBoss) return;
+
+                    // Calculate starting bonus from prestige skills
+                    const startingBonusLevel = gameState.prestigeSkills[8] || 0;
+                    const startGold = 50 + startingBonusLevel * 50;
+                    const startOre = 5 + startingBonusLevel * 10;
+                    const startLeather = 5 + startingBonusLevel * 10;
+
+                    setGameState(prev => ({
+                      ...prev,
+                      // Reset progress
+                      gold: startGold,
+                      ore: startOre,
+                      leather: startLeather,
+                      enhanceStone: 3,
+                      blessedOrb: 0,
+                      celestialShard: 0,
+                      level: 1,
+                      xp: 0,
+                      currentZone: 0,
+                      stats: { str: 5, int: 5, vit: 5, agi: 5, lck: 5 },
+                      statPoints: 0,
+                      gear: { weapon: null, helmet: null, armor: null, boots: null, accessory: null, shield: null, gloves: null, amulet: null },
+                      inventory: [],
+                      unlockedSkills: [],
+                      enemyHp: 20,
+                      enemyMaxHp: 20,
+                      playerHp: 100,
+                      playerMaxHp: 100,
+                      kills: 0,
+                      zoneKills: {},
+                      // Keep prestige data and add rewards
+                      prestigeLevel: prev.prestigeLevel + 1,
+                      prestigeStones: prev.prestigeStones + 10,
+                      prestigeSkills: prev.prestigeSkills,
+                      totalPrestiges: prev.totalPrestiges + 1,
+                      totalGold: prev.totalGold,
+                      enhanceFails: prev.enhanceFails,
+                    }));
+                    setTimeout(() => saveGameImmediate(), 0);
+                  }}
+                  disabled={(gameState.zoneKills[20] || 0) < 1}
+                  className="bg-pink-600 hover:bg-pink-700 disabled:bg-gray-700 disabled:text-gray-500"
+                >
+                  🌟 Prestige
+                </Button>
+              </div>
+            </div>
+
+            {/* Prestige Skills */}
+            <h3 className="font-bold text-white mb-3">Prestige Skills</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {PRESTIGE_SKILLS.map(skill => {
+                const currentLevel = gameState.prestigeSkills[skill.id] || 0;
+                const isMaxed = currentLevel >= skill.maxLevel;
+                const cost = skill.cost(currentLevel);
+                const canAfford = gameState.prestigeStones >= cost;
+
+                return (
+                  <div
+                    key={skill.id}
+                    className={`p-3 rounded-lg border ${
+                      isMaxed ? 'bg-pink-900/20 border-pink-500/50' : 'bg-gray-700 border-gray-600'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start mb-1">
+                      <span className="font-bold text-pink-300">{skill.name}</span>
+                      <span className="text-xs bg-gray-800 px-2 py-0.5 rounded">
+                        {currentLevel}/{skill.maxLevel}
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-400 mb-2">{skill.desc}</p>
+                    {!isMaxed && (
+                      <Button
+                        onClick={() => {
+                          if (!canAfford) return;
+                          setGameState(prev => ({
+                            ...prev,
+                            prestigeStones: prev.prestigeStones - cost,
+                            prestigeSkills: {
+                              ...prev.prestigeSkills,
+                              [skill.id]: currentLevel + 1
+                            }
+                          }));
+                          setTimeout(() => saveGameImmediate(), 0);
+                        }}
+                        disabled={!canAfford}
+                        size="sm"
+                        className={`w-full text-xs ${
+                          canAfford ? 'bg-pink-600 hover:bg-pink-700' : 'bg-gray-600 text-gray-400'
+                        }`}
+                      >
+                        Upgrade ({cost} {MATERIALS.prestigeStone.icon})
+                      </Button>
+                    )}
+                    {isMaxed && (
+                      <div className="text-xs text-pink-400 text-center font-medium">MAXED</div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Prestige Unlocks Info */}
+            <div className="mt-4 p-3 bg-gray-900 rounded-lg">
+              <h3 className="font-bold text-white mb-2">Prestige Unlocks</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                <div>
+                  <div className="text-gray-400 mb-1">Prestige 1:</div>
+                  <div className="text-pink-300">Astral Zones + Scythe</div>
+                </div>
+                <div>
+                  <div className="text-gray-400 mb-1">Prestige 2:</div>
+                  <div className="text-pink-300">Cosmic Zones + Katana</div>
+                </div>
+                <div>
+                  <div className="text-gray-400 mb-1">Prestige 3:</div>
+                  <div className="text-pink-300">Primordial Zones + Greataxe</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </TabsContent>
       </Tabs>
 
       {/* Footer */}
@@ -1729,7 +2027,7 @@ function GearName({ item }) {
   let gearColor = tier.color;
 
   if (item.isBossItem && item.bossSet) {
-    const bossSet = BOSS_SETS[item.bossSet];
+    const bossSet = BOSS_SETS[item.bossSet] || PRESTIGE_BOSS_SETS[item.bossSet];
     if (bossSet && bossSet.items[item.slot]) {
       gearName = bossSet.items[item.slot].name;
       gearColor = bossSet.color;
