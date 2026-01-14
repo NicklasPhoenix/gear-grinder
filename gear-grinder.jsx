@@ -114,10 +114,16 @@ const BOSS_SETS = {
       helmet: { name: "Guardian's Crown", effect: { id: 'bonusHp', name: '+HP', value: 150 } },
       armor: { name: "Guardian's Plate", effect: { id: 'thorns', name: 'Thorns', value: 20 } },
       boots: { name: "Guardian's Treads", effect: { id: 'dodge', name: 'Dodge', value: 10 } },
+      gloves: { name: "Guardian's Grasp", effect: { id: 'bonusDmg', name: '+DMG', value: 25 } },
+      shield: { name: "Guardian's Bulwark", effect: { id: 'bonusHp', name: '+HP', value: 200 } },
+      accessory: { name: "Guardian's Signet", effect: { id: 'critChance', name: 'Crit', value: 8 } },
+      amulet: { name: "Guardian's Charm", effect: { id: 'lifesteal', name: 'Lifesteal', value: 4 } },
     },
     setBonuses: [
       { pieces: 2, desc: '+25% HP', effect: { hpMult: 0.25 } },
       { pieces: 4, desc: '+40% DMG, +15% Thorns', effect: { dmgMult: 0.40, thorns: 15 } },
+      { pieces: 6, desc: '+30% All Stats', effect: { dmgMult: 0.30, hpMult: 0.30, speedMult: 0.20 } },
+      { pieces: 8, desc: 'Guardian Blessing: +60% HP, +20% Dodge', effect: { hpMult: 0.60, dodge: 20 } },
     ]
   },
   lich: {
@@ -126,11 +132,17 @@ const BOSS_SETS = {
       weapon: { name: "Lich's Staff", effect: { id: 'critDamage', name: 'Crit DMG', value: 100 } },
       helmet: { name: "Lich's Crown", effect: { id: 'lifesteal', name: 'Lifesteal', value: 8 } },
       armor: { name: "Lich's Robes", effect: { id: 'bonusHp', name: '+HP', value: 250 } },
+      boots: { name: "Lich's Sandals", effect: { id: 'dodge', name: 'Dodge', value: 12 } },
       gloves: { name: "Lich's Grasp", effect: { id: 'critChance', name: 'Crit', value: 18 } },
+      shield: { name: "Lich's Tome", effect: { id: 'bonusDmg', name: '+DMG', value: 60 } },
+      accessory: { name: "Lich's Phylactery", effect: { id: 'lifesteal', name: 'Lifesteal', value: 6 } },
+      amulet: { name: "Lich's Soulstone", effect: { id: 'critDamage', name: 'Crit DMG', value: 80 } },
     },
     setBonuses: [
       { pieces: 2, desc: '+8% Lifesteal', effect: { lifesteal: 8 } },
       { pieces: 4, desc: '+50% Crit DMG, +50% DMG', effect: { critDamage: 50, dmgMult: 0.50 } },
+      { pieces: 6, desc: '+15% Crit Chance, +60% HP', effect: { critChance: 15, hpMult: 0.60 } },
+      { pieces: 8, desc: 'Undeath: +12% Lifesteal, +100% Crit DMG', effect: { lifesteal: 12, critDamage: 100 } },
     ]
   },
   dragon: {
@@ -139,11 +151,17 @@ const BOSS_SETS = {
       weapon: { name: "Dragonborn Blade", effect: { id: 'bonusDmg', name: '+DMG', value: 80 } },
       helmet: { name: "Dragonborn Horns", effect: { id: 'critChance', name: 'Crit', value: 20 } },
       armor: { name: "Dragonborn Scales", effect: { id: 'bonusHp', name: '+HP', value: 350 } },
+      boots: { name: "Dragonborn Claws", effect: { id: 'dodge', name: 'Dodge', value: 14 } },
+      gloves: { name: "Dragonborn Talons", effect: { id: 'critDamage', name: 'Crit DMG', value: 90 } },
       shield: { name: "Dragonborn Aegis", effect: { id: 'thorns', name: 'Thorns', value: 30 } },
+      accessory: { name: "Dragonborn Scale", effect: { id: 'bonusHp', name: '+HP', value: 300 } },
+      amulet: { name: "Dragonborn Heart", effect: { id: 'bonusDmg', name: '+DMG', value: 70 } },
     },
     setBonuses: [
       { pieces: 2, desc: '+50% DMG', effect: { dmgMult: 0.50 } },
       { pieces: 4, desc: '+40% HP, +20% Crit Chance', effect: { hpMult: 0.40, critChance: 20 } },
+      { pieces: 6, desc: '+80% Crit DMG, +25% Thorns', effect: { critDamage: 80, thorns: 25 } },
+      { pieces: 8, desc: 'Dragon Fury: +100% DMG, +50% Speed', effect: { dmgMult: 1.00, speedMult: 0.50 } },
     ]
   },
   frost: {
@@ -153,11 +171,16 @@ const BOSS_SETS = {
       helmet: { name: "Frostborn Helm", effect: { id: 'dodge', name: 'Dodge', value: 15 } },
       armor: { name: "Frostborn Mail", effect: { id: 'bonusHp', name: '+HP', value: 500 } },
       boots: { name: "Frostborn Boots", effect: { id: 'dodge', name: 'Dodge', value: 12 } },
-      amulet: { name: "Frostborn Pendant", effect: { id: 'critChance', name: 'Crit', value: 22 } },
+      gloves: { name: "Frostborn Grips", effect: { id: 'critChance', name: 'Crit', value: 18 } },
+      shield: { name: "Frostborn Barrier", effect: { id: 'thorns', name: 'Thorns', value: 28 } },
+      accessory: { name: "Frostborn Band", effect: { id: 'lifesteal', name: 'Lifesteal', value: 7 } },
+      amulet: { name: "Frostborn Pendant", effect: { id: 'critDamage', name: 'Crit DMG', value: 110 } },
     },
     setBonuses: [
       { pieces: 2, desc: '+20% Dodge', effect: { dodge: 20 } },
       { pieces: 4, desc: '+70% DMG, +60% HP', effect: { dmgMult: 0.70, hpMult: 0.60 } },
+      { pieces: 6, desc: '+25% Crit, +100% Crit DMG', effect: { critChance: 25, critDamage: 100 } },
+      { pieces: 8, desc: 'Frozen Heart: +40% All Stats', effect: { dmgMult: 0.40, hpMult: 0.40, speedMult: 0.40 } },
     ]
   },
   demon: {
@@ -166,13 +189,17 @@ const BOSS_SETS = {
       weapon: { name: "Demonheart Scythe", effect: { id: 'lifesteal', name: 'Lifesteal', value: 10 } },
       helmet: { name: "Demonheart Horns", effect: { id: 'bonusDmg', name: '+DMG', value: 150 } },
       armor: { name: "Demonheart Plate", effect: { id: 'thorns', name: 'Thorns', value: 35 } },
+      boots: { name: "Demonheart Hooves", effect: { id: 'dodge', name: 'Dodge', value: 16 } },
       gloves: { name: "Demonheart Claws", effect: { id: 'critDamage', name: 'Crit DMG', value: 120 } },
-      accessory: { name: "Demonheart Ring", effect: { id: 'bonusHp', name: '+HP', value: 600 } },
+      shield: { name: "Demonheart Ward", effect: { id: 'bonusHp', name: '+HP', value: 550 } },
+      accessory: { name: "Demonheart Ring", effect: { id: 'critChance', name: 'Crit', value: 20 } },
+      amulet: { name: "Demonheart Soul", effect: { id: 'lifesteal', name: 'Lifesteal', value: 8 } },
     },
     setBonuses: [
       { pieces: 2, desc: '+10% Lifesteal', effect: { lifesteal: 10 } },
-      { pieces: 3, desc: '+80% DMG', effect: { dmgMult: 0.80 } },
-      { pieces: 5, desc: '+70% HP, +25% Thorns', effect: { hpMult: 0.70, thorns: 25 } },
+      { pieces: 4, desc: '+80% DMG, +30% Thorns', effect: { dmgMult: 0.80, thorns: 30 } },
+      { pieces: 6, desc: '+70% HP, +120% Crit DMG', effect: { hpMult: 0.70, critDamage: 120 } },
+      { pieces: 8, desc: 'Demonic Pact: +15% Lifesteal, +150% DMG', effect: { lifesteal: 15, dmgMult: 1.50 } },
     ]
   },
   seraph: {
@@ -182,13 +209,16 @@ const BOSS_SETS = {
       helmet: { name: "Seraphic Halo", effect: { id: 'critChance', name: 'Crit', value: 25 } },
       armor: { name: "Seraphic Wings", effect: { id: 'bonusHp', name: '+HP', value: 800 } },
       boots: { name: "Seraphic Steps", effect: { id: 'dodge', name: 'Dodge', value: 18 } },
-      shield: { name: "Seraphic Bulwark", effect: { id: 'lifesteal', name: 'Lifesteal', value: 10 } },
-      amulet: { name: "Seraphic Star", effect: { id: 'critDamage', name: 'Crit DMG', value: 150 } },
+      gloves: { name: "Seraphic Touch", effect: { id: 'lifesteal', name: 'Lifesteal', value: 9 } },
+      shield: { name: "Seraphic Bulwark", effect: { id: 'thorns', name: 'Thorns', value: 38 } },
+      accessory: { name: "Seraphic Ring", effect: { id: 'critDamage', name: 'Crit DMG', value: 140 } },
+      amulet: { name: "Seraphic Star", effect: { id: 'bonusDmg', name: '+DMG', value: 180 } },
     },
     setBonuses: [
       { pieces: 2, desc: '+25% Crit Chance', effect: { critChance: 25 } },
       { pieces: 4, desc: '+100% DMG, +80% HP', effect: { dmgMult: 1.00, hpMult: 0.80 } },
       { pieces: 6, desc: '+30% All Stats', effect: { dmgMult: 0.30, hpMult: 0.30, speedMult: 0.30 } },
+      { pieces: 8, desc: 'Divine Grace: +50% All Stats, +10% Lifesteal', effect: { dmgMult: 0.50, hpMult: 0.50, speedMult: 0.50, lifesteal: 10 } },
     ]
   },
   void: {
@@ -199,12 +229,15 @@ const BOSS_SETS = {
       armor: { name: "Voidwalker Shroud", effect: { id: 'bonusHp', name: '+HP', value: 1000 } },
       boots: { name: "Voidwalker Striders", effect: { id: 'dodge', name: 'Dodge', value: 20 } },
       gloves: { name: "Voidwalker Grips", effect: { id: 'bonusDmg', name: '+DMG', value: 250 } },
+      shield: { name: "Voidwalker Veil", effect: { id: 'dodge', name: 'Dodge', value: 18 } },
       accessory: { name: "Voidwalker Band", effect: { id: 'lifesteal', name: 'Lifesteal', value: 10 } },
+      amulet: { name: "Voidwalker Core", effect: { id: 'critChance', name: 'Crit', value: 22 } },
     },
     setBonuses: [
       { pieces: 2, desc: '+30% Crit Chance', effect: { critChance: 30 } },
       { pieces: 4, desc: '+120% DMG, +100% HP', effect: { dmgMult: 1.20, hpMult: 1.00 } },
       { pieces: 6, desc: '+80% Crit DMG, +20% Dodge', effect: { critDamage: 80, dodge: 20 } },
+      { pieces: 8, desc: 'Void Embrace: +200% Crit DMG, +35% Dodge', effect: { critDamage: 200, dodge: 35 } },
     ]
   },
   chaos: {
@@ -216,12 +249,14 @@ const BOSS_SETS = {
       boots: { name: "Chaosborn Greaves", effect: { id: 'dodge', name: 'Dodge', value: 22 } },
       gloves: { name: "Chaosborn Fists", effect: { id: 'critDamage', name: 'Crit DMG', value: 200 } },
       shield: { name: "Chaosborn Barrier", effect: { id: 'thorns', name: 'Thorns', value: 45 } },
-      amulet: { name: "Chaosborn Essence", effect: { id: 'lifesteal', name: 'Lifesteal', value: 10 } },
+      accessory: { name: "Chaosborn Seal", effect: { id: 'lifesteal', name: 'Lifesteal', value: 11 } },
+      amulet: { name: "Chaosborn Essence", effect: { id: 'bonusDmg', name: '+DMG', value: 300 } },
     },
     setBonuses: [
       { pieces: 2, desc: '+60% Crit DMG', effect: { critDamage: 60 } },
       { pieces: 4, desc: '+150% DMG, +120% HP', effect: { dmgMult: 1.50, hpMult: 1.20 } },
       { pieces: 6, desc: '+50% All Stats', effect: { dmgMult: 0.50, hpMult: 0.50, speedMult: 0.50 } },
+      { pieces: 8, desc: 'Chaos Incarnate: +250% DMG, +200% HP', effect: { dmgMult: 2.50, hpMult: 2.00 } },
     ]
   },
   eternal: {
@@ -319,10 +354,16 @@ const PRESTIGE_BOSS_SETS = {
       helmet: { name: "Astral Crown", effect: { id: 'critChance', name: 'Crit', value: 35 } },
       armor: { name: "Astral Vestments", effect: { id: 'bonusHp', name: '+HP', value: 4000 } },
       boots: { name: "Astral Treads", effect: { id: 'dodge', name: 'Dodge', value: 28 } },
+      gloves: { name: "Astral Grips", effect: { id: 'critDamage', name: 'Crit DMG', value: 280 } },
+      shield: { name: "Astral Ward", effect: { id: 'thorns', name: 'Thorns', value: 60 } },
+      accessory: { name: "Astral Band", effect: { id: 'lifesteal', name: 'Lifesteal', value: 14 } },
+      amulet: { name: "Astral Core", effect: { id: 'bonusDmg', name: '+DMG', value: 600 } },
     },
     setBonuses: [
       { pieces: 2, desc: '+150% All Stats', effect: { dmgMult: 1.50, hpMult: 1.50, speedMult: 0.50 } },
       { pieces: 4, desc: '+400% DMG, +300% HP', effect: { dmgMult: 4.00, hpMult: 3.00 } },
+      { pieces: 6, desc: '+60% Crit, +250% Crit DMG', effect: { critChance: 60, critDamage: 250 } },
+      { pieces: 8, desc: 'Astral Ascension: +600% All Stats', effect: { dmgMult: 6.0, hpMult: 6.0, speedMult: 1.0 } },
     ]
   },
   cosmic: {
@@ -333,12 +374,15 @@ const PRESTIGE_BOSS_SETS = {
       armor: { name: "Cosmic Aegis", effect: { id: 'bonusHp', name: '+HP', value: 8000 } },
       boots: { name: "Cosmic Striders", effect: { id: 'dodge', name: 'Dodge', value: 32 } },
       gloves: { name: "Cosmic Gauntlets", effect: { id: 'critDamage', name: 'Crit DMG', value: 350 } },
+      shield: { name: "Cosmic Barrier", effect: { id: 'thorns', name: 'Thorns', value: 80 } },
+      accessory: { name: "Cosmic Ring", effect: { id: 'critChance', name: 'Crit', value: 35 } },
       amulet: { name: "Cosmic Heart", effect: { id: 'lifesteal', name: 'Lifesteal', value: 15 } },
     },
     setBonuses: [
       { pieces: 2, desc: '+250% All Stats', effect: { dmgMult: 2.50, hpMult: 2.50, speedMult: 0.80 } },
       { pieces: 4, desc: '+700% DMG, +500% HP', effect: { dmgMult: 7.00, hpMult: 5.00 } },
       { pieces: 6, desc: '+50% Crit, +300% Crit DMG', effect: { critChance: 50, critDamage: 300 } },
+      { pieces: 8, desc: 'Cosmic Infinity: +1200% All Stats', effect: { dmgMult: 12.0, hpMult: 12.0, speedMult: 1.5 } },
     ]
   },
   primordial: {
@@ -1310,12 +1354,14 @@ function GearGrinder() {
     setTimeout(() => saveGameImmediate(), 0);
   };
 
-  const allocateStat = (statKey) => {
+  const allocateStat = (statKey, amount = 1) => {
     if (gameState.statPoints <= 0) return;
+    const toAdd = Math.min(amount, gameState.statPoints);
+    if (toAdd <= 0) return;
     setGameState(prev => ({
       ...prev,
-      statPoints: prev.statPoints - 1,
-      stats: { ...prev.stats, [statKey]: prev.stats[statKey] + 1 },
+      statPoints: prev.statPoints - toAdd,
+      stats: { ...prev.stats, [statKey]: prev.stats[statKey] + toAdd },
     }));
     // Save immediately after stat allocation
     setTimeout(() => saveGameImmediate(), 0);
@@ -1609,15 +1655,35 @@ function GearGrinder() {
                             <span className="font-bold" style={{ color: stat.color }}>{stat.name}</span>
                             <span className="text-gray-400 ml-2 text-lg font-bold">{gameState.stats[key]}</span>
                           </div>
-                          <Button
-                            onClick={() => allocateStat(key)}
-                            disabled={gameState.statPoints <= 0}
-                            variant={gameState.statPoints > 0 ? "default" : "secondary"}
-                            size="sm"
-                            className={gameState.statPoints > 0 ? 'bg-purple-600 hover:bg-purple-500' : ''}
-                          >
-                            +1
-                          </Button>
+                          <div className="flex gap-1">
+                            <Button
+                              onClick={() => allocateStat(key, 1)}
+                              disabled={gameState.statPoints <= 0}
+                              variant={gameState.statPoints > 0 ? "default" : "secondary"}
+                              size="sm"
+                              className={gameState.statPoints > 0 ? 'bg-purple-600 hover:bg-purple-500 px-2' : 'px-2'}
+                            >
+                              +1
+                            </Button>
+                            <Button
+                              onClick={() => allocateStat(key, 10)}
+                              disabled={gameState.statPoints <= 0}
+                              variant={gameState.statPoints > 0 ? "default" : "secondary"}
+                              size="sm"
+                              className={gameState.statPoints > 0 ? 'bg-purple-600 hover:bg-purple-500 px-2' : 'px-2'}
+                            >
+                              +10
+                            </Button>
+                            <Button
+                              onClick={() => allocateStat(key, gameState.statPoints)}
+                              disabled={gameState.statPoints <= 0}
+                              variant={gameState.statPoints > 0 ? "default" : "secondary"}
+                              size="sm"
+                              className={gameState.statPoints > 0 ? 'bg-purple-600 hover:bg-purple-500 px-2' : 'px-2'}
+                            >
+                              Max
+                            </Button>
+                          </div>
                         </div>
                         <div className="text-xs text-gray-500 mt-1">{stat.desc}</div>
                       </div>
@@ -1748,7 +1814,7 @@ function GearGrinder() {
                     <h3 className="text-sm font-bold text-gray-300 mb-2">⚡ Active Set Bonuses</h3>
                     <div className="space-y-2">
                       {Object.entries(setBonuses).map(([setName, count]) => {
-                        const bossSet = BOSS_SETS[setName];
+                        const bossSet = BOSS_SETS[setName] || PRESTIGE_BOSS_SETS[setName];
                         if (!bossSet) return null;
                         return (
                           <div key={setName} className="bg-gray-900 rounded p-2">
