@@ -64,21 +64,49 @@ export default function GameRenderer() {
                         ctx.fillRect(x + 4, y, 8, 2);
                         ctx.fillStyle = '#ffffff'; // Sword
                         ctx.fillRect(x + 12, y + 6, 2, 8);
-                    } else if (type === 'enemy') {
+                    } else {
+                        // Enemy features
                         ctx.fillStyle = '#000000'; // Eyes
                         ctx.fillRect(x + 5, y + 5, 2, 2);
                         ctx.fillRect(x + 9, y + 5, 2, 2);
-                        ctx.fillStyle = '#ef4444'; // Red Eyes
-                        ctx.fillRect(x + 5, y + 6, 1, 1);
-                        ctx.fillRect(x + 9, y + 6, 1, 1);
+
+                        if (type === 'Boss') {
+                            // Crown
+                            ctx.fillStyle = '#fbbf24';
+                            ctx.fillRect(x + 4, y - 2, 2, 2);
+                            ctx.fillRect(x + 10, y - 2, 2, 2);
+                            ctx.fillRect(x + 7, y - 1, 2, 2);
+                        } else if (type === 'Undead') {
+                            // Ribs
+                            ctx.fillStyle = '#333333';
+                            ctx.fillRect(x + 5, y + 8, 2, 1);
+                            ctx.fillRect(x + 9, y + 8, 2, 1);
+                        }
                     }
                 };
 
-                // Draw Hero at 0, 80 (Row 5 ish) similar to our previous logic
-                drawChar(0, 80, '#3b82f6', 'hero'); // Blue Hero
+                // Draw Hero at 0, 80 (Row 5 ish)
+                drawChar(0, 80, '#3b82f6', 'hero');
 
-                // Draw Enemy at 0, 0
-                drawChar(0, 0, '#ef4444', 'enemy'); // Red Enemy
+                // Draw All Enemy Types
+                const enemyColors = {
+                    Beast: '#cd7f32',
+                    Humanoid: '#A0522D',
+                    Boss: '#800080',
+                    Undead: '#90EE90',
+                    Dragon: '#FF4500',
+                    Demon: '#8B0000',
+                    Elemental: '#00FFFF',
+                    Celestial: '#FFD700',
+                    Abyssal: '#00008B',
+                    Chaos: '#FF1493',
+                    Void: '#4B0082'
+                };
+
+                Object.entries(ENEMY_SPRITES).forEach(([key, data]) => {
+                    const color = enemyColors[key] || '#ef4444';
+                    drawChar(data.frame.x, data.frame.y, color, key);
+                });
 
                 sheetTexture = await PIXI.Assets.load(canvas.toDataURL());
                 sheetTexture.source.scaleMode = 'nearest';
