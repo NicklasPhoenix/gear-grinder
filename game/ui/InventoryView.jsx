@@ -1,6 +1,6 @@
 import React from 'react';
 import { useGame } from '../context/GameContext';
-import { generateWeaponIcon, generateArmorIcon } from '../../assets/gameAssets';
+import ItemIcon from './ItemIcon';
 import { TIERS, GEAR_SLOTS } from '../data/items';
 
 export default function InventoryView({ onHover }) {
@@ -49,9 +49,11 @@ export default function InventoryView({ onHover }) {
                             >
                                 {item ? (
                                     <>
-                                        <img src={item.slot === 'weapon' ? generateWeaponIcon(item.weaponType, item.tier) : generateArmorIcon(item.slot, item.tier)}
-                                            className="w-3/4 h-3/4 object-contain pixelated" />
+                                        <div className="w-3/4 h-3/4">
+                                            <ItemIcon item={item} />
+                                        </div>
                                         <div className="absolute top-1 right-1 text-[10px] font-bold text-yellow-400">+{item.plus}</div>
+
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
                                         <div className="absolute bottom-1 w-full text-center text-[8px] uppercase tracking-tighter text-slate-300 truncate px-1">
                                             {item.name}
@@ -79,8 +81,9 @@ export default function InventoryView({ onHover }) {
                             onMouseEnter={(e) => onHover && onHover(item, { x: e.clientX, y: e.clientY })}
                             onMouseLeave={() => onHover && onHover(null)}
                         >
-                            <img src={item.slot === 'weapon' ? generateWeaponIcon(item.weaponType, item.tier) : generateArmorIcon(item.slot, item.tier)}
-                                alt={item.name} className="w-full h-full object-contain pixelated p-1" />
+                            <div className="w-full h-full p-1">
+                                <ItemIcon item={item} />
+                            </div>
                             <div className="absolute top-1 right-1 w-2 h-2 rounded-full shadow-sm" style={{ backgroundColor: TIERS[item.tier].color }} />
                         </div>
                     ))}

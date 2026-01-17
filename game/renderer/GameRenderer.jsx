@@ -35,81 +35,14 @@ export default function GameRenderer() {
             containerRef.current.appendChild(app.canvas);
             appRef.current = app;
 
-            // Load Spritesheet with procedural fallback
+            // Load Spritesheet
             let sheetTexture;
             try {
                 sheetTexture = await PIXI.Assets.load(ASSET_BASE.characters);
-                sheetTexture.source.scaleMode = 'nearest'; // Ensure pixel art look
-            } catch (e) {
-                console.warn("Asset load failed, using procedural sprites");
-                // Generate a sprite sheet on the fly
-                const canvas = document.createElement('canvas');
-                canvas.width = 128; // Enough for a few rows
-                canvas.height = 128;
-                const ctx = canvas.getContext('2d');
-
-                // Helper to draw a pixel character
-                const drawChar = (x, y, color, type) => {
-                    ctx.fillStyle = color;
-                    // Body
-                    ctx.fillRect(x + 4, y + 4, 8, 8);
-                    // Head
-                    ctx.fillRect(x + 4, y, 8, 4);
-                    // Legs
-                    ctx.fillRect(x + 5, y + 12, 2, 4);
-                    ctx.fillRect(x + 9, y + 12, 2, 4);
-
-                    if (type === 'hero') {
-                        ctx.fillStyle = '#fbbf24'; // Gold helmet
-                        ctx.fillRect(x + 4, y, 8, 2);
-                        ctx.fillStyle = '#ffffff'; // Sword
-                        ctx.fillRect(x + 12, y + 6, 2, 8);
-                    } else {
-                        // Enemy features
-                        ctx.fillStyle = '#000000'; // Eyes
-                        ctx.fillRect(x + 5, y + 5, 2, 2);
-                        ctx.fillRect(x + 9, y + 5, 2, 2);
-
-                        if (type === 'Boss') {
-                            // Crown
-                            ctx.fillStyle = '#fbbf24';
-                            ctx.fillRect(x + 4, y - 2, 2, 2);
-                            ctx.fillRect(x + 10, y - 2, 2, 2);
-                            ctx.fillRect(x + 7, y - 1, 2, 2);
-                        } else if (type === 'Undead') {
-                            // Ribs
-                            ctx.fillStyle = '#333333';
-                            ctx.fillRect(x + 5, y + 8, 2, 1);
-                            ctx.fillRect(x + 9, y + 8, 2, 1);
-                        }
-                    }
-                };
-
-                // Draw Hero at 0, 80 (Row 5 ish)
-                drawChar(0, 80, '#3b82f6', 'hero');
-
-                // Draw All Enemy Types
-                const enemyColors = {
-                    Beast: '#cd7f32',
-                    Humanoid: '#A0522D',
-                    Boss: '#800080',
-                    Undead: '#90EE90',
-                    Dragon: '#FF4500',
-                    Demon: '#8B0000',
-                    Elemental: '#00FFFF',
-                    Celestial: '#FFD700',
-                    Abyssal: '#00008B',
-                    Chaos: '#FF1493',
-                    Void: '#4B0082'
-                };
-
-                Object.entries(ENEMY_SPRITES).forEach(([key, data]) => {
-                    const color = enemyColors[key] || '#ef4444';
-                    drawChar(data.frame.x, data.frame.y, color, key);
-                });
-
-                sheetTexture = await PIXI.Assets.load(canvas.toDataURL());
                 sheetTexture.source.scaleMode = 'nearest';
+            } catch (e) {
+                console.error("Failed to load assets", e);
+                return;
             }
             textureSheetRef.current = sheetTexture;
 
@@ -125,68 +58,55 @@ export default function GameRenderer() {
             app.stage.addChild(fxContainer);
             effectsContainerRef.current = fxContainer;
 
-            // --- Create Player (Hero) ---
-            // Assuming the hero is the first sprite in row 2 (index based on 16x16 grid)
-            // The spritesheet is packed. Kenney's Tiny RPG has 12 columns.
-            // Row 0: 0-11, Row 1: 12-23...
-            // Let's grab a hero-looking sprite. Row 7, Col 0 is usually a knight.
-            // 16x16 pixels. Spacing 1px sometimes? Let's assume standard grid.
+            // --- Sprite Slicing Helper ---
+            // The generated image is likely 1024x1024 or similar square aspect.
+            // We requested 7 rows. Let's assume a grid of roughly 8x8 for safety (128px cells).
+            const CELL_SIZE = sheetTexture.width / 8;
 
-            // Note: ENEMY_SPRITES has explicit frames. Let's use similar logic for player.
-            // Let's use Humanoid frame for player default.
-            let playerTexture;
-            try {
-                // Safeguard against missing frames if asset failed
-                playerTexture = new PIXI.Texture({
-                    source: sheetTexture.source,
-                    frame: new PIXI.Rectangle(0, 80, 16, 16) // A knight
-                });
-            } catch {
-                playerTexture = PIXI.Texture.WHITE;
-            }
+            const getSpriteFrame = (row, col) => {
+                return new PIXI.Rectangle(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+            };
+
+            // --- Create Player (Hero) ---
+            // Row 0, Col 0 (Knight)
+            const playerTexture = new PIXI.Texture({
+                source: sheetTexture.source,
+                frame: getSpriteFrame(0, 0) // Row 0 is Knight
+            });
+
             const player = new PIXI.Sprite(playerTexture);
-            player.scale.set(4, 4); // Scale up 4x
+            // Generated sprites are high res (1024x1024 sheet -> 128x128 cells).
+            // We want them to display at roughly 64x64 or 128x128 on screen.
+            player.width = 96;
+            player.height = 96;
             player.anchor.set(0.5);
             player.x = 200;
             player.y = 300;
-            player.eventMode = 'none'; // Passive
-            if (playerTexture === PIXI.Texture.WHITE) {
-                player.tint = 0x3b82f6; // Blue hero fallback
-                player.width = 64;
-                player.height = 64;
-            }
 
             gameContainer.addChild(player);
             playerRef.current = player;
 
             // --- Player Shadow ---
             const shadow = new PIXI.Graphics();
-            shadow.ellipse(0, 0, 8, 4);
+            shadow.ellipse(0, 0, 24, 8);
             shadow.fill({ color: 0x000000, alpha: 0.5 });
-            shadow.y = 12; // Below feet
+            shadow.y = 40;
             player.addChildAt(shadow, 0);
 
             // --- Create Enemy ---
             // Start with generic placeholder, updated on state change
-            let enemyTexture;
-            try {
-                enemyTexture = new PIXI.Texture({
-                    source: sheetTexture.source,
-                    frame: new PIXI.Rectangle(0, 0, 16, 16)
-                });
-            } catch {
-                enemyTexture = PIXI.Texture.WHITE;
-            }
+            const enemyTexture = new PIXI.Texture({
+                source: sheetTexture.source,
+                frame: getSpriteFrame(1, 0) // Default to Skeleton (Row 1)
+            });
+
             const enemy = new PIXI.Sprite(enemyTexture);
-            enemy.scale.set(4, 4);
+            enemy.width = 96;
+            enemy.height = 96;
             enemy.anchor.set(0.5);
             enemy.x = 600;
             enemy.y = 300;
-            if (enemyTexture === PIXI.Texture.WHITE) {
-                enemy.tint = 0xef4444; // Red enemy fallback
-                enemy.width = 64;
-                enemy.height = 64;
-            }
+
             gameContainer.addChild(enemy);
             enemyRef.current = enemy;
 
@@ -311,15 +231,18 @@ export default function GameRenderer() {
         if (enemyRef.current && textureSheetRef.current && state) {
             const zone = getZoneById(state.currentZone);
             const enemyType = zone.enemyType;
-            const spriteData = ENEMY_SPRITES[enemyType] || ENEMY_SPRITES['Beast'];
+            const spriteLoc = ENEMY_SPRITES[enemyType] || ENEMY_SPRITES['Beast'];
+
+            // Re-calc cell size just in case, or move to a ref. 
+            // For now, assuming standard 8x8 grid on the sheet.
+            const CELL_SIZE = textureSheetRef.current.width / 8;
 
             // Check if texture frame needs update
-            // We can compare current Texture frame with target
             const newFrame = new PIXI.Rectangle(
-                spriteData.frame.x,
-                spriteData.frame.y,
-                spriteData.frame.w,
-                spriteData.frame.h
+                (spriteLoc.col || 0) * CELL_SIZE,
+                (spriteLoc.row || 0) * CELL_SIZE,
+                CELL_SIZE,
+                CELL_SIZE
             );
 
             // Create a new texture view for the frame
@@ -329,13 +252,15 @@ export default function GameRenderer() {
             });
             enemyRef.current.texture = newTexture;
 
-            // Scale Bosses
+            // Scale Bosses / Adjust Size
             if (zone.isBoss) {
-                enemyRef.current.scale.set(6, 6);
-                // Tint bosses red/menacing
-                enemyRef.current.tint = 0xffaaaa;
+                // Bosses are visually larger
+                enemyRef.current.width = 144;
+                enemyRef.current.height = 144;
+                enemyRef.current.tint = 0xffffff; // Natural color
             } else {
-                enemyRef.current.scale.set(4, 4);
+                enemyRef.current.width = 96;
+                enemyRef.current.height = 96;
                 enemyRef.current.tint = 0xffffff;
             }
         }

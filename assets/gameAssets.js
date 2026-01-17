@@ -2,62 +2,36 @@
 // All assets are freely available and CDN-hosted
 
 export const ASSET_BASE = {
-  // Kenney Tiny RPG Character sprites
-  characters: 'https://kenney.nl/content/3-assets/2-asset-packs/tiny-rpg-characters/preview.png',
-
-  // Weapons and items from Kenney Game Icons
-  items: 'https://kenney.nl/content/3-assets/2-asset-packs/game-icons/preview.png',
-
-  // UI elements
-  ui: 'https://kenney.nl/content/3-assets/2-asset-packs/ui-pack-rpg-expansion/preview.png',
+  // Local assets generated via AI
+  characters: '/assets/characters.png',
+  items: '/assets/items.png',
+  ui: 'https://kenney.nl/content/3-assets/2-asset-packs/ui-pack-rpg-expansion/preview.png', // Keep UI for now or replace if needed
 };
 
 // Enemy sprites by zone type
+// Mapped to generated spreadsheet rows (approximate)
+// Assuming standard grid layout from generation
+const GRID_SIZE = 120; // Approximately 120px usually for sprite gen outputs per cell if 1024x1024?
+// Let's rely on GameRenderer.jsx to handle the slicing logic properly by checking texture size.
+// Actually, let's define logical slots here.
 export const ENEMY_SPRITES = {
-  Beast: {
-    image: 'https://raw.githubusercontent.com/kenney/kenney.nl/main/static/content/3-assets/2-asset-packs/tiny-rpg-characters/tinyRPG_characters_V1.png',
-    frame: { x: 0, y: 0, w: 16, h: 16 }
-  },
-  Humanoid: {
-    image: 'https://raw.githubusercontent.com/kenney/kenney.nl/main/static/content/3-assets/2-asset-packs/tiny-rpg-characters/tinyRPG_characters_V1.png',
-    frame: { x: 16, y: 0, w: 16, h: 16 }
-  },
-  Boss: {
-    image: 'https://raw.githubusercontent.com/kenney/kenney.nl/main/static/content/3-assets/2-asset-packs/tiny-rpg-characters/tinyRPG_characters_V1.png',
-    frame: { x: 32, y: 0, w: 16, h: 16 }
-  },
-  Undead: {
-    image: 'https://raw.githubusercontent.com/kenney/kenney.nl/main/static/content/3-assets/2-asset-packs/tiny-rpg-characters/tinyRPG_characters_V1.png',
-    frame: { x: 48, y: 0, w: 16, h: 16 }
-  },
-  Dragon: {
-    image: 'https://raw.githubusercontent.com/kenney/kenney.nl/main/static/content/3-assets/2-asset-packs/tiny-rpg-characters/tinyRPG_characters_V1.png',
-    frame: { x: 64, y: 0, w: 16, h: 16 }
-  },
-  Demon: {
-    image: 'https://raw.githubusercontent.com/kenney/kenney.nl/main/static/content/3-assets/2-asset-packs/tiny-rpg-characters/tinyRPG_characters_V1.png',
-    frame: { x: 80, y: 0, w: 16, h: 16 }
-  },
-  Elemental: {
-    image: 'https://raw.githubusercontent.com/kenney/kenney.nl/main/static/content/3-assets/2-asset-packs/tiny-rpg-characters/tinyRPG_characters_V1.png',
-    frame: { x: 96, y: 0, w: 16, h: 16 }
-  },
-  Celestial: {
-    image: 'https://raw.githubusercontent.com/kenney/kenney.nl/main/static/content/3-assets/2-asset-packs/tiny-rpg-characters/tinyRPG_characters_V1.png',
-    frame: { x: 112, y: 0, w: 16, h: 16 }
-  },
-  Abyssal: {
-    image: 'https://raw.githubusercontent.com/kenney/kenney.nl/main/static/content/3-assets/2-asset-packs/tiny-rpg-characters/tinyRPG_characters_V1.png',
-    frame: { x: 128, y: 0, w: 16, h: 16 }
-  },
-  Chaos: {
-    image: 'https://raw.githubusercontent.com/kenney/kenney.nl/main/static/content/3-assets/2-asset-packs/tiny-rpg-characters/tinyRPG_characters_V1.png',
-    frame: { x: 144, y: 0, w: 16, h: 16 }
-  },
-  Void: {
-    image: 'https://raw.githubusercontent.com/kenney/kenney.nl/main/static/content/3-assets/2-asset-packs/tiny-rpg-characters/tinyRPG_characters_V1.png',
-    frame: { x: 160, y: 0, w: 16, h: 16 }
-  },
+  // Row 2: Skeleton
+  Undead: { row: 1, col: 0 },
+  // Row 3: Orc
+  Beast: { row: 2, col: 0 },
+  Humanoid: { row: 2, col: 2 },
+  // Row 4: Dragon
+  Dragon: { row: 3, col: 0 },
+  Boss: { row: 3, col: 1 },
+  // Row 5: Demon
+  Demon: { row: 4, col: 0 },
+  Abyssal: { row: 4, col: 2 },
+  Void: { row: 4, col: 3 },
+  // Row 6: Elemental
+  Elemental: { row: 5, col: 0 },
+  Chaos: { row: 5, col: 2 },
+  // Row 7: Angel
+  Celestial: { row: 6, col: 0 },
 };
 
 // Procedurally generate weapon icons based on type and tier
@@ -76,7 +50,7 @@ export function generateWeaponIcon(weaponType, tier) {
   ctx.fillStyle = tierColors[tier] || tierColors[0];
 
   // Draw different shapes based on weapon type
-  switch(weaponType) {
+  switch (weaponType) {
     case 'sword':
       // Sword shape
       ctx.fillRect(20, 10, 8, 28);
@@ -155,7 +129,7 @@ export function generateArmorIcon(slot, tier) {
 
   ctx.fillStyle = tierColors[tier] || tierColors[0];
 
-  switch(slot) {
+  switch (slot) {
     case 'helmet':
       ctx.fillRect(14, 12, 20, 16);
       ctx.fillRect(12, 20, 24, 4);
@@ -218,7 +192,7 @@ export function generateMaterialIcon(materialType) {
   canvas.height = 32;
   const ctx = canvas.getContext('2d');
 
-  switch(materialType) {
+  switch (materialType) {
     case 'ore':
       ctx.fillStyle = '#94a3b8';
       ctx.fillRect(8, 12, 16, 14);
