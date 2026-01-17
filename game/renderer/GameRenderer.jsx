@@ -35,21 +35,53 @@ export default function GameRenderer() {
             containerRef.current.appendChild(app.canvas);
             appRef.current = app;
 
-            // Load Spritesheet with fallback
+            // Load Spritesheet with procedural fallback
             let sheetTexture;
             try {
                 sheetTexture = await PIXI.Assets.load(ASSET_BASE.characters);
                 sheetTexture.source.scaleMode = 'nearest'; // Ensure pixel art look
             } catch (e) {
-                console.warn("Asset load failed, using fallback textures", e);
-                // Create a procedural 128x128 white texture to use as fallback
+                console.warn("Asset load failed, using procedural sprites");
+                // Generate a sprite sheet on the fly
                 const canvas = document.createElement('canvas');
-                canvas.width = 128;
+                canvas.width = 128; // Enough for a few rows
                 canvas.height = 128;
                 const ctx = canvas.getContext('2d');
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(0, 0, 128, 128);
+
+                // Helper to draw a pixel character
+                const drawChar = (x, y, color, type) => {
+                    ctx.fillStyle = color;
+                    // Body
+                    ctx.fillRect(x + 4, y + 4, 8, 8);
+                    // Head
+                    ctx.fillRect(x + 4, y, 8, 4);
+                    // Legs
+                    ctx.fillRect(x + 5, y + 12, 2, 4);
+                    ctx.fillRect(x + 9, y + 12, 2, 4);
+
+                    if (type === 'hero') {
+                        ctx.fillStyle = '#fbbf24'; // Gold helmet
+                        ctx.fillRect(x + 4, y, 8, 2);
+                        ctx.fillStyle = '#ffffff'; // Sword
+                        ctx.fillRect(x + 12, y + 6, 2, 8);
+                    } else if (type === 'enemy') {
+                        ctx.fillStyle = '#000000'; // Eyes
+                        ctx.fillRect(x + 5, y + 5, 2, 2);
+                        ctx.fillRect(x + 9, y + 5, 2, 2);
+                        ctx.fillStyle = '#ef4444'; // Red Eyes
+                        ctx.fillRect(x + 5, y + 6, 1, 1);
+                        ctx.fillRect(x + 9, y + 6, 1, 1);
+                    }
+                };
+
+                // Draw Hero at 0, 80 (Row 5 ish) similar to our previous logic
+                drawChar(0, 80, '#3b82f6', 'hero'); // Blue Hero
+
+                // Draw Enemy at 0, 0
+                drawChar(0, 0, '#ef4444', 'enemy'); // Red Enemy
+
                 sheetTexture = await PIXI.Assets.load(canvas.toDataURL());
+                sheetTexture.source.scaleMode = 'nearest';
             }
             textureSheetRef.current = sheetTexture;
 

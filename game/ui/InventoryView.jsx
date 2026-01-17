@@ -70,17 +70,18 @@ export default function InventoryView() {
             </div>
 
             {/* Inventory Grid */}
-            <div className="flex-1 p-2 bg-slate-800 rounded overflow-y-auto">
-                <div className="flex justify-between mb-2">
-                    <h3 className="font-bold text-white uppercase">Backpack ({state.inventory.length}/50)</h3>
+            <div className="flex-1 p-4 bg-slate-900/50 rounded-lg overflow-y-auto custom-scrollbar">
+                <div className="flex justify-between mb-2 border-b border-slate-700 pb-2">
+                    <h3 className="font-bold text-white uppercase tracking-wider">Backpack ({state.inventory.length}/50)</h3>
+                    <span className="text-xs text-slate-400">Click to Equip</span>
                 </div>
-                <div className="grid grid-cols-5 gap-2">
+                <div className="grid grid-cols-6 gap-3 content-start">
                     {state.inventory.map(item => (
-                        <div key={item.id} className="relative aspect-square bg-slate-900 border border-slate-600 hover:border-white cursor-pointer group"
+                        <div key={item.id} className="relative aspect-square bg-slate-800 border-2 border-slate-700 hover:border-yellow-400 hover:bg-slate-700 cursor-pointer group transition-all rounded shadow-sm"
                             onClick={() => handleEquip(item)}>
                             <img src={item.slot === 'weapon' ? generateWeaponIcon(item.weaponType, item.tier) : generateArmorIcon(item.slot, item.tier)}
-                                alt={item.name} className="w-full h-full object-contain pixelated" />
-                            <div className="absolute top-0 right-0 w-2 h-2 rounded-full" style={{ backgroundColor: TIERS[item.tier].color }} />
+                                alt={item.name} className="w-full h-full object-contain pixelated p-1" />
+                            <div className="absolute top-1 right-1 w-2 h-2 rounded-full shadow-sm" style={{ backgroundColor: TIERS[item.tier].color }} />
 
                             {/* Tooltip */}
                             <div className="hidden group-hover:block absolute bottom-full right-0 w-48 bg-slate-900 border border-slate-500 p-2 z-50 pointer-events-none">
