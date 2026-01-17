@@ -35,9 +35,22 @@ export default function GameRenderer() {
             containerRef.current.appendChild(app.canvas);
             appRef.current = app;
 
-            // Load Spritesheet
-            const sheetTexture = await PIXI.Assets.load(ASSET_BASE.characters);
-            sheetTexture.source.scaleMode = 'nearest'; // Ensure pixel art look
+            // Load Spritesheet with fallback
+            let sheetTexture;
+            try {
+                sheetTexture = await PIXI.Assets.load(ASSET_BASE.characters);
+                sheetTexture.source.scaleMode = 'nearest'; // Ensure pixel art look
+            } catch (e) {
+                console.warn("Asset load failed, using fallback textures", e);
+                // Create a procedural 128x128 white texture to use as fallback
+                const canvas = document.createElement('canvas');
+                canvas.width = 128;
+                canvas.height = 128;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, 128, 128);
+                sheetTexture = await PIXI.Assets.load(canvas.toDataURL());
+            }
             textureSheetRef.current = sheetTexture;
 
             // Containers
@@ -61,16 +74,27 @@ export default function GameRenderer() {
 
             // Note: ENEMY_SPRITES has explicit frames. Let's use similar logic for player.
             // Let's use Humanoid frame for player default.
-            const playerTexture = new PIXI.Texture({
-                source: sheetTexture.source,
-                frame: new PIXI.Rectangle(0, 80, 16, 16) // A knight
-            });
+            let playerTexture;
+            try {
+                // Safeguard against missing frames if asset failed
+                playerTexture = new PIXI.Texture({
+                    source: sheetTexture.source,
+                    frame: new PIXI.Rectangle(0, 80, 16, 16) // A knight
+                });
+            } catch {
+                playerTexture = PIXI.Texture.WHITE;
+            }
             const player = new PIXI.Sprite(playerTexture);
             player.scale.set(4, 4); // Scale up 4x
             player.anchor.set(0.5);
             player.x = 200;
             player.y = 300;
             player.eventMode = 'none'; // Passive
+            if (playerTexture === PIXI.Texture.WHITE) {
+                player.tint = 0x3b82f6; // Blue hero fallback
+                player.width = 64;
+                player.height = 64;
+            }
 
             gameContainer.addChild(player);
             playerRef.current = player;
@@ -84,15 +108,25 @@ export default function GameRenderer() {
 
             // --- Create Enemy ---
             // Start with generic placeholder, updated on state change
-            const enemyTexture = new PIXI.Texture({
-                source: sheetTexture.source,
-                frame: new PIXI.Rectangle(0, 0, 16, 16)
-            });
+            let enemyTexture;
+            try {
+                enemyTexture = new PIXI.Texture({
+                    source: sheetTexture.source,
+                    frame: new PIXI.Rectangle(0, 0, 16, 16)
+                });
+            } catch {
+                enemyTexture = PIXI.Texture.WHITE;
+            }
             const enemy = new PIXI.Sprite(enemyTexture);
             enemy.scale.set(4, 4);
             enemy.anchor.set(0.5);
             enemy.x = 600;
             enemy.y = 300;
+            if (enemyTexture === PIXI.Texture.WHITE) {
+                enemy.tint = 0xef4444; // Red enemy fallback
+                enemy.width = 64;
+                enemy.height = 64;
+            }
             gameContainer.addChild(enemy);
             enemyRef.current = enemy;
 
