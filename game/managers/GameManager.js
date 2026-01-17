@@ -80,6 +80,7 @@ export class GameManager {
     // --- Persistence & Offline Progress ---
     async save() {
         this.state.lastSaveTime = Date.now();
+        this.emit('floatingText', { x: 100, y: 50, text: "Game Saved", color: "#64748b" }); // Visual feedback
         // Return serialized state for the context to handle, or handle internal if we pass storage ref.
         // For now, let's just return the object and let context save it.
         return JSON.stringify(this.state);
@@ -92,7 +93,7 @@ export class GameManager {
         const diff = now - savedState.lastSaveTime;
         const secondsOffline = Math.floor(diff / 1000);
 
-        if (secondsOffline < 60) return null; // Minimal offline time ignore
+        if (secondsOffline < 5) return null; // Reduced to 5s for easier testing
 
         // Simulate progress
         // Simple heuristic: 1 kill every 3 seconds if player is alive
@@ -114,8 +115,10 @@ export class GameManager {
 
         // Notify
         setTimeout(() => {
-            this.emit('floatingText', { x: 400, y: 100, text: `OFFLINE: +${goldGain} Gold`, color: '#fbbf24' });
-        }, 1000);
+            this.emit('floatingText', { x: 400, y: 150, text: `WELCOME BACK!`, color: '#ffffff' });
+            this.emit('floatingText', { x: 400, y: 200, text: `OFFLINE: +${goldGain} Gold`, color: '#fbbf24' });
+            this.emit('floatingText', { x: 400, y: 230, text: `+${kills} Kills`, color: '#ef4444' });
+        }, 1500);
 
         return { time: secondsOffline, kills, gold: goldGain, xp: xpGain };
     }
