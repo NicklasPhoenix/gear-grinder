@@ -18,19 +18,30 @@ export async function loadAndProcessImage(url) {
             // or #666666 sometimes.
             // Responsive matching with tolerance.
 
-            const isLight = (r, g, b) => r > 240 && g > 240 && b > 240;
-            const isGrey = (r, g, b) => r > 190 && r < 215 && g > 190 && g < 215 && b > 190 && b < 215 && Math.abs(r - g) < 5;
-
-            // Also very dark grey checkerboard sometimes?
-            // Based on user screenshot, it looks like standard white/grey pattern.
+            // Aggressive Checkerboard Removal
+            // Detect neutral colors (R=G=B) common in checkerboards
+            // Background is usually White (255) and Light Grey (~204 or ~192)
 
             for (let i = 0; i < data.length; i += 4) {
                 const r = data[i];
                 const g = data[i + 1];
                 const b = data[i + 2];
 
-                if (isLight(r, g, b) || isGrey(r, g, b)) {
-                    data[i + 3] = 0; // Alpha 0
+                // Check for neutrality (Greyscale)
+                // Allow small variance for compression artifacts (though PNG should be clean)
+                const isNeutral = Math.abs(r - g) < 15 && Math.abs(g - b) < 15 && Math.abs(r - b) < 15;
+
+                if (isNeutral) {
+                    // Remove White-ish
+                    if (r > 240) { // > 240 is almost certainly background white
+                        data[i + 3] = 0;
+                    }
+                    // Remove Light Grey Checkerboard (Usually around 204/0xCC or 192/0xC0)
+                    else if (r > 160 && r < 225) {
+                        data[i + 3] = 0;
+                    }
+                    // Remove any other specific hardcoded checker colors if needed
+                    // e.g. dark grey 128
                 }
             }
 
