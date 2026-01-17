@@ -8,9 +8,20 @@ import ZoneView from './ZoneView';
 import CraftingView from './CraftingView';
 import EnhancementView from './EnhancementView';
 
+import GameTooltip from './GameTooltip';
+
 export default function GameLayout() {
     const { state } = useGame();
     const [activeTab, setActiveTab] = useState('inventory');
+    const [tooltipUser, setTooltipUser] = useState(null);
+
+    const handleHover = (item, position) => {
+        if (!item) {
+            setTooltipUser(null);
+        } else {
+            setTooltipUser({ item, position: position });
+        }
+    };
 
     if (!state) return null;
 
@@ -62,13 +73,16 @@ export default function GameLayout() {
 
                 {/* Full Height Content */}
                 <div className="flex-1 overflow-auto bg-slate-900 p-6 relative custom-scrollbar">
-                    {activeTab === 'inventory' && <InventoryView />}
+                    {activeTab === 'inventory' && <InventoryView onHover={handleHover} />}
                     {activeTab === 'stats' && <StatsView />}
                     {activeTab === 'forge' && <CraftingView />}
                     {activeTab === 'enhance' && <EnhancementView />}
                     {activeTab === 'skills' && <SkillsView />}
                     {activeTab === 'zone' && <ZoneView />}
                 </div>
+
+                {/* Global Tooltip Layer */}
+                {tooltipUser && <GameTooltip tooltip={tooltipUser} />}
             </div>
         </div>
     );

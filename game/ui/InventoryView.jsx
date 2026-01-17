@@ -1,71 +1,68 @@
 import React from 'react';
 import { useGame } from '../context/GameContext';
 import { generateWeaponIcon, generateArmorIcon } from '../../assets/gameAssets';
-import { TIERS } from '../data/items';
+import { TIERS, GEAR_SLOTS } from '../data/items';
 
-export default function InventoryView() {
+export default function InventoryView({ onHover }) {
     const { state, gameManager } = useGame();
 
     // Helper to trigger equip
     const handleEquip = (item) => {
-        // We need to implement equip action in GameManager or expose it
-        // Currently logic is in gear-grinder.jsx. 
-        // We need to move logic to GameManager.
-        // BUT for now, let's assume we can add actions to GameManager.
-        gameManager.setState(prev => {
-            // Simple swap logic replicated for immediate feedback
-            const oldGear = prev.gear[item.slot];
-            const newInventory = prev.inventory.filter(i => i.id !== item.id);
-            if (oldGear) {
-                const { isEquipped, ...cleanOld } = oldGear;
-                newInventory.push(cleanOld);
-            }
-            const { isEquipped, ...cleanItem } = item;
-            return {
-                ...prev,
-                gear: { ...prev.gear, [item.slot]: cleanItem },
-                inventory: newInventory
-            };
-        });
-    };
+        let newGear = { ...state.gear };
+        let newInv = [...state.inventory];
+        const oldItem = newGear[item.slot];
 
-    const handleSalvage = (item) => {
-        gameManager.setState(prev => {
-            // Simplified salvage provided for UI demo
-            // Real logic should be in a System
-            return {
-                ...prev,
-                gold: prev.gold + 50, // placeholder
-                inventory: prev.inventory.filter(i => i.id !== item.id)
-            };
-        });
+        // Remove from inventory
+        newInv = newInv.filter(i => i.id !== item.id);
+
+        // Equip
+        newGear[item.slot] = item;
+
+        // Return old item to inventory
+        if (oldItem) {
+            newInv.push(oldItem);
+        }
+
+        // Update state
+        gameManager.setState(prev => ({
+            ...prev,
+            gear: newGear,
+            inventory: newInv
+        }));
+
+        gameManager.emit('floatingText', { x: 400, y: 300, text: "EQUIPPED", color: "#ffffff" });
     };
 
     return (
-        <div className="flex h-full gap-4 text-xs">
-            {/* Equipped Gear */}
-            <div className="w-1/3 p-2 bg-slate-800 rounded flex flex-col gap-2">
-                <h3 className="font-bold text-yellow-500 uppercase">Equipped</h3>
-                <div className="grid grid-cols-2 gap-2">
-                    {Object.entries(state.gear).map(([slot, item]) => (
-                        <div key={slot} className="relative aspect-square bg-slate-900 border border-slate-700 rounded p-1 group">
-                            <div className="absolute top-0 left-1 text-[10px] text-slate-500 uppercase">{slot}</div>
-                            {item ? (
-                                <>
-                                    <img src={slot === 'weapon' ? generateWeaponIcon(item.weaponType, item.tier) : generateArmorIcon(slot, item.tier)}
-                                        alt={item.name} className="w-full h-full object-contain pixelated" />
-                                    <div className="absolute bottom-0 right-0 bg-black/50 px-1 text-white">+{item.plus || 0}</div>
-                                    {/* Hover Tooltip (Basic) */}
-                                    <div className="hidden group-hover:block absolute bottom-full left-0 w-48 bg-black border border-white p-2 z-50">
-                                        <div style={{ color: TIERS[item.tier].color }}>{item.name}</div>
-                                        <div>Tier {item.tier}</div>
-                                    </div>
-                                </>
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center text-slate-700 text-2xl">+</div>
-                            )}
-                        </div>
-                    ))}
+        <div className="flex flex-col h-full gap-4">
+            {/* Equipped Section */}
+            <div className="bg-slate-800 p-4 rounded-lg border border-slate-700">
+                <h3 className="font-bold text-yellow-500 uppercase tracking-widest mb-4 text-xs">Equipped Gear</h3>
+                <div className="grid grid-cols-4 gap-4">
+                    {GEAR_SLOTS.map(slot => {
+                        const item = state.gear[slot];
+                        return (
+                            <div key={slot} className="relative aspect-square bg-slate-900 border-2 border-slate-800 rounded flex items-center justify-center group hover:border-blue-500 transition-colors cursor-pointer"
+                                onClick={() => item && handleEquip(item)}
+                                onMouseEnter={(e) => onHover && item && onHover(item, { x: e.clientX, y: e.clientY })}
+                                onMouseLeave={() => onHover && onHover(null)}
+                            >
+                                {item ? (
+                                    <>
+                                        <img src={item.slot === 'weapon' ? generateWeaponIcon(item.weaponType, item.tier) : generateArmorIcon(item.slot, item.tier)}
+                                            className="w-3/4 h-3/4 object-contain pixelated" />
+                                        <div className="absolute top-1 right-1 text-[10px] font-bold text-yellow-400">+{item.plus}</div>
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
+                                        <div className="absolute bottom-1 w-full text-center text-[8px] uppercase tracking-tighter text-slate-300 truncate px-1">
+                                            {item.name}
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="text-slate-700 text-xs uppercase font-bold tracking-widest rotate-[-45deg]">{slot}</div>
+                                )}
+                            </div>
+                        )
+                    })}
                 </div>
             </div>
 
@@ -78,21 +75,13 @@ export default function InventoryView() {
                 <div className="grid grid-cols-6 gap-3 content-start">
                     {state.inventory.map(item => (
                         <div key={item.id} className="relative aspect-square bg-slate-800 border-2 border-slate-700 hover:border-yellow-400 hover:bg-slate-700 cursor-pointer group transition-all rounded shadow-sm"
-                            onClick={() => handleEquip(item)}>
+                            onClick={() => handleEquip(item)}
+                            onMouseEnter={(e) => onHover && onHover(item, { x: e.clientX, y: e.clientY })}
+                            onMouseLeave={() => onHover && onHover(null)}
+                        >
                             <img src={item.slot === 'weapon' ? generateWeaponIcon(item.weaponType, item.tier) : generateArmorIcon(item.slot, item.tier)}
                                 alt={item.name} className="w-full h-full object-contain pixelated p-1" />
                             <div className="absolute top-1 right-1 w-2 h-2 rounded-full shadow-sm" style={{ backgroundColor: TIERS[item.tier].color }} />
-
-                            {/* Tooltip */}
-                            <div className="hidden group-hover:block absolute bottom-full right-0 w-48 bg-slate-900 border border-slate-500 p-2 z-50 pointer-events-none">
-                                <div className="font-bold border-b border-gray-700 pb-1 mb-1" style={{ color: TIERS[item.tier].color }}>{item.plus ? `+${item.plus} ` : ''}{item.name}</div>
-                                {item.effects && item.effects.map((e, i) => (
-                                    <div key={i} className="text-green-400">
-                                        {e.name}: {e.value}
-                                    </div>
-                                ))}
-                                <div className="text-gray-500 mt-1 italic">Click to Equip</div>
-                            </div>
                         </div>
                     ))}
                     {/* Empty Slots Filler */}

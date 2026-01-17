@@ -77,6 +77,49 @@ export class GameManager {
         }
     }
 
+    // --- Persistence & Offline Progress ---
+    async save() {
+        this.state.lastSaveTime = Date.now();
+        // Return serialized state for the context to handle, or handle internal if we pass storage ref.
+        // For now, let's just return the object and let context save it.
+        return JSON.stringify(this.state);
+    }
+
+    processOfflineProgress(savedState) {
+        if (!savedState.lastSaveTime) return null;
+
+        const now = Date.now();
+        const diff = now - savedState.lastSaveTime;
+        const secondsOffline = Math.floor(diff / 1000);
+
+        if (secondsOffline < 60) return null; // Minimal offline time ignore
+
+        // Simulate progress
+        // Simple heuristic: 1 kill every 3 seconds if player is alive
+        const stats = calculatePlayerStats(savedState);
+        const zone = savedState.currentZone;
+
+        // Assume survival if stats are decent (simple check)
+        const kills = Math.floor(secondsOffline / 3);
+        const goldGain = kills * (10 + zone * 5); // Rough formula matching Zone 0-1
+        const xpGain = kills * (20 + zone * 10);
+
+        // Apply
+        this.state.gold += goldGain;
+        this.state.xp += xpGain;
+        this.state.totalGold += goldGain;
+
+        // Check level up from bulk XP
+        // (Simplified, actual level up logic is in CombatSystem but we can just let it carry over)
+
+        // Notify
+        setTimeout(() => {
+            this.emit('floatingText', { x: 400, y: 100, text: `OFFLINE: +${goldGain} Gold`, color: '#fbbf24' });
+        }, 1000);
+
+        return { time: secondsOffline, kills, gold: goldGain, xp: xpGain };
+    }
+
     gameLoop() {
         if (!this.isRunning) return;
 
@@ -91,6 +134,9 @@ export class GameManager {
         const tickSpeed = Math.max(40, baseTickSpeed / this.gameSpeed);
 
         this.accumulatedTime += deltaTime;
+
+        // Cap accumulation to prevent death spirals if tab was inactive (browser throttling)
+        if (this.accumulatedTime > 1000) this.accumulatedTime = 1000;
 
         while (this.accumulatedTime >= tickSpeed) {
             this.combatSystem.tick(tickSpeed);

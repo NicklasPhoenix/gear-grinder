@@ -34,13 +34,31 @@ export function GameProvider({ children }) {
                 setGameState({ ...newState });
             });
 
+            // Process Offline
+            const offlineReport = gm.processOfflineProgress(gm.state);
+            if (offlineReport) {
+                console.log("Offline Progress:", offlineReport);
+            }
+
             // Start the loop
             gm.start();
         };
 
+        const saveGame = async () => {
+            if (!gameManagerRef.current) return;
+            const data = await gameManagerRef.current.save();
+            await window.storage.set('gear-grinder-save', data);
+            console.log("Game Saved");
+        };
+
         loadGame();
 
+        // Auto Save Interval (30s)
+        const saveInterval = setInterval(saveGame, 30000);
+
         return () => {
+            clearInterval(saveInterval);
+            saveGame(); // Save on unmount
             gm.stop();
         };
     }, []);
