@@ -63,18 +63,18 @@ export default function GameRenderer() {
 
             // --- Sprite Slicing Helper ---
             // The generated image is likely 1024x1024.
-            // Adjusting grid to 12 cols based on user feedback (ghosting).
-            const COL_COUNT = 12;
+            // Adjusting grid to 10 cols based on distortion feedback.
+            const COL_COUNT = 10;
             const ROW_COUNT = 8;
             const CELL_WIDTH = sheetTexture.width / COL_COUNT;
             const CELL_HEIGHT = sheetTexture.height / ROW_COUNT;
 
             const getSpriteFrame = (row, col) => {
-                // Return cropped frame (90% width to avoid bleed)
+                // Return cropped frame (95% width to avoid bleed)
                 return new PIXI.Rectangle(
                     col * CELL_WIDTH,
                     row * CELL_HEIGHT,
-                    CELL_WIDTH * 0.9,
+                    CELL_WIDTH * 0.95,
                     CELL_HEIGHT
                 );
             };
@@ -87,10 +87,9 @@ export default function GameRenderer() {
             });
 
             const player = new PIXI.Sprite(playerTexture);
-            // Generated sprites are high res (1024x1024 sheet -> 128x128 cells).
-            // We want them to display at roughly 64x64 or 128x128 on screen.
-            player.width = 96;
-            player.height = 96;
+            // Generated sprites are high res.
+            // Use scale to prevent distortion.
+            player.scale.set(3.5, 3.5);
             player.anchor.set(0.5);
             player.x = 200;
             player.y = 300;
@@ -246,9 +245,9 @@ export default function GameRenderer() {
             const spriteLoc = ENEMY_SPRITES[enemyType] || ENEMY_SPRITES['Beast'];
 
             // Re-calc cell size. 
-            // User reported ghosting with /8, meaning the cells were too big.
-            // Let's try / 12 (assuming 12 sprites per row which is common for 1024px sheet with 64px-ish sprites)
-            const COL_COUNT = 12;
+            // User reported ghosting with 8 (too wide) and cutoff with 12 (too narrow).
+            // Trying 10 columns (1024/10 = 102px).
+            const COL_COUNT = 10;
             const ROW_COUNT = 8;
             const CELL_WIDTH = textureSheetRef.current.width / COL_COUNT;
             const CELL_HEIGHT = textureSheetRef.current.height / ROW_COUNT;
@@ -257,7 +256,7 @@ export default function GameRenderer() {
             const newFrame = new PIXI.Rectangle(
                 (spriteLoc.col || 0) * CELL_WIDTH,
                 (spriteLoc.row || 0) * CELL_HEIGHT,
-                CELL_WIDTH * 0.9, // Trim 10% to avoid bleeding
+                CELL_WIDTH * 0.95, // Slight trim
                 CELL_HEIGHT
             );
 
@@ -269,17 +268,14 @@ export default function GameRenderer() {
             enemyRef.current.texture = newTexture;
 
             // Scale Bosses / Adjust Size
-            // Flip enemy to face left (negative scale.x)
+            // Use SCALE instead of WIDTH/HEIGHT to prevent distortion
             if (zone.isBoss) {
-                // Bosses are visually larger
-                enemyRef.current.width = 144;
-                enemyRef.current.height = 144;
-                enemyRef.current.scale.x = -Math.abs(enemyRef.current.scale.x); // Ensure flipped
+                // Bosses: Scale 5x, Flip X
+                enemyRef.current.scale.set(-5, 5);
                 enemyRef.current.tint = 0xffffff;
             } else {
-                enemyRef.current.width = 96;
-                enemyRef.current.height = 96;
-                enemyRef.current.scale.x = -Math.abs(enemyRef.current.scale.x); // Ensure flipped
+                // Normal: Scale 3.5x, Flip X
+                enemyRef.current.scale.set(-3.5, 3.5);
                 enemyRef.current.tint = 0xffffff;
             }
         }
