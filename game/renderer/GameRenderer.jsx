@@ -3,6 +3,7 @@ import * as PIXI from 'pixi.js';
 import { useGame } from '../context/GameContext';
 import { ASSET_BASE, ENEMY_SPRITES } from '../../assets/gameAssets';
 import { getZoneById } from '../data/zones';
+import { loadAndProcessImage } from '../utils/assetLoader';
 
 export default function GameRenderer() {
     const containerRef = useRef(null);
@@ -38,7 +39,9 @@ export default function GameRenderer() {
             // Load Spritesheet
             let sheetTexture;
             try {
-                sheetTexture = await PIXI.Assets.load(ASSET_BASE.characters);
+                // Process transparency first
+                const cleanedUrl = await loadAndProcessImage(ASSET_BASE.characters);
+                sheetTexture = await PIXI.Assets.load(cleanedUrl);
                 sheetTexture.source.scaleMode = 'nearest';
             } catch (e) {
                 console.error("Failed to load assets", e);
