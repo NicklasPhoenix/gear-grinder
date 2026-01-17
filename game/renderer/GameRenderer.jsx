@@ -62,34 +62,29 @@ export default function GameRenderer() {
             effectsContainerRef.current = fxContainer;
 
             // --- Sprite Slicing Helper ---
-            // The generated image is likely 1024x1024.
-            // Adjusted grid back to 8 cols but with scale reduction to fit screen.
-            const COL_COUNT = 8;
-            const ROW_COUNT = 8;
-            const CELL_WIDTH = sheetTexture.width / COL_COUNT;
-            const CELL_HEIGHT = sheetTexture.height / ROW_COUNT;
+            // The generated image is 1024x1024.
+            // Rows are approximately 128px high (8 rows).
+            // Columns vary per row.
+            const getSpriteFrame = (row, col, rowCols, rowSpan = 1) => {
+                const cellW = sheetTexture.width / rowCols;
+                const cellH = sheetTexture.height / 8; // Assumed 8 logical rows
 
-            const getSpriteFrame = (row, col) => {
-                // Return cropped frame (85% width to avoid bleed)
                 return new PIXI.Rectangle(
-                    col * CELL_WIDTH,
-                    row * CELL_HEIGHT,
-                    CELL_WIDTH * 0.85,
-                    CELL_HEIGHT
+                    col * cellW,
+                    row * cellH,
+                    cellW * 0.9, // Tight crop to avoid bleed
+                    cellH * rowSpan
                 );
             };
 
             // --- Create Player (Hero) ---
-            // Row 0, Col 0 (Knight)
+            const playerSpriteLoc = ENEMY_SPRITES['Knight'];
             const playerTexture = new PIXI.Texture({
                 source: sheetTexture.source,
-                frame: getSpriteFrame(0, 0) // Row 0 is Knight
+                frame: getSpriteFrame(playerSpriteLoc.row, playerSpriteLoc.col, playerSpriteLoc.cols)
             });
 
             const player = new PIXI.Sprite(playerTexture);
-            // Generated sprites are high res.
-            // Screen is 450px high. 1024/8 = 128px per cell.
-            // Scale 0.8 -> ~102px visual height. Good.
             player.scale.set(0.8, 0.8);
             player.anchor.set(0.5);
             player.x = 200;
@@ -105,16 +100,13 @@ export default function GameRenderer() {
             shadow.y = 40;
             player.addChildAt(shadow, 0);
 
-            // --- Create Enemy ---
-            // Start with generic placeholder, updated on state change
+            // --- Create Enemy Placeholder ---
             const enemyTexture = new PIXI.Texture({
                 source: sheetTexture.source,
-                frame: getSpriteFrame(1, 0) // Default to Skeleton (Row 1)
+                frame: getSpriteFrame(1, 0, 9) // Row 1 is Skeleton (9 cols)
             });
 
             const enemy = new PIXI.Sprite(enemyTexture);
-            enemy.width = 96;
-            enemy.height = 96;
             enemy.anchor.set(0.5);
             enemy.x = 600;
             enemy.y = 300;
@@ -237,47 +229,35 @@ export default function GameRenderer() {
 
     // --- Update Visuals on State Change ---
     useEffect(() => {
-        if (!state) return;
+        if (!state || !textureSheetRef.current) return;
 
         // 1. Update Sprites based on Zone/Enemy Type
-        if (enemyRef.current && textureSheetRef.current && state) {
+        if (enemyRef.current && textureSheetRef.current) {
             const zone = getZoneById(state.currentZone);
             const enemyType = zone.enemyType;
             const spriteLoc = ENEMY_SPRITES[enemyType] || ENEMY_SPRITES['Beast'];
 
-            // Re-calc cell size. 
-            // 8 Columns is standard for 1024px sheets (128px cells).
-            // 10 or 12 clips the Dragon. 8 caused ghosting, so we trim the width.
-            const COL_COUNT = 8;
-            const ROW_COUNT = 8;
-            const CELL_WIDTH = textureSheetRef.current.width / COL_COUNT;
-            const CELL_HEIGHT = textureSheetRef.current.height / ROW_COUNT;
+            // Recalculate frame with specific grid info
+            const cellW = textureSheetRef.current.width / spriteLoc.cols;
+            const cellH = textureSheetRef.current.height / 8;
 
-            // Check if texture frame needs update
             const newFrame = new PIXI.Rectangle(
-                (spriteLoc.col || 0) * CELL_WIDTH,
-                (spriteLoc.row || 0) * CELL_HEIGHT,
-                CELL_WIDTH * 0.85, // Trim 15% to securely remove neighbor ghosting
-                CELL_HEIGHT
+                (spriteLoc.col || 0) * cellW,
+                (spriteLoc.row || 0) * cellH,
+                cellW * 0.9,
+                cellH * (spriteLoc.height || 1)
             );
 
-            // Create a new texture view for the frame
-            const newTexture = new PIXI.Texture({
+            enemyRef.current.texture = new PIXI.Texture({
                 source: textureSheetRef.current.source,
                 frame: newFrame
             });
-            enemyRef.current.texture = newTexture;
 
-            // Scale Bosses / Adjust Size
-            // Original sprites are ~100px.
-            // Screen is 450px high. 
-            // Scale 1.0 is huge. Let's reduce.
+            // Scaling logic
             if (zone.isBoss) {
-                // Bosses: Scale 1.25x (approx 160px tall), Flip X
                 enemyRef.current.scale.set(-1.25, 1.25);
                 enemyRef.current.tint = 0xffffff;
             } else {
-                // Normal: Scale 0.8x (approx 100px tall), Flip X
                 enemyRef.current.scale.set(-0.8, 0.8);
                 enemyRef.current.tint = 0xffffff;
             }

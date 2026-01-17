@@ -9,29 +9,28 @@ export const ASSET_BASE = {
 };
 
 // Enemy sprites by zone type
-// Mapped to generated spreadsheet rows (approximate)
-// Assuming standard grid layout from generation
-const GRID_SIZE = 120; // Approximately 120px usually for sprite gen outputs per cell if 1024x1024?
-// Let's rely on GameRenderer.jsx to handle the slicing logic properly by checking texture size.
-// Actually, let's define logical slots here.
+// The spritesheet is 1024x1024. Logical rows are approx 128px high.
+// Columns vary per row.
 export const ENEMY_SPRITES = {
-  // Row 2: Skeleton
-  Undead: { row: 1, col: 0 },
-  // Row 3: Orc
-  Beast: { row: 2, col: 0 },
-  Humanoid: { row: 2, col: 2 },
-  // Row 4: Dragon
-  Dragon: { row: 3, col: 0 },
-  Boss: { row: 3, col: 1 },
-  // Row 5: Demon
-  Demon: { row: 4, col: 0 },
-  Abyssal: { row: 4, col: 2 },
-  Void: { row: 4, col: 3 },
-  // Row 6: Elemental
-  Elemental: { row: 5, col: 0 },
-  Chaos: { row: 5, col: 2 },
-  // Row 7: Angel
-  Celestial: { row: 6, col: 0 },
+  // Row 0: Player/Knight (12 cols)
+  Knight: { row: 0, col: 0, cols: 12, height: 1 },
+  // Row 1: Skeleton (9 cols)
+  Undead: { row: 1, col: 0, cols: 9, height: 1 },
+  // Row 2: Orcs/Goblins (10 cols)
+  Beast: { row: 2, col: 0, cols: 10, height: 1 },
+  Humanoid: { row: 2, col: 2, cols: 10, height: 1 },
+  // Row 3: Dragon (4 cols, 2 rows high)
+  Dragon: { row: 3, col: 0, cols: 4, height: 2 },
+  Boss: { row: 3, col: 1, cols: 4, height: 2 },
+  // Row 5: Demon (5 cols)
+  Demon: { row: 5, col: 0, cols: 5, height: 1 },
+  Abyssal: { row: 5, col: 1, cols: 5, height: 1 },
+  Void: { row: 5, col: 2, cols: 5, height: 1 },
+  // Row 6: Elemental (5 cols)
+  Elemental: { row: 6, col: 0, cols: 5, height: 1 },
+  Chaos: { row: 6, col: 1, cols: 5, height: 1 },
+  // Row 7: Angel (5 cols)
+  Celestial: { row: 7, col: 0, cols: 5, height: 1 },
 };
 
 // Procedurally generate weapon icons based on type and tier
