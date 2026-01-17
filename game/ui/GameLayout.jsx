@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import GameRenderer from '../renderer/GameRenderer';
 import { useGame } from '../context/GameContext';
 import InventoryView from './InventoryView';
 import StatsView from './StatsView';
-import { useState } from 'react';
+import SkillsView from './SkillsView';
+import ZoneView from './ZoneView';
 
 export default function GameLayout() {
     const { state } = useGame();
@@ -56,11 +57,11 @@ export default function GameLayout() {
                 </div>
 
                 {/* Full Height Content */}
-                <div className="flex-1 overflow-auto bg-slate-900 p-6 relative">
+                <div className="flex-1 overflow-auto bg-slate-900 p-6 relative custom-scrollbar">
                     {activeTab === 'inventory' && <InventoryView />}
                     {activeTab === 'stats' && <StatsView />}
-                    {activeTab === 'skills' && <div className="flex items-center justify-center h-full text-gray-500 text-lg">Skill Tree Module Inactive</div>}
-                    {activeTab === 'zone' && <div className="flex items-center justify-center h-full text-gray-500 text-lg">World Map Module Inactive</div>}
+                    {activeTab === 'skills' && <SkillsView />}
+                    {activeTab === 'zone' && <ZoneView />}
                 </div>
             </div>
         </div>
@@ -72,8 +73,8 @@ function TabButton({ children, active, onClick }) {
         <button
             onClick={onClick}
             className={`flex-1 py-4 font-bold text-sm tracking-wider uppercase transition-all duration-200 clip-path-slant ${active
-                    ? 'bg-gradient-to-t from-blue-900 to-slate-800 text-white border-b-2 border-blue-500 shadow-inner'
-                    : 'bg-transparent text-gray-500 hover:text-gray-300 hover:bg-slate-800'
+                ? 'bg-gradient-to-t from-blue-900 to-slate-800 text-white border-b-2 border-blue-500 shadow-inner'
+                : 'bg-transparent text-gray-500 hover:text-gray-300 hover:bg-slate-800'
                 }`}
         >
             {children}
