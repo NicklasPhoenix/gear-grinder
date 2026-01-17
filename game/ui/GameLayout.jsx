@@ -5,6 +5,8 @@ import InventoryView from './InventoryView';
 import StatsView from './StatsView';
 import SkillsView from './SkillsView';
 import ZoneView from './ZoneView';
+import CraftingView from './CraftingView';
+import EnhancementView from './EnhancementView';
 
 export default function GameLayout() {
     const { state } = useGame();
@@ -52,6 +54,8 @@ export default function GameLayout() {
                 <div className="flex bg-slate-950 border-b border-slate-800 p-2 gap-1 shadow-md">
                     <TabButton active={activeTab === 'inventory'} onClick={() => setActiveTab('inventory')}>Inventory</TabButton>
                     <TabButton active={activeTab === 'stats'} onClick={() => setActiveTab('stats')}>Attributes</TabButton>
+                    <TabButton active={activeTab === 'forge'} onClick={() => setActiveTab('forge')}>Forge</TabButton>
+                    <TabButton active={activeTab === 'enhance'} onClick={() => setActiveTab('enhance')}>Enhance</TabButton>
                     <TabButton active={activeTab === 'skills'} onClick={() => setActiveTab('skills')}>Skills</TabButton>
                     <TabButton active={activeTab === 'zone'} onClick={() => setActiveTab('zone')}>Map</TabButton>
                 </div>
@@ -60,6 +64,8 @@ export default function GameLayout() {
                 <div className="flex-1 overflow-auto bg-slate-900 p-6 relative custom-scrollbar">
                     {activeTab === 'inventory' && <InventoryView />}
                     {activeTab === 'stats' && <StatsView />}
+                    {activeTab === 'forge' && <CraftingView />}
+                    {activeTab === 'enhance' && <EnhancementView />}
                     {activeTab === 'skills' && <SkillsView />}
                     {activeTab === 'zone' && <ZoneView />}
                 </div>
