@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import GearGrinder from './gear-grinder.jsx'
+import GearGrinderV2 from './gear-grinder-v2.jsx'
 import './index.css'
 
 // Polyfill for window.storage API using localStorage
@@ -19,6 +19,6 @@ window.storage = {
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <GearGrinder />
+    <GearGrinderV2 />
   </React.StrictMode>,
 )
