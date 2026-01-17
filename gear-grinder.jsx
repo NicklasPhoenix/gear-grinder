@@ -3,6 +3,9 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from './components/ui/tabs';
 import { Card, CardHeader, CardTitle, CardContent } from './components/ui/card';
 import { Progress } from './components/ui/progress';
 import { Button } from './components/ui/button';
+import CombatCanvas from './components/CombatCanvas';
+import { generateWeaponIcon, generateArmorIcon, generateMaterialIcon } from './assets/gameAssets';
+import './styles/game.css';
 
 // Game constants
 const ZONES = [
@@ -505,6 +508,9 @@ function GearGrinder() {
   // Use ref to track latest gameState for auto-save without causing re-renders
   const gameStateRef = useRef(gameState);
   const saveTimeoutRef = useRef(null);
+  const lastDamageRef = useRef(0);
+  const lastHealRef = useRef(0);
+  const isPlayerTurnRef = useRef(true);
 
   // Add floating text helper
   const addFloatingText = useCallback((text, type, target) => {
@@ -833,13 +839,18 @@ function GearGrinder() {
         newState.enemyHp -= playerDmg;
         // Show floating damage on enemy
         addFloatingText(isCrit ? `CRIT ${playerDmg}!` : `-${playerDmg}`, isCrit ? 'crit' : 'playerDmg', 'enemy');
+        lastDamageRef.current = playerDmg;
+        isPlayerTurnRef.current = true;
 
         if (stats.lifesteal > 0) {
           // Lifesteal capped at % of max HP to prevent infinite sustain
           const rawHeal = Math.floor(playerDmg * stats.lifesteal / 100);
           const healed = Math.min(rawHeal, stats.lifestealMaxHeal);
           newState.playerHp = Math.min(newState.playerHp + healed, stats.maxHp);
-          if (healed > 0) addFloatingText(`+${healed}`, 'heal', 'player');
+          if (healed > 0) {
+            addFloatingText(`+${healed}`, 'heal', 'player');
+            lastHealRef.current = healed;
+          }
         }
 
         if (newState.enemyHp <= 0) {
@@ -937,12 +948,15 @@ function GearGrinder() {
           const dodged = Math.random() * 100 < stats.dodge;
           if (dodged) {
             addFloatingText('DODGE!', 'dodge', 'player');
+            lastDamageRef.current = 0;
           } else {
             // Armor is less effective now - need more armor for same reduction
             const damageReduction = stats.armor / (stats.armor + 250);
             const reducedDmg = Math.max(1, Math.floor(zone.enemyDmg * (1 - damageReduction)));
             newState.playerHp -= reducedDmg;
             addFloatingText(`-${reducedDmg}`, 'enemyDmg', 'player');
+            lastDamageRef.current = reducedDmg;
+            isPlayerTurnRef.current = false;
             if (stats.thorns > 0) {
               const thornsDmg = Math.floor(reducedDmg * stats.thorns / 100);
               newState.enemyHp -= thornsDmg;
@@ -1388,7 +1402,10 @@ function GearGrinder() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 p-2 sm:p-4 font-sans">
+    <div className="min-h-screen text-gray-100 p-2 sm:p-4 font-sans" style={{
+      background: 'linear-gradient(135deg, #1e1b4b 0%, #0f172a 50%, #1e293b 100%)',
+      backgroundAttachment: 'fixed'
+    }}>
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <Card className="mb-3 sm:mb-4">
@@ -1466,7 +1483,7 @@ function GearGrinder() {
               <Button
                 onClick={() => setGameSpeed(gameSpeed === 1 ? 5 : 1)}
                 size="sm"
-                className={`text-xs font-bold ${
+                className={`text-xs font-bold btn-enhanced ${
                   gameSpeed === 5
                     ? 'bg-yellow-600 hover:bg-yellow-500 text-black'
                     : 'bg-gray-700 hover:bg-gray-600'
@@ -1475,6 +1492,21 @@ function GearGrinder() {
                 {gameSpeed === 1 ? '1x Speed' : '5x Speed'}
               </Button>
             </div>
+
+            {/* Combat Canvas - Main Visual */}
+            <div className="mb-4 flex justify-center">
+              <CombatCanvas
+                currentZone={ZONES[gameState.currentZone]}
+                playerHp={gameState.playerHp}
+                playerMaxHp={stats.maxHp}
+                enemyHp={gameState.enemyHp}
+                enemyMaxHp={gameState.enemyMaxHp}
+                lastDamage={lastDamageRef.current}
+                lastHeal={lastHealRef.current}
+                isPlayerTurn={isPlayerTurnRef.current}
+              />
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
               {/* Player */}
               <Card>
