@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useGame } from '../context/GameContext';
 import { getEnhanceCost, getEnhanceSuccess, getEnhanceBonus } from '../utils/formulas';
-import { generateWeaponIcon, generateArmorIcon } from '../../assets/gameAssets';
+import ItemIcon from './ItemIcon';
 import { TIERS, MATERIALS } from '../data/items';
 
 export default function EnhancementView() {
@@ -85,8 +85,9 @@ export default function EnhancementView() {
                             onClick={() => setSelectedItem(item)}
                             className={`flex items-center gap-2 p-2 rounded cursor-pointer border ${selectedItem?.id === item.id ? 'bg-blue-900/50 border-blue-500' : 'bg-slate-800 border-slate-700 hover:border-slate-500'}`}
                         >
-                            <img src={item.slot === 'weapon' ? generateWeaponIcon(item.weaponType, item.tier) : generateArmorIcon(item.slot, item.tier)}
-                                className="w-8 h-8 bg-slate-900 rounded" />
+                            <div className="w-8 h-8 rounded overflow-hidden">
+                                <ItemIcon item={item} size="sm" />
+                            </div>
                             <div className="text-xs">
                                 <div style={{ color: TIERS[item.tier].color }} className="font-bold">{item.name} +{item.plus}</div>
                                 <div className="text-slate-500 capitalize">{item.tier > 0 ? TIERS[item.tier].name : ''} {item.slot}</div>

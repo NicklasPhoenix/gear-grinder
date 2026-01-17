@@ -7,6 +7,7 @@ import SkillsView from './SkillsView';
 import ZoneView from './ZoneView';
 import CraftingView from './CraftingView';
 import EnhancementView from './EnhancementView';
+import PrestigeView from './PrestigeView';
 
 import GameTooltip from './GameTooltip';
 
@@ -69,6 +70,7 @@ export default function GameLayout() {
                     <TabButton active={activeTab === 'enhance'} onClick={() => setActiveTab('enhance')}>Enhance</TabButton>
                     <TabButton active={activeTab === 'skills'} onClick={() => setActiveTab('skills')}>Skills</TabButton>
                     <TabButton active={activeTab === 'zone'} onClick={() => setActiveTab('zone')}>Map</TabButton>
+                    <TabButton active={activeTab === 'prestige'} onClick={() => setActiveTab('prestige')}>Prestige</TabButton>
                 </div>
 
                 {/* Full Height Content */}
@@ -79,6 +81,7 @@ export default function GameLayout() {
                     {activeTab === 'enhance' && <EnhancementView />}
                     {activeTab === 'skills' && <SkillsView />}
                     {activeTab === 'zone' && <ZoneView />}
+                    {activeTab === 'prestige' && <PrestigeView />}
                 </div>
 
                 {/* Global Tooltip Layer */}

@@ -1,7 +1,4 @@
-import React, { useState } from 'react';
-import { useGame } from '../context/GameContext';
-import { TIERS, GEAR_SLOTS, WEAPON_TYPES, MATERIALS } from '../data/items';
-import { generateWeaponIcon, generateArmorIcon } from '../../assets/gameAssets';
+import ItemIcon from './ItemIcon';
 
 export default function CraftingView() {
     const { state, gameManager } = useGame();
@@ -13,6 +10,13 @@ export default function CraftingView() {
     const canCraft = state.gold >= tierData.goldCost &&
         state.ore >= tierData.oreCost &&
         state.leather >= tierData.leatherCost;
+
+    const previewItem = {
+        slot: selectedSlot,
+        weaponType: selectedWeaponType,
+        tier: selectedTier,
+        plus: 0
+    };
 
     const handleCraft = () => {
         if (!canCraft) return;
@@ -104,10 +108,9 @@ export default function CraftingView() {
 
                 {/* Icon Preview */}
                 <div className="w-24 h-24 bg-slate-800 border-2 border-slate-600 rounded flex items-center justify-center relative">
-                    <img
-                        src={selectedSlot === 'weapon' ? generateWeaponIcon(selectedWeaponType, selectedTier) : generateArmorIcon(selectedSlot, selectedTier)}
-                        className="w-16 h-16 object-contain pixelated"
-                    />
+                    <div className="w-16 h-16">
+                        <ItemIcon item={previewItem} />
+                    </div>
                     <div className="absolute top-1 right-1 w-3 h-3 rounded-full" style={{ backgroundColor: tierData.color }} />
                 </div>
 
@@ -132,8 +135,8 @@ export default function CraftingView() {
                     disabled={!canCraft}
                     onClick={handleCraft}
                     className={`px-6 py-4 font-bold text-lg rounded uppercase tracking-wider ${canCraft
-                            ? 'bg-yellow-600 hover:bg-yellow-500 text-white shadow-lg transform hover:scale-105 transition-all'
-                            : 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                        ? 'bg-yellow-600 hover:bg-yellow-500 text-white shadow-lg transform hover:scale-105 transition-all'
+                        : 'bg-slate-800 text-slate-500 cursor-not-allowed'
                         }`}
                 >
                     Forge Item

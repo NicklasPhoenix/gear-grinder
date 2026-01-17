@@ -81,8 +81,6 @@ export class GameManager {
     async save() {
         this.state.lastSaveTime = Date.now();
         this.emit('floatingText', { x: 100, y: 50, text: "Game Saved", color: "#64748b" }); // Visual feedback
-        // Return serialized state for the context to handle, or handle internal if we pass storage ref.
-        // For now, let's just return the object and let context save it.
         return JSON.stringify(this.state);
     }
 
@@ -93,27 +91,19 @@ export class GameManager {
         const diff = now - savedState.lastSaveTime;
         const secondsOffline = Math.floor(diff / 1000);
 
-        if (secondsOffline < 5) return null; // Reduced to 5s for easier testing
+        if (secondsOffline < 5) return null;
 
-        // Simulate progress
-        // Simple heuristic: 1 kill every 3 seconds if player is alive
         const stats = calculatePlayerStats(savedState);
         const zone = savedState.currentZone;
 
-        // Assume survival if stats are decent (simple check)
         const kills = Math.floor(secondsOffline / 3);
-        const goldGain = kills * (10 + zone * 5); // Rough formula matching Zone 0-1
+        const goldGain = kills * (10 + zone * 5);
         const xpGain = kills * (20 + zone * 10);
 
-        // Apply
         this.state.gold += goldGain;
         this.state.xp += xpGain;
         this.state.totalGold += goldGain;
 
-        // Check level up from bulk XP
-        // (Simplified, actual level up logic is in CombatSystem but we can just let it carry over)
-
-        // Notify
         setTimeout(() => {
             this.emit('floatingText', { x: 400, y: 150, text: `WELCOME BACK!`, color: '#ffffff' });
             this.emit('floatingText', { x: 400, y: 200, text: `OFFLINE: +${goldGain} Gold`, color: '#fbbf24' });
@@ -130,15 +120,12 @@ export class GameManager {
         const deltaTime = now - this.lastTime;
         this.lastTime = now;
 
-        // Tick Logic
-        // Adjust tick speed based on stats
         const stats = calculatePlayerStats(this.state);
         const baseTickSpeed = Math.max(200, 1000 - (stats.speedMult - 1) * 500);
         const tickSpeed = Math.max(40, baseTickSpeed / this.gameSpeed);
 
         this.accumulatedTime += deltaTime;
 
-        // Cap accumulation to prevent death spirals if tab was inactive (browser throttling)
         if (this.accumulatedTime > 1000) this.accumulatedTime = 1000;
 
         while (this.accumulatedTime >= tickSpeed) {
@@ -147,5 +134,60 @@ export class GameManager {
         }
 
         this.animationFrameId = requestAnimationFrame(() => this.gameLoop());
+    }
+
+    performPrestige() {
+        const lastBossZone = 20; // Eternal One
+        const hasBeatenLastBoss = (this.state.zoneKills[lastBossZone] || 0) >= 1;
+        if (!hasBeatenLastBoss) return;
+
+        // Calculate starting bonus from prestige skills
+        const startingBonusLevel = this.state.prestigeSkills?.[8] || 0;
+        const startGold = 50 + startingBonusLevel * 50;
+        const startOre = 5 + startingBonusLevel * 10;
+        const startLeather = 5 + startingBonusLevel * 10;
+
+        this.setState(prev => ({
+            ...prev,
+            gold: startGold,
+            ore: startOre,
+            leather: startLeather,
+            enhanceStone: 3,
+            blessedOrb: 0,
+            celestialShard: 0,
+            level: 1,
+            xp: 0,
+            currentZone: 0,
+            stats: { str: 5, int: 5, vit: 5, agi: 5, lck: 5 },
+            statPoints: 0,
+            gear: { weapon: null, helmet: null, armor: null, boots: null, accessory: null, shield: null, gloves: null, amulet: null },
+            inventory: [],
+            unlockedSkills: [],
+            enemyHp: 20,
+            enemyMaxHp: 20,
+            playerHp: 100,
+            playerMaxHp: 100,
+            kills: 0,
+            zoneKills: {},
+            prestigeLevel: (prev.prestigeLevel || 0) + 1,
+            prestigeStones: (prev.prestigeStones || 0) + 10,
+            prestigeSkills: prev.prestigeSkills || {},
+            totalPrestiges: (prev.totalPrestiges || 0) + 1,
+        }));
+
+        this.emit('floatingText', { text: "ASCENDED!", type: "levelup", target: "player" });
+    }
+
+    upgradePrestigeSkill(skillId, cost) {
+        if (this.state.prestigeStones < cost) return;
+
+        this.setState(prev => ({
+            ...prev,
+            prestigeStones: prev.prestigeStones - cost,
+            prestigeSkills: {
+                ...prev.prestigeSkills,
+                [skillId]: (prev.prestigeSkills[skillId] || 0) + 1
+            }
+        }));
     }
 }
