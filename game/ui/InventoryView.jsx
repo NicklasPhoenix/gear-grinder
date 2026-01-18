@@ -139,6 +139,16 @@ export default function InventoryView({ onHover }) {
         gameManager.emit('floatingText', { text: "EQUIPPED!", type: 'heal', target: 'player' });
     };
 
+    const handleUnequip = (item) => {
+        if (!item) return;
+        gameManager.setState(prev => ({
+            ...prev,
+            gear: { ...prev.gear, [item.slot]: null },
+            inventory: [...prev.inventory, item]
+        }));
+        gameManager.emit('floatingText', { text: "UNEQUIPPED", type: 'damage', target: 'player' });
+    };
+
     const getTierGlow = (tier) => {
         if (tier < 2) return '';
         const glowClasses = [
@@ -192,7 +202,7 @@ export default function InventoryView({ onHover }) {
                                         : 'border-slate-700/30 border-dashed hover:border-slate-500/50'
                                     }
                                 `}
-                                onClick={() => item && handleEquip(item)}
+                                onClick={() => item && handleUnequip(item)}
                                 onMouseEnter={(e) => onHover && item && onHover(item, { x: e.clientX, y: e.clientY })}
                                 onMouseLeave={() => onHover && onHover(null)}
                             >

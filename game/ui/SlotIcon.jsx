@@ -22,7 +22,7 @@ const SLOT_SPRITES = {
     helmet: { sheet: 'hat', row: 0, col: 2 },         // Knight helmet
     armor: { sheet: 'armor_items', row: 0, col: 2 },  // Plate armor
     boots: { sheet: 'boot', row: 0, col: 2 },         // Nice boots
-    accessory: { sheet: 'ring', row: 0, col: 0 },     // Single ring
+    accessory: { sheet: 'ring', row: 1, col: 0 },     // Single ring
     shield: { sheet: 'shield', row: 0, col: 2 },      // Nice shield
     gloves: { sheet: 'glove', row: 0, col: 2 },       // Gauntlets
     amulet: { sheet: 'amulet', row: 0, col: 2 },      // Nice amulet

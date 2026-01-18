@@ -125,7 +125,7 @@ export const ITEM_SPRITES = {
   katana:   { sheet: 'medwep', row: 0, col: 2 },
   axe:      { sheet: 'medwep', row: 1, col: 0 },
   greataxe: { sheet: 'medwep', row: 1, col: 2 },
-  mace:     { sheet: 'medwep', row: 1, col: 4 },
+  mace:     { sheet: 'medwep', row: 1, col: 6 },
   // Daggers from shortwep
   dagger:   { sheet: 'shortwep', row: 0, col: 0 },
   // Staffs from longwep
@@ -139,8 +139,8 @@ export const ITEM_SPRITES = {
   gloves:   { sheet: 'glove', row: 0, col: 0 },
   // Accessories
   amulet:   { sheet: 'amulet', row: 0, col: 0 },
-  accessory:{ sheet: 'ring', row: 0, col: 0 },
-  ring:     { sheet: 'ring', row: 0, col: 0 },
+  accessory:{ sheet: 'ring', row: 1, col: 0 },
+  ring:     { sheet: 'ring', row: 1, col: 0 },
   // Materials (use potion sheet)
   ore:      { sheet: 'potion', row: 1, col: 0 },
   leather:  { sheet: 'potion', row: 1, col: 2 },
