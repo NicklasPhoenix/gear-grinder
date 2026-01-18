@@ -100,19 +100,27 @@ export default function GameRenderer() {
             particleContainerRef.current = particleContainer;
             gameContainerRef.current = gameContainer;
 
-            // --- Load character sprite sheet ---
-            let spriteSheet;
-            try {
-                spriteSheet = await PIXI.Assets.load(ASSET_BASE.characters);
-                spriteSheet.source.scaleMode = 'nearest';
-                spriteSheetRef.current = spriteSheet;
-            } catch (e) {
-                console.error("Failed to load character sprites", e);
-            }
+            // --- Load all character sprite sheets ---
+            const spriteSheets = {};
+            const sheetNames = ['player', 'humanoid', 'demon', 'undead', 'beast', 'reptile', 'elemental', 'avian', 'misc'];
 
-            // --- Helper to get sprite texture from sheet ---
+            for (const sheetName of sheetNames) {
+                try {
+                    const sheet = await PIXI.Assets.load(ASSET_BASE[sheetName]);
+                    sheet.source.scaleMode = 'nearest';
+                    spriteSheets[sheetName] = sheet;
+                } catch (e) {
+                    console.warn(`Failed to load sprite sheet: ${sheetName}`, e);
+                }
+            }
+            spriteSheetRef.current = spriteSheets;
+
+            // --- Helper to get sprite texture from the appropriate sheet ---
             const getSpriteTexture = (spriteData) => {
-                if (!spriteSheet) return null;
+                const sheetName = spriteData.sheet || 'player';
+                const sheet = spriteSheets[sheetName];
+                if (!sheet) return null;
+
                 const { tileSize } = SPRITE_CONFIG;
                 const frame = new PIXI.Rectangle(
                     spriteData.col * tileSize,
@@ -120,7 +128,7 @@ export default function GameRenderer() {
                     tileSize,
                     tileSize
                 );
-                return new PIXI.Texture({ source: spriteSheet.source, frame });
+                return new PIXI.Texture({ source: sheet.source, frame });
             };
 
             // --- Create animated background ---
@@ -838,8 +846,14 @@ export default function GameRenderer() {
     useEffect(() => {
         if (!state || !spriteSheetRef.current) return;
 
-        // Helper to get sprite texture
+        const spriteSheets = spriteSheetRef.current;
+
+        // Helper to get sprite texture from the appropriate sheet
         const getSpriteTexture = (spriteData) => {
+            const sheetName = spriteData.sheet || 'player';
+            const sheet = spriteSheets[sheetName];
+            if (!sheet) return null;
+
             const { tileSize } = SPRITE_CONFIG;
             const frame = new PIXI.Rectangle(
                 spriteData.col * tileSize,
@@ -847,7 +861,7 @@ export default function GameRenderer() {
                 tileSize,
                 tileSize
             );
-            return new PIXI.Texture({ source: spriteSheetRef.current.source, frame });
+            return new PIXI.Texture({ source: sheet.source, frame });
         };
 
         // 1. Update Enemy Sprite based on Zone/Enemy Type
@@ -856,7 +870,7 @@ export default function GameRenderer() {
             const enemyType = zone.enemyType;
             const spriteData = ENEMY_SPRITES[enemyType] || ENEMY_SPRITES['Beast'];
 
-            // Update texture
+            // Update texture from the correct sprite sheet
             const newTexture = getSpriteTexture(spriteData);
             if (newTexture && enemyRef.current.texture) {
                 enemyRef.current.texture = newTexture;

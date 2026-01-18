@@ -1,62 +1,128 @@
-// Real sprite sheets from OpenGameArt
-// Characters: Tiny 16 Expanded Character Sprites (16x16 pixel sprites)
-// Items: 16x16 Weapon RPG Icons by Shade
+// DawnLike 16x16 Universal Roguelike Tileset by DragonDePlatino
+// CC-BY 4.0 - Credit: DragonDePlatino (art) and DawnBringer (palette)
+// Characters organized by type in separate sprite sheets
 
 export const ASSET_BASE = {
-  characters: '/assets/characters.png',  // Tiny 16 expanded (800x800, 50x50 grid)
-  items: '/assets/items.png',            // 16x16 weapon icons
+  player: '/assets/characters.png',    // Player/hero sprites (128x240)
+  humanoid: '/assets/humanoid.png',    // Humanoid enemies (128x432)
+  demon: '/assets/demon.png',          // Demon sprites (128x144)
+  undead: '/assets/undead.png',        // Undead/skeleton (128x160)
+  beast: '/assets/beast.png',          // Quadruped beasts (128x192)
+  reptile: '/assets/reptile.png',      // Reptiles/dragons (128x248)
+  elemental: '/assets/elemental.png',  // Elementals (128x?)
+  avian: '/assets/avian.png',          // Flying creatures (128x208)
+  misc: '/assets/misc.png',            // Misc creatures (128x?)
+  items: '/assets/weapons.png',        // Weapon icons
+  armor: '/assets/armor.png',          // Armor icons
 };
 
-// Character sprite config: 16x16 tiles in 50x50 grid (800x800 px)
+// Sprite config: All DawnLike sprites are 16x16 in 8-column sheets
 export const SPRITE_CONFIG = {
   tileSize: 16,
-  cols: 50,
-  rows: 50,
+  cols: 8,  // 128px / 16px = 8 columns
 };
 
-// Item sprite config: 16x16 tiles in 24x20 grid (384x320 px)
+// Item sprite config (weapons.png)
 export const ITEM_SPRITE_CONFIG = {
   tileSize: 16,
   cols: 24,
   rows: 20,
 };
 
-// Character positions in Tiny 16 Expanded spritesheet (16x16 pixels each)
-// Layout: Various character types in rows with animation frames in columns
+// Enemy sprite definitions - maps enemy type to sprite sheet and position
+// DawnLike organizes sprites in rows, with animation frames in columns 0-1
+// Row/col are the grid position within each sprite sheet
 export const ENEMY_SPRITES = {
-  // Player/Heroes - row 0-3 have various hero types
-  Knight:    { row: 0, col: 0, scale: 4 },   // Knight
-  // Monsters/Enemies
-  Humanoid:  { row: 6, col: 0, scale: 4 },   // Humanoid enemy
-  Beast:     { row: 12, col: 0, scale: 4 },  // Beast type
-  Undead:    { row: 18, col: 0, scale: 4 },  // Skeleton/undead
-  Dragon:    { row: 24, col: 0, scale: 5 },  // Large creature
-  Demon:     { row: 30, col: 0, scale: 5 },  // Demon
-  Elemental: { row: 36, col: 0, scale: 4 },  // Elemental
-  Celestial: { row: 3, col: 0, scale: 4 },   // Angel/celestial
-  Abyssal:   { row: 42, col: 0, scale: 5 },  // Dark creature
-  Chaos:     { row: 45, col: 0, scale: 5 },  // Chaos creature
-  Void:      { row: 48, col: 0, scale: 4 },  // Ghost/void
-  Boss:      { row: 24, col: 6, scale: 6 },  // Boss variant
+  // Player/Knight uses player sheet
+  Knight: {
+    sheet: 'player',
+    row: 0, col: 0,  // First hero sprite
+    scale: 4
+  },
+  // Humanoid enemies
+  Humanoid: {
+    sheet: 'humanoid',
+    row: 4, col: 0,  // Orc/goblin type
+    scale: 4
+  },
+  // Beast (quadruped)
+  Beast: {
+    sheet: 'beast',
+    row: 2, col: 0,  // Wolf/bear type
+    scale: 4
+  },
+  // Undead
+  Undead: {
+    sheet: 'undead',
+    row: 0, col: 0,  // Skeleton
+    scale: 4
+  },
+  // Dragon/Reptile
+  Dragon: {
+    sheet: 'reptile',
+    row: 8, col: 0,  // Large dragon
+    scale: 5
+  },
+  // Demon
+  Demon: {
+    sheet: 'demon',
+    row: 2, col: 0,  // Demon type
+    scale: 5
+  },
+  // Elemental
+  Elemental: {
+    sheet: 'elemental',
+    row: 2, col: 0,  // Fire/ice elemental
+    scale: 4
+  },
+  // Celestial (use humanoid with angel-like row)
+  Celestial: {
+    sheet: 'humanoid',
+    row: 0, col: 0,  // Human/angel type
+    scale: 4
+  },
+  // Abyssal (dark demon)
+  Abyssal: {
+    sheet: 'demon',
+    row: 4, col: 0,
+    scale: 5
+  },
+  // Chaos (misc weird creature)
+  Chaos: {
+    sheet: 'misc',
+    row: 2, col: 0,
+    scale: 5
+  },
+  // Void (ghost-like)
+  Void: {
+    sheet: 'undead',
+    row: 4, col: 0,  // Ghost/wraith
+    scale: 4
+  },
+  // Boss variant (large dragon)
+  Boss: {
+    sheet: 'reptile',
+    row: 10, col: 0,
+    scale: 6
+  },
 };
 
 // Item positions in 16x16 weapon sprite sheet (384x320, 24 cols x 20 rows)
-// Organized by weapon type in rows
 export const ITEM_SPRITES = {
-  // Swords - row 0-2
+  // Swords
   sword:    { row: 0, col: 0 },
   katana:   { row: 0, col: 4 },
-  // Axes - row 6-7
+  // Axes
   axe:      { row: 6, col: 0 },
   greataxe: { row: 6, col: 4 },
-  // Daggers - row 4-5
+  // Daggers
   dagger:   { row: 4, col: 0 },
-  // Maces - row 8-9
+  // Maces
   mace:     { row: 8, col: 0 },
-  // Staffs - row 18-19 (spears used as staffs)
+  // Staffs
   staff:    { row: 18, col: 0 },
   scythe:   { row: 18, col: 4 },
-  // Armor items (use weapon variants as placeholders)
+  // Armor items
   helmet:   { row: 2, col: 8 },
   armor:    { row: 2, col: 12 },
   boots:    { row: 2, col: 16 },
@@ -88,23 +154,19 @@ export function generateWeaponIcon(weaponType, tier) {
 
   ctx.fillStyle = tierColors[tier] || tierColors[0];
 
-  // Draw different shapes based on weapon type
   switch (weaponType) {
     case 'sword':
-      // Sword shape
       ctx.fillRect(20, 10, 8, 28);
       ctx.fillRect(18, 38, 12, 4);
       ctx.fillRect(22, 6, 4, 8);
       break;
     case 'staff':
-      // Staff shape
       ctx.fillRect(23, 10, 2, 32);
       ctx.beginPath();
       ctx.arc(24, 10, 6, 0, Math.PI * 2);
       ctx.fill();
       break;
     case 'dagger':
-      // Dagger shape
       ctx.fillRect(22, 15, 4, 20);
       ctx.fillRect(20, 35, 8, 3);
       ctx.beginPath();
@@ -114,19 +176,16 @@ export function generateWeaponIcon(weaponType, tier) {
       ctx.fill();
       break;
     case 'mace':
-      // Mace shape
       ctx.fillRect(23, 20, 2, 18);
       ctx.fillRect(18, 15, 12, 8);
       break;
     case 'scythe':
-      // Scythe shape
       ctx.fillRect(20, 15, 2, 25);
       ctx.beginPath();
       ctx.arc(24, 18, 8, 0, Math.PI);
       ctx.fill();
       break;
     case 'katana':
-      // Katana shape
       ctx.save();
       ctx.translate(24, 24);
       ctx.rotate(-0.3);
@@ -135,16 +194,13 @@ export function generateWeaponIcon(weaponType, tier) {
       ctx.restore();
       break;
     case 'greataxe':
-      // Greataxe shape
       ctx.fillRect(23, 20, 2, 20);
       ctx.fillRect(12, 12, 24, 12);
       break;
     default:
-      // Default sword
       ctx.fillRect(20, 10, 8, 28);
   }
 
-  // Add glow effect based on tier
   if (tier >= 3) {
     ctx.shadowBlur = 10;
     ctx.shadowColor = tierColors[tier];
@@ -215,7 +271,6 @@ export function generateArmorIcon(slot, tier) {
       ctx.fillRect(16, 16, 16, 16);
   }
 
-  // Add glow effect based on tier
   if (tier >= 3) {
     ctx.shadowBlur = 10;
     ctx.shadowColor = tierColors[tier];
