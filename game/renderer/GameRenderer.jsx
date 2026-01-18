@@ -523,12 +523,13 @@ export default function GameRenderer() {
 
             const cellW = textureSheetRef.current.width / spriteLoc.cols;
             const cellH = textureSheetRef.current.height / 8;
+            const spriteHeight = spriteLoc.height || 1;
 
             const newFrame = new PIXI.Rectangle(
                 (spriteLoc.col || 0) * cellW,
                 (spriteLoc.row || 0) * cellH,
-                cellW * 0.9,
-                cellH * (spriteLoc.height || 1)
+                cellW * 0.95,
+                cellH * spriteHeight * 0.95
             );
 
             enemyRef.current.texture = new PIXI.Texture({
@@ -536,27 +537,35 @@ export default function GameRenderer() {
                 frame: newFrame
             });
 
-            // Scaling and effects based on boss status
+            // Calculate scale based on sprite height and boss status
+            // Multi-row sprites (like dragons) need smaller scale
+            let baseScale = spriteHeight > 1 ? 0.5 : 0.9;
+
             if (zone.isBoss) {
-                enemyRef.current.scale.set(-1.4, 1.4);
+                // Bosses are bigger, but tall sprites get less boost
+                const bossScale = spriteHeight > 1 ? baseScale * 1.3 : baseScale * 1.5;
+                enemyRef.current.scale.set(-bossScale, bossScale);
+
                 if (enemyRef.current.aura) {
                     enemyRef.current.aura.clear();
-                    enemyRef.current.aura.circle(600, 350, 80);
+                    enemyRef.current.aura.circle(600, 350, 70);
                     enemyRef.current.aura.fill({ color: 0xef4444, alpha: 0.15 });
                 }
                 if (enemyRef.current.shadow) {
                     enemyRef.current.shadow.clear();
-                    enemyRef.current.shadow.ellipse(600, 375, 45, 15);
+                    const shadowSize = spriteHeight > 1 ? 50 : 40;
+                    enemyRef.current.shadow.ellipse(600, 375, shadowSize, 15);
                     enemyRef.current.shadow.fill({ color: 0x000000, alpha: 0.5 });
                 }
             } else {
-                enemyRef.current.scale.set(-0.9, 0.9);
+                enemyRef.current.scale.set(-baseScale, baseScale);
                 if (enemyRef.current.aura) {
                     enemyRef.current.aura.clear();
                 }
                 if (enemyRef.current.shadow) {
                     enemyRef.current.shadow.clear();
-                    enemyRef.current.shadow.ellipse(600, 375, 30, 10);
+                    const shadowSize = spriteHeight > 1 ? 35 : 30;
+                    enemyRef.current.shadow.ellipse(600, 375, shadowSize, 10);
                     enemyRef.current.shadow.fill({ color: 0x000000, alpha: 0.4 });
                 }
             }
@@ -685,8 +694,8 @@ function spawnFloatingText(app, container, { text, type, target }) {
 
     container.addChild(pixiText);
 
-    let velocityY = isCrit ? -4 : -2.5;
-    let velocityX = (Math.random() - 0.5) * 1;
+    let velocityY = isCrit ? -3 : -2;
+    let velocityX = (Math.random() - 0.5) * 0.8;
     let tick = 0;
     const scale = isCrit ? 1.5 : 1;
 
@@ -696,21 +705,22 @@ function spawnFloatingText(app, container, { text, type, target }) {
         tick++;
 
         // Pop-in effect
-        if (tick < 8) {
-            pixiText.scale.set(0.5 + (tick / 8) * (scale - 0.5) * 1.2);
-        } else if (tick < 12) {
-            pixiText.scale.set(scale * 1.2 - ((tick - 8) / 4) * 0.2 * scale);
+        if (tick < 10) {
+            pixiText.scale.set(0.5 + (tick / 10) * (scale - 0.5) * 1.2);
+        } else if (tick < 15) {
+            pixiText.scale.set(scale * 1.2 - ((tick - 10) / 5) * 0.2 * scale);
         }
 
         pixiText.x += velocityX;
         pixiText.y += velocityY;
-        velocityY += 0.08;
+        velocityY += 0.04; // Slower gravity
 
-        if (tick > 35) {
-            pixiText.alpha -= 0.06;
+        // Start fading much later and fade slower
+        if (tick > 70) {
+            pixiText.alpha -= 0.04;
         }
 
-        if (pixiText.alpha <= 0 || tick > 80) {
+        if (pixiText.alpha <= 0 || tick > 120) {
             app.ticker.remove(animate);
             pixiText.destroy();
         }

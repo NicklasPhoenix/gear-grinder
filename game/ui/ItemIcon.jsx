@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ASSET_BASE } from '../../assets/gameAssets';
-import { loadAndProcessImage } from '../utils/assetLoader';
+import { loadAndProcessItemImage } from '../utils/assetLoader';
 
 // Shared cache
 let processedItemsUrl = null;
@@ -44,7 +44,7 @@ export default function ItemIcon({ item, size = "full" }) {
         if (processedItemsUrl) return;
 
         if (!processingPromise) {
-            processingPromise = loadAndProcessImage(ASSET_BASE.items)
+            processingPromise = loadAndProcessItemImage(ASSET_BASE.items)
                 .then(url => {
                     processedItemsUrl = url;
                     return url;
