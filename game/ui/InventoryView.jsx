@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useGame } from '../context/GameContext';
 import ItemIcon from './ItemIcon';
-import { TIERS, GEAR_SLOTS, getItemScore, getSalvageReturns, BOSS_SETS, addItemToInventory, removeOneFromStack } from '../data/items';
+import { TIERS, GEAR_SLOTS, getItemScore, getSalvageReturns, BOSS_SETS, addItemToInventory, removeOneFromStack, getEnhanceStage } from '../data/items';
 
 const SLOT_ICONS = {
     weapon: '&#9876;',
@@ -274,12 +274,24 @@ export default function InventoryView({ onHover }) {
                                             </div>
                                         )}
 
-                                        {/* Enhancement level */}
-                                        {item.plus > 0 && (
-                                            <div className="absolute top-1 right-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-black/60 text-yellow-400">
-                                                +{item.plus}
-                                            </div>
-                                        )}
+                                        {/* Enhancement level with stage styling */}
+                                        {item.plus > 0 && (() => {
+                                            const stage = getEnhanceStage(item.plus);
+                                            return (
+                                                <div
+                                                    className="absolute top-1 right-1 px-1.5 py-0.5 rounded text-[10px] font-bold flex items-center gap-0.5"
+                                                    style={{
+                                                        backgroundColor: stage.bgColor,
+                                                        color: stage.color,
+                                                        boxShadow: stage.glow,
+                                                        border: `1px solid ${stage.borderColor}`
+                                                    }}
+                                                >
+                                                    {stage.icon && <span className="text-[8px]">{stage.icon}</span>}
+                                                    +{item.plus}
+                                                </div>
+                                            );
+                                        })()}
 
                                         {/* Tier indicator */}
                                         <div
@@ -437,12 +449,24 @@ export default function InventoryView({ onHover }) {
                                             }}
                                         />
 
-                                        {/* Enhancement */}
-                                        {item.plus > 0 && (
-                                            <div className="absolute bottom-0.5 right-0.5 text-[8px] font-bold text-yellow-400 bg-black/60 px-1 rounded">
-                                                +{item.plus}
-                                            </div>
-                                        )}
+                                        {/* Enhancement with stage styling */}
+                                        {item.plus > 0 && (() => {
+                                            const stage = getEnhanceStage(item.plus);
+                                            return (
+                                                <div
+                                                    className="absolute bottom-0.5 right-0.5 text-[8px] font-bold px-1 rounded flex items-center gap-0.5"
+                                                    style={{
+                                                        backgroundColor: stage.bgColor,
+                                                        color: stage.color,
+                                                        boxShadow: stage.glow,
+                                                        border: `1px solid ${stage.borderColor}`
+                                                    }}
+                                                >
+                                                    {stage.icon && <span className="text-[6px]">{stage.icon}</span>}
+                                                    +{item.plus}
+                                                </div>
+                                            );
+                                        })()}
 
                                         {/* Stack count */}
                                         {(item.count || 1) > 1 && (

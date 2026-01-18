@@ -3,7 +3,7 @@ import { useGame } from '../context/GameContext';
 import { getEnhanceCost, getEnhanceSuccess, getEnhanceBonus } from '../utils/formulas';
 import ItemIcon from './ItemIcon';
 import { MaterialIcon } from './MaterialIcons';
-import { TIERS, addItemToInventory, removeOneFromStack } from '../data/items';
+import { TIERS, addItemToInventory, removeOneFromStack, getEnhanceStage } from '../data/items';
 
 export default function EnhancementView() {
     const { state, gameManager } = useGame();
@@ -194,7 +194,22 @@ export default function EnhancementView() {
                                                 {item.name}
                                             </div>
                                             <div className="text-[10px] text-slate-400 flex items-center gap-2">
-                                                <span className="text-yellow-400">+{item.plus}</span>
+                                                {(() => {
+                                                    const stage = getEnhanceStage(item.plus);
+                                                    return (
+                                                        <span
+                                                            className="px-1 rounded flex items-center gap-0.5"
+                                                            style={{
+                                                                color: stage.color,
+                                                                backgroundColor: stage.bgColor,
+                                                                boxShadow: stage.glow
+                                                            }}
+                                                        >
+                                                            {stage.icon && <span className="text-[8px]">{stage.icon}</span>}
+                                                            +{item.plus}
+                                                        </span>
+                                                    );
+                                                })()}
                                                 {(item.count || 1) > 1 && (
                                                     <span className="text-blue-400 bg-blue-500/20 px-1 rounded">x{item.count}</span>
                                                 )}
@@ -220,10 +235,44 @@ export default function EnhancementView() {
                                     <div className="font-bold text-sm truncate" style={{ color: TIERS[selectedItem.tier].color }}>
                                         {selectedItem.name}
                                     </div>
-                                    <div className="text-xs">
-                                        <span className="text-yellow-400">+{selectedItem.plus}</span>
-                                        <span className="text-slate-500 mx-1">&rarr;</span>
-                                        <span className="text-green-400">+{selectedItem.plus + 1}</span>
+                                    <div className="text-xs flex items-center gap-1">
+                                        {(() => {
+                                            const currentStage = getEnhanceStage(selectedItem.plus);
+                                            const nextStage = getEnhanceStage(selectedItem.plus + 1);
+                                            const isNewStage = currentStage.stage !== nextStage.stage;
+                                            return (
+                                                <>
+                                                    <span
+                                                        className="px-1.5 py-0.5 rounded flex items-center gap-0.5"
+                                                        style={{
+                                                            color: currentStage.color,
+                                                            backgroundColor: currentStage.bgColor,
+                                                            boxShadow: currentStage.glow
+                                                        }}
+                                                    >
+                                                        {currentStage.icon && <span className="text-[9px]">{currentStage.icon}</span>}
+                                                        +{selectedItem.plus}
+                                                    </span>
+                                                    <span className="text-slate-500">&rarr;</span>
+                                                    <span
+                                                        className={`px-1.5 py-0.5 rounded flex items-center gap-0.5 ${isNewStage ? 'animate-pulse' : ''}`}
+                                                        style={{
+                                                            color: nextStage.color,
+                                                            backgroundColor: nextStage.bgColor,
+                                                            boxShadow: nextStage.glow
+                                                        }}
+                                                    >
+                                                        {nextStage.icon && <span className="text-[9px]">{nextStage.icon}</span>}
+                                                        +{selectedItem.plus + 1}
+                                                    </span>
+                                                    {isNewStage && nextStage.name && (
+                                                        <span className="text-[9px] ml-1 px-1 py-0.5 rounded animate-pulse" style={{ color: nextStage.color, backgroundColor: nextStage.bgColor }}>
+                                                            {nextStage.name}!
+                                                        </span>
+                                                    )}
+                                                </>
+                                            );
+                                        })()}
                                     </div>
                                 </div>
                                 <div className="text-right">

@@ -1,5 +1,5 @@
 import React from 'react';
-import { TIERS, GEAR_BASES, WEAPON_TYPES, PRESTIGE_WEAPONS, BOSS_SETS, getItemScore } from '../data/items';
+import { TIERS, GEAR_BASES, WEAPON_TYPES, PRESTIGE_WEAPONS, BOSS_SETS, PRESTIGE_BOSS_SETS, getItemScore, getEnhanceStage } from '../data/items';
 import { getEnhanceBonus } from '../utils/formulas';
 
 // Effect descriptions - what each effect actually does
@@ -147,7 +147,22 @@ export default function GameTooltip({ tooltip }) {
                     <div>
                         <div className="font-bold text-lg leading-tight" style={{ color: tierData.color }}>
                             {item.name}
-                            {item.plus > 0 && <span className="text-white ml-1">+{item.plus}</span>}
+                            {item.plus > 0 && (() => {
+                                const stage = getEnhanceStage(item.plus);
+                                return (
+                                    <span
+                                        className="ml-2 px-1.5 py-0.5 rounded text-sm inline-flex items-center gap-0.5"
+                                        style={{
+                                            color: stage.color,
+                                            backgroundColor: stage.bgColor,
+                                            boxShadow: stage.glow
+                                        }}
+                                    >
+                                        {stage.icon && <span className="text-xs">{stage.icon}</span>}
+                                        +{item.plus}
+                                    </span>
+                                );
+                            })()}
                         </div>
                         <div className="text-xs text-slate-400 uppercase font-bold mt-0.5 flex items-center gap-2">
                             <span style={{ color: tierData.color }}>{tierData.name}</span>
@@ -338,15 +353,30 @@ export default function GameTooltip({ tooltip }) {
                 </div>
             )}
 
-            {/* Enhancement Info */}
-            {item.plus > 0 && enhanceBonus.dmgMult > 1 && (
-                <div className="px-4 py-2 bg-yellow-500/5">
-                    <div className="text-[10px] text-yellow-400/70 uppercase tracking-wider">Enhancement Bonus</div>
-                    <div className="text-sm text-yellow-300">
-                        +{((enhanceBonus.dmgMult - 1) * 100).toFixed(0)}% Total Damage
+            {/* Enhancement Stage Info */}
+            {item.plus >= 10 && (() => {
+                const stage = getEnhanceStage(item.plus);
+                return (
+                    <div
+                        className="px-4 py-2 border-t border-slate-700/30"
+                        style={{ background: `linear-gradient(135deg, ${stage.bgColor}, transparent)` }}
+                    >
+                        <div className="flex items-center gap-2 mb-1">
+                            {stage.icon && (
+                                <span style={{ color: stage.color }} className="text-base">{stage.icon}</span>
+                            )}
+                            <span className="text-[10px] uppercase tracking-wider font-bold" style={{ color: stage.color }}>
+                                {stage.name} Enhancement
+                            </span>
+                        </div>
+                        <div className="text-[11px] text-slate-300 space-y-0.5">
+                            {item.plus >= 10 && <div>• Requires Blessed Orbs to enhance</div>}
+                            {item.plus >= 15 && <div style={{ color: stage.color }}>• +{((enhanceBonus.dmgMult - 1) * 100).toFixed(0)}% Total Damage bonus</div>}
+                            {item.plus >= 20 && <div>• Requires Celestial Shards to enhance</div>}
+                        </div>
                     </div>
-                </div>
-            )}
+                );
+            })()}
 
             {/* Footer with Score */}
             <div className="px-4 py-2 bg-slate-950/50 flex justify-between items-center">

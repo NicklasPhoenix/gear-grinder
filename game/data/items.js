@@ -383,6 +383,52 @@ export function addItemToInventory(inventory, newItem) {
     }
 }
 
+// Get enhancement stage info for visual styling
+// +0-9: Normal, +10-14: Awakened, +15-19: Transcendent, +20+: Celestial
+export function getEnhanceStage(plus) {
+    if (!plus || plus < 10) {
+        return {
+            stage: 'normal',
+            name: null,
+            color: '#fbbf24', // Yellow
+            bgColor: 'rgba(251, 191, 36, 0.15)',
+            borderColor: 'rgba(251, 191, 36, 0.4)',
+            glow: null,
+            icon: null
+        };
+    } else if (plus < 15) {
+        return {
+            stage: 'awakened',
+            name: 'Awakened',
+            color: '#22d3ee', // Cyan
+            bgColor: 'rgba(34, 211, 238, 0.2)',
+            borderColor: 'rgba(34, 211, 238, 0.5)',
+            glow: '0 0 8px rgba(34, 211, 238, 0.6)',
+            icon: '◆' // Diamond
+        };
+    } else if (plus < 20) {
+        return {
+            stage: 'transcendent',
+            name: 'Transcendent',
+            color: '#c084fc', // Purple
+            bgColor: 'rgba(192, 132, 252, 0.25)',
+            borderColor: 'rgba(192, 132, 252, 0.6)',
+            glow: '0 0 12px rgba(192, 132, 252, 0.7)',
+            icon: '★' // Star
+        };
+    } else {
+        return {
+            stage: 'celestial',
+            name: 'Celestial',
+            color: '#f472b6', // Pink
+            bgColor: 'rgba(244, 114, 182, 0.3)',
+            borderColor: 'rgba(244, 114, 182, 0.7)',
+            glow: '0 0 15px rgba(244, 114, 182, 0.8), 0 0 25px rgba(251, 191, 36, 0.4)',
+            icon: '✦' // Four-pointed star
+        };
+    }
+}
+
 // Remove one item from a stack (for equipping)
 export function removeOneFromStack(inventory, itemId) {
     const itemIndex = inventory.findIndex(item => item.id === itemId);
