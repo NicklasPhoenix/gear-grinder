@@ -3,7 +3,7 @@ import { useGame } from '../context/GameContext';
 import ItemIcon from './ItemIcon';
 import SlotIcon from './SlotIcon';
 import { MaterialIcon } from './MaterialIcons';
-import { GEAR_SLOTS, TIERS, WEAPON_TYPES, PRESTIGE_WEAPONS, GEAR_BASES, SPECIAL_EFFECTS } from '../data/items';
+import { GEAR_SLOTS, TIERS, WEAPON_TYPES, PRESTIGE_WEAPONS, GEAR_BASES, SPECIAL_EFFECTS, addItemToInventory } from '../data/items';
 
 const SLOT_NAMES = {
     weapon: 'Weapon',
@@ -84,7 +84,7 @@ export default function CraftingView() {
             gold: prev.gold - tierData.goldCost,
             ore: prev.ore - tierData.oreCost,
             leather: prev.leather - tierData.leatherCost,
-            inventory: [...prev.inventory, newItem]
+            inventory: addItemToInventory(prev.inventory, newItem)
         }));
 
         const effectText = effects.length > 0 ? ` (${effects[0].name}!)` : '';

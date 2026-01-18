@@ -3,7 +3,7 @@ import { useGame } from '../context/GameContext';
 import { getEnhanceCost, getEnhanceSuccess, getEnhanceBonus } from '../utils/formulas';
 import ItemIcon from './ItemIcon';
 import { MaterialIcon } from './MaterialIcons';
-import { TIERS } from '../data/items';
+import { TIERS, addItemToInventory, removeOneFromStack } from '../data/items';
 
 export default function EnhancementView() {
     const { state, gameManager } = useGame();
@@ -65,6 +65,7 @@ export default function EnhancementView() {
     const doEnhance = (item, costs) => {
         const successChance = getEnhanceSuccess(item.plus);
         const success = Math.random() * 100 < successChance;
+        const isInventoryItem = state.inventory.find(i => i.id === item.id);
 
         let newState = {
             ...state,
@@ -74,27 +75,42 @@ export default function EnhancementView() {
             celestialShard: state.celestialShard - (costs.celestialShard || 0)
         };
 
-        if (success) {
-            const newItem = { ...item, plus: item.plus + 1 };
-            if (state.inventory.find(i => i.id === newItem.id)) {
-                newState.inventory = state.inventory.map(i => i.id === newItem.id ? newItem : i);
-            } else {
-                newState.gear = { ...state.gear, [newItem.slot]: newItem };
-            }
-            gameManager.setState(newState);
-            gameManager.emit('floatingText', { text: `+${newItem.plus}!`, type: 'heal', target: 'player' });
-            setSelectedItem(newItem);
+        const newPlus = success ? item.plus + 1 : Math.max(0, item.plus - 1);
+        const newItem = { ...item, plus: newPlus, id: Date.now() };
+        delete newItem.count; // Remove count for single enhanced item
+
+        if (isInventoryItem) {
+            // Remove one from stack and add enhanced item with stacking
+            let updatedInventory = removeOneFromStack(state.inventory, item.id);
+            updatedInventory = addItemToInventory(updatedInventory, newItem);
+            newState.inventory = updatedInventory;
         } else {
-            const newPlus = Math.max(0, item.plus - 1);
-            const newItem = { ...item, plus: newPlus };
-            if (state.inventory.find(i => i.id === newItem.id)) {
-                newState.inventory = state.inventory.map(i => i.id === newItem.id ? newItem : i);
-            } else {
-                newState.gear = { ...state.gear, [newItem.slot]: newItem };
-            }
+            // Equipped item - just update in place
+            newState.gear = { ...state.gear, [newItem.slot]: newItem };
+        }
+
+        if (!success) {
             newState.enhanceFails = (state.enhanceFails || 0) + 1;
-            gameManager.setState(newState);
+        }
+
+        gameManager.setState(newState);
+
+        if (success) {
+            gameManager.emit('floatingText', { text: `+${newItem.plus}!`, type: 'heal', target: 'player' });
+        } else {
             gameManager.emit('floatingText', { text: `FAIL`, type: 'death', target: 'player' });
+        }
+
+        // Find the new item in inventory for selection
+        if (isInventoryItem) {
+            const updatedItem = newState.inventory.find(i =>
+                i.slot === newItem.slot &&
+                i.tier === newItem.tier &&
+                i.plus === newItem.plus &&
+                i.bossSet === newItem.bossSet
+            );
+            setSelectedItem(updatedItem || newItem);
+        } else {
             setSelectedItem(newItem);
         }
     };
@@ -177,8 +193,11 @@ export default function EnhancementView() {
                                             <div className="font-bold text-xs truncate" style={{ color: tierInfo.color }}>
                                                 {item.name}
                                             </div>
-                                            <div className="text-[10px] text-slate-400">
+                                            <div className="text-[10px] text-slate-400 flex items-center gap-2">
                                                 <span className="text-yellow-400">+{item.plus}</span>
+                                                {(item.count || 1) > 1 && (
+                                                    <span className="text-blue-400 bg-blue-500/20 px-1 rounded">x{item.count}</span>
+                                                )}
                                             </div>
                                         </div>
                                     </div>

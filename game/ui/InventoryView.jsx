@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useGame } from '../context/GameContext';
 import ItemIcon from './ItemIcon';
-import { TIERS, GEAR_SLOTS, getItemScore, getSalvageReturns, BOSS_SETS } from '../data/items';
+import { TIERS, GEAR_SLOTS, getItemScore, getSalvageReturns, BOSS_SETS, addItemToInventory, removeOneFromStack } from '../data/items';
 
 const SLOT_ICONS = {
     weapon: '&#9876;',
@@ -150,14 +150,19 @@ export default function InventoryView({ onHover }) {
 
     const handleEquip = (item) => {
         let newGear = { ...state.gear };
-        let newInv = [...state.inventory];
         const oldItem = newGear[item.slot];
 
-        newInv = newInv.filter(i => i.id !== item.id);
-        newGear[item.slot] = item;
+        // Remove one from stack (or remove entirely if count is 1)
+        let newInv = removeOneFromStack(state.inventory, item.id);
 
+        // Create a clean copy of the item for equipping (no count property)
+        const equippedItem = { ...item };
+        delete equippedItem.count;
+        newGear[item.slot] = equippedItem;
+
+        // Add old equipped item back to inventory with stacking
         if (oldItem) {
-            newInv.push(oldItem);
+            newInv = addItemToInventory(newInv, { ...oldItem, id: Date.now() });
         }
 
         gameManager.setState(prev => ({
@@ -174,7 +179,7 @@ export default function InventoryView({ onHover }) {
         gameManager.setState(prev => ({
             ...prev,
             gear: { ...prev.gear, [item.slot]: null },
-            inventory: [...prev.inventory, item]
+            inventory: addItemToInventory(prev.inventory, { ...item, id: Date.now() })
         }));
         gameManager.emit('floatingText', { text: "UNEQUIPPED", type: 'damage', target: 'player' });
     };
@@ -436,6 +441,13 @@ export default function InventoryView({ onHover }) {
                                         {item.plus > 0 && (
                                             <div className="absolute bottom-0.5 right-0.5 text-[8px] font-bold text-yellow-400 bg-black/60 px-1 rounded">
                                                 +{item.plus}
+                                            </div>
+                                        )}
+
+                                        {/* Stack count */}
+                                        {(item.count || 1) > 1 && (
+                                            <div className="absolute bottom-0.5 left-0.5 text-[9px] font-bold text-white bg-blue-600/90 px-1.5 rounded-sm min-w-[18px] text-center">
+                                                x{item.count}
                                             </div>
                                         )}
                                     </div>

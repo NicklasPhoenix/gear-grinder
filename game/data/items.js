@@ -336,17 +336,68 @@ export function getItemScore(item) {
     return Math.floor(score);
 }
 
-// Get salvage returns for an item
-export function getSalvageReturns(item) {
+// Get salvage returns for an item (multiply by count for stacked items)
+export function getSalvageReturns(item, explicitCount) {
     if (!item) return { gold: 0, ore: 0, leather: 0, enhanceStone: 0 };
 
     const tier = TIERS[item.tier] || TIERS[0];
     const plus = item.plus || 0;
+    // Use explicit count if provided, otherwise use item's stack count, default to 1
+    const itemCount = explicitCount !== undefined ? explicitCount : (item.count || 1);
 
     return {
-        gold: Math.floor((tier.goldCost || 50) * 0.3 + plus * 20),
-        ore: Math.floor((tier.oreCost || 5) * 0.4 + plus * 2),
-        leather: Math.floor((tier.leatherCost || 5) * 0.4 + plus * 2),
-        enhanceStone: Math.floor(plus * 0.5),
+        gold: Math.floor(((tier.goldCost || 50) * 0.3 + plus * 20) * itemCount),
+        ore: Math.floor(((tier.oreCost || 5) * 0.4 + plus * 2) * itemCount),
+        leather: Math.floor(((tier.leatherCost || 5) * 0.4 + plus * 2) * itemCount),
+        enhanceStone: Math.floor((plus * 0.5) * itemCount),
     };
+}
+
+// Generate a unique stack key for an item (items with same key can stack)
+export function getItemStackKey(item) {
+    if (!item) return null;
+    // Create a stable representation of effects for comparison
+    const effectsKey = item.effects && item.effects.length > 0
+        ? item.effects.map(e => `${e.id}:${e.value}`).sort().join('|')
+        : 'none';
+    // Stack by: slot, tier, plus, bossSet, weaponType, effects
+    return `${item.slot}_${item.tier}_${item.plus || 0}_${item.bossSet || 'none'}_${item.weaponType || 'none'}_${effectsKey}`;
+}
+
+// Add item to inventory with stacking
+export function addItemToInventory(inventory, newItem) {
+    const stackKey = getItemStackKey(newItem);
+    const existingIndex = inventory.findIndex(item => getItemStackKey(item) === stackKey);
+
+    if (existingIndex >= 0) {
+        // Stack with existing item
+        const updated = [...inventory];
+        updated[existingIndex] = {
+            ...updated[existingIndex],
+            count: (updated[existingIndex].count || 1) + (newItem.count || 1)
+        };
+        return updated;
+    } else {
+        // Add as new item with count 1
+        return [...inventory, { ...newItem, count: newItem.count || 1 }];
+    }
+}
+
+// Remove one item from a stack (for equipping)
+export function removeOneFromStack(inventory, itemId) {
+    const itemIndex = inventory.findIndex(item => item.id === itemId);
+    if (itemIndex < 0) return inventory;
+
+    const item = inventory[itemIndex];
+    const count = item.count || 1;
+
+    if (count <= 1) {
+        // Remove entirely
+        return inventory.filter(i => i.id !== itemId);
+    } else {
+        // Reduce count
+        const updated = [...inventory];
+        updated[itemIndex] = { ...item, count: count - 1 };
+        return updated;
+    }
 }
