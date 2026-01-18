@@ -194,10 +194,10 @@ export default function GameLayout() {
                         </span>
                     </div>
                 </div>
-
-                {/* Tooltip Layer */}
-                {tooltipUser && <GameTooltip tooltip={tooltipUser} />}
             </div>
+
+            {/* Tooltip Layer - outside panels to avoid stacking context issues */}
+            {tooltipUser && <GameTooltip tooltip={tooltipUser} />}
         </div>
     );
 }
