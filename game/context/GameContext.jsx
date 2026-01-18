@@ -18,7 +18,17 @@ export function GameProvider({ children }) {
                 const saved = await window.storage.get('gear-grinder-save');
                 if (saved && saved.value) {
                     const parsed = JSON.parse(saved.value);
-                    // TODO: Add robust migration here, for now simple merge
+                    // Sanitize numeric values that might be NaN
+                    if (isNaN(parsed.playerHp) || parsed.playerHp === null) {
+                        parsed.playerHp = parsed.playerMaxHp || 100;
+                    }
+                    if (isNaN(parsed.enemyHp) || parsed.enemyHp === null) {
+                        parsed.enemyHp = parsed.enemyMaxHp || 20;
+                    }
+                    if (isNaN(parsed.gold)) parsed.gold = 0;
+                    if (isNaN(parsed.xp)) parsed.xp = 0;
+                    if (isNaN(parsed.level)) parsed.level = 1;
+                    // Merge with default state
                     gm.state = { ...gm.state, ...parsed, combatLog: [] };
                 }
             } catch (e) {

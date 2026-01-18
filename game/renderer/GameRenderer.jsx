@@ -386,10 +386,24 @@ export default function GameRenderer() {
                 if (Math.floor(time / 16) % 10 === 0) {
                     const gmState = gameManager.getState();
                     if (gmState && playerHpBarRef.current) {
-                        updateHpBar(playerHpBarRef.current, gmState.playerHp || 100, gmState.playerMaxHp || 100, true);
+                        // Fix NaN values by resetting to max HP
+                        let playerHp = gmState.playerHp;
+                        const playerMaxHp = gmState.playerMaxHp || 100;
+                        if (isNaN(playerHp) || playerHp === null || playerHp === undefined) {
+                            playerHp = playerMaxHp;
+                            // Fix the state
+                            gameManager.setState(prev => ({ ...prev, playerHp: playerMaxHp }));
+                        }
+                        updateHpBar(playerHpBarRef.current, playerHp, playerMaxHp, true);
                     }
                     if (gmState && enemyHpBarRef.current) {
-                        updateHpBar(enemyHpBarRef.current, gmState.enemyHp || 20, gmState.enemyMaxHp || 20, false);
+                        let enemyHp = gmState.enemyHp;
+                        const enemyMaxHp = gmState.enemyMaxHp || 20;
+                        if (isNaN(enemyHp) || enemyHp === null || enemyHp === undefined) {
+                            enemyHp = enemyMaxHp;
+                            gameManager.setState(prev => ({ ...prev, enemyHp: enemyMaxHp }));
+                        }
+                        updateHpBar(enemyHpBarRef.current, enemyHp, enemyMaxHp, false);
                     }
                 }
             });
@@ -1015,14 +1029,11 @@ function updateHpBar(barContainer, current, max, isPlayer) {
 
     const width = barContainer.barWidth || 120;
 
-    // Ensure valid values
-    const safeMax = Math.max(1, max || 100);
-    const safeCurrent = Math.max(0, current || 0);
-    const pct = Math.min(1, safeCurrent / safeMax);
+    // Ensure valid values - handle NaN explicitly
+    const safeMax = Math.max(1, (isNaN(max) || max === null || max === undefined) ? 100 : max);
+    const safeCurrent = Math.max(0, (isNaN(current) || current === null || current === undefined) ? safeMax : current);
+    const pct = Math.min(1, Math.max(0, safeCurrent / safeMax));
     const barWidth = Math.max(4, width * pct); // At least 4px width if health > 0
-
-    // Only log occasionally to avoid console spam
-    // console.log(`HP Bar Update (${isPlayer ? 'player' : 'enemy'}): ${safeCurrent}/${safeMax}`);
 
     // Update HP text overlay
     if (barContainer.hpText) {
