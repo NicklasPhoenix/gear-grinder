@@ -1,6 +1,8 @@
 import React from 'react';
 import { useGame } from '../context/GameContext';
 import { ZONES, PRESTIGE_ZONES, getZoneById } from '../data/zones';
+import { BOSS_SETS, PRESTIGE_BOSS_SETS } from '../data/items';
+import { MaterialIcon } from './MaterialIcons';
 
 const ZONE_COLORS = {
     Beast: 'from-green-600/20 to-green-900/30',
@@ -123,6 +125,35 @@ export default function ZoneView() {
                                                 {zone.goldMin}-{zone.goldMax}
                                             </span>
                                         </div>
+
+                                        {/* Drop rates */}
+                                        <div className="flex items-center gap-2 mt-2 flex-wrap">
+                                            {zone.drops.ore > 0 && (
+                                                <DropBadge icon="ore" rate={zone.drops.ore} />
+                                            )}
+                                            {zone.drops.leather > 0 && (
+                                                <DropBadge icon="leather" rate={zone.drops.leather} />
+                                            )}
+                                            {zone.drops.enhanceStone > 0 && (
+                                                <DropBadge icon="enhanceStone" rate={zone.drops.enhanceStone} />
+                                            )}
+                                            {zone.drops.blessedOrb > 0 && (
+                                                <DropBadge icon="blessedOrb" rate={zone.drops.blessedOrb} />
+                                            )}
+                                            {zone.drops.celestialShard > 0 && (
+                                                <DropBadge icon="celestialShard" rate={zone.drops.celestialShard} />
+                                            )}
+                                            {zone.drops.prestigeStone > 0 && (
+                                                <DropBadge icon="prestigeStone" rate={zone.drops.prestigeStone} />
+                                            )}
+                                        </div>
+
+                                        {/* Boss set info */}
+                                        {zone.bossSet && (
+                                            <div className="mt-2">
+                                                <BossSetBadge setName={zone.bossSet} />
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* Right side - Status */}
@@ -198,4 +229,38 @@ function formatNumber(num) {
     if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
     if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
     return num.toString();
+}
+
+function DropBadge({ icon, rate }) {
+    const percent = Math.round(rate * 100);
+    const rateColor = rate >= 0.3 ? 'text-green-400' : rate >= 0.1 ? 'text-yellow-400' : 'text-slate-400';
+
+    return (
+        <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-800/60 text-[10px]">
+            <MaterialIcon type={icon} size={12} />
+            <span className={rateColor}>{percent}%</span>
+        </div>
+    );
+}
+
+function BossSetBadge({ setName }) {
+    const bossSet = BOSS_SETS[setName] || PRESTIGE_BOSS_SETS[setName];
+    if (!bossSet) return null;
+
+    return (
+        <div
+            className="inline-flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-bold"
+            style={{
+                backgroundColor: `${bossSet.color}20`,
+                borderLeft: `2px solid ${bossSet.color}`,
+                color: bossSet.color
+            }}
+        >
+            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+            <span>{bossSet.name} Set</span>
+            <span className="opacity-60">(20% drop)</span>
+        </div>
+    );
 }
