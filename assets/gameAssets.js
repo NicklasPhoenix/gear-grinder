@@ -139,7 +139,7 @@ export const ITEM_SPRITES = {
   gloves:   { sheet: 'glove', row: 0, col: 0 },
   // Accessories
   amulet:   { sheet: 'amulet', row: 0, col: 0 },
-  accessory:{ sheet: 'ring', row: 0, col: 2 },
+  accessory:{ sheet: 'ring', row: 0, col: 0 },
   ring:     { sheet: 'ring', row: 0, col: 0 },
   // Materials (use potion sheet)
   ore:      { sheet: 'potion', row: 1, col: 0 },
