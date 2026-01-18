@@ -216,30 +216,34 @@ export default function GameRenderer() {
 
             // --- HP Bars (Modern style) ---
             const createHpBar = (x, y, width, isPlayer) => {
+                console.log(`Creating HP bar at (${x}, ${y}), width=${width}, isPlayer=${isPlayer}`);
                 const container = new PIXI.Container();
                 container.position.set(x, y);
 
-                // Outer frame
+                // Outer frame - simple rect for reliability
                 const frame = new PIXI.Graphics();
-                frame.roundRect(-width/2 - 3, -9, width + 6, 18, 4);
+                frame.rect(-width/2 - 3, -9, width + 6, 18);
                 frame.fill({ color: 0x000000, alpha: 0.6 });
-                frame.stroke({ width: 2, color: isPlayer ? 0x3b82f6 : 0xef4444, alpha: 0.5 });
+                frame.rect(-width/2 - 3, -9, width + 6, 18);
+                frame.stroke({ width: 2, color: isPlayer ? 0x3b82f6 : 0xef4444, alpha: 0.8 });
                 container.addChild(frame);
 
                 // Background
                 const bg = new PIXI.Graphics();
-                bg.roundRect(-width/2, -6, width, 12, 3);
+                bg.rect(-width/2, -6, width, 12);
                 bg.fill(0x1f2937);
                 container.addChild(bg);
 
-                // Fill - draw initial full bar directly
+                // Fill - draw initial full bar
                 const fill = new PIXI.Graphics();
-                fill.roundRect(-width/2, -6, width, 12, 3);
+                fill.rect(-width/2, -6, width, 12);
                 fill.fill(isPlayer ? 0x3b82f6 : 0xef4444);
                 container.addChild(fill);
                 container.fillRef = fill;
                 container.barWidth = width;
                 container.isPlayer = isPlayer;
+
+                console.log(`HP bar created, fillRef set: ${!!container.fillRef}`);
 
                 // Label
                 const labelStyle = new PIXI.TextStyle({
@@ -264,24 +268,17 @@ export default function GameRenderer() {
             playerHpBarRef.current = playerBar;
             enemyHpBarRef.current = enemyBar;
 
-            // Initialize HP bars with full health (will be updated by useEffect immediately)
-            updateHpBar(playerBar, 100, 100, true);
-            updateHpBar(enemyBar, 100, 100, false);
-
-            // Mark initialization complete so HP bar updates can run
+            // Set initialized and force an HP bar update after a short delay
             setIsInitialized(true);
 
-            // Force immediate HP bar update after a tick to ensure state is current
+            // Force update HP bars after PIXI has rendered at least one frame
             setTimeout(() => {
-                if (playerHpBarRef.current?.fillRef) {
-                    const hp = gameManager.state?.playerHp || 100;
-                    const maxHp = gameManager.state?.playerMaxHp || 100;
-                    updateHpBar(playerHpBarRef.current, hp, maxHp, true);
-                }
-                if (enemyHpBarRef.current?.fillRef) {
-                    const hp = gameManager.state?.enemyHp || 20;
-                    const maxHp = gameManager.state?.enemyMaxHp || 20;
-                    updateHpBar(enemyHpBarRef.current, hp, maxHp, false);
+                console.log('Forcing HP bar update after delay');
+                const gmState = gameManager.getState();
+                if (gmState && playerHpBarRef.current && enemyHpBarRef.current) {
+                    console.log('State values:', gmState.playerHp, gmState.playerMaxHp, gmState.enemyHp, gmState.enemyMaxHp);
+                    updateHpBar(playerHpBarRef.current, gmState.playerHp || 100, gmState.playerMaxHp || 100, true);
+                    updateHpBar(enemyHpBarRef.current, gmState.enemyHp || 20, gmState.enemyMaxHp || 20, false);
                 }
             }, 100);
 
@@ -987,18 +984,21 @@ export default function GameRenderer() {
 }
 
 function updateHpBar(barContainer, current, max, isPlayer) {
-    if (!barContainer || !barContainer.fillRef) return;
+    if (!barContainer || !barContainer.fillRef) {
+        console.log('HP Bar: missing container or fillRef');
+        return;
+    }
 
     const fill = barContainer.fillRef;
     const width = barContainer.barWidth || 120;
-
-    fill.clear();
 
     // Ensure valid values
     const safeMax = Math.max(1, max || 100);
     const safeCurrent = Math.max(0, current || 0);
     const pct = Math.min(1, safeCurrent / safeMax);
-    const barWidth = Math.max(1, width * pct); // At least 1px width if health > 0
+    const barWidth = Math.max(4, width * pct); // At least 4px width if health > 0
+
+    console.log(`HP Bar Update (${isPlayer ? 'player' : 'enemy'}): ${safeCurrent}/${safeMax} = ${(pct * 100).toFixed(1)}%, barWidth=${barWidth}`);
 
     // Gradient fill based on health
     let color1;
@@ -1014,13 +1014,16 @@ function updateHpBar(barContainer, current, max, isPlayer) {
         }
     }
 
-    // Draw main fill
+    // Clear and redraw - use simple rect for reliability
+    fill.clear();
+
     if (pct > 0) {
-        fill.roundRect(-width/2, -6, barWidth, 12, 3);
+        // Main fill - use simple rect first
+        fill.rect(-width/2, -6, barWidth, 12);
         fill.fill(color1);
 
         // Highlight on top
-        fill.roundRect(-width/2, -6, barWidth, 4, 2);
+        fill.rect(-width/2, -6, barWidth, 4);
         fill.fill({ color: 0xffffff, alpha: 0.2 });
     }
 }
