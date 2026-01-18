@@ -852,6 +852,23 @@ export default function GameRenderer() {
         return g;
     }
 
+    // --- Update HP Bars on State Change (separate from sprite updates) ---
+    useEffect(() => {
+        if (!state) return;
+
+        // Update HP Bars (doesn't depend on sprite sheets)
+        if (playerHpBarRef.current && playerHpBarRef.current.fillRef) {
+            const playerHp = state.playerHp || 100;
+            const playerMaxHp = state.playerMaxHp || 100;
+            updateHpBar(playerHpBarRef.current, playerHp, playerMaxHp, true);
+        }
+        if (enemyHpBarRef.current && enemyHpBarRef.current.fillRef) {
+            const enemyHp = state.enemyHp || 20;
+            const enemyMaxHp = state.enemyMaxHp || 20;
+            updateHpBar(enemyHpBarRef.current, enemyHp, enemyMaxHp, false);
+        }
+    }, [state?.playerHp, state?.playerMaxHp, state?.enemyHp, state?.enemyMaxHp]);
+
     // --- Update Visuals on State Change ---
     useEffect(() => {
         if (!state || !spriteSheetRef.current) return;
@@ -920,17 +937,7 @@ export default function GameRenderer() {
             }
         }
 
-        // 2. Update HP Bars (use || to treat 0 as fallback case)
-        if (playerHpBarRef.current && playerHpBarRef.current.fillRef) {
-            const playerHp = state.playerHp || 100;
-            const playerMaxHp = state.playerMaxHp || 100;
-            updateHpBar(playerHpBarRef.current, playerHp, playerMaxHp, true);
-        }
-        if (enemyHpBarRef.current && enemyHpBarRef.current.fillRef) {
-            const enemyHp = state.enemyHp || 20;
-            const enemyMaxHp = state.enemyMaxHp || 20;
-            updateHpBar(enemyHpBarRef.current, enemyHp, enemyMaxHp, false);
-        }
+        // HP Bars are now updated in a separate useEffect above
 
     }, [state]);
 
