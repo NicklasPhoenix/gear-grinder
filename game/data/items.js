@@ -310,3 +310,43 @@ export const PRESTIGE_WEAPONS = [
     { id: 'katana', name: 'Katana', baseDmg: 7, baseHp: 0, scaling: 'agi', speedBonus: 0.3, critBonus: 20, desc: 'Lightning fast, +20% crit', prestigeReq: 2 },
     { id: 'greataxe', name: 'Greataxe', baseDmg: 15, baseHp: 50, scaling: 'str', speedBonus: -0.2, critBonus: 8, desc: 'Massive damage, +50 HP', prestigeReq: 3 },
 ];
+
+// Calculate item score for comparison (higher is better)
+export function getItemScore(item) {
+    if (!item) return 0;
+
+    const tier = TIERS[item.tier] || TIERS[0];
+    let score = tier.statMult * 100; // Base score from tier
+
+    // Add enhancement bonus
+    score += (item.plus || 0) * 15;
+
+    // Add effect values
+    if (item.effects) {
+        for (const effect of item.effects) {
+            score += (effect.value || 0) * 2;
+        }
+    }
+
+    // Boss items get bonus
+    if (item.bossSet) {
+        score *= 1.3;
+    }
+
+    return Math.floor(score);
+}
+
+// Get salvage returns for an item
+export function getSalvageReturns(item) {
+    if (!item) return { gold: 0, ore: 0, leather: 0, enhanceStone: 0 };
+
+    const tier = TIERS[item.tier] || TIERS[0];
+    const plus = item.plus || 0;
+
+    return {
+        gold: Math.floor((tier.goldCost || 50) * 0.3 + plus * 20),
+        ore: Math.floor((tier.oreCost || 5) * 0.4 + plus * 2),
+        leather: Math.floor((tier.leatherCost || 5) * 0.4 + plus * 2),
+        enhanceStone: Math.floor(plus * 0.5),
+    };
+}

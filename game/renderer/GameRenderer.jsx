@@ -261,6 +261,10 @@ export default function GameRenderer() {
             playerHpBarRef.current = playerBar;
             enemyHpBarRef.current = enemyBar;
 
+            // Initialize HP bars with full health
+            updateHpBar(playerBar, 100, 100, true);
+            updateHpBar(enemyBar, 20, 20, false);
+
             // --- Zone name display ---
             const zoneStyle = new PIXI.TextStyle({
                 fontFamily: 'Press Start 2P',
@@ -916,12 +920,16 @@ export default function GameRenderer() {
             }
         }
 
-        // 2. Update HP Bars
+        // 2. Update HP Bars (use || to treat 0 as fallback case)
         if (playerHpBarRef.current && playerHpBarRef.current.fillRef) {
-            updateHpBar(playerHpBarRef.current, state.playerHp, state.playerMaxHp, true);
+            const playerHp = state.playerHp || 100;
+            const playerMaxHp = state.playerMaxHp || 100;
+            updateHpBar(playerHpBarRef.current, playerHp, playerMaxHp, true);
         }
         if (enemyHpBarRef.current && enemyHpBarRef.current.fillRef) {
-            updateHpBar(enemyHpBarRef.current, state.enemyHp, state.enemyMaxHp, false);
+            const enemyHp = state.enemyHp || 20;
+            const enemyMaxHp = state.enemyMaxHp || 20;
+            updateHpBar(enemyHpBarRef.current, enemyHp, enemyMaxHp, false);
         }
 
     }, [state]);

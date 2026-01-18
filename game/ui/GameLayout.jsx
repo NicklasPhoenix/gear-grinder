@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import GameRenderer from '../renderer/GameRenderer';
 import { useGame } from '../context/GameContext';
 import InventoryView from './InventoryView';
@@ -10,6 +10,7 @@ import EnhancementView from './EnhancementView';
 import PrestigeView from './PrestigeView';
 import GameTooltip from './GameTooltip';
 import { getZoneById } from '../data/zones';
+import { calculatePlayerStats } from '../systems/PlayerSystem';
 
 // Icons for tabs
 const TabIcons = {
@@ -74,6 +75,7 @@ export default function GameLayout() {
     );
 
     const currentZone = getZoneById(state.currentZone);
+    const playerStats = useMemo(() => calculatePlayerStats(state), [state]);
 
     return (
         <div className="w-screen h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 overflow-hidden flex font-rajdhani">
@@ -147,10 +149,10 @@ export default function GameLayout() {
                 {/* Bottom Stats Bar */}
                 <div className="absolute bottom-4 left-4 right-4 flex justify-center">
                     <div className="glass-card rounded-xl px-6 py-3 flex items-center gap-8 animate-fadeIn">
-                        <StatMini label="Level" value={state.playerLevel || 1} color="text-purple-400" />
-                        <StatMini label="ATK" value={Math.floor(state.playerAtk || 10)} color="text-red-400" />
-                        <StatMini label="DEF" value={Math.floor(state.playerDef || 5)} color="text-blue-400" />
-                        <StatMini label="Kills" value={state.totalKills || 0} color="text-green-400" />
+                        <StatMini label="Level" value={state.level || 1} color="text-purple-400" />
+                        <StatMini label="ATK" value={Math.floor(playerStats.damage || 10)} color="text-red-400" />
+                        <StatMini label="DEF" value={Math.floor(playerStats.armor || 5)} color="text-blue-400" />
+                        <StatMini label="Kills" value={state.kills || 0} color="text-green-400" />
                         {state.prestigeLevel > 0 && (
                             <StatMini label="Prestige" value={state.prestigeLevel} color="text-pink-400" />
                         )}

@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useGame } from '../context/GameContext';
 import ItemIcon from './ItemIcon';
-import { TIERS, GEAR_SLOTS } from '../data/items';
+import { TIERS, GEAR_SLOTS, getItemScore, getSalvageReturns } from '../data/items';
 
 const SLOT_ICONS = {
     weapon: '&#9876;',
@@ -27,6 +27,96 @@ const SLOT_NAMES = {
 
 export default function InventoryView({ onHover }) {
     const { state, gameManager } = useGame();
+    const [selectedForSalvage, setSelectedForSalvage] = useState(new Set());
+
+    // Equip Best - automatically equip highest scored item for each slot
+    const handleEquipBest = () => {
+        let newGear = { ...state.gear };
+        let newInv = [...state.inventory];
+        let equipped = 0;
+
+        for (const slot of GEAR_SLOTS) {
+            // Get all items for this slot (in inventory)
+            const slotItems = newInv.filter(item => item.slot === slot);
+            if (slotItems.length === 0) continue;
+
+            // Find the best item
+            const bestInvItem = slotItems.reduce((best, item) => {
+                return getItemScore(item) > getItemScore(best) ? item : best;
+            }, slotItems[0]);
+
+            // Compare with currently equipped
+            const currentEquipped = newGear[slot];
+            const currentScore = getItemScore(currentEquipped);
+            const bestScore = getItemScore(bestInvItem);
+
+            if (bestScore > currentScore) {
+                // Swap items
+                newInv = newInv.filter(i => i.id !== bestInvItem.id);
+                if (currentEquipped) {
+                    newInv.push(currentEquipped);
+                }
+                newGear[slot] = bestInvItem;
+                equipped++;
+            }
+        }
+
+        if (equipped > 0) {
+            gameManager.setState(prev => ({
+                ...prev,
+                gear: newGear,
+                inventory: newInv
+            }));
+            gameManager.emit('floatingText', { text: `EQUIPPED ${equipped}!`, type: 'heal', target: 'player' });
+        }
+    };
+
+    // Toggle item selection for salvage
+    const toggleSalvageSelection = (itemId) => {
+        setSelectedForSalvage(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(itemId)) {
+                newSet.delete(itemId);
+            } else {
+                newSet.add(itemId);
+            }
+            return newSet;
+        });
+    };
+
+    // Salvage selected items
+    const handleSalvage = () => {
+        if (selectedForSalvage.size === 0) return;
+
+        let totalGold = 0;
+        let totalOre = 0;
+        let totalLeather = 0;
+        let totalStones = 0;
+
+        const itemsToSalvage = state.inventory.filter(item => selectedForSalvage.has(item.id));
+
+        for (const item of itemsToSalvage) {
+            const returns = getSalvageReturns(item);
+            totalGold += returns.gold;
+            totalOre += returns.ore;
+            totalLeather += returns.leather;
+            totalStones += returns.enhanceStone;
+        }
+
+        const newInv = state.inventory.filter(item => !selectedForSalvage.has(item.id));
+
+        gameManager.setState(prev => ({
+            ...prev,
+            inventory: newInv,
+            gold: (prev.gold || 0) + totalGold,
+            ore: (prev.ore || 0) + totalOre,
+            leather: (prev.leather || 0) + totalLeather,
+            enhanceStone: (prev.enhanceStone || 0) + totalStones,
+        }));
+
+        setSelectedForSalvage(new Set());
+        gameManager.emit('floatingText', { text: `+${totalGold} GOLD`, type: 'heal', target: 'player' });
+    };
 
     const handleEquip = (item) => {
         let newGear = { ...state.gear };
@@ -76,7 +166,15 @@ export default function InventoryView({ onHover }) {
                         </svg>
                         Equipped Gear
                     </h3>
-                    <span className="text-xs text-slate-400">{Object.values(state.gear).filter(Boolean).length}/{GEAR_SLOTS.length} slots</span>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={handleEquipBest}
+                            className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-green-600/30 hover:bg-green-600/50 text-green-400 rounded transition-colors"
+                        >
+                            Equip Best
+                        </button>
+                        <span className="text-xs text-slate-400">{Object.values(state.gear).filter(Boolean).length}/{GEAR_SLOTS.length}</span>
+                    </div>
                 </div>
                 <div className="grid grid-cols-4 gap-3">
                     {GEAR_SLOTS.map(slot => {
@@ -145,9 +243,19 @@ export default function InventoryView({ onHover }) {
                         </svg>
                         Backpack
                     </h3>
-                    <span className="text-xs px-2 py-1 rounded-full bg-slate-800 text-slate-300">
-                        {state.inventory.length}/50
-                    </span>
+                    <div className="flex items-center gap-2">
+                        {selectedForSalvage.size > 0 && (
+                            <button
+                                onClick={handleSalvage}
+                                className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-red-600/30 hover:bg-red-600/50 text-red-400 rounded transition-colors"
+                            >
+                                Salvage ({selectedForSalvage.size})
+                            </button>
+                        )}
+                        <span className="text-xs px-2 py-1 rounded-full bg-slate-800 text-slate-300">
+                            {state.inventory.length}/50
+                        </span>
+                    </div>
                 </div>
 
                 <div className="flex-1 overflow-y-auto custom-scrollbar pr-1">
@@ -165,24 +273,40 @@ export default function InventoryView({ onHover }) {
                         <div className="grid grid-cols-6 gap-2 content-start">
                             {state.inventory.map(item => {
                                 const tierInfo = TIERS[item.tier];
+                                const isSelected = selectedForSalvage.has(item.id);
                                 return (
                                     <div
                                         key={item.id}
                                         className={`
                                             relative aspect-square rounded-lg overflow-hidden
                                             bg-gradient-to-br from-slate-800/60 to-slate-900/60
-                                            border-2 border-slate-700/40
-                                            hover:border-blue-500/60 hover:scale-105
+                                            border-2
+                                            ${isSelected
+                                                ? 'border-red-500 bg-red-500/20'
+                                                : 'border-slate-700/40 hover:border-blue-500/60'
+                                            }
+                                            hover:scale-105
                                             cursor-pointer transition-all duration-150
                                             ${getTierGlow(item.tier)}
                                         `}
                                         onClick={() => handleEquip(item)}
+                                        onContextMenu={(e) => {
+                                            e.preventDefault();
+                                            toggleSalvageSelection(item.id);
+                                        }}
                                         onMouseEnter={(e) => onHover && onHover(item, { x: e.clientX, y: e.clientY })}
                                         onMouseLeave={() => onHover && onHover(null)}
                                     >
                                         <div className="absolute inset-0 flex items-center justify-center p-1">
                                             <ItemIcon item={item} />
                                         </div>
+
+                                        {/* Selection indicator */}
+                                        {isSelected && (
+                                            <div className="absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-red-500 flex items-center justify-center">
+                                                <span className="text-white text-[8px]">X</span>
+                                            </div>
+                                        )}
 
                                         {/* Tier dot */}
                                         <div
@@ -209,7 +333,7 @@ export default function InventoryView({ onHover }) {
                 {/* Quick tip */}
                 <div className="mt-3 pt-3 border-t border-slate-700/30 text-center">
                     <span className="text-[10px] text-slate-500 uppercase tracking-wider">
-                        Click item to equip
+                        Left-click to equip | Right-click to select for salvage
                     </span>
                 </div>
             </div>
