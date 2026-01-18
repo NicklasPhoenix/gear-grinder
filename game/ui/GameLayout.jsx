@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import GameRenderer from '../renderer/GameRenderer';
 import { useGame } from '../context/GameContext';
 import InventoryView from './InventoryView';
@@ -9,6 +9,7 @@ import CraftingView from './CraftingView';
 import EnhancementView from './EnhancementView';
 import PrestigeView from './PrestigeView';
 import GameTooltip from './GameTooltip';
+import { MaterialIcon } from './MaterialIcons';
 import { getZoneById } from '../data/zones';
 import { calculatePlayerStats } from '../systems/PlayerSystem';
 
@@ -116,27 +117,18 @@ export default function GameLayout() {
                         )}
                     </div>
 
-                    {/* Currency Display */}
-                    <div className="glass-card rounded-xl p-4 animate-fadeIn">
-                        <div className="flex gap-6">
-                            <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-yellow-500/30 to-amber-500/30 flex items-center justify-center">
-                                    <span className="text-yellow-400 text-sm">&#9733;</span>
-                                </div>
-                                <div>
-                                    <p className="text-[10px] text-slate-400 uppercase">Gold</p>
-                                    <p className="text-lg font-bold text-yellow-400">{state.gold.toLocaleString()}</p>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500/30 to-cyan-500/30 flex items-center justify-center">
-                                    <span className="text-blue-400 text-sm">&#9830;</span>
-                                </div>
-                                <div>
-                                    <p className="text-[10px] text-slate-400 uppercase">Stones</p>
-                                    <p className="text-lg font-bold text-blue-400">{state.enhanceStone}</p>
-                                </div>
-                            </div>
+                    {/* Currency Display - All Materials */}
+                    <div className="glass-card rounded-xl p-3 animate-fadeIn">
+                        <div className="grid grid-cols-3 gap-3">
+                            <MaterialDisplay type="gold" value={state.gold} color="text-yellow-400" />
+                            <MaterialDisplay type="ore" value={state.ore} color="text-slate-300" />
+                            <MaterialDisplay type="leather" value={state.leather} color="text-amber-500" />
+                            <MaterialDisplay type="enhanceStone" value={state.enhanceStone} color="text-blue-400" />
+                            <MaterialDisplay type="blessedOrb" value={state.blessedOrb} color="text-purple-400" />
+                            <MaterialDisplay type="celestialShard" value={state.celestialShard} color="text-yellow-300" />
+                            {state.prestigeLevel > 0 && (
+                                <MaterialDisplay type="prestigeStone" value={state.prestigeStones} color="text-pink-400" />
+                            )}
                         </div>
                     </div>
                 </div>
@@ -191,10 +183,11 @@ export default function GameLayout() {
                     </div>
                 </div>
 
-                {/* Footer */}
+                {/* Footer with Speed Control */}
                 <div className="px-4 py-2 border-t border-slate-800/50 bg-slate-950/50">
                     <div className="flex justify-between items-center text-xs text-slate-500">
                         <span>Gear Grinder v1.0</span>
+                        <SpeedControl />
                         <span className="flex items-center gap-1">
                             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                             Auto-saving
@@ -235,6 +228,69 @@ function StatMini({ label, value, color }) {
         <div className="text-center">
             <p className="text-[10px] text-slate-400 uppercase tracking-wider">{label}</p>
             <p className={`text-lg font-bold ${color}`}>{typeof value === 'number' ? value.toLocaleString() : value}</p>
+        </div>
+    );
+}
+
+const MATERIAL_NAMES = {
+    gold: 'Gold',
+    ore: 'Ore',
+    leather: 'Leather',
+    enhanceStone: 'E.Stone',
+    blessedOrb: 'B.Orb',
+    celestialShard: 'C.Shard',
+    prestigeStone: 'P.Stone',
+};
+
+function MaterialDisplay({ type, value, color }) {
+    return (
+        <div className="flex items-center gap-1.5">
+            <div className="w-6 h-6 flex items-center justify-center">
+                <MaterialIcon type={type} size={20} />
+            </div>
+            <div className="min-w-0">
+                <p className="text-[9px] text-slate-500 uppercase truncate">{MATERIAL_NAMES[type]}</p>
+                <p className={`text-sm font-bold ${color} leading-none`}>
+                    {typeof value === 'number' ? value.toLocaleString() : value}
+                </p>
+            </div>
+        </div>
+    );
+}
+
+const SPEED_OPTIONS = [1, 2, 5];
+
+function SpeedControl() {
+    const { gameManager } = useGame();
+    const [speed, setSpeed] = useState(1);
+
+    useEffect(() => {
+        if (!gameManager) return;
+        return gameManager.subscribeSpeed(setSpeed);
+    }, [gameManager]);
+
+    const handleSpeedChange = (newSpeed) => {
+        if (gameManager) {
+            gameManager.setSpeed(newSpeed);
+        }
+    };
+
+    return (
+        <div className="flex items-center gap-1">
+            <span className="text-slate-400 mr-1">Speed:</span>
+            {SPEED_OPTIONS.map(s => (
+                <button
+                    key={s}
+                    onClick={() => handleSpeedChange(s)}
+                    className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all ${
+                        speed === s
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-slate-700 text-slate-400 hover:bg-slate-600'
+                    }`}
+                >
+                    {s}x
+                </button>
+            ))}
         </div>
     );
 }

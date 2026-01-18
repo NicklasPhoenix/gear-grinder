@@ -14,6 +14,21 @@ export class GameManager {
         this.animationFrameId = null;
 
         this.gameSpeed = 1;
+        this.speedListeners = new Set();
+    }
+
+    // --- Speed Control ---
+    setSpeed(speed) {
+        this.gameSpeed = speed;
+        for (const listener of this.speedListeners) {
+            listener(speed);
+        }
+    }
+
+    subscribeSpeed(listener) {
+        this.speedListeners.add(listener);
+        listener(this.gameSpeed);
+        return () => this.speedListeners.delete(listener);
     }
 
     // --- State Management ---
