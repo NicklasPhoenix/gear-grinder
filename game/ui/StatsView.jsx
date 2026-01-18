@@ -90,7 +90,7 @@ export default function StatsView() {
                         <StatRow label="Thorns Dmg" value={calculated.thorns || 0} />
                         <div className="pt-2 mt-2 border-t border-slate-700">
                             <StatRow label="Gold Find" value={`+${((calculated.goldMult - 1) * 100).toFixed(0)}%`} />
-                            <StatRow label="XP Bonus" value={`+${((calculated.xpMult - 1) * 100).toFixed(0)}%`} />
+                            <StatRow label="XP Bonus" value={`+${(calculated.xpBonus || 0).toFixed(0)}%`} />
                         </div>
                     </div>
                 </div>
