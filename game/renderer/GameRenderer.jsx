@@ -1,8 +1,24 @@
 import React, { useEffect, useRef } from 'react';
 import * as PIXI from 'pixi.js';
 import { useGame } from '../context/GameContext';
-import { ASSET_BASE, ENEMY_SPRITES, SPRITE_CONFIG, ZONE_BACKGROUNDS } from '../../assets/gameAssets';
+import { ENEMY_SPRITES, ZONE_BACKGROUNDS } from '../../assets/gameAssets';
 import { getZoneById } from '../data/zones';
+
+// Color palettes for procedural characters
+const ENEMY_COLORS = {
+    Knight: { primary: 0x3b82f6, secondary: 0x60a5fa, accent: 0xfbbf24 },
+    Undead: { primary: 0x6b7280, secondary: 0x9ca3af, accent: 0x22c55e },
+    Beast: { primary: 0x22c55e, secondary: 0x4ade80, accent: 0xfbbf24 },
+    Humanoid: { primary: 0xf97316, secondary: 0xfb923c, accent: 0xfbbf24 },
+    Dragon: { primary: 0xdc2626, secondary: 0xf87171, accent: 0xfbbf24 },
+    Demon: { primary: 0x7f1d1d, secondary: 0xef4444, accent: 0xf97316 },
+    Elemental: { primary: 0x06b6d4, secondary: 0x22d3ee, accent: 0xfbbf24 },
+    Celestial: { primary: 0xfbbf24, secondary: 0xfde047, accent: 0xffffff },
+    Abyssal: { primary: 0x4c1d95, secondary: 0x7c3aed, accent: 0xc4b5fd },
+    Chaos: { primary: 0xdb2777, secondary: 0xf472b6, accent: 0xfbbf24 },
+    Void: { primary: 0x1e1b4b, secondary: 0x4338ca, accent: 0x818cf8 },
+    Boss: { primary: 0xdc2626, secondary: 0xfbbf24, accent: 0xffffff },
+};
 
 // Particle class for ambient effects
 class Particle {
@@ -44,7 +60,6 @@ export default function GameRenderer() {
     const bgContainerRef = useRef(null);
     const particleContainerRef = useRef(null);
     const gameContainerRef = useRef(null);
-    const spriteSheetRef = useRef(null);
 
     // Particle system
     const particlesRef = useRef([]);
@@ -100,16 +115,6 @@ export default function GameRenderer() {
             particleContainerRef.current = particleContainer;
             gameContainerRef.current = gameContainer;
 
-            // --- Load sprite sheet ---
-            let spriteSheet;
-            try {
-                spriteSheet = await PIXI.Assets.load(ASSET_BASE.characters);
-                spriteSheet.source.scaleMode = 'nearest';
-                spriteSheetRef.current = spriteSheet;
-            } catch (e) {
-                console.error("Failed to load sprite sheet", e);
-            }
-
             // --- Create animated background ---
             createBackground(bgContainer);
 
@@ -132,37 +137,19 @@ export default function GameRenderer() {
             }
             bgContainer.addChild(gridLines);
 
-            // --- Helper to get sprite texture from sheet ---
-            const getSpriteTexture = (spriteData) => {
-                if (!spriteSheet) return null;
-                const { tileSize, cols } = SPRITE_CONFIG;
-                const frame = new PIXI.Rectangle(
-                    spriteData.col * tileSize,
-                    spriteData.row * tileSize,
-                    tileSize,
-                    tileSize
-                );
-                return new PIXI.Texture({ source: spriteSheet.source, frame });
-            };
-
-            // --- Create Player (Hero) using real sprites ---
-            const playerData = ENEMY_SPRITES['Knight'];
-            const playerTexture = getSpriteTexture(playerData);
-            const player = playerTexture
-                ? new PIXI.Sprite(playerTexture)
-                : new PIXI.Graphics().rect(-8, -16, 16, 16).fill(0x3b82f6);
-
-            player.anchor.set(0.5, 1);
-            player.x = 200;
-            player.y = 375;
-            player.scale.set(playerData.scale || 4);
-
-            gameContainer.addChild(player);
-            playerRef.current = player;
+            // --- Create Player (Hero) using procedural graphics ---
+            const playerContainer = new PIXI.Container();
+            playerContainer.x = 200;
+            playerContainer.y = 350;
+            const playerGraphics = createCharacterGraphics('Knight', false);
+            playerContainer.addChild(playerGraphics);
+            playerContainer.characterType = 'Knight';
+            gameContainer.addChild(playerContainer);
+            playerRef.current = playerContainer;
 
             // --- Player Shadow ---
             const playerShadow = new PIXI.Graphics();
-            playerShadow.ellipse(200, 378, 25, 8);
+            playerShadow.ellipse(200, 378, 30, 10);
             playerShadow.fill({ color: 0x000000, alpha: 0.4 });
             gameContainer.addChildAt(playerShadow, 0);
 
@@ -172,24 +159,19 @@ export default function GameRenderer() {
             playerGlow.fill({ color: 0x3b82f6, alpha: 0.1 });
             gameContainer.addChildAt(playerGlow, 0);
 
-            // --- Create Enemy using real sprites ---
-            const enemyData = ENEMY_SPRITES['Beast'];
-            const enemyTexture = getSpriteTexture(enemyData);
-            const enemy = enemyTexture
-                ? new PIXI.Sprite(enemyTexture)
-                : new PIXI.Graphics().rect(-8, -16, 16, 16).fill(0x22c55e);
-
-            enemy.anchor.set(0.5, 1);
-            enemy.x = 600;
-            enemy.y = 375;
-            enemy.scale.set(-(enemyData.scale || 4), enemyData.scale || 4); // Flip to face player
-
-            gameContainer.addChild(enemy);
-            enemyRef.current = enemy;
+            // --- Create Enemy using procedural graphics ---
+            const enemyContainer = new PIXI.Container();
+            enemyContainer.x = 600;
+            enemyContainer.y = 350;
+            const enemyGraphics = createCharacterGraphics('Beast', false);
+            enemyContainer.addChild(enemyGraphics);
+            enemyContainer.characterType = 'Beast';
+            gameContainer.addChild(enemyContainer);
+            enemyRef.current = enemyContainer;
 
             // --- Enemy Shadow ---
             const enemyShadow = new PIXI.Graphics();
-            enemyShadow.ellipse(600, 378, 25, 8);
+            enemyShadow.ellipse(600, 378, 30, 10);
             enemyShadow.fill({ color: 0x000000, alpha: 0.4 });
             gameContainer.addChildAt(enemyShadow, 0);
 
@@ -198,12 +180,12 @@ export default function GameRenderer() {
             enemyAura.circle(600, 350, 60);
             enemyAura.fill({ color: 0xef4444, alpha: 0 });
             gameContainer.addChildAt(enemyAura, 0);
-            enemy.aura = enemyAura;
-            enemy.shadow = enemyShadow;
+            enemyContainer.aura = enemyAura;
+            enemyContainer.shadow = enemyShadow;
 
             // Store shadow ref
-            player.shadow = playerShadow;
-            player.glow = playerGlow;
+            playerContainer.shadow = playerShadow;
+            playerContainer.glow = playerGlow;
 
             // --- HP Bars (Modern style) ---
             const createHpBar = (x, y, width, isPlayer) => {
@@ -514,13 +496,18 @@ export default function GameRenderer() {
     // --- Create Procedural Character Graphics ---
     function createCharacterGraphics(enemyType, isBoss) {
         const g = new PIXI.Graphics();
-        const colors = getEnemyColors(enemyType);
-        const primary = parseInt(colors.primary.replace('#', ''), 16);
-        const secondary = parseInt(colors.secondary.replace('#', ''), 16);
-        const accent = parseInt(colors.accent.replace('#', ''), 16);
+        const colors = ENEMY_COLORS[enemyType] || ENEMY_COLORS.Beast;
+        const primary = colors.primary;
+        const secondary = colors.secondary;
+        const accent = colors.accent;
 
-        const spriteData = ENEMY_SPRITES[enemyType] || ENEMY_SPRITES['Beast'];
-        const type = spriteData.type;
+        // Map enemy type to visual type
+        const typeMap = {
+            Knight: 'humanoid', Undead: 'skeleton', Beast: 'beast', Humanoid: 'orc',
+            Dragon: 'dragon', Demon: 'demon', Elemental: 'elemental', Celestial: 'angel',
+            Abyssal: 'demon', Chaos: 'elemental', Void: 'wraith', Boss: 'dragon'
+        };
+        const type = typeMap[enemyType] || 'beast';
 
         // Draw based on type - all centered around origin
         switch (type) {
@@ -833,46 +820,37 @@ export default function GameRenderer() {
 
     // --- Update Visuals on State Change ---
     useEffect(() => {
-        if (!state || !spriteSheetRef.current) return;
+        if (!state || !gameContainerRef.current) return;
 
-        // Helper to get sprite texture
-        const getSpriteTexture = (spriteData) => {
-            const { tileSize } = SPRITE_CONFIG;
-            const frame = new PIXI.Rectangle(
-                spriteData.col * tileSize,
-                spriteData.row * tileSize,
-                tileSize,
-                tileSize
-            );
-            return new PIXI.Texture({ source: spriteSheetRef.current.source, frame });
-        };
-
-        // 1. Update Enemy Sprite based on Zone/Enemy Type
+        // 1. Update Enemy Graphics based on Zone/Enemy Type
         if (enemyRef.current) {
             const zone = getZoneById(state.currentZone);
             const enemyType = zone.enemyType;
-            const spriteData = ENEMY_SPRITES[enemyType] || ENEMY_SPRITES['Beast'];
 
-            // Update texture
-            const newTexture = getSpriteTexture(spriteData);
-            if (newTexture && enemyRef.current.texture) {
-                enemyRef.current.texture = newTexture;
+            // Only recreate graphics if enemy type changed
+            if (enemyRef.current.characterType !== enemyType) {
+                // Remove old graphics
+                enemyRef.current.removeChildren();
+                // Create new graphics
+                const newGraphics = createCharacterGraphics(enemyType, zone.isBoss);
+                enemyRef.current.addChild(newGraphics);
+                enemyRef.current.characterType = enemyType;
             }
 
-            // Scale based on sprite data and boss status
-            const baseScale = spriteData.scale || 4;
+            // Scale for bosses
+            const baseScale = 1.0;
             const finalScale = zone.isBoss ? baseScale * 1.3 : baseScale;
-            enemyRef.current.scale.set(-finalScale, finalScale); // Negative X to face player
+            enemyRef.current.scale.set(finalScale, finalScale);
 
             if (zone.isBoss) {
                 if (enemyRef.current.aura) {
                     enemyRef.current.aura.clear();
-                    enemyRef.current.aura.circle(600, 350, 60);
+                    enemyRef.current.aura.circle(600, 350, 70);
                     enemyRef.current.aura.fill({ color: 0xef4444, alpha: 0.15 });
                 }
                 if (enemyRef.current.shadow) {
                     enemyRef.current.shadow.clear();
-                    enemyRef.current.shadow.ellipse(600, 378, 35, 12);
+                    enemyRef.current.shadow.ellipse(600, 378, 40, 14);
                     enemyRef.current.shadow.fill({ color: 0x000000, alpha: 0.5 });
                 }
             } else {
@@ -881,7 +859,7 @@ export default function GameRenderer() {
                 }
                 if (enemyRef.current.shadow) {
                     enemyRef.current.shadow.clear();
-                    enemyRef.current.shadow.ellipse(600, 378, 25, 8);
+                    enemyRef.current.shadow.ellipse(600, 378, 30, 10);
                     enemyRef.current.shadow.fill({ color: 0x000000, alpha: 0.4 });
                 }
             }

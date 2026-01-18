@@ -1,27 +1,48 @@
-import React from 'react';
-import { ASSET_BASE, ITEM_SPRITES, ITEM_SPRITE_CONFIG } from '../../assets/gameAssets';
+import React, { useMemo } from 'react';
+import { ASSET_BASE, ITEM_SPRITES, ITEM_SPRITE_CONFIG, generateWeaponIcon, generateArmorIcon, generateMaterialIcon } from '../../assets/gameAssets';
 
 export default function ItemIcon({ item, size = "full" }) {
-    if (!item) return null;
+    const iconData = useMemo(() => {
+        if (!item) return null;
 
-    // Get sprite position from the items sprite sheet
-    let spriteData = null;
+        // Materials use procedural generation
+        if (item.type === 'material') {
+            return { type: 'procedural', url: generateMaterialIcon(item.id || 'ore') };
+        }
 
-    if (item.type === 'material') {
-        spriteData = ITEM_SPRITES[item.id] || ITEM_SPRITES.ore;
-    } else if (item.slot === 'weapon') {
-        spriteData = ITEM_SPRITES[item.weaponType] || ITEM_SPRITES.sword;
-    } else {
-        spriteData = ITEM_SPRITES[item.slot] || ITEM_SPRITES.armor;
-    }
+        // Weapons use the sprite sheet
+        if (item.slot === 'weapon') {
+            const spriteData = ITEM_SPRITES[item.weaponType] || ITEM_SPRITES.sword;
+            return { type: 'sprite', spriteData };
+        }
 
-    const { tileSize, cols, rows } = ITEM_SPRITE_CONFIG;
+        // Armor and accessories use procedural generation
+        return { type: 'procedural', url: generateArmorIcon(item.slot || 'armor', item.tier || 0) };
+    }, [item?.id, item?.slot, item?.weaponType, item?.tier, item?.type]);
 
-    // Calculate background position percentage
-    const bgPosX = cols > 1 ? (spriteData.col / (cols - 1)) * 100 : 0;
-    const bgPosY = rows > 1 ? (spriteData.row / (rows - 1)) * 100 : 0;
+    if (!item || !iconData) return null;
 
     const sizeClass = size === 'sm' ? 'p-0' : 'p-1';
+
+    // Procedural icon (armor, accessories, materials)
+    if (iconData.type === 'procedural') {
+        return (
+            <div className={`w-full h-full ${sizeClass} flex items-center justify-center`}>
+                <img
+                    src={iconData.url}
+                    alt={item.name || 'Item'}
+                    className="w-full h-full object-contain"
+                    style={{ imageRendering: 'pixelated' }}
+                />
+            </div>
+        );
+    }
+
+    // Sprite sheet icon (weapons)
+    const { cols, rows } = ITEM_SPRITE_CONFIG;
+    const { spriteData } = iconData;
+    const bgPosX = cols > 1 ? (spriteData.col / (cols - 1)) * 100 : 0;
+    const bgPosY = rows > 1 ? (spriteData.row / (rows - 1)) * 100 : 0;
 
     return (
         <div className={`w-full h-full ${sizeClass} flex items-center justify-center`}>
