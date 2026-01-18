@@ -262,16 +262,26 @@ export default function GameRenderer() {
             playerHpBarRef.current = playerBar;
             enemyHpBarRef.current = enemyBar;
 
-            // Initialize HP bars with current state values
-            const initPlayerHp = state?.playerHp || 100;
-            const initPlayerMaxHp = state?.playerMaxHp || 100;
-            const initEnemyHp = state?.enemyHp || 20;
-            const initEnemyMaxHp = state?.enemyMaxHp || 20;
-            updateHpBar(playerBar, initPlayerHp, initPlayerMaxHp, true);
-            updateHpBar(enemyBar, initEnemyHp, initEnemyMaxHp, false);
+            // Initialize HP bars with full health (will be updated by useEffect immediately)
+            updateHpBar(playerBar, 100, 100, true);
+            updateHpBar(enemyBar, 100, 100, false);
 
             // Mark initialization complete so HP bar updates can run
             setIsInitialized(true);
+
+            // Force immediate HP bar update after a tick to ensure state is current
+            setTimeout(() => {
+                if (playerHpBarRef.current?.fillRef) {
+                    const hp = gameManager.state?.playerHp || 100;
+                    const maxHp = gameManager.state?.playerMaxHp || 100;
+                    updateHpBar(playerHpBarRef.current, hp, maxHp, true);
+                }
+                if (enemyHpBarRef.current?.fillRef) {
+                    const hp = gameManager.state?.enemyHp || 20;
+                    const maxHp = gameManager.state?.enemyMaxHp || 20;
+                    updateHpBar(enemyHpBarRef.current, hp, maxHp, false);
+                }
+            }, 100);
 
             // --- Zone name display ---
             const zoneStyle = new PIXI.TextStyle({
@@ -975,39 +985,42 @@ export default function GameRenderer() {
 }
 
 function updateHpBar(barContainer, current, max, isPlayer) {
+    if (!barContainer || !barContainer.fillRef) return;
+
     const fill = barContainer.fillRef;
-    const width = barContainer.barWidth;
+    const width = barContainer.barWidth || 120;
 
     fill.clear();
-    if (max <= 0) return;
 
-    const pct = Math.max(0, Math.min(1, current / max));
-    const barWidth = width * pct;
+    // Ensure valid values
+    const safeMax = Math.max(1, max || 100);
+    const safeCurrent = Math.max(0, current || 0);
+    const pct = Math.min(1, safeCurrent / safeMax);
+    const barWidth = Math.max(1, width * pct); // At least 1px width if health > 0
 
     // Gradient fill based on health
-    let color1, color2;
+    let color1;
     if (isPlayer) {
         color1 = 0x3b82f6;
-        color2 = 0x60a5fa;
     } else {
         if (pct > 0.5) {
             color1 = 0xef4444;
-            color2 = 0xf87171;
         } else if (pct > 0.25) {
             color1 = 0xf97316;
-            color2 = 0xfb923c;
         } else {
             color1 = 0xdc2626;
-            color2 = 0xef4444;
         }
     }
 
-    fill.roundRect(-width/2, -6, barWidth, 12, 3);
-    fill.fill(color1);
+    // Draw main fill
+    if (pct > 0) {
+        fill.roundRect(-width/2, -6, barWidth, 12, 3);
+        fill.fill(color1);
 
-    // Highlight on top
-    fill.roundRect(-width/2, -6, barWidth, 4, 2);
-    fill.fill({ color: 0xffffff, alpha: 0.2 });
+        // Highlight on top
+        fill.roundRect(-width/2, -6, barWidth, 4, 2);
+        fill.fill({ color: 0xffffff, alpha: 0.2 });
+    }
 }
 
 function spawnFloatingText(app, container, { text, type, target }) {
