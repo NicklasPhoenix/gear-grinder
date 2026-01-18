@@ -377,8 +377,8 @@ export default function GameRenderer() {
                 // Update particles
                 updateParticles(particleContainer);
 
-                // Spawn ambient particles
-                if (Math.random() < 0.02) {
+                // Spawn ambient particles (limit spawn rate and count)
+                if (ambientParticlesRef.current.length < 20 && Math.random() < 0.01) {
                     spawnAmbientParticle();
                 }
 
@@ -498,7 +498,24 @@ export default function GameRenderer() {
         function updateParticles(container) {
             if (!container) return;
 
-            container.removeChildren();
+            // Properly destroy old graphics objects to prevent memory leaks
+            while (container.children.length > 0) {
+                const child = container.children[0];
+                container.removeChild(child);
+                child.destroy();
+            }
+
+            // Cap particle counts to prevent memory issues
+            const MAX_HIT_PARTICLES = 50;
+            const MAX_AMBIENT_PARTICLES = 30;
+
+            // Trim excess particles
+            if (particlesRef.current.length > MAX_HIT_PARTICLES) {
+                particlesRef.current = particlesRef.current.slice(-MAX_HIT_PARTICLES);
+            }
+            if (ambientParticlesRef.current.length > MAX_AMBIENT_PARTICLES) {
+                ambientParticlesRef.current = ambientParticlesRef.current.slice(-MAX_AMBIENT_PARTICLES);
+            }
 
             // Update and draw hit particles
             particlesRef.current = particlesRef.current.filter(p => {
