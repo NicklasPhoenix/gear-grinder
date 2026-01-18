@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useGame } from '../context/GameContext';
 import ItemIcon from './ItemIcon';
-import { TIERS, GEAR_SLOTS, getItemScore, getSalvageReturns } from '../data/items';
+import { TIERS, GEAR_SLOTS, getItemScore, getSalvageReturns, BOSS_SETS } from '../data/items';
 
 const SLOT_ICONS = {
     weapon: '&#9876;',
@@ -220,6 +220,7 @@ export default function InventoryView({ onHover }) {
                     {GEAR_SLOTS.map(slot => {
                         const item = state.gear[slot];
                         const tierInfo = item ? TIERS[item.tier] : null;
+                        const setInfo = item?.bossSet ? BOSS_SETS[item.bossSet] : null;
                         return (
                             <div
                                 key={slot}
@@ -228,10 +229,16 @@ export default function InventoryView({ onHover }) {
                                     bg-gradient-to-br from-slate-800/80 to-slate-900/80
                                     border-2 transition-all duration-200 cursor-pointer group
                                     ${item
-                                        ? `border-slate-600/50 hover:border-blue-500/70 ${getTierGlow(item.tier)}`
+                                        ? setInfo
+                                            ? ''
+                                            : `border-slate-600/50 hover:border-blue-500/70 ${getTierGlow(item.tier)}`
                                         : 'border-slate-700/30 border-dashed hover:border-slate-500/50'
                                     }
                                 `}
+                                style={item && setInfo ? {
+                                    borderColor: setInfo.color,
+                                    boxShadow: `0 0 15px ${setInfo.color}60, inset 0 0 10px ${setInfo.color}25`
+                                } : undefined}
                                 onClick={() => item && handleUnequip(item)}
                                 onMouseEnter={(e) => onHover && item && onHover(item, { x: e.clientX, y: e.clientY })}
                                 onMouseLeave={() => onHover && onHover(null)}
@@ -241,6 +248,18 @@ export default function InventoryView({ onHover }) {
                                         <div className="absolute inset-0 flex items-center justify-center p-2">
                                             <ItemIcon item={item} />
                                         </div>
+
+                                        {/* Set indicator - star icon for set items */}
+                                        {setInfo && (
+                                            <div
+                                                className="absolute top-0.5 left-0.5 w-4 h-4 flex items-center justify-center"
+                                                style={{ color: setInfo.color }}
+                                            >
+                                                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                </svg>
+                                            </div>
+                                        )}
 
                                         {/* Enhancement level */}
                                         {item.plus > 0 && (
@@ -252,7 +271,7 @@ export default function InventoryView({ onHover }) {
                                         {/* Tier indicator */}
                                         <div
                                             className="absolute bottom-0 left-0 right-0 h-1 opacity-80"
-                                            style={{ backgroundColor: tierInfo?.color || '#666' }}
+                                            style={{ backgroundColor: setInfo?.color || tierInfo?.color || '#666' }}
                                         />
 
                                         {/* Item name on hover */}
@@ -322,6 +341,7 @@ export default function InventoryView({ onHover }) {
                             {state.inventory.map(item => {
                                 const tierInfo = TIERS[item.tier];
                                 const isSelected = selectedForSalvage.has(item.id);
+                                const setInfo = item.bossSet ? BOSS_SETS[item.bossSet] : null;
                                 return (
                                     <div
                                         key={item.id}
@@ -331,29 +351,50 @@ export default function InventoryView({ onHover }) {
                                             border-2
                                             ${isSelected
                                                 ? 'border-red-500 bg-red-500/20'
-                                                : 'border-slate-700/40 hover:border-blue-500/60'
+                                                : setInfo
+                                                    ? 'hover:scale-105'
+                                                    : 'border-slate-700/40 hover:border-blue-500/60'
                                             }
                                             hover:scale-105
                                             cursor-pointer transition-all duration-150
-                                            ${getTierGlow(item.tier)}
+                                            ${setInfo ? '' : getTierGlow(item.tier)}
                                         `}
+                                        style={!isSelected && setInfo ? {
+                                            borderColor: setInfo.color,
+                                            boxShadow: `0 0 12px ${setInfo.color}50, inset 0 0 8px ${setInfo.color}20`
+                                        } : undefined}
                                         onClick={() => handleEquip(item)}
                                         onContextMenu={(e) => {
                                             e.preventDefault();
                                             toggleSalvageSelection(item.id);
                                         }}
-                                        onMouseEnter={(e) => onHover && onHover(item, { x: e.clientX, y: e.clientY })}
+                                        onMouseEnter={(e) => onHover && onHover(item, { x: e.clientX, y: e.clientY }, true)}
                                         onMouseLeave={() => onHover && onHover(null)}
                                     >
                                         <div className="absolute inset-0 flex items-center justify-center p-1">
                                             <ItemIcon item={item} />
                                         </div>
 
+                                        {/* Set indicator - star icon for set items */}
+                                        {setInfo && (
+                                            <div
+                                                className="absolute top-0.5 left-0.5 w-4 h-4 flex items-center justify-center"
+                                                style={{ color: setInfo.color }}
+                                            >
+                                                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                </svg>
+                                            </div>
+                                        )}
+
                                         {/* Selection indicator */}
-                                        {isSelected && (
+                                        {isSelected && !setInfo && (
                                             <div className="absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-red-500 flex items-center justify-center">
                                                 <span className="text-white text-[8px]">X</span>
                                             </div>
+                                        )}
+                                        {isSelected && setInfo && (
+                                            <div className="absolute top-0 left-0 right-0 bottom-0 bg-red-500/30 pointer-events-none" />
                                         )}
 
                                         {/* Tier dot */}

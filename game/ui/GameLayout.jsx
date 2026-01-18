@@ -58,11 +58,11 @@ export default function GameLayout() {
     const [activeTab, setActiveTab] = useState('inventory');
     const [tooltipUser, setTooltipUser] = useState(null);
 
-    const handleHover = (item, position) => {
+    const handleHover = (item, position, isInventoryItem = false) => {
         if (!item) {
             setTooltipUser(null);
         } else {
-            setTooltipUser({ item, position, gear: state.gear });
+            setTooltipUser({ item, position, gear: state.gear, isInventoryItem });
         }
     };
 

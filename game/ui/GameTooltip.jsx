@@ -15,10 +15,38 @@ const EFFECT_DESCRIPTIONS = {
     dodge: (val) => `${val}% chance to avoid attacks`,
 };
 
+// Helper to calculate item stats for comparison
+function calculateItemStats(item) {
+    if (!item) return { dmg: 0, hp: 0, armor: 0, score: 0 };
+
+    const tierData = TIERS[item.tier] || TIERS[0];
+    const gearBase = GEAR_BASES[item.slot] || { baseDmg: 0, baseHp: 0, baseArmor: 0 };
+    let weaponBase = gearBase;
+
+    if (item.slot === 'weapon' && item.weaponType) {
+        const weaponDef = WEAPON_TYPES.find(w => w.id === item.weaponType)
+            || PRESTIGE_WEAPONS.find(w => w.id === item.weaponType);
+        if (weaponDef) {
+            weaponBase = { ...gearBase, ...weaponDef };
+        }
+    }
+
+    const tierMult = tierData.statMult || 1;
+    const bossBonus = item.isBossItem && item.statBonus ? item.statBonus : 1;
+    const enhanceBonus = getEnhanceBonus(item.plus || 0, item.tier);
+
+    return {
+        dmg: Math.floor((weaponBase.baseDmg || 0) * tierMult * bossBonus) + (enhanceBonus.dmgBonus || 0),
+        hp: Math.floor((weaponBase.baseHp || 0) * tierMult * bossBonus) + (enhanceBonus.hpBonus || 0),
+        armor: Math.floor((weaponBase.baseArmor || 0) * tierMult * bossBonus) + (enhanceBonus.armorBonus || 0),
+        score: getItemScore(item),
+    };
+}
+
 export default function GameTooltip({ tooltip }) {
     if (!tooltip || !tooltip.item) return null;
 
-    const { item, position, gear } = tooltip;
+    const { item, position, gear, isInventoryItem } = tooltip;
 
     // Count equipped pieces of the same set
     const getEquippedSetCount = (setName) => {
@@ -52,6 +80,24 @@ export default function GameTooltip({ tooltip }) {
     const baseHp = Math.floor((weaponBase.baseHp || 0) * tierMult * bossBonus) + (enhanceBonus.hpBonus || 0);
     const baseArmor = Math.floor((weaponBase.baseArmor || 0) * tierMult * bossBonus) + (enhanceBonus.armorBonus || 0);
 
+    // Get equipped item for comparison (only if viewing inventory item)
+    const equippedItem = isInventoryItem && gear ? gear[item.slot] : null;
+    const equippedStats = equippedItem ? calculateItemStats(equippedItem) : null;
+    const hoveredStats = calculateItemStats(item);
+
+    // Calculate differences
+    const getDiff = (newVal, oldVal) => {
+        if (!equippedStats) return null;
+        const diff = newVal - oldVal;
+        if (diff === 0) return null;
+        return diff;
+    };
+
+    const dmgDiff = getDiff(hoveredStats.dmg, equippedStats?.dmg || 0);
+    const hpDiff = getDiff(hoveredStats.hp, equippedStats?.hp || 0);
+    const armorDiff = getDiff(hoveredStats.armor, equippedStats?.armor || 0);
+    const scoreDiff = getDiff(hoveredStats.score, equippedStats?.score || 0);
+
     // Calculate position to keep on screen
     let style = {
         top: position.y + 10,
@@ -61,8 +107,8 @@ export default function GameTooltip({ tooltip }) {
     if (position.x > window.innerWidth - 300) {
         style.left = position.x - 260;
     }
-    if (position.y > window.innerHeight - 400) {
-        style.top = position.y - 200;
+    if (position.y > window.innerHeight - 450) {
+        style.top = position.y - 250;
     }
 
     // Get rating label based on score
@@ -157,6 +203,63 @@ export default function GameTooltip({ tooltip }) {
                     </div>
                 )}
             </div>
+
+            {/* Comparison Section - Only show when hovering inventory items */}
+            {isInventoryItem && equippedItem && (
+                <div className="px-4 py-3 border-b border-slate-700/30 bg-gradient-to-r from-blue-500/5 to-purple-500/5">
+                    <div className="text-[10px] text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                        </svg>
+                        vs Equipped: {equippedItem.name}
+                    </div>
+                    <div className="grid grid-cols-4 gap-2 text-xs">
+                        {/* DMG comparison */}
+                        <div className={`flex flex-col items-center p-1.5 rounded ${dmgDiff !== null ? (dmgDiff > 0 ? 'bg-green-500/15' : 'bg-red-500/15') : 'bg-slate-700/20'}`}>
+                            <span className="text-[9px] text-slate-400">DMG</span>
+                            <span className={`font-bold ${dmgDiff === null ? 'text-slate-400' : dmgDiff > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                {dmgDiff === null ? '=' : dmgDiff > 0 ? `+${dmgDiff}` : dmgDiff}
+                            </span>
+                        </div>
+                        {/* HP comparison */}
+                        <div className={`flex flex-col items-center p-1.5 rounded ${hpDiff !== null ? (hpDiff > 0 ? 'bg-green-500/15' : 'bg-red-500/15') : 'bg-slate-700/20'}`}>
+                            <span className="text-[9px] text-slate-400">HP</span>
+                            <span className={`font-bold ${hpDiff === null ? 'text-slate-400' : hpDiff > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                {hpDiff === null ? '=' : hpDiff > 0 ? `+${hpDiff}` : hpDiff}
+                            </span>
+                        </div>
+                        {/* Armor comparison */}
+                        <div className={`flex flex-col items-center p-1.5 rounded ${armorDiff !== null ? (armorDiff > 0 ? 'bg-green-500/15' : 'bg-red-500/15') : 'bg-slate-700/20'}`}>
+                            <span className="text-[9px] text-slate-400">ARM</span>
+                            <span className={`font-bold ${armorDiff === null ? 'text-slate-400' : armorDiff > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                {armorDiff === null ? '=' : armorDiff > 0 ? `+${armorDiff}` : armorDiff}
+                            </span>
+                        </div>
+                        {/* Score comparison */}
+                        <div className={`flex flex-col items-center p-1.5 rounded ${scoreDiff !== null ? (scoreDiff > 0 ? 'bg-green-500/15' : 'bg-red-500/15') : 'bg-slate-700/20'}`}>
+                            <span className="text-[9px] text-slate-400">PWR</span>
+                            <span className={`font-bold ${scoreDiff === null ? 'text-slate-400' : scoreDiff > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                {scoreDiff === null ? '=' : scoreDiff > 0 ? `+${scoreDiff}` : scoreDiff}
+                            </span>
+                        </div>
+                    </div>
+                    {/* Upgrade indicator */}
+                    {scoreDiff !== null && (
+                        <div className={`mt-2 text-center text-[10px] font-bold uppercase tracking-wider ${scoreDiff > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            {scoreDiff > 0 ? '^ UPGRADE ^' : 'v DOWNGRADE v'}
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Show "Empty slot" comparison when no item equipped */}
+            {isInventoryItem && !equippedItem && (
+                <div className="px-4 py-2 border-b border-slate-700/30 bg-green-500/5">
+                    <div className="text-[10px] text-green-400 uppercase tracking-wider text-center font-bold">
+                        Slot Empty - Equipping will add stats!
+                    </div>
+                </div>
+            )}
 
             {/* Special Effects */}
             {effects.length > 0 && (
