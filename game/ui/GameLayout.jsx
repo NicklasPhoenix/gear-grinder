@@ -62,7 +62,7 @@ export default function GameLayout() {
         if (!item) {
             setTooltipUser(null);
         } else {
-            setTooltipUser({ item, position: position });
+            setTooltipUser({ item, position, gear: state.gear });
         }
     };
 
