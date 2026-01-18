@@ -1,6 +1,7 @@
 export const initialState = {
     gold: 50, ore: 5, leather: 5, enhanceStone: 3, blessedOrb: 0, celestialShard: 0,
     level: 1, xp: 0, currentZone: 0,
+    autoSalvage: false, // Auto-salvage dropped items
     // Base stats - player can allocate points
     stats: { str: 5, int: 5, vit: 5, agi: 5, lck: 5 },
     statPoints: 0, // Points available to allocate (3 per level up)

@@ -179,6 +179,14 @@ export default function InventoryView({ onHover }) {
         gameManager.emit('floatingText', { text: "UNEQUIPPED", type: 'damage', target: 'player' });
     };
 
+    // Toggle auto-salvage
+    const toggleAutoSalvage = () => {
+        gameManager.setState(prev => ({
+            ...prev,
+            autoSalvage: !prev.autoSalvage
+        }));
+    };
+
     const getTierGlow = (tier) => {
         if (tier < 2) return '';
         const glowClasses = [
@@ -303,6 +311,24 @@ export default function InventoryView({ onHover }) {
                         Backpack
                     </h3>
                     <div className="flex items-center gap-2">
+                        {/* Auto-Salvage Toggle */}
+                        <button
+                            onClick={toggleAutoSalvage}
+                            className={`px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded transition-colors flex items-center gap-1 ${
+                                state.autoSalvage
+                                    ? 'bg-green-600/40 text-green-300 border border-green-500/50'
+                                    : 'bg-slate-700/50 text-slate-400 border border-slate-600/50 hover:bg-slate-600/50'
+                            }`}
+                            title="Auto-salvage dropped items"
+                        >
+                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            Auto
+                            {state.autoSalvage && (
+                                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                            )}
+                        </button>
                         {selectedForSalvage.size > 0 && (
                             <button
                                 onClick={handleSalvage}

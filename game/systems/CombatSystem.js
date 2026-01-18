@@ -1,5 +1,5 @@
 import { getZoneById } from '../data/zones';
-import { BOSS_SETS, PRESTIGE_BOSS_SETS, MATERIALS } from '../data/items';
+import { BOSS_SETS, PRESTIGE_BOSS_SETS, MATERIALS, getSalvageReturns } from '../data/items';
 import { SKILLS } from '../data/skills';
 import { calculatePlayerStats } from './PlayerSystem';
 
@@ -195,9 +195,22 @@ export class CombatSystem {
                 bossSet: zone.bossSet,
                 isBossItem: true,
                 weaponType: droppedSlot === 'weapon' ? 'sword' : null,
+                name: bossItem.name,
             };
-            state.inventory = [...state.inventory, newBossItem];
-            log.push({ type: 'bossLoot', msg: `⚡ ${bossItem.name} obtained!` });
+
+            // Check if auto-salvage is enabled
+            if (state.autoSalvage) {
+                const returns = getSalvageReturns(newBossItem);
+                state.gold += returns.gold;
+                state.ore += returns.ore;
+                state.leather += returns.leather;
+                state.enhanceStone += returns.enhanceStone;
+                log.push({ type: 'autoSalvage', msg: `♻️ ${bossItem.name} salvaged! +${returns.gold}g` });
+                this.callbacks.onFloatingText(`+${returns.gold}g`, 'heal', 'player');
+            } else {
+                state.inventory = [...state.inventory, newBossItem];
+                log.push({ type: 'bossLoot', msg: `⚡ ${bossItem.name} obtained!` });
+            }
         }
     }
 
