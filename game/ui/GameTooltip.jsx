@@ -101,29 +101,23 @@ export default function GameTooltip({ tooltip }) {
     // Calculate position to keep on screen
     // Estimate tooltip height based on content (base + effects + set bonuses)
     const hasSetBonuses = item.bossSet && (BOSS_SETS[item.bossSet] || PRESTIGE_BOSS_SETS[item.bossSet]);
-    const estimatedHeight = 300 + (effects.length * 30) + (hasSetBonuses ? 200 : 0) + (isInventoryItem ? 80 : 0);
+    const estimatedHeight = 350 + (effects.length * 30) + (hasSetBonuses ? 220 : 0) + (isInventoryItem ? 100 : 0);
 
-    let style = {
-        left: position.x + 10,
-    };
+    let style = {};
 
     // Horizontal positioning
-    if (position.x > window.innerWidth - 300) {
-        style.left = position.x - 260;
+    if (position.x > window.innerWidth - 280) {
+        style.left = position.x - 270;
+    } else {
+        style.left = position.x + 15;
     }
 
-    // Vertical positioning - prefer below cursor, but flip above if not enough space
-    const spaceBelow = window.innerHeight - position.y - 20;
-    const spaceAbove = position.y - 20;
-
-    if (spaceBelow >= estimatedHeight || spaceBelow >= spaceAbove) {
-        // Position below cursor
-        style.top = position.y + 10;
-        style.maxHeight = Math.min(estimatedHeight, spaceBelow - 10);
+    // Vertical positioning - if tooltip would go off bottom, position it from bottom instead
+    if (position.y + estimatedHeight > window.innerHeight - 20) {
+        // Anchor to bottom of screen with some padding
+        style.bottom = 20;
     } else {
-        // Position above cursor
-        style.bottom = window.innerHeight - position.y + 10;
-        style.maxHeight = Math.min(estimatedHeight, spaceAbove - 10);
+        style.top = position.y + 10;
     }
 
     // Get rating label based on score
@@ -141,7 +135,7 @@ export default function GameTooltip({ tooltip }) {
 
     return (
         <div
-            className="fixed z-[100] w-64 bg-gradient-to-br from-slate-900 to-slate-950 border-2 shadow-2xl rounded-lg overflow-hidden overflow-y-auto pointer-events-none custom-scrollbar"
+            className="fixed z-[100] w-64 bg-gradient-to-br from-slate-900 to-slate-950 border-2 shadow-2xl rounded-lg overflow-hidden pointer-events-none"
             style={{ ...style, borderColor: tierData.color }}
         >
             {/* Header with tier glow */}
