@@ -214,7 +214,7 @@ export default function GameRenderer() {
             player.shadow = playerShadow;
             player.glow = playerGlow;
 
-            // --- HP Bars (Modern style) ---
+            // --- HP Bars (Modern style with text display) ---
             const createHpBar = (x, y, width, isPlayer) => {
                 console.log(`Creating HP bar at (${x}, ${y}), width=${width}, isPlayer=${isPlayer}`);
                 const container = new PIXI.Container();
@@ -242,6 +242,19 @@ export default function GameRenderer() {
                 container.fillRef = fill;
                 container.barWidth = width;
                 container.isPlayer = isPlayer;
+
+                // HP Text overlay (shows current/max)
+                const hpTextStyle = new PIXI.TextStyle({
+                    fontFamily: 'Rajdhani',
+                    fontSize: 10,
+                    fontWeight: 'bold',
+                    fill: '#ffffff',
+                });
+                const hpText = new PIXI.Text({ text: '100/100', style: hpTextStyle });
+                hpText.anchor.set(0.5);
+                hpText.y = 0;
+                container.addChild(hpText);
+                container.hpText = hpText;
 
                 console.log(`HP bar created, fillRef set: ${!!container.fillRef}`);
 
@@ -367,6 +380,17 @@ export default function GameRenderer() {
                 // Spawn ambient particles
                 if (Math.random() < 0.02) {
                     spawnAmbientParticle();
+                }
+
+                // Update HP bars periodically (every 10 frames) from gameManager state
+                if (Math.floor(time / 16) % 10 === 0) {
+                    const gmState = gameManager.getState();
+                    if (gmState && playerHpBarRef.current) {
+                        updateHpBar(playerHpBarRef.current, gmState.playerHp || 100, gmState.playerMaxHp || 100, true);
+                    }
+                    if (gmState && enemyHpBarRef.current) {
+                        updateHpBar(enemyHpBarRef.current, gmState.enemyHp || 20, gmState.enemyMaxHp || 20, false);
+                    }
                 }
             });
         };
@@ -997,7 +1021,13 @@ function updateHpBar(barContainer, current, max, isPlayer) {
     const pct = Math.min(1, safeCurrent / safeMax);
     const barWidth = Math.max(4, width * pct); // At least 4px width if health > 0
 
-    console.log(`HP Bar Update (${isPlayer ? 'player' : 'enemy'}): ${safeCurrent}/${safeMax} = ${(pct * 100).toFixed(1)}%, barWidth=${barWidth}`);
+    // Only log occasionally to avoid console spam
+    // console.log(`HP Bar Update (${isPlayer ? 'player' : 'enemy'}): ${safeCurrent}/${safeMax}`);
+
+    // Update HP text overlay
+    if (barContainer.hpText) {
+        barContainer.hpText.text = `${Math.floor(safeCurrent)}/${Math.floor(safeMax)}`;
+    }
 
     // Color based on health percentage
     let color1;
