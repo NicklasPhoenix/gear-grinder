@@ -1,9 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import * as PIXI from 'pixi.js';
 import { useGame } from '../context/GameContext';
-import { ASSET_BASE, ENEMY_SPRITES, ZONE_BACKGROUNDS } from '../../assets/gameAssets';
+import { ENEMY_SPRITES, ZONE_BACKGROUNDS, getEnemyColors } from '../../assets/gameAssets';
 import { getZoneById } from '../data/zones';
-import { loadAndProcessImage } from '../utils/assetLoader';
 
 // Particle class for ambient effects
 class Particle {
@@ -41,10 +40,10 @@ export default function GameRenderer() {
     const playerHpBarRef = useRef(null);
     const enemyHpBarRef = useRef(null);
 
-    const textureSheetRef = useRef(null);
     const effectsContainerRef = useRef(null);
     const bgContainerRef = useRef(null);
     const particleContainerRef = useRef(null);
+    const gameContainerRef = useRef(null);
 
     // Particle system
     const particlesRef = useRef([]);
@@ -78,18 +77,6 @@ export default function GameRenderer() {
             containerRef.current.appendChild(app.canvas);
             appRef.current = app;
 
-            // Load Spritesheet
-            let sheetTexture;
-            try {
-                const cleanedUrl = await loadAndProcessImage(ASSET_BASE.characters);
-                sheetTexture = await PIXI.Assets.load(cleanedUrl);
-                sheetTexture.source.scaleMode = 'nearest';
-            } catch (e) {
-                console.error("Failed to load assets", e);
-                return;
-            }
-            textureSheetRef.current = sheetTexture;
-
             // Main container with shake support
             const mainContainer = new PIXI.Container();
             app.stage.addChild(mainContainer);
@@ -110,6 +97,7 @@ export default function GameRenderer() {
             effectsContainerRef.current = fxContainer;
             bgContainerRef.current = bgContainer;
             particleContainerRef.current = particleContainer;
+            gameContainerRef.current = gameContainer;
 
             // --- Create animated background ---
             createBackground(bgContainer);
@@ -133,33 +121,17 @@ export default function GameRenderer() {
             }
             bgContainer.addChild(gridLines);
 
-            // --- Sprite Slicing Helper ---
-            const getSpriteFrame = (row, col, rowCols, rowSpan = 1) => {
-                const cellW = sheetTexture.width / rowCols;
-                const cellH = sheetTexture.height / 8;
-                return new PIXI.Rectangle(
-                    col * cellW,
-                    row * cellH,
-                    cellW * 0.9,
-                    cellH * rowSpan
-                );
-            };
+            // --- Create Player (Hero) using procedural graphics ---
+            const playerContainer = new PIXI.Container();
+            playerContainer.x = 200;
+            playerContainer.y = 350;
 
-            // --- Create Player (Hero) ---
-            const playerSpriteLoc = ENEMY_SPRITES['Knight'];
-            const playerTexture = new PIXI.Texture({
-                source: sheetTexture.source,
-                frame: getSpriteFrame(playerSpriteLoc.row, playerSpriteLoc.col, playerSpriteLoc.cols)
-            });
+            const playerGraphics = createCharacterGraphics('Knight', false);
+            playerContainer.addChild(playerGraphics);
+            playerContainer.graphics = playerGraphics;
 
-            const player = new PIXI.Sprite(playerTexture);
-            player.scale.set(1.0, 1.0);
-            player.anchor.set(0.5, 0.8);
-            player.x = 200;
-            player.y = 350;
-
-            gameContainer.addChild(player);
-            playerRef.current = player;
+            gameContainer.addChild(playerContainer);
+            playerRef.current = playerContainer;
 
             // --- Player Shadow ---
             const playerShadow = new PIXI.Graphics();
@@ -173,19 +145,17 @@ export default function GameRenderer() {
             playerGlow.fill({ color: 0x3b82f6, alpha: 0.1 });
             gameContainer.addChildAt(playerGlow, 0);
 
-            // --- Create Enemy ---
-            const enemyTexture = new PIXI.Texture({
-                source: sheetTexture.source,
-                frame: getSpriteFrame(1, 0, 9)
-            });
+            // --- Create Enemy using procedural graphics ---
+            const enemyContainer = new PIXI.Container();
+            enemyContainer.x = 600;
+            enemyContainer.y = 350;
 
-            const enemy = new PIXI.Sprite(enemyTexture);
-            enemy.anchor.set(0.5, 0.8);
-            enemy.x = 600;
-            enemy.y = 350;
+            const enemyGraphics = createCharacterGraphics('Beast', false);
+            enemyContainer.addChild(enemyGraphics);
+            enemyContainer.graphics = enemyGraphics;
 
-            gameContainer.addChild(enemy);
-            enemyRef.current = enemy;
+            gameContainer.addChild(enemyContainer);
+            enemyRef.current = enemyContainer;
 
             // --- Enemy Shadow ---
             const enemyShadow = new PIXI.Graphics();
@@ -198,12 +168,12 @@ export default function GameRenderer() {
             enemyAura.circle(600, 350, 70);
             enemyAura.fill({ color: 0xef4444, alpha: 0 });
             gameContainer.addChildAt(enemyAura, 0);
-            enemy.aura = enemyAura;
-            enemy.shadow = enemyShadow;
+            enemyContainer.aura = enemyAura;
+            enemyContainer.shadow = enemyShadow;
 
             // Store shadow ref
-            player.shadow = playerShadow;
-            player.glow = playerGlow;
+            playerContainer.shadow = playerShadow;
+            playerContainer.glow = playerGlow;
 
             // --- HP Bars (Modern style) ---
             const createHpBar = (x, y, width, isPlayer) => {
@@ -511,41 +481,350 @@ export default function GameRenderer() {
         container.addChild(vignette);
     }
 
+    // --- Create Procedural Character Graphics ---
+    function createCharacterGraphics(enemyType, isBoss) {
+        const g = new PIXI.Graphics();
+        const colors = getEnemyColors(enemyType);
+        const primary = parseInt(colors.primary.replace('#', ''), 16);
+        const secondary = parseInt(colors.secondary.replace('#', ''), 16);
+        const accent = parseInt(colors.accent.replace('#', ''), 16);
+
+        const spriteData = ENEMY_SPRITES[enemyType] || ENEMY_SPRITES['Beast'];
+        const type = spriteData.type;
+
+        // Draw based on type - all centered around origin
+        switch (type) {
+            case 'humanoid':
+            case 'orc':
+                // Head
+                g.circle(0, -55, 18);
+                g.fill(secondary);
+                // Body
+                g.roundRect(-20, -38, 40, 50, 8);
+                g.fill(primary);
+                // Arms
+                g.roundRect(-30, -35, 12, 35, 4);
+                g.roundRect(18, -35, 12, 35, 4);
+                g.fill(secondary);
+                // Legs
+                g.roundRect(-16, 10, 14, 30, 4);
+                g.roundRect(2, 10, 14, 30, 4);
+                g.fill(primary);
+                // Weapon/accent
+                g.roundRect(24, -45, 6, 50, 2);
+                g.fill(accent);
+                // Eyes
+                g.circle(-6, -58, 3);
+                g.circle(6, -58, 3);
+                g.fill(0xffffff);
+                break;
+
+            case 'skeleton':
+                // Skull
+                g.circle(0, -55, 16);
+                g.fill(0xd1d5db);
+                // Eye sockets
+                g.circle(-5, -58, 4);
+                g.circle(5, -58, 4);
+                g.fill(0x1f2937);
+                // Jaw
+                g.rect(-10, -48, 20, 6);
+                g.fill(0xd1d5db);
+                // Ribcage
+                for (let i = 0; i < 4; i++) {
+                    g.roundRect(-18, -35 + i * 10, 36, 6, 2);
+                    g.fill(0xd1d5db);
+                }
+                // Spine
+                g.roundRect(-3, -38, 6, 50, 2);
+                g.fill(0x9ca3af);
+                // Arms
+                g.roundRect(-28, -35, 8, 35, 2);
+                g.roundRect(20, -35, 8, 35, 2);
+                g.fill(0xd1d5db);
+                // Legs
+                g.roundRect(-12, 10, 8, 30, 2);
+                g.roundRect(4, 10, 8, 30, 2);
+                g.fill(0xd1d5db);
+                // Glow
+                g.circle(-5, -58, 2);
+                g.circle(5, -58, 2);
+                g.fill(accent);
+                break;
+
+            case 'beast':
+                // Body (quadruped stance)
+                g.ellipse(0, -20, 35, 25);
+                g.fill(primary);
+                // Head
+                g.ellipse(-30, -30, 20, 18);
+                g.fill(primary);
+                // Snout
+                g.ellipse(-45, -28, 10, 8);
+                g.fill(secondary);
+                // Ears
+                g.moveTo(-25, -48);
+                g.lineTo(-35, -55);
+                g.lineTo(-30, -45);
+                g.fill(primary);
+                g.moveTo(-15, -45);
+                g.lineTo(-22, -55);
+                g.lineTo(-20, -42);
+                g.fill(primary);
+                // Legs
+                g.roundRect(-25, 0, 12, 25, 4);
+                g.roundRect(-5, 0, 12, 25, 4);
+                g.roundRect(15, 0, 12, 25, 4);
+                g.fill(secondary);
+                // Tail
+                g.moveTo(30, -25);
+                g.quadraticCurveTo(50, -30, 45, -10);
+                g.lineTo(42, -12);
+                g.quadraticCurveTo(45, -28, 28, -22);
+                g.fill(primary);
+                // Eye
+                g.circle(-38, -32, 4);
+                g.fill(accent);
+                break;
+
+            case 'dragon':
+                // Body (large, serpentine)
+                g.ellipse(0, -30, 50, 35);
+                g.fill(primary);
+                // Belly scales
+                g.ellipse(0, -20, 35, 20);
+                g.fill(secondary);
+                // Head
+                g.ellipse(-45, -45, 25, 20);
+                g.fill(primary);
+                // Snout
+                g.ellipse(-65, -42, 15, 10);
+                g.fill(secondary);
+                // Horns
+                g.moveTo(-35, -60);
+                g.lineTo(-25, -80);
+                g.lineTo(-30, -58);
+                g.fill(accent);
+                g.moveTo(-50, -58);
+                g.lineTo(-45, -78);
+                g.lineTo(-42, -55);
+                g.fill(accent);
+                // Wings
+                g.moveTo(10, -55);
+                g.lineTo(60, -90);
+                g.lineTo(70, -50);
+                g.lineTo(50, -55);
+                g.lineTo(40, -40);
+                g.fill(secondary);
+                // Legs
+                g.roundRect(-30, 0, 20, 35, 6);
+                g.roundRect(10, 0, 20, 35, 6);
+                g.fill(primary);
+                // Claws
+                g.moveTo(-25, 35);
+                g.lineTo(-30, 45);
+                g.lineTo(-20, 35);
+                g.fill(accent);
+                // Eye
+                g.circle(-55, -48, 5);
+                g.fill(accent);
+                // Tail
+                g.moveTo(45, -25);
+                g.quadraticCurveTo(80, -20, 85, -40);
+                g.lineTo(82, -38);
+                g.quadraticCurveTo(75, -22, 43, -22);
+                g.fill(primary);
+                break;
+
+            case 'demon':
+                // Body
+                g.roundRect(-25, -40, 50, 55, 10);
+                g.fill(primary);
+                // Head
+                g.circle(0, -55, 22);
+                g.fill(primary);
+                // Horns
+                g.moveTo(-18, -70);
+                g.lineTo(-25, -95);
+                g.lineTo(-12, -72);
+                g.fill(accent);
+                g.moveTo(18, -70);
+                g.lineTo(25, -95);
+                g.lineTo(12, -72);
+                g.fill(accent);
+                // Eyes (glowing)
+                g.circle(-8, -58, 5);
+                g.circle(8, -58, 5);
+                g.fill(accent);
+                g.circle(-8, -58, 2);
+                g.circle(8, -58, 2);
+                g.fill(0xffffff);
+                // Wings
+                g.moveTo(-25, -30);
+                g.lineTo(-55, -60);
+                g.lineTo(-60, -20);
+                g.lineTo(-30, -25);
+                g.fill(secondary);
+                g.moveTo(25, -30);
+                g.lineTo(55, -60);
+                g.lineTo(60, -20);
+                g.lineTo(30, -25);
+                g.fill(secondary);
+                // Arms
+                g.roundRect(-35, -30, 12, 40, 4);
+                g.roundRect(23, -30, 12, 40, 4);
+                g.fill(secondary);
+                // Legs
+                g.roundRect(-18, 12, 16, 28, 5);
+                g.roundRect(2, 12, 16, 28, 5);
+                g.fill(primary);
+                break;
+
+            case 'wraith':
+                // Ghostly body (wispy)
+                g.moveTo(0, -70);
+                g.quadraticCurveTo(30, -50, 25, -20);
+                g.quadraticCurveTo(30, 10, 15, 35);
+                g.lineTo(5, 30);
+                g.lineTo(-5, 40);
+                g.lineTo(-15, 30);
+                g.quadraticCurveTo(-30, 10, -25, -20);
+                g.quadraticCurveTo(-30, -50, 0, -70);
+                g.fill({ color: primary, alpha: 0.7 });
+                // Hood
+                g.ellipse(0, -55, 20, 25);
+                g.fill(secondary);
+                // Face void
+                g.ellipse(0, -50, 12, 15);
+                g.fill(0x000000);
+                // Eyes
+                g.circle(-5, -52, 3);
+                g.circle(5, -52, 3);
+                g.fill(accent);
+                // Wisps
+                g.moveTo(-20, -30);
+                g.quadraticCurveTo(-40, -40, -35, -20);
+                g.fill({ color: secondary, alpha: 0.5 });
+                g.moveTo(20, -30);
+                g.quadraticCurveTo(40, -40, 35, -20);
+                g.fill({ color: secondary, alpha: 0.5 });
+                break;
+
+            case 'elemental':
+                // Core
+                g.circle(0, -35, 30);
+                g.fill(primary);
+                // Inner glow
+                g.circle(0, -35, 20);
+                g.fill(secondary);
+                g.circle(0, -35, 10);
+                g.fill(accent);
+                // Orbiting fragments
+                for (let i = 0; i < 6; i++) {
+                    const angle = (i / 6) * Math.PI * 2;
+                    const ox = Math.cos(angle) * 40;
+                    const oy = Math.sin(angle) * 40 - 35;
+                    g.circle(ox, oy, 8);
+                    g.fill(primary);
+                }
+                // Energy streams
+                g.setStrokeStyle({ width: 3, color: accent, alpha: 0.7 });
+                g.moveTo(-30, -20);
+                g.quadraticCurveTo(-15, -50, 0, -35);
+                g.stroke();
+                g.moveTo(30, -20);
+                g.quadraticCurveTo(15, -50, 0, -35);
+                g.stroke();
+                break;
+
+            case 'angel':
+                // Body (robed)
+                g.moveTo(-20, -30);
+                g.lineTo(-30, 35);
+                g.lineTo(30, 35);
+                g.lineTo(20, -30);
+                g.fill(0xffffff);
+                // Head
+                g.circle(0, -45, 18);
+                g.fill(0xfef3c7);
+                // Halo
+                g.setStrokeStyle({ width: 4, color: accent });
+                g.circle(0, -70, 15);
+                g.stroke();
+                // Wings
+                g.moveTo(-18, -25);
+                g.quadraticCurveTo(-60, -50, -70, -15);
+                g.quadraticCurveTo(-65, -35, -55, -30);
+                g.quadraticCurveTo(-50, -45, -40, -35);
+                g.quadraticCurveTo(-35, -48, -18, -30);
+                g.fill(0xffffff);
+                g.moveTo(18, -25);
+                g.quadraticCurveTo(60, -50, 70, -15);
+                g.quadraticCurveTo(65, -35, 55, -30);
+                g.quadraticCurveTo(50, -45, 40, -35);
+                g.quadraticCurveTo(35, -48, 18, -30);
+                g.fill(0xffffff);
+                // Face
+                g.circle(-5, -48, 2);
+                g.circle(5, -48, 2);
+                g.fill(primary);
+                // Arms holding staff
+                g.roundRect(-8, -25, 6, 30, 2);
+                g.roundRect(2, -25, 6, 30, 2);
+                g.fill(0xfef3c7);
+                // Staff
+                g.roundRect(-2, -60, 4, 80, 2);
+                g.fill(accent);
+                g.circle(0, -65, 8);
+                g.fill(accent);
+                break;
+
+            default:
+                // Default blob enemy
+                g.ellipse(0, -25, 30, 35);
+                g.fill(primary);
+                g.circle(-10, -35, 5);
+                g.circle(10, -35, 5);
+                g.fill(0xffffff);
+                g.circle(-10, -35, 2);
+                g.circle(10, -35, 2);
+                g.fill(0x000000);
+        }
+
+        // Boss enhancement - add glowing outline
+        if (isBoss) {
+            g.setStrokeStyle({ width: 3, color: accent, alpha: 0.8 });
+            g.circle(0, -30, 50);
+            g.stroke();
+        }
+
+        return g;
+    }
+
     // --- Update Visuals on State Change ---
     useEffect(() => {
-        if (!state || !textureSheetRef.current) return;
+        if (!state || !gameContainerRef.current) return;
 
-        // 1. Update Sprites based on Zone/Enemy Type
-        if (enemyRef.current && textureSheetRef.current) {
+        // 1. Update Enemy Graphics based on Zone/Enemy Type
+        if (enemyRef.current) {
             const zone = getZoneById(state.currentZone);
             const enemyType = zone.enemyType;
             const spriteLoc = ENEMY_SPRITES[enemyType] || ENEMY_SPRITES['Beast'];
 
-            const cellW = textureSheetRef.current.width / spriteLoc.cols;
-            const cellH = textureSheetRef.current.height / 8;
-            const spriteHeight = spriteLoc.height || 1;
+            // Remove old graphics and create new one
+            if (enemyRef.current.graphics) {
+                enemyRef.current.removeChild(enemyRef.current.graphics);
+            }
+            const newGraphics = createCharacterGraphics(enemyType, zone.isBoss);
+            enemyRef.current.addChild(newGraphics);
+            enemyRef.current.graphics = newGraphics;
 
-            const newFrame = new PIXI.Rectangle(
-                (spriteLoc.col || 0) * cellW,
-                (spriteLoc.row || 0) * cellH,
-                cellW * 0.95,
-                cellH * spriteHeight * 0.95
-            );
-
-            enemyRef.current.texture = new PIXI.Texture({
-                source: textureSheetRef.current.source,
-                frame: newFrame
-            });
-
-            // Calculate scale based on sprite height and boss status
-            // Multi-row sprites (like dragons) need smaller scale
-            let baseScale = spriteHeight > 1 ? 0.5 : 0.9;
+            // Scale based on sprite data and boss status
+            const baseScale = spriteLoc.scale || 1.0;
+            const finalScale = zone.isBoss ? baseScale * 1.3 : baseScale;
+            enemyRef.current.scale.set(finalScale, finalScale);
 
             if (zone.isBoss) {
-                // Bosses are bigger, but tall sprites get less boost
-                const bossScale = spriteHeight > 1 ? baseScale * 1.3 : baseScale * 1.5;
-                enemyRef.current.scale.set(-bossScale, bossScale);
-
                 if (enemyRef.current.aura) {
                     enemyRef.current.aura.clear();
                     enemyRef.current.aura.circle(600, 350, 70);
@@ -553,19 +832,16 @@ export default function GameRenderer() {
                 }
                 if (enemyRef.current.shadow) {
                     enemyRef.current.shadow.clear();
-                    const shadowSize = spriteHeight > 1 ? 50 : 40;
-                    enemyRef.current.shadow.ellipse(600, 375, shadowSize, 15);
+                    enemyRef.current.shadow.ellipse(600, 375, 45, 15);
                     enemyRef.current.shadow.fill({ color: 0x000000, alpha: 0.5 });
                 }
             } else {
-                enemyRef.current.scale.set(-baseScale, baseScale);
                 if (enemyRef.current.aura) {
                     enemyRef.current.aura.clear();
                 }
                 if (enemyRef.current.shadow) {
                     enemyRef.current.shadow.clear();
-                    const shadowSize = spriteHeight > 1 ? 35 : 30;
-                    enemyRef.current.shadow.ellipse(600, 375, shadowSize, 10);
+                    enemyRef.current.shadow.ellipse(600, 375, 30, 10);
                     enemyRef.current.shadow.fill({ color: 0x000000, alpha: 0.4 });
                 }
             }

@@ -1,37 +1,46 @@
-// Game asset URLs from Kenney.nl and other free CDNs
-// All assets are freely available and CDN-hosted
+// Game asset URLs and procedural generation
+// Using procedural graphics for clean, transparent sprites
 
 export const ASSET_BASE = {
-  // Local assets generated via AI
-  characters: '/assets/characters.png',
-  items: '/assets/items.png',
-  ui: 'https://kenney.nl/content/3-assets/2-asset-packs/ui-pack-rpg-expansion/preview.png', // Keep UI for now or replace if needed
+  ui: 'https://kenney.nl/content/3-assets/2-asset-packs/ui-pack-rpg-expansion/preview.png',
 };
 
-// Enemy sprites by zone type
-// The spritesheet is 1024x1024. Logical rows are approx 128px high.
-// Columns vary per row.
-export const ENEMY_SPRITES = {
-  // Row 0: Player/Knight (12 cols)
-  Knight: { row: 0, col: 0, cols: 12, height: 1 },
-  // Row 1: Skeleton (9 cols)
-  Undead: { row: 1, col: 0, cols: 9, height: 1 },
-  // Row 2: Orcs/Goblins (10 cols)
-  Beast: { row: 2, col: 0, cols: 10, height: 1 },
-  Humanoid: { row: 2, col: 2, cols: 10, height: 1 },
-  // Row 3: Dragon (4 cols, 2 rows high)
-  Dragon: { row: 3, col: 0, cols: 4, height: 2 },
-  Boss: { row: 3, col: 1, cols: 4, height: 2 },
-  // Row 5: Demon (5 cols)
-  Demon: { row: 5, col: 0, cols: 5, height: 1 },
-  Abyssal: { row: 5, col: 1, cols: 5, height: 1 },
-  Void: { row: 5, col: 2, cols: 5, height: 1 },
-  // Row 6: Elemental (5 cols)
-  Elemental: { row: 6, col: 0, cols: 5, height: 1 },
-  Chaos: { row: 6, col: 1, cols: 5, height: 1 },
-  // Row 7: Angel (5 cols)
-  Celestial: { row: 7, col: 0, cols: 5, height: 1 },
+// Color palettes for different enemy types
+const ENEMY_COLORS = {
+  Knight: { primary: '#3b82f6', secondary: '#60a5fa', accent: '#fbbf24' },
+  Undead: { primary: '#6b7280', secondary: '#9ca3af', accent: '#22c55e' },
+  Beast: { primary: '#22c55e', secondary: '#4ade80', accent: '#fbbf24' },
+  Humanoid: { primary: '#f97316', secondary: '#fb923c', accent: '#fbbf24' },
+  Dragon: { primary: '#dc2626', secondary: '#f87171', accent: '#fbbf24' },
+  Demon: { primary: '#7f1d1d', secondary: '#ef4444', accent: '#f97316' },
+  Elemental: { primary: '#06b6d4', secondary: '#22d3ee', accent: '#fbbf24' },
+  Celestial: { primary: '#fbbf24', secondary: '#fde047', accent: '#ffffff' },
+  Abyssal: { primary: '#4c1d95', secondary: '#7c3aed', accent: '#c4b5fd' },
+  Chaos: { primary: '#db2777', secondary: '#f472b6', accent: '#fbbf24' },
+  Void: { primary: '#1e1b4b', secondary: '#4338ca', accent: '#818cf8' },
+  Boss: { primary: '#dc2626', secondary: '#fbbf24', accent: '#ffffff' },
 };
+
+// Enemy sprite data for procedural generation
+export const ENEMY_SPRITES = {
+  Knight: { type: 'humanoid', scale: 1.0 },
+  Undead: { type: 'skeleton', scale: 1.0 },
+  Beast: { type: 'beast', scale: 1.1 },
+  Humanoid: { type: 'orc', scale: 1.0 },
+  Dragon: { type: 'dragon', scale: 1.5 },
+  Boss: { type: 'dragon', scale: 1.8 },
+  Demon: { type: 'demon', scale: 1.2 },
+  Abyssal: { type: 'demon', scale: 1.3 },
+  Void: { type: 'wraith', scale: 1.1 },
+  Elemental: { type: 'elemental', scale: 1.2 },
+  Chaos: { type: 'elemental', scale: 1.3 },
+  Celestial: { type: 'angel', scale: 1.2 },
+};
+
+// Get enemy colors by type
+export function getEnemyColors(enemyType) {
+  return ENEMY_COLORS[enemyType] || ENEMY_COLORS.Beast;
+}
 
 // Procedurally generate weapon icons based on type and tier
 export function generateWeaponIcon(weaponType, tier) {
