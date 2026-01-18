@@ -171,18 +171,16 @@ export default function GameLayout() {
                     ))}
                 </div>
 
-                {/* Content Area */}
-                <div className="flex-1 overflow-hidden">
-                    <div className="h-full overflow-auto custom-scrollbar p-5">
-                        <div className="animate-fadeIn">
-                            {activeTab === 'inventory' && <InventoryView onHover={handleHover} />}
-                            {activeTab === 'stats' && <StatsView />}
-                            {activeTab === 'forge' && <CraftingView />}
-                            {activeTab === 'enhance' && <EnhancementView />}
-                            {activeTab === 'skills' && <SkillsView />}
-                            {activeTab === 'zone' && <ZoneView />}
-                            {activeTab === 'prestige' && <PrestigeView />}
-                        </div>
+                {/* Content Area - Fixed height, no outer scroll */}
+                <div className="flex-1 overflow-hidden p-3">
+                    <div className="h-full animate-fadeIn">
+                        {activeTab === 'inventory' && <InventoryView onHover={handleHover} />}
+                        {activeTab === 'stats' && <StatsView />}
+                        {activeTab === 'forge' && <CraftingView />}
+                        {activeTab === 'enhance' && <EnhancementView />}
+                        {activeTab === 'skills' && <SkillsView />}
+                        {activeTab === 'zone' && <ZoneView />}
+                        {activeTab === 'prestige' && <PrestigeView />}
                     </div>
                 </div>
 

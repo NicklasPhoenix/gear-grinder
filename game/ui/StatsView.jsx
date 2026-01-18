@@ -24,73 +24,79 @@ export default function StatsView() {
     };
 
     const handleReset = async () => {
-        if (confirm("Are you sure you want to delete your save? This cannot be undone.")) {
+        if (confirm("Delete save? Cannot be undone.")) {
             await window.storage.remove('gear-grinder-save');
             location.reload();
         }
     };
 
     return (
-        <div className="flex flex-col h-full gap-2">
-
-            {/* Header / Controls */}
-            <div className="flex justify-between items-center p-2 bg-slate-800 rounded border border-slate-700">
-                <div className="text-sm bg-slate-900 px-3 py-1 rounded text-white border border-slate-600">
-                    Unspent Points: <span className="text-green-400 font-bold">{state.statPoints}</span>
-                </div>
-                <div className="flex gap-2">
-                    <button onClick={handleManualSave} className="text-xs bg-blue-900 border border-blue-700 hover:bg-blue-800 text-blue-200 px-3 py-1 rounded transition-colors">
-                        💾 Save Game
-                    </button>
-                    <button onClick={handleReset} className="text-xs bg-red-900 border border-red-700 hover:bg-red-800 text-red-200 px-3 py-1 rounded transition-colors">
-                        ♻️ Reset Save
-                    </button>
+        <div className="h-full flex flex-col gap-2">
+            {/* Header */}
+            <div className="game-panel">
+                <div className="game-panel-header flex justify-between items-center">
+                    <span>Stats</span>
+                    <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-green-400">
+                            Points: <span className="font-bold">{state.statPoints}</span>
+                        </span>
+                        <button onClick={handleManualSave} className="px-2 py-0.5 text-[9px] bg-blue-600/40 hover:bg-blue-600/60 text-blue-200 rounded">
+                            SAVE
+                        </button>
+                        <button onClick={handleReset} className="px-2 py-0.5 text-[9px] bg-red-600/40 hover:bg-red-600/60 text-red-200 rounded">
+                            RESET
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <div className="flex h-full gap-4">
-                {/* Attributes Column */}
-                <div className="w-1/2 p-4 bg-slate-800 rounded flex flex-col gap-2 overflow-y-auto custom-scrollbar">
-                    <h3 className="font-bold text-yellow-500 uppercase border-b border-slate-700 pb-2 mb-2">Base Attributes</h3>
-
-                    {Object.entries(state.stats).map(([key, val]) => (
-                        <div key={key} className="flex items-center justify-between text-xs bg-slate-900/50 p-2 rounded hover:bg-slate-900 transition-colors">
-                            <div className="flex flex-col">
-                                <span className="font-bold" style={{ color: STATS[key].color }}>{STATS[key].name}</span>
-                                <span className="text-[10px] text-gray-500">{STATS[key].desc}</span>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <span className="text-lg font-mono w-8 text-right text-white">{val}</span>
-                                <button
-                                    onClick={() => handleStatUp(key)}
-                                    disabled={state.statPoints <= 0}
-                                    className={`w-8 h-8 flex items-center justify-center rounded border transition-all ${state.statPoints > 0
-                                        ? 'bg-blue-600 border-blue-400 hover:bg-blue-500 text-white shadow-lg transform hover:scale-105'
-                                        : 'bg-slate-700 border-slate-600 text-slate-500 cursor-not-allowed opacity-50'
+            <div className="flex-1 flex gap-2 min-h-0">
+                {/* Base Attributes */}
+                <div className="w-1/2 game-panel flex flex-col min-h-0">
+                    <div className="game-panel-header">Attributes</div>
+                    <div className="flex-1 overflow-y-auto custom-scrollbar p-2 min-h-0 space-y-1">
+                        {Object.entries(state.stats).map(([key, val]) => (
+                            <div key={key} className="flex items-center justify-between p-1.5 bg-slate-900/50 rounded hover:bg-slate-800/50 transition-colors">
+                                <div>
+                                    <div className="text-[11px] font-bold" style={{ color: STATS[key].color }}>{STATS[key].name}</div>
+                                    <div className="text-[8px] text-slate-500">{STATS[key].desc}</div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-sm font-mono font-bold text-white w-6 text-right">{val}</span>
+                                    <button
+                                        onClick={() => handleStatUp(key)}
+                                        disabled={state.statPoints <= 0}
+                                        className={`w-6 h-6 flex items-center justify-center rounded text-sm font-bold transition-all ${
+                                            state.statPoints > 0
+                                                ? 'bg-blue-600 hover:bg-blue-500 text-white'
+                                                : 'bg-slate-700 text-slate-500 cursor-not-allowed'
                                         }`}
-                                >
-                                    +
-                                </button>
+                                    >
+                                        +
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
 
-                {/* Combat Stats Column */}
-                <div className="w-1/2 p-4 bg-slate-800 rounded flex flex-col gap-2 overflow-y-auto custom-scrollbar text-xs text-white">
-                    <h3 className="font-bold text-yellow-500 uppercase border-b border-slate-700 pb-2 mb-2">Combat Statistics</h3>
-                    <div className="space-y-2">
-                        <StatRow label="Damage" value={calculated.damage} />
-                        <StatRow label="Armor / Def" value={calculated.armor} />
-                        <StatRow label="Crit Chance" value={`${calculated.critChance.toFixed(1)}%`} />
-                        <StatRow label="Crit Multiplier" value={`${calculated.critDamage.toFixed(0)}%`} />
-                        <StatRow label="Attack Speed" value={`${calculated.speedMult.toFixed(2)}x`} />
-                        <StatRow label="Dodge Chance" value={`${calculated.dodge.toFixed(1)}%`} />
-                        <StatRow label="Lifesteal" value={`${calculated.lifesteal.toFixed(1)}%`} />
-                        <StatRow label="Thorns Dmg" value={calculated.thorns || 0} />
-                        <div className="pt-2 mt-2 border-t border-slate-700">
-                            <StatRow label="Gold Find" value={`+${((calculated.goldMult - 1) * 100).toFixed(0)}%`} />
-                            <StatRow label="XP Bonus" value={`+${(calculated.xpBonus || 0).toFixed(0)}%`} />
+                {/* Combat Stats */}
+                <div className="w-1/2 game-panel flex flex-col min-h-0">
+                    <div className="game-panel-header">Combat</div>
+                    <div className="flex-1 overflow-y-auto custom-scrollbar p-2 min-h-0">
+                        <div className="space-y-0.5 text-[11px]">
+                            <StatRow label="Damage" value={calculated.damage} color="text-red-300" />
+                            <StatRow label="Armor" value={calculated.armor} color="text-blue-300" />
+                            <StatRow label="Crit %" value={`${calculated.critChance.toFixed(1)}%`} color="text-yellow-300" />
+                            <StatRow label="Crit DMG" value={`${calculated.critDamage.toFixed(0)}%`} color="text-orange-300" />
+                            <StatRow label="Speed" value={`${calculated.speedMult.toFixed(2)}x`} color="text-cyan-300" />
+                            <StatRow label="Dodge" value={`${calculated.dodge.toFixed(1)}%`} color="text-green-300" />
+                            <StatRow label="Lifesteal" value={`${calculated.lifesteal.toFixed(1)}%`} color="text-pink-300" />
+                            <StatRow label="Thorns" value={calculated.thorns || 0} color="text-purple-300" />
+                            <div className="border-t border-slate-700/50 my-1 pt-1">
+                                <StatRow label="Gold %" value={`+${((calculated.goldMult - 1) * 100).toFixed(0)}%`} color="text-yellow-400" />
+                                <StatRow label="XP %" value={`+${(calculated.xpBonus || 0).toFixed(0)}%`} color="text-purple-400" />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -99,11 +105,11 @@ export default function StatsView() {
     );
 }
 
-function StatRow({ label, value }) {
+function StatRow({ label, value, color = "text-slate-200" }) {
     return (
-        <div className="flex justify-between border-b border-slate-700/50 pb-1 hover:bg-slate-700/30 px-1 rounded">
-            <span className="text-gray-400">{label}</span>
-            <span className="font-mono text-blue-200">{value}</span>
+        <div className="flex justify-between py-0.5 px-1 hover:bg-slate-800/30 rounded">
+            <span className="text-slate-400">{label}</span>
+            <span className={`font-mono font-bold ${color}`}>{value}</span>
         </div>
     );
 }

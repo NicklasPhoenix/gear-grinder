@@ -77,15 +77,13 @@ export default function EnhancementView() {
 
         const newPlus = success ? item.plus + 1 : Math.max(0, item.plus - 1);
         const newItem = { ...item, plus: newPlus, id: Date.now() };
-        delete newItem.count; // Remove count for single enhanced item
+        delete newItem.count;
 
         if (isInventoryItem) {
-            // Remove one from stack and add enhanced item with stacking
             let updatedInventory = removeOneFromStack(state.inventory, item.id);
             updatedInventory = addItemToInventory(updatedInventory, newItem);
             newState.inventory = updatedInventory;
         } else {
-            // Equipped item - just update in place
             newState.gear = { ...state.gear, [newItem.slot]: newItem };
         }
 
@@ -101,13 +99,10 @@ export default function EnhancementView() {
             gameManager.emit('floatingText', { text: `FAIL`, type: 'death', target: 'player' });
         }
 
-        // Find the new item in inventory for selection
         if (isInventoryItem) {
             const updatedItem = newState.inventory.find(i =>
-                i.slot === newItem.slot &&
-                i.tier === newItem.tier &&
-                i.plus === newItem.plus &&
-                i.bossSet === newItem.bossSet
+                i.slot === newItem.slot && i.tier === newItem.tier &&
+                i.plus === newItem.plus && i.bossSet === newItem.bossSet
             );
             setSelectedItem(updatedItem || newItem);
         } else {
@@ -140,240 +135,218 @@ export default function EnhancementView() {
     const canAfford = costs && state.gold >= costs.gold && state.enhanceStone >= costs.enhanceStone;
 
     return (
-        <div className="h-full flex flex-col gap-3">
-            {/* Header */}
-            <div className="glass-card rounded-xl p-3">
-                <div className="flex items-center justify-between">
-                    <h2 className="text-base font-bold text-white flex items-center gap-2">
-                        <svg className="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                        Enhance
-                    </h2>
-                    <div className="flex items-center gap-3 text-xs">
-                        <div className="flex items-center gap-1">
-                            <MaterialIcon type="gold" size={16} />
-                            <span className="text-yellow-400 font-bold">{state.gold.toLocaleString()}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                            <MaterialIcon type="enhanceStone" size={16} />
-                            <span className="text-blue-400 font-bold">{state.enhanceStone}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div className="flex-1 flex gap-3 min-h-0">
-                {/* Left: Item Selector */}
-                <div className="w-2/5 glass-card rounded-xl overflow-hidden flex flex-col min-h-0">
-                    <div className="px-3 py-2 border-b border-slate-700/50 bg-slate-900/50">
-                        <h3 className="font-bold text-blue-400 text-xs uppercase tracking-wider">Items</h3>
-                    </div>
-                    <div className="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar">
-                        {allItems.length === 0 ? (
-                            <div className="text-center text-slate-500 py-4 text-xs">No items</div>
-                        ) : (
-                            allItems.map(item => {
+        <div className="h-full flex gap-2">
+            {/* Left: Item List */}
+            <div className="w-1/3 game-panel flex flex-col min-h-0">
+                <div className="game-panel-header">Select Item</div>
+                <div className="flex-1 overflow-y-auto custom-scrollbar p-1.5 min-h-0">
+                    {allItems.length === 0 ? (
+                        <div className="text-center text-slate-600 py-4 text-xs">No items</div>
+                    ) : (
+                        <div className="space-y-1">
+                            {allItems.map(item => {
                                 const tierInfo = TIERS[item.tier];
                                 const isSelected = selectedItem?.id === item.id;
+                                const stage = getEnhanceStage(item.plus);
+
                                 return (
                                     <div
                                         key={item.id}
                                         onClick={() => { stopAutoEnhance(); setSelectedItem(item); }}
-                                        className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer border transition-all ${
+                                        className={`flex items-center gap-2 p-1.5 rounded cursor-pointer border transition-all ${
                                             isSelected
-                                                ? 'bg-blue-900/40 border-blue-500'
-                                                : 'bg-slate-800/50 border-slate-700/50 hover:border-slate-500'
+                                                ? 'bg-blue-900/50 border-blue-500/70'
+                                                : 'bg-slate-800/30 border-slate-700/30 hover:border-slate-500/50'
                                         }`}
                                     >
-                                        <div className="w-8 h-8 rounded overflow-hidden bg-slate-900/50 flex-shrink-0">
+                                        <div className="w-8 h-8 rounded bg-slate-900/50 flex-shrink-0 relative">
                                             <ItemIcon item={item} />
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <div className="font-bold text-xs truncate" style={{ color: tierInfo.color }}>
+                                            <div className="text-[10px] font-bold truncate" style={{ color: tierInfo.color }}>
                                                 {item.name}
                                             </div>
-                                            <div className="text-[10px] text-slate-400 flex items-center gap-2">
-                                                {(() => {
-                                                    const stage = getEnhanceStage(item.plus);
-                                                    return (
-                                                        <span
-                                                            className="px-1 rounded flex items-center gap-0.5"
-                                                            style={{
-                                                                color: stage.color,
-                                                                backgroundColor: stage.bgColor,
-                                                                boxShadow: stage.glow
-                                                            }}
-                                                        >
-                                                            {stage.icon && <span className="text-[8px]">{stage.icon}</span>}
-                                                            +{item.plus}
-                                                        </span>
-                                                    );
-                                                })()}
+                                            <div className="flex items-center gap-1">
+                                                <span
+                                                    className="text-[9px] px-1 rounded"
+                                                    style={{ color: stage.color, backgroundColor: stage.bgColor }}
+                                                >
+                                                    {stage.icon && <span className="mr-0.5">{stage.icon}</span>}
+                                                    +{item.plus}
+                                                </span>
                                                 {(item.count || 1) > 1 && (
-                                                    <span className="text-blue-400 bg-blue-500/20 px-1 rounded">x{item.count}</span>
+                                                    <span className="text-[9px] text-blue-400">x{item.count}</span>
                                                 )}
                                             </div>
                                         </div>
                                     </div>
                                 );
-                            })
-                        )}
-                    </div>
-                </div>
-
-                {/* Right: Enhancement Interface */}
-                <div className="flex-1 glass-card rounded-xl p-3 flex flex-col min-h-0">
-                    {selectedItem ? (
-                        <>
-                            {/* Item + Success in one row */}
-                            <div className="flex items-center gap-3 mb-3">
-                                <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 border border-slate-600">
-                                    <ItemIcon item={selectedItem} />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <div className="font-bold text-sm truncate" style={{ color: TIERS[selectedItem.tier].color }}>
-                                        {selectedItem.name}
-                                    </div>
-                                    <div className="text-xs flex items-center gap-1">
-                                        {(() => {
-                                            const currentStage = getEnhanceStage(selectedItem.plus);
-                                            const nextStage = getEnhanceStage(selectedItem.plus + 1);
-                                            const isNewStage = currentStage.stage !== nextStage.stage;
-                                            return (
-                                                <>
-                                                    <span
-                                                        className="px-1.5 py-0.5 rounded flex items-center gap-0.5"
-                                                        style={{
-                                                            color: currentStage.color,
-                                                            backgroundColor: currentStage.bgColor,
-                                                            boxShadow: currentStage.glow
-                                                        }}
-                                                    >
-                                                        {currentStage.icon && <span className="text-[9px]">{currentStage.icon}</span>}
-                                                        +{selectedItem.plus}
-                                                    </span>
-                                                    <span className="text-slate-500">&rarr;</span>
-                                                    <span
-                                                        className={`px-1.5 py-0.5 rounded flex items-center gap-0.5 ${isNewStage ? 'animate-pulse' : ''}`}
-                                                        style={{
-                                                            color: nextStage.color,
-                                                            backgroundColor: nextStage.bgColor,
-                                                            boxShadow: nextStage.glow
-                                                        }}
-                                                    >
-                                                        {nextStage.icon && <span className="text-[9px]">{nextStage.icon}</span>}
-                                                        +{selectedItem.plus + 1}
-                                                    </span>
-                                                    {isNewStage && nextStage.name && (
-                                                        <span className="text-[9px] ml-1 px-1 py-0.5 rounded animate-pulse" style={{ color: nextStage.color, backgroundColor: nextStage.bgColor }}>
-                                                            {nextStage.name}!
-                                                        </span>
-                                                    )}
-                                                </>
-                                            );
-                                        })()}
-                                    </div>
-                                </div>
-                                <div className="text-right">
-                                    <div className="text-[10px] text-slate-500">Success</div>
-                                    <div className={`text-xl font-bold ${
-                                        successChance > 80 ? 'text-green-400' :
-                                        successChance > 50 ? 'text-yellow-400' :
-                                        successChance > 20 ? 'text-orange-400' : 'text-red-400'
-                                    }`}>
-                                        {successChance}%
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Stats side by side */}
-                            <div className="grid grid-cols-2 gap-2 mb-3">
-                                <div className="p-2 rounded bg-slate-800/30 border border-slate-700/30">
-                                    <div className="text-[10px] text-slate-500 mb-1">Current</div>
-                                    <div className="flex gap-3 text-xs">
-                                        <span className="text-red-300">DMG +{currentStats.dmgBonus}</span>
-                                        <span className="text-green-300">HP +{currentStats.hpBonus}</span>
-                                    </div>
-                                </div>
-                                <div className="p-2 rounded bg-green-900/20 border border-green-500/30">
-                                    <div className="text-[10px] text-green-400 mb-1">Next</div>
-                                    <div className="flex gap-3 text-xs">
-                                        <span className="text-red-300">DMG +{nextStats.dmgBonus}</span>
-                                        <span className="text-green-300">HP +{nextStats.hpBonus}</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Cost */}
-                            <div className="flex justify-center gap-4 mb-3 p-2 rounded bg-slate-900/50">
-                                <div className={`flex items-center gap-1 ${state.gold >= costs.gold ? 'text-yellow-400' : 'text-red-400'}`}>
-                                    <MaterialIcon type="gold" size={16} />
-                                    <span className="font-bold text-sm">{costs.gold.toLocaleString()}</span>
-                                </div>
-                                <div className={`flex items-center gap-1 ${state.enhanceStone >= costs.enhanceStone ? 'text-blue-400' : 'text-red-400'}`}>
-                                    <MaterialIcon type="enhanceStone" size={16} />
-                                    <span className="font-bold text-sm">{costs.enhanceStone}</span>
-                                </div>
-                            </div>
-
-                            {/* Buttons */}
-                            <div className="mt-auto space-y-2">
-                                {autoEnhancing ? (
-                                    <button
-                                        onClick={stopAutoEnhance}
-                                        className="w-full py-3 bg-red-600 hover:bg-red-500 text-white font-bold uppercase text-sm rounded-lg flex items-center justify-center gap-2"
-                                    >
-                                        <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                                        </svg>
-                                        STOP (+{autoEnhanceTarget})
-                                    </button>
-                                ) : (
-                                    <>
-                                        <button
-                                            onClick={handleEnhance}
-                                            disabled={!canAfford}
-                                            className={`w-full py-3 font-bold uppercase text-sm rounded-lg transition-all ${
-                                                canAfford
-                                                    ? 'bg-blue-600 hover:bg-blue-500 text-white'
-                                                    : 'bg-slate-700 text-slate-500 cursor-not-allowed'
-                                            }`}
-                                        >
-                                            Enhance
-                                        </button>
-                                        <div className="flex gap-2">
-                                            {[3, 5, 10].map(n => (
-                                                <button
-                                                    key={n}
-                                                    onClick={() => startAutoEnhance(selectedItem.plus + n)}
-                                                    disabled={!canAfford}
-                                                    className={`flex-1 py-1.5 text-xs font-bold uppercase rounded transition-all ${
-                                                        canAfford
-                                                            ? 'bg-purple-600/50 hover:bg-purple-600 text-purple-200'
-                                                            : 'bg-slate-700/50 text-slate-500 cursor-not-allowed'
-                                                    }`}
-                                                >
-                                                    +{selectedItem.plus + n}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-                        </>
-                    ) : (
-                        <div className="flex-1 flex items-center justify-center">
-                            <div className="text-center text-slate-500 text-sm">
-                                <svg className="w-12 h-12 mx-auto mb-2 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                </svg>
-                                Select an item
-                            </div>
+                            })}
                         </div>
                     )}
                 </div>
+            </div>
+
+            {/* Right: Enhancement Panel */}
+            <div className="flex-1 game-panel flex flex-col min-h-0">
+                <div className="game-panel-header">Enhance</div>
+
+                {selectedItem ? (
+                    <div className="flex-1 flex flex-col p-3 min-h-0">
+                        {/* Selected Item Display */}
+                        <div className="flex items-center gap-3 mb-3">
+                            <div className="w-16 h-16 rounded bg-slate-900/80 border border-slate-600 relative">
+                                <ItemIcon item={selectedItem} />
+                                {selectedItem.plus > 0 && (
+                                    <div
+                                        className="absolute -top-1 -right-1 px-1 text-[9px] font-bold rounded"
+                                        style={{
+                                            color: getEnhanceStage(selectedItem.plus).color,
+                                            backgroundColor: getEnhanceStage(selectedItem.plus).bgColor,
+                                            boxShadow: getEnhanceStage(selectedItem.plus).glow
+                                        }}
+                                    >
+                                        +{selectedItem.plus}
+                                    </div>
+                                )}
+                            </div>
+                            <div className="flex-1">
+                                <div className="font-bold text-sm" style={{ color: TIERS[selectedItem.tier].color }}>
+                                    {selectedItem.name}
+                                </div>
+                                {/* Enhancement transition */}
+                                <div className="flex items-center gap-2 mt-1">
+                                    {(() => {
+                                        const current = getEnhanceStage(selectedItem.plus);
+                                        const next = getEnhanceStage(selectedItem.plus + 1);
+                                        const isNewStage = current.stage !== next.stage;
+                                        return (
+                                            <>
+                                                <span className="text-sm px-1.5 py-0.5 rounded" style={{ color: current.color, backgroundColor: current.bgColor }}>
+                                                    {current.icon}{current.icon && ' '}+{selectedItem.plus}
+                                                </span>
+                                                <span className="text-slate-500">→</span>
+                                                <span
+                                                    className={`text-sm px-1.5 py-0.5 rounded ${isNewStage ? 'animate-pulse' : ''}`}
+                                                    style={{ color: next.color, backgroundColor: next.bgColor, boxShadow: next.glow }}
+                                                >
+                                                    {next.icon}{next.icon && ' '}+{selectedItem.plus + 1}
+                                                </span>
+                                                {isNewStage && next.name && (
+                                                    <span className="text-[10px] px-1.5 py-0.5 rounded animate-pulse" style={{ color: next.color }}>
+                                                        {next.name}!
+                                                    </span>
+                                                )}
+                                            </>
+                                        );
+                                    })()}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Success Rate - Visual Bar */}
+                        <div className="mb-3">
+                            <div className="flex justify-between text-[10px] text-slate-400 mb-1">
+                                <span>SUCCESS RATE</span>
+                                <span className={successChance > 80 ? 'text-green-400' : successChance > 50 ? 'text-yellow-400' : successChance > 20 ? 'text-orange-400' : 'text-red-400'}>
+                                    {successChance}%
+                                </span>
+                            </div>
+                            <div className="h-3 bg-slate-800 rounded overflow-hidden">
+                                <div
+                                    className={`h-full transition-all duration-300 ${
+                                        successChance > 80 ? 'bg-green-500' :
+                                        successChance > 50 ? 'bg-yellow-500' :
+                                        successChance > 20 ? 'bg-orange-500' : 'bg-red-500'
+                                    }`}
+                                    style={{ width: `${successChance}%` }}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Stats Preview */}
+                        <div className="grid grid-cols-2 gap-2 mb-3 text-[11px]">
+                            <div className="bg-slate-800/50 rounded p-2">
+                                <div className="text-slate-500 text-[9px] uppercase mb-1">Current</div>
+                                <div className="text-red-300">DMG +{currentStats.dmgBonus}</div>
+                                <div className="text-green-300">HP +{currentStats.hpBonus}</div>
+                            </div>
+                            <div className="bg-blue-900/30 rounded p-2 border border-blue-500/30">
+                                <div className="text-blue-400 text-[9px] uppercase mb-1">Next</div>
+                                <div className="text-red-300">DMG +{nextStats.dmgBonus}</div>
+                                <div className="text-green-300">HP +{nextStats.hpBonus}</div>
+                            </div>
+                        </div>
+
+                        {/* Cost */}
+                        <div className="flex justify-center gap-4 mb-3 py-2 bg-slate-900/50 rounded">
+                            <div className={`flex items-center gap-1 ${state.gold >= costs.gold ? 'opacity-100' : 'opacity-40'}`}>
+                                <MaterialIcon type="gold" size={16} />
+                                <span className="text-sm font-bold text-yellow-400">{costs.gold.toLocaleString()}</span>
+                            </div>
+                            <div className={`flex items-center gap-1 ${state.enhanceStone >= costs.enhanceStone ? 'opacity-100' : 'opacity-40'}`}>
+                                <MaterialIcon type="enhanceStone" size={16} />
+                                <span className="text-sm font-bold text-blue-400">{costs.enhanceStone}</span>
+                            </div>
+                            {costs.blessedOrb > 0 && (
+                                <div className={`flex items-center gap-1 ${state.blessedOrb >= costs.blessedOrb ? 'opacity-100' : 'opacity-40'}`}>
+                                    <MaterialIcon type="blessedOrb" size={16} />
+                                    <span className="text-sm font-bold text-purple-400">{costs.blessedOrb}</span>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Buttons */}
+                        <div className="mt-auto space-y-2">
+                            {autoEnhancing ? (
+                                <button
+                                    onClick={stopAutoEnhance}
+                                    className="w-full py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold uppercase text-sm rounded flex items-center justify-center gap-2"
+                                >
+                                    <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                    STOP (+{autoEnhanceTarget})
+                                </button>
+                            ) : (
+                                <>
+                                    <button
+                                        onClick={handleEnhance}
+                                        disabled={!canAfford}
+                                        className={`w-full py-2.5 font-bold uppercase text-sm rounded transition-all ${
+                                            canAfford
+                                                ? 'bg-blue-600 hover:bg-blue-500 text-white'
+                                                : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                                        }`}
+                                    >
+                                        ENHANCE
+                                    </button>
+                                    <div className="flex gap-1">
+                                        {[3, 5, 10].map(n => (
+                                            <button
+                                                key={n}
+                                                onClick={() => startAutoEnhance(selectedItem.plus + n)}
+                                                disabled={!canAfford}
+                                                className={`flex-1 py-1.5 text-[10px] font-bold uppercase rounded transition-all ${
+                                                    canAfford
+                                                        ? 'bg-purple-600/40 hover:bg-purple-600/60 text-purple-200'
+                                                        : 'bg-slate-700/30 text-slate-600 cursor-not-allowed'
+                                                }`}
+                                            >
+                                                AUTO +{selectedItem.plus + n}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                ) : (
+                    <div className="flex-1 flex items-center justify-center text-slate-600">
+                        <div className="text-center">
+                            <div className="text-3xl mb-2 opacity-30">⚡</div>
+                            <div className="text-sm">Select an item</div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
