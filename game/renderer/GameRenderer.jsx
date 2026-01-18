@@ -232,8 +232,10 @@ export default function GameRenderer() {
                 bg.fill(0x1f2937);
                 container.addChild(bg);
 
-                // Fill
+                // Fill - draw initial full bar directly
                 const fill = new PIXI.Graphics();
+                fill.roundRect(-width/2, -6, width, 12, 3);
+                fill.fill(isPlayer ? 0x3b82f6 : 0xef4444);
                 container.addChild(fill);
                 container.fillRef = fill;
                 container.barWidth = width;
