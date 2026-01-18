@@ -140,14 +140,17 @@ export default function GameLayout() {
 
                 {/* Bottom Stats Bar */}
                 <div className="absolute bottom-4 left-4 right-4 flex justify-center">
-                    <div className="glass-card rounded-xl px-6 py-3 flex items-center gap-8 animate-fadeIn">
-                        <StatMini label="Level" value={state.level || 1} color="text-purple-400" />
-                        <StatMini label="ATK" value={Math.floor(playerStats.damage || 10)} color="text-red-400" />
-                        <StatMini label="DEF" value={Math.floor(playerStats.armor || 5)} color="text-blue-400" />
-                        <StatMini label="Kills" value={state.kills || 0} color="text-green-400" />
-                        {state.prestigeLevel > 0 && (
-                            <StatMini label="Prestige" value={state.prestigeLevel} color="text-pink-400" />
-                        )}
+                    <div className="glass-card rounded-xl px-6 py-3 animate-fadeIn">
+                        <div className="flex items-center gap-8">
+                            <StatMini label="Level" value={state.level || 1} color="text-purple-400" />
+                            <StatMini label="ATK" value={Math.floor(playerStats.damage || 10)} color="text-red-400" />
+                            <StatMini label="DEF" value={Math.floor(playerStats.armor || 5)} color="text-blue-400" />
+                            <StatMini label="Kills" value={state.kills || 0} color="text-green-400" />
+                            {state.prestigeLevel > 0 && (
+                                <StatMini label="Prestige" value={state.prestigeLevel} color="text-pink-400" />
+                            )}
+                        </div>
+                        <XPBar level={state.level || 1} xp={state.xp || 0} />
                     </div>
                 </div>
             </div>
@@ -291,6 +294,27 @@ function SpeedControl() {
                     {s}x
                 </button>
             ))}
+        </div>
+    );
+}
+
+function XPBar({ level, xp }) {
+    const xpForLevel = (lvl) => Math.floor(50 * Math.pow(1.3, lvl - 1));
+    const xpNeeded = xpForLevel(level);
+    const progress = Math.min(100, (xp / xpNeeded) * 100);
+
+    return (
+        <div className="mt-2">
+            <div className="flex justify-between text-[9px] text-slate-400 mb-0.5">
+                <span>XP</span>
+                <span>{xp.toLocaleString()} / {xpNeeded.toLocaleString()}</span>
+            </div>
+            <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+                <div
+                    className="h-full bg-gradient-to-r from-purple-600 to-purple-400 transition-all duration-300"
+                    style={{ width: `${progress}%` }}
+                />
+            </div>
         </div>
     );
 }

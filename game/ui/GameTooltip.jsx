@@ -1,6 +1,19 @@
 import React from 'react';
-import { TIERS, GEAR_BASES, WEAPON_TYPES, PRESTIGE_WEAPONS, getItemScore } from '../data/items';
+import { TIERS, GEAR_BASES, WEAPON_TYPES, PRESTIGE_WEAPONS, BOSS_SETS, getItemScore } from '../data/items';
 import { getEnhanceBonus } from '../utils/formulas';
+
+// Effect descriptions - what each effect actually does
+const EFFECT_DESCRIPTIONS = {
+    thorns: (val) => `Reflect ${val}% damage back to attackers`,
+    lifesteal: (val) => `Heal for ${val}% of damage dealt`,
+    critChance: (val) => `+${val}% chance to deal critical hits`,
+    critDamage: (val) => `+${val}% critical hit damage`,
+    bonusDmg: (val) => `+${val} flat damage bonus`,
+    bonusHp: (val) => `+${val} maximum HP`,
+    goldFind: (val) => `+${val}% gold from enemies`,
+    xpBonus: (val) => `+${val}% experience gained`,
+    dodge: (val) => `${val}% chance to avoid attacks`,
+};
 
 export default function GameTooltip({ tooltip }) {
     if (!tooltip || !tooltip.item) return null;
@@ -142,25 +155,43 @@ export default function GameTooltip({ tooltip }) {
             {effects.length > 0 && (
                 <div className="px-4 py-3 border-b border-slate-700/30">
                     <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">Special Effects</div>
-                    <div className="space-y-1.5">
-                        {effects.map((eff, i) => (
-                            <div key={i} className="flex justify-between items-center">
-                                <span className="text-slate-300 text-sm">{eff.name}</span>
-                                <span className="font-mono font-bold text-purple-300 text-sm">+{eff.value}</span>
-                            </div>
-                        ))}
+                    <div className="space-y-2">
+                        {effects.map((eff, i) => {
+                            const desc = EFFECT_DESCRIPTIONS[eff.id];
+                            return (
+                                <div key={i}>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-purple-300 text-sm font-bold">{eff.name}</span>
+                                        <span className="font-mono font-bold text-purple-300 text-sm">+{eff.value}</span>
+                                    </div>
+                                    {desc && (
+                                        <div className="text-[10px] text-slate-400 mt-0.5">{desc(eff.value)}</div>
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             )}
 
-            {/* Boss Set Info */}
-            {item.bossSet && (
-                <div className="px-4 py-2 border-b border-slate-700/30 bg-purple-500/5">
-                    <div className="flex items-center gap-2">
+            {/* Boss Set Info with Bonuses */}
+            {item.bossSet && BOSS_SETS[item.bossSet] && (
+                <div className="px-4 py-3 border-b border-slate-700/30 bg-purple-500/5">
+                    <div className="flex items-center gap-2 mb-2">
                         <svg className="w-4 h-4 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                         </svg>
-                        <span className="text-sm text-purple-300 capitalize">{item.bossSet} Set</span>
+                        <span className="text-sm font-bold" style={{ color: BOSS_SETS[item.bossSet].color }}>
+                            {BOSS_SETS[item.bossSet].name} Set
+                        </span>
+                    </div>
+                    <div className="space-y-1 text-[10px]">
+                        {BOSS_SETS[item.bossSet].setBonuses.map((bonus, i) => (
+                            <div key={i} className="flex gap-2">
+                                <span className="text-slate-500 w-8">{bonus.pieces}pc:</span>
+                                <span className="text-slate-300">{bonus.desc}</span>
+                            </div>
+                        ))}
                     </div>
                 </div>
             )}
