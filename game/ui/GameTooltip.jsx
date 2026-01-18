@@ -99,16 +99,31 @@ export default function GameTooltip({ tooltip }) {
     const scoreDiff = getDiff(hoveredStats.score, equippedStats?.score || 0);
 
     // Calculate position to keep on screen
+    // Estimate tooltip height based on content (base + effects + set bonuses)
+    const hasSetBonuses = item.bossSet && (BOSS_SETS[item.bossSet] || PRESTIGE_BOSS_SETS[item.bossSet]);
+    const estimatedHeight = 300 + (effects.length * 30) + (hasSetBonuses ? 200 : 0) + (isInventoryItem ? 80 : 0);
+
     let style = {
-        top: position.y + 10,
         left: position.x + 10,
     };
 
+    // Horizontal positioning
     if (position.x > window.innerWidth - 300) {
         style.left = position.x - 260;
     }
-    if (position.y > window.innerHeight - 450) {
-        style.top = position.y - 250;
+
+    // Vertical positioning - prefer below cursor, but flip above if not enough space
+    const spaceBelow = window.innerHeight - position.y - 20;
+    const spaceAbove = position.y - 20;
+
+    if (spaceBelow >= estimatedHeight || spaceBelow >= spaceAbove) {
+        // Position below cursor
+        style.top = position.y + 10;
+        style.maxHeight = Math.min(estimatedHeight, spaceBelow - 10);
+    } else {
+        // Position above cursor
+        style.bottom = window.innerHeight - position.y + 10;
+        style.maxHeight = Math.min(estimatedHeight, spaceAbove - 10);
     }
 
     // Get rating label based on score
@@ -126,7 +141,7 @@ export default function GameTooltip({ tooltip }) {
 
     return (
         <div
-            className="fixed z-[100] w-64 bg-gradient-to-br from-slate-900 to-slate-950 border-2 shadow-2xl rounded-lg overflow-hidden pointer-events-none"
+            className="fixed z-[100] w-64 bg-gradient-to-br from-slate-900 to-slate-950 border-2 shadow-2xl rounded-lg overflow-hidden overflow-y-auto pointer-events-none custom-scrollbar"
             style={{ ...style, borderColor: tierData.color }}
         >
             {/* Header with tier glow */}
