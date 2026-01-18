@@ -118,6 +118,36 @@ export default function InventoryView({ onHover }) {
         gameManager.emit('floatingText', { text: `+${totalGold} GOLD`, type: 'heal', target: 'player' });
     };
 
+    // Salvage all items in inventory
+    const handleSalvageAll = () => {
+        if (state.inventory.length === 0) return;
+
+        let totalGold = 0;
+        let totalOre = 0;
+        let totalLeather = 0;
+        let totalStones = 0;
+
+        for (const item of state.inventory) {
+            const returns = getSalvageReturns(item);
+            totalGold += returns.gold;
+            totalOre += returns.ore;
+            totalLeather += returns.leather;
+            totalStones += returns.enhanceStone;
+        }
+
+        gameManager.setState(prev => ({
+            ...prev,
+            inventory: [],
+            gold: (prev.gold || 0) + totalGold,
+            ore: (prev.ore || 0) + totalOre,
+            leather: (prev.leather || 0) + totalLeather,
+            enhanceStone: (prev.enhanceStone || 0) + totalStones,
+        }));
+
+        setSelectedForSalvage(new Set());
+        gameManager.emit('floatingText', { text: `SALVAGED ALL! +${totalGold}g`, type: 'heal', target: 'player' });
+    };
+
     const handleEquip = (item) => {
         let newGear = { ...state.gear };
         let newInv = [...state.inventory];
@@ -260,6 +290,14 @@ export default function InventoryView({ onHover }) {
                                 className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-red-600/30 hover:bg-red-600/50 text-red-400 rounded transition-colors"
                             >
                                 Salvage ({selectedForSalvage.size})
+                            </button>
+                        )}
+                        {state.inventory.length > 0 && (
+                            <button
+                                onClick={handleSalvageAll}
+                                className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-orange-600/30 hover:bg-orange-600/50 text-orange-400 rounded transition-colors"
+                            >
+                                Salvage All
                             </button>
                         )}
                         <span className="text-xs px-2 py-1 rounded-full bg-slate-800 text-slate-300">
