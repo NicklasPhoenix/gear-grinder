@@ -154,6 +154,7 @@ export default function GameRenderer() {
             bgContainer.addChild(gridLines);
 
             // --- Create Player (Hero) using real sprite ---
+            // DawnLike sprites face LEFT by default, so flip player to face RIGHT (toward enemy)
             const playerData = ENEMY_SPRITES['Knight'];
             const playerTexture = getSpriteTexture(playerData);
             const player = playerTexture
@@ -162,7 +163,8 @@ export default function GameRenderer() {
             player.anchor.set(0.5, 1);
             player.x = 200;
             player.y = 375;
-            player.scale.set(playerData.scale || 4);
+            const playerScale = playerData.scale || 4;
+            player.scale.set(-playerScale, playerScale); // Negative X to face right
             gameContainer.addChild(player);
             playerRef.current = player;
 
@@ -179,6 +181,7 @@ export default function GameRenderer() {
             gameContainer.addChildAt(playerGlow, 0);
 
             // --- Create Enemy using real sprite ---
+            // DawnLike sprites face LEFT by default, which is toward the player - no flip needed
             const enemyData = ENEMY_SPRITES['Beast'];
             const enemyTexture = getSpriteTexture(enemyData);
             const enemy = enemyTexture
@@ -187,7 +190,8 @@ export default function GameRenderer() {
             enemy.anchor.set(0.5, 1);
             enemy.x = 600;
             enemy.y = 375;
-            enemy.scale.set(-(enemyData.scale || 4), enemyData.scale || 4); // Flipped to face player
+            const enemyScale = enemyData.scale || 4;
+            enemy.scale.set(enemyScale, enemyScale); // Positive X - already faces left toward player
             gameContainer.addChild(enemy);
             enemyRef.current = enemy;
 
@@ -292,11 +296,12 @@ export default function GameRenderer() {
                 }
 
                 // Player idle animation (breathing + slight bob)
+                // Player faces right (negative X scale)
                 if (playerRef.current) {
                     const breathe = Math.sin(time * 0.002) * 0.02;
                     const bob = Math.sin(time * 0.003) * 3;
                     const playerBaseScale = ENEMY_SPRITES['Knight'].scale || 4;
-                    playerRef.current.scale.y = playerBaseScale * (1.0 + breathe);
+                    playerRef.current.scale.set(-playerBaseScale, playerBaseScale * (1.0 + breathe));
                     playerRef.current.y = 350 + bob;
 
                     // Attack cooldown animation
@@ -310,10 +315,11 @@ export default function GameRenderer() {
                 }
 
                 // Enemy idle animation
+                // Enemy faces left (positive X scale) - toward the player
                 if (enemyRef.current) {
                     const breathe = Math.sin(time * 0.0025 + 1) * 0.02;
                     const bob = Math.sin(time * 0.004 + 1) * 4;
-                    const enemyBaseScale = Math.abs(enemyRef.current.scale.x);
+                    const enemyBaseScale = enemyRef.current.scale.x; // Positive scale
                     enemyRef.current.scale.y = enemyBaseScale * (1.0 + breathe);
                     enemyRef.current.y = 350 + bob;
 
@@ -877,9 +883,10 @@ export default function GameRenderer() {
             }
 
             // Scale based on sprite data and boss status
+            // DawnLike sprites face LEFT by default - enemy already faces player (positive scale)
             const baseScale = spriteData.scale || 4;
             const finalScale = zone.isBoss ? baseScale * 1.3 : baseScale;
-            enemyRef.current.scale.set(-finalScale, finalScale); // Negative X to face player
+            enemyRef.current.scale.set(finalScale, finalScale); // Positive X - faces left toward player
 
             if (zone.isBoss) {
                 if (enemyRef.current.aura) {

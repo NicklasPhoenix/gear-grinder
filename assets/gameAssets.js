@@ -3,17 +3,28 @@
 // Characters organized by type in separate sprite sheets
 
 export const ASSET_BASE = {
+  // Character sprite sheets
   player: '/assets/characters.png',    // Player/hero sprites (128x240)
   humanoid: '/assets/humanoid.png',    // Humanoid enemies (128x432)
   demon: '/assets/demon.png',          // Demon sprites (128x144)
   undead: '/assets/undead.png',        // Undead/skeleton (128x160)
   beast: '/assets/beast.png',          // Quadruped beasts (128x192)
   reptile: '/assets/reptile.png',      // Reptiles/dragons (128x248)
-  elemental: '/assets/elemental.png',  // Elementals (128x?)
+  elemental: '/assets/elemental.png',  // Elementals
   avian: '/assets/avian.png',          // Flying creatures (128x208)
-  misc: '/assets/misc.png',            // Misc creatures (128x?)
-  items: '/assets/weapons.png',        // Weapon icons
-  armor: '/assets/armor.png',          // Armor icons
+  misc: '/assets/misc.png',            // Misc creatures
+  // Item sprite sheets (DawnLike - all 128px wide, 8 cols of 16x16)
+  shortwep: '/assets/shortwep.png',    // Daggers (128x80, 5 rows)
+  medwep: '/assets/medwep.png',        // Swords (128x32, 2 rows)
+  longwep: '/assets/longwep.png',      // Staffs/spears (128x112, 7 rows)
+  shield: '/assets/shield.png',        // Shields (128x16, 1 row)
+  armor_items: '/assets/armor_items.png', // Armor (128x144, 9 rows)
+  amulet: '/assets/amulet.png',        // Amulets (128x48, 3 rows)
+  ring: '/assets/ring.png',            // Rings
+  boot: '/assets/boot.png',            // Boots
+  glove: '/assets/glove.png',          // Gloves
+  hat: '/assets/hat.png',              // Hats/helmets
+  potion: '/assets/potion.png',        // Potions
 };
 
 // Sprite config: All DawnLike sprites are 16x16 in 8-column sheets
@@ -22,11 +33,10 @@ export const SPRITE_CONFIG = {
   cols: 8,  // 128px / 16px = 8 columns
 };
 
-// Item sprite config (weapons.png)
+// Item sprite config (DawnLike - all sheets are 8 columns of 16x16)
 export const ITEM_SPRITE_CONFIG = {
   tileSize: 16,
-  cols: 24,
-  rows: 20,
+  cols: 8,
 };
 
 // Enemy sprite definitions - maps enemy type to sprite sheet and position
@@ -107,36 +117,35 @@ export const ENEMY_SPRITES = {
   },
 };
 
-// Item positions in 16x16 weapon sprite sheet (384x320, 24 cols x 20 rows)
+// Item sprites - maps item type to sprite sheet and position
+// DawnLike organizes items by category in separate sheets (8 columns each)
 export const ITEM_SPRITES = {
-  // Swords
-  sword:    { row: 0, col: 0 },
-  katana:   { row: 0, col: 4 },
-  // Axes
-  axe:      { row: 6, col: 0 },
-  greataxe: { row: 6, col: 4 },
-  // Daggers
-  dagger:   { row: 4, col: 0 },
-  // Maces
-  mace:     { row: 8, col: 0 },
-  // Staffs
-  staff:    { row: 18, col: 0 },
-  scythe:   { row: 18, col: 4 },
-  // Armor items
-  helmet:   { row: 2, col: 8 },
-  armor:    { row: 2, col: 12 },
-  boots:    { row: 2, col: 16 },
-  shield:   { row: 10, col: 0 },
-  gloves:   { row: 2, col: 20 },
+  // Weapons - swords from medwep sheet
+  sword:    { sheet: 'medwep', row: 0, col: 0 },
+  katana:   { sheet: 'medwep', row: 0, col: 2 },
+  axe:      { sheet: 'medwep', row: 1, col: 0 },
+  greataxe: { sheet: 'medwep', row: 1, col: 2 },
+  mace:     { sheet: 'medwep', row: 1, col: 4 },
+  // Daggers from shortwep
+  dagger:   { sheet: 'shortwep', row: 0, col: 0 },
+  // Staffs from longwep
+  staff:    { sheet: 'longwep', row: 0, col: 0 },
+  scythe:   { sheet: 'longwep', row: 2, col: 0 },
+  // Armor from armor_items
+  helmet:   { sheet: 'hat', row: 0, col: 0 },
+  armor:    { sheet: 'armor_items', row: 0, col: 0 },
+  boots:    { sheet: 'boot', row: 0, col: 0 },
+  shield:   { sheet: 'shield', row: 0, col: 0 },
+  gloves:   { sheet: 'glove', row: 0, col: 0 },
   // Accessories
-  amulet:   { row: 4, col: 8 },
-  accessory:{ row: 4, col: 12 },
-  ring:     { row: 4, col: 16 },
-  // Materials
-  ore:      { row: 6, col: 8 },
-  leather:  { row: 6, col: 12 },
-  gem:      { row: 8, col: 8 },
-  potion:   { row: 8, col: 12 },
+  amulet:   { sheet: 'amulet', row: 0, col: 0 },
+  accessory:{ sheet: 'ring', row: 0, col: 2 },
+  ring:     { sheet: 'ring', row: 0, col: 0 },
+  // Materials (use potion sheet)
+  ore:      { sheet: 'potion', row: 1, col: 0 },
+  leather:  { sheet: 'potion', row: 1, col: 2 },
+  gem:      { sheet: 'potion', row: 0, col: 4 },
+  potion:   { sheet: 'potion', row: 0, col: 0 },
 };
 
 // Procedurally generate weapon icons based on type and tier
