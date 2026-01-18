@@ -1,5 +1,5 @@
 import React from 'react';
-import { ASSET_BASE, ITEM_SPRITES, SPRITE_CONFIG } from '../../assets/gameAssets';
+import { ASSET_BASE, ITEM_SPRITES, ITEM_SPRITE_CONFIG } from '../../assets/gameAssets';
 
 export default function ItemIcon({ item, size = "full" }) {
     if (!item) return null;
@@ -15,11 +15,11 @@ export default function ItemIcon({ item, size = "full" }) {
         spriteData = ITEM_SPRITES[item.slot] || ITEM_SPRITES.armor;
     }
 
-    const { tileSize, cols, rows } = SPRITE_CONFIG;
+    const { tileSize, cols, rows } = ITEM_SPRITE_CONFIG;
 
     // Calculate background position percentage
-    const bgPosX = (spriteData.col / (cols - 1)) * 100;
-    const bgPosY = (spriteData.row / (rows - 1)) * 100;
+    const bgPosX = cols > 1 ? (spriteData.col / (cols - 1)) * 100 : 0;
+    const bgPosY = rows > 1 ? (spriteData.row / (rows - 1)) * 100 : 0;
 
     const sizeClass = size === 'sm' ? 'p-0' : 'p-1';
 

@@ -1,62 +1,77 @@
-// Real sprite sheets from OpenGameArt (Tiny 16 Basic by Sharm)
-// 16x16 pixel tiles with proper RGBA transparency
-// Sheet is 192x128 (12 cols x 8 rows)
+// Real sprite sheets from OpenGameArt
+// Characters: RogueLite by Lucid Design Art (8x8 pixel sprites)
+// Items: 16x16 Weapon RPG Icons by Shade
 
 export const ASSET_BASE = {
-  characters: '/assets/characters.png',  // Real sprites
-  items: '/assets/items.png',            // Real sprites
+  characters: '/assets/characters.png',  // RogueLite spritesheet
+  items: '/assets/items.png',            // 16x16 weapon icons
 };
 
-// Sprite sheet config: 16x16 tiles, 12 columns, 8 rows
+// Character sprite config: 8x8 tiles in a ~24x14 grid (194x113 px)
 export const SPRITE_CONFIG = {
+  tileSize: 8,
+  cols: 24,
+  rows: 14,
+};
+
+// Item sprite config: 16x16 tiles in 24x20 grid (384x320 px)
+export const ITEM_SPRITE_CONFIG = {
   tileSize: 16,
-  cols: 12,
-  rows: 8,
+  cols: 24,
+  rows: 20,
 };
 
-// Character sprite positions (row, col) in the sprite sheet
-// Based on OpenGameArt Tiny 16 Basic character sheet
+// Character positions in RogueLite spritesheet (8x8 pixels each)
+// Row 0: Player characters (thief, sorcerer, assassin, soldier, archer)
+// Row 1-2: More characters and enemies
 export const ENEMY_SPRITES = {
-  // Heroes (row 0-1)
-  Knight:    { row: 0, col: 0, scale: 4 },  // Knight/warrior
-  // Enemies by type
-  Beast:     { row: 2, col: 0, scale: 4 },  // Wolf/beast
-  Humanoid:  { row: 2, col: 4, scale: 4 },  // Orc/goblin
-  Undead:    { row: 3, col: 0, scale: 4 },  // Skeleton
-  Dragon:    { row: 4, col: 0, scale: 5 },  // Dragon
-  Demon:     { row: 4, col: 4, scale: 5 },  // Demon
-  Elemental: { row: 5, col: 0, scale: 4 },  // Elemental
-  Celestial: { row: 5, col: 4, scale: 4 },  // Angel
-  Abyssal:   { row: 6, col: 0, scale: 5 },  // Dark creature
-  Chaos:     { row: 6, col: 4, scale: 5 },  // Chaos creature
-  Void:      { row: 7, col: 0, scale: 4 },  // Ghost/wraith
-  Boss:      { row: 7, col: 4, scale: 6 },  // Boss variant
+  // Player/Heroes (row 0)
+  Knight:    { row: 0, col: 0, scale: 6 },  // Thief/knight
+  // Enemies
+  Beast:     { row: 1, col: 15, scale: 6 }, // Wolf
+  Humanoid:  { row: 1, col: 12, scale: 6 }, // Orc
+  Undead:    { row: 1, col: 8, scale: 6 },  // Skeleton
+  Dragon:    { row: 2, col: 0, scale: 7 },  // Lizard (use as dragon)
+  Demon:     { row: 1, col: 18, scale: 7 }, // Demon-like
+  Elemental: { row: 2, col: 4, scale: 6 },  // Slime (elemental)
+  Celestial: { row: 0, col: 8, scale: 6 },  // Paladin (celestial)
+  Abyssal:   { row: 2, col: 8, scale: 7 },  // Bat
+  Chaos:     { row: 1, col: 20, scale: 7 }, // Ghost variant
+  Void:      { row: 2, col: 12, scale: 6 }, // Ghost
+  Boss:      { row: 0, col: 12, scale: 8 }, // Bishop (boss)
 };
 
-// Item sprite positions in items.png
+// Item positions in 16x16 weapon sprite sheet (384x320, 24 cols x 20 rows)
+// Organized by weapon type in rows
 export const ITEM_SPRITES = {
-  // Weapons (row 0-1)
+  // Swords - row 0-2
   sword:    { row: 0, col: 0 },
-  staff:    { row: 0, col: 1 },
-  dagger:   { row: 0, col: 2 },
-  mace:     { row: 0, col: 3 },
-  axe:      { row: 0, col: 4 },
-  bow:      { row: 0, col: 5 },
-  // Armor (row 2-3)
-  helmet:   { row: 2, col: 0 },
-  armor:    { row: 2, col: 1 },
-  boots:    { row: 2, col: 2 },
-  shield:   { row: 2, col: 3 },
-  gloves:   { row: 2, col: 4 },
-  // Accessories (row 4)
-  amulet:   { row: 4, col: 0 },
-  accessory:{ row: 4, col: 1 },
-  ring:     { row: 4, col: 2 },
-  // Materials (row 5-6)
-  ore:      { row: 5, col: 0 },
-  leather:  { row: 5, col: 1 },
-  gem:      { row: 5, col: 2 },
-  potion:   { row: 6, col: 0 },
+  katana:   { row: 0, col: 4 },
+  // Axes - row 6-7
+  axe:      { row: 6, col: 0 },
+  greataxe: { row: 6, col: 4 },
+  // Daggers - row 4-5
+  dagger:   { row: 4, col: 0 },
+  // Maces - row 8-9
+  mace:     { row: 8, col: 0 },
+  // Staffs - row 18-19 (spears used as staffs)
+  staff:    { row: 18, col: 0 },
+  scythe:   { row: 18, col: 4 },
+  // Armor items (use weapon variants as placeholders)
+  helmet:   { row: 2, col: 8 },
+  armor:    { row: 2, col: 12 },
+  boots:    { row: 2, col: 16 },
+  shield:   { row: 10, col: 0 },
+  gloves:   { row: 2, col: 20 },
+  // Accessories
+  amulet:   { row: 4, col: 8 },
+  accessory:{ row: 4, col: 12 },
+  ring:     { row: 4, col: 16 },
+  // Materials
+  ore:      { row: 6, col: 8 },
+  leather:  { row: 6, col: 12 },
+  gem:      { row: 8, col: 8 },
+  potion:   { row: 8, col: 12 },
 };
 
 // Procedurally generate weapon icons based on type and tier
