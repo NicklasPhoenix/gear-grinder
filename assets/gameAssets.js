@@ -1,46 +1,63 @@
-// Game asset URLs and procedural generation
-// Using procedural graphics for clean, transparent sprites
+// Real sprite sheets from OpenGameArt (Tiny 16 Basic by Sharm)
+// 16x16 pixel tiles with proper RGBA transparency
+// Sheet is 192x128 (12 cols x 8 rows)
 
 export const ASSET_BASE = {
-  ui: 'https://kenney.nl/content/3-assets/2-asset-packs/ui-pack-rpg-expansion/preview.png',
+  characters: '/assets/characters.png',  // Real sprites
+  items: '/assets/items.png',            // Real sprites
 };
 
-// Color palettes for different enemy types
-const ENEMY_COLORS = {
-  Knight: { primary: '#3b82f6', secondary: '#60a5fa', accent: '#fbbf24' },
-  Undead: { primary: '#6b7280', secondary: '#9ca3af', accent: '#22c55e' },
-  Beast: { primary: '#22c55e', secondary: '#4ade80', accent: '#fbbf24' },
-  Humanoid: { primary: '#f97316', secondary: '#fb923c', accent: '#fbbf24' },
-  Dragon: { primary: '#dc2626', secondary: '#f87171', accent: '#fbbf24' },
-  Demon: { primary: '#7f1d1d', secondary: '#ef4444', accent: '#f97316' },
-  Elemental: { primary: '#06b6d4', secondary: '#22d3ee', accent: '#fbbf24' },
-  Celestial: { primary: '#fbbf24', secondary: '#fde047', accent: '#ffffff' },
-  Abyssal: { primary: '#4c1d95', secondary: '#7c3aed', accent: '#c4b5fd' },
-  Chaos: { primary: '#db2777', secondary: '#f472b6', accent: '#fbbf24' },
-  Void: { primary: '#1e1b4b', secondary: '#4338ca', accent: '#818cf8' },
-  Boss: { primary: '#dc2626', secondary: '#fbbf24', accent: '#ffffff' },
+// Sprite sheet config: 16x16 tiles, 12 columns, 8 rows
+export const SPRITE_CONFIG = {
+  tileSize: 16,
+  cols: 12,
+  rows: 8,
 };
 
-// Enemy sprite data for procedural generation
+// Character sprite positions (row, col) in the sprite sheet
+// Based on OpenGameArt Tiny 16 Basic character sheet
 export const ENEMY_SPRITES = {
-  Knight: { type: 'humanoid', scale: 1.0 },
-  Undead: { type: 'skeleton', scale: 1.0 },
-  Beast: { type: 'beast', scale: 1.1 },
-  Humanoid: { type: 'orc', scale: 1.0 },
-  Dragon: { type: 'dragon', scale: 1.5 },
-  Boss: { type: 'dragon', scale: 1.8 },
-  Demon: { type: 'demon', scale: 1.2 },
-  Abyssal: { type: 'demon', scale: 1.3 },
-  Void: { type: 'wraith', scale: 1.1 },
-  Elemental: { type: 'elemental', scale: 1.2 },
-  Chaos: { type: 'elemental', scale: 1.3 },
-  Celestial: { type: 'angel', scale: 1.2 },
+  // Heroes (row 0-1)
+  Knight:    { row: 0, col: 0, scale: 4 },  // Knight/warrior
+  // Enemies by type
+  Beast:     { row: 2, col: 0, scale: 4 },  // Wolf/beast
+  Humanoid:  { row: 2, col: 4, scale: 4 },  // Orc/goblin
+  Undead:    { row: 3, col: 0, scale: 4 },  // Skeleton
+  Dragon:    { row: 4, col: 0, scale: 5 },  // Dragon
+  Demon:     { row: 4, col: 4, scale: 5 },  // Demon
+  Elemental: { row: 5, col: 0, scale: 4 },  // Elemental
+  Celestial: { row: 5, col: 4, scale: 4 },  // Angel
+  Abyssal:   { row: 6, col: 0, scale: 5 },  // Dark creature
+  Chaos:     { row: 6, col: 4, scale: 5 },  // Chaos creature
+  Void:      { row: 7, col: 0, scale: 4 },  // Ghost/wraith
+  Boss:      { row: 7, col: 4, scale: 6 },  // Boss variant
 };
 
-// Get enemy colors by type
-export function getEnemyColors(enemyType) {
-  return ENEMY_COLORS[enemyType] || ENEMY_COLORS.Beast;
-}
+// Item sprite positions in items.png
+export const ITEM_SPRITES = {
+  // Weapons (row 0-1)
+  sword:    { row: 0, col: 0 },
+  staff:    { row: 0, col: 1 },
+  dagger:   { row: 0, col: 2 },
+  mace:     { row: 0, col: 3 },
+  axe:      { row: 0, col: 4 },
+  bow:      { row: 0, col: 5 },
+  // Armor (row 2-3)
+  helmet:   { row: 2, col: 0 },
+  armor:    { row: 2, col: 1 },
+  boots:    { row: 2, col: 2 },
+  shield:   { row: 2, col: 3 },
+  gloves:   { row: 2, col: 4 },
+  // Accessories (row 4)
+  amulet:   { row: 4, col: 0 },
+  accessory:{ row: 4, col: 1 },
+  ring:     { row: 4, col: 2 },
+  // Materials (row 5-6)
+  ore:      { row: 5, col: 0 },
+  leather:  { row: 5, col: 1 },
+  gem:      { row: 5, col: 2 },
+  potion:   { row: 6, col: 0 },
+};
 
 // Procedurally generate weapon icons based on type and tier
 export function generateWeaponIcon(weaponType, tier) {
