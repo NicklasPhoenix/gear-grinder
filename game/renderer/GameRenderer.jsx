@@ -984,12 +984,11 @@ export default function GameRenderer() {
 }
 
 function updateHpBar(barContainer, current, max, isPlayer) {
-    if (!barContainer || !barContainer.fillRef) {
-        console.log('HP Bar: missing container or fillRef');
+    if (!barContainer) {
+        console.log('HP Bar: missing container');
         return;
     }
 
-    const fill = barContainer.fillRef;
     const width = barContainer.barWidth || 120;
 
     // Ensure valid values
@@ -1000,7 +999,7 @@ function updateHpBar(barContainer, current, max, isPlayer) {
 
     console.log(`HP Bar Update (${isPlayer ? 'player' : 'enemy'}): ${safeCurrent}/${safeMax} = ${(pct * 100).toFixed(1)}%, barWidth=${barWidth}`);
 
-    // Gradient fill based on health
+    // Color based on health percentage
     let color1;
     if (isPlayer) {
         color1 = 0x3b82f6;
@@ -1014,11 +1013,16 @@ function updateHpBar(barContainer, current, max, isPlayer) {
         }
     }
 
-    // Clear and redraw - use simple rect for reliability
-    fill.clear();
+    // Remove old fill and create new one (more reliable than clear+redraw)
+    if (barContainer.fillRef) {
+        barContainer.removeChild(barContainer.fillRef);
+        barContainer.fillRef.destroy();
+    }
 
+    // Create new fill Graphics
+    const fill = new PIXI.Graphics();
     if (pct > 0) {
-        // Main fill - use simple rect first
+        // Main fill
         fill.rect(-width/2, -6, barWidth, 12);
         fill.fill(color1);
 
@@ -1026,6 +1030,10 @@ function updateHpBar(barContainer, current, max, isPlayer) {
         fill.rect(-width/2, -6, barWidth, 4);
         fill.fill({ color: 0xffffff, alpha: 0.2 });
     }
+
+    // Add at index 2 (after frame and bg)
+    barContainer.addChildAt(fill, 2);
+    barContainer.fillRef = fill;
 }
 
 function spawnFloatingText(app, container, { text, type, target }) {
