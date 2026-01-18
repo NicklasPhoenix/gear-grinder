@@ -1,17 +1,17 @@
 // Real sprite sheets from OpenGameArt
-// Characters: RogueLite by Lucid Design Art (8x8 pixel sprites)
+// Characters: Tiny 16 Expanded Character Sprites (16x16 pixel sprites)
 // Items: 16x16 Weapon RPG Icons by Shade
 
 export const ASSET_BASE = {
-  characters: '/assets/characters.png',  // RogueLite spritesheet
+  characters: '/assets/characters.png',  // Tiny 16 expanded (800x800, 50x50 grid)
   items: '/assets/items.png',            // 16x16 weapon icons
 };
 
-// Character sprite config: 8x8 tiles in a ~24x14 grid (194x113 px)
+// Character sprite config: 16x16 tiles in 50x50 grid (800x800 px)
 export const SPRITE_CONFIG = {
-  tileSize: 8,
-  cols: 24,
-  rows: 14,
+  tileSize: 16,
+  cols: 50,
+  rows: 50,
 };
 
 // Item sprite config: 16x16 tiles in 24x20 grid (384x320 px)
@@ -21,24 +21,23 @@ export const ITEM_SPRITE_CONFIG = {
   rows: 20,
 };
 
-// Character positions in RogueLite spritesheet (8x8 pixels each)
-// Row 0: Player characters (thief, sorcerer, assassin, soldier, archer)
-// Row 1-2: More characters and enemies
+// Character positions in Tiny 16 Expanded spritesheet (16x16 pixels each)
+// Layout: Various character types in rows with animation frames in columns
 export const ENEMY_SPRITES = {
-  // Player/Heroes (row 0)
-  Knight:    { row: 0, col: 0, scale: 6 },  // Thief/knight
-  // Enemies
-  Beast:     { row: 1, col: 15, scale: 6 }, // Wolf
-  Humanoid:  { row: 1, col: 12, scale: 6 }, // Orc
-  Undead:    { row: 1, col: 8, scale: 6 },  // Skeleton
-  Dragon:    { row: 2, col: 0, scale: 7 },  // Lizard (use as dragon)
-  Demon:     { row: 1, col: 18, scale: 7 }, // Demon-like
-  Elemental: { row: 2, col: 4, scale: 6 },  // Slime (elemental)
-  Celestial: { row: 0, col: 8, scale: 6 },  // Paladin (celestial)
-  Abyssal:   { row: 2, col: 8, scale: 7 },  // Bat
-  Chaos:     { row: 1, col: 20, scale: 7 }, // Ghost variant
-  Void:      { row: 2, col: 12, scale: 6 }, // Ghost
-  Boss:      { row: 0, col: 12, scale: 8 }, // Bishop (boss)
+  // Player/Heroes - row 0-3 have various hero types
+  Knight:    { row: 0, col: 0, scale: 4 },   // Knight
+  // Monsters/Enemies
+  Humanoid:  { row: 6, col: 0, scale: 4 },   // Humanoid enemy
+  Beast:     { row: 12, col: 0, scale: 4 },  // Beast type
+  Undead:    { row: 18, col: 0, scale: 4 },  // Skeleton/undead
+  Dragon:    { row: 24, col: 0, scale: 5 },  // Large creature
+  Demon:     { row: 30, col: 0, scale: 5 },  // Demon
+  Elemental: { row: 36, col: 0, scale: 4 },  // Elemental
+  Celestial: { row: 3, col: 0, scale: 4 },   // Angel/celestial
+  Abyssal:   { row: 42, col: 0, scale: 5 },  // Dark creature
+  Chaos:     { row: 45, col: 0, scale: 5 },  // Chaos creature
+  Void:      { row: 48, col: 0, scale: 4 },  // Ghost/void
+  Boss:      { row: 24, col: 6, scale: 6 },  // Boss variant
 };
 
 // Item positions in 16x16 weapon sprite sheet (384x320, 24 cols x 20 rows)
