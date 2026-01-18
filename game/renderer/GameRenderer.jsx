@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as PIXI from 'pixi.js';
 import { useGame } from '../context/GameContext';
 import { ASSET_BASE, ENEMY_SPRITES, SPRITE_CONFIG, ZONE_BACKGROUNDS } from '../../assets/gameAssets';
@@ -33,6 +33,7 @@ export default function GameRenderer() {
     const containerRef = useRef(null);
     const appRef = useRef(null);
     const { gameManager, state } = useGame();
+    const [isInitialized, setIsInitialized] = useState(false);
 
     // Entities refs for updating
     const playerRef = useRef(null);
@@ -261,9 +262,16 @@ export default function GameRenderer() {
             playerHpBarRef.current = playerBar;
             enemyHpBarRef.current = enemyBar;
 
-            // Initialize HP bars with full health
-            updateHpBar(playerBar, 100, 100, true);
-            updateHpBar(enemyBar, 20, 20, false);
+            // Initialize HP bars with current state values
+            const initPlayerHp = state?.playerHp || 100;
+            const initPlayerMaxHp = state?.playerMaxHp || 100;
+            const initEnemyHp = state?.enemyHp || 20;
+            const initEnemyMaxHp = state?.enemyMaxHp || 20;
+            updateHpBar(playerBar, initPlayerHp, initPlayerMaxHp, true);
+            updateHpBar(enemyBar, initEnemyHp, initEnemyMaxHp, false);
+
+            // Mark initialization complete so HP bar updates can run
+            setIsInitialized(true);
 
             // --- Zone name display ---
             const zoneStyle = new PIXI.TextStyle({
@@ -854,7 +862,8 @@ export default function GameRenderer() {
 
     // --- Update HP Bars on State Change (separate from sprite updates) ---
     useEffect(() => {
-        if (!state) return;
+        // Wait for PIXI to initialize and refs to be set
+        if (!state || !isInitialized) return;
 
         // Update HP Bars (doesn't depend on sprite sheets)
         if (playerHpBarRef.current && playerHpBarRef.current.fillRef) {
@@ -867,7 +876,7 @@ export default function GameRenderer() {
             const enemyMaxHp = state.enemyMaxHp || 20;
             updateHpBar(enemyHpBarRef.current, enemyHp, enemyMaxHp, false);
         }
-    }, [state?.playerHp, state?.playerMaxHp, state?.enemyHp, state?.enemyMaxHp]);
+    }, [state?.playerHp, state?.playerMaxHp, state?.enemyHp, state?.enemyMaxHp, isInitialized]);
 
     // --- Update Visuals on State Change ---
     useEffect(() => {
