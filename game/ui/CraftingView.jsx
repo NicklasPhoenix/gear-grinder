@@ -1,4 +1,7 @@
+import React, { useState } from 'react';
+import { useGame } from '../context/GameContext';
 import ItemIcon from './ItemIcon';
+import { GEAR_SLOTS, TIERS, MATERIALS, WEAPON_TYPES } from '../data/items';
 
 export default function CraftingView() {
     const { state, gameManager } = useGame();
