@@ -20,23 +20,27 @@ export class CombatSystem {
         const state = this.stateManager.getState();
         const stats = calculatePlayerStats(state);
 
-        // Calculate tick speed based on stats (same as original logic)
-        // Original: baseTickSpeed = max(200, 1000 - (stats.speedMult - 1) * 500)
-        // This runs logic every X ms. 
-        // In a frame-based loop, we should accumulate time.
-
-        // However, to keep it simple for this refactor phase, we will just call this 'tick' method 
-        // when the accumulated time exceeds the tick speed in the main loop.
+        // Ensure stats.maxHp is valid
+        const safeMaxHp = (typeof stats.maxHp === 'number' && !isNaN(stats.maxHp) && stats.maxHp > 0)
+            ? stats.maxHp : 100;
 
         const zone = getZoneById(state.currentZone);
         let newState = { ...state };
         let log = [...state.combatLog].slice(-4);
         let combatUpdates = {}; // Track what happened for visuals
 
+        // Ensure playerHp is valid before combat
+        if (typeof newState.playerHp !== 'number' || isNaN(newState.playerHp)) {
+            newState.playerHp = safeMaxHp;
+        }
+        if (typeof newState.enemyHp !== 'number' || isNaN(newState.enemyHp)) {
+            newState.enemyHp = zone.enemyHp;
+        }
+
         // Player Turn
-        let playerDmg = stats.damage;
-        let isCrit = Math.random() * 100 < stats.critChance;
-        if (isCrit) playerDmg = Math.floor(playerDmg * stats.critDamage / 100);
+        let playerDmg = stats.damage || 10;
+        let isCrit = Math.random() * 100 < (stats.critChance || 5);
+        if (isCrit) playerDmg = Math.floor(playerDmg * (stats.critDamage || 150) / 100);
 
         newState.enemyHp -= playerDmg;
 
@@ -52,8 +56,8 @@ export class CombatSystem {
         // Lifesteal
         if (stats.lifesteal > 0) {
             const rawHeal = Math.floor(playerDmg * stats.lifesteal / 100);
-            const healed = Math.min(rawHeal, stats.lifestealMaxHeal);
-            newState.playerHp = Math.min(newState.playerHp + healed, stats.maxHp);
+            const healed = Math.min(rawHeal, stats.lifestealMaxHeal || 1000);
+            newState.playerHp = Math.min(newState.playerHp + healed, safeMaxHp);
 
             if (healed > 0) {
                 this.callbacks.onFloatingText(`+${healed}`, 'heal', 'player');
@@ -63,7 +67,7 @@ export class CombatSystem {
 
         // Check Enemy Death
         if (newState.enemyHp <= 0) {
-            this.handleEnemyDeath(newState, stats, zone, log);
+            this.handleEnemyDeath(newState, stats, zone, log, safeMaxHp);
             // Post-death cleanup/reset is handled inside handleEnemyDeath
         } else {
             // Enemy Return Fire (if alive)
@@ -90,7 +94,7 @@ export class CombatSystem {
 
             // Check Player Death
             if (newState.playerHp <= 0) {
-                this.handlePlayerDeath(newState, stats, zone);
+                this.handlePlayerDeath(newState, stats, zone, safeMaxHp);
             }
         }
 
@@ -101,7 +105,7 @@ export class CombatSystem {
         return combatUpdates;
     }
 
-    handleEnemyDeath(state, stats, zone, log) {
+    handleEnemyDeath(state, stats, zone, log, safeMaxHp) {
         const goldEarned = Math.floor((zone.goldMin + Math.random() * (zone.goldMax - zone.goldMin)) * stats.goldMult);
         const xpEarned = Math.floor(zone.enemyHp / 2 * (1 + stats.xpBonus / 100));
         const drops = zone.drops;
@@ -169,8 +173,8 @@ export class CombatSystem {
         state.enemyHp = zone.enemyHp;
         state.enemyMaxHp = zone.enemyHp;
 
-        // Heal Player (3% rule)
-        state.playerHp = Math.min(state.playerHp + Math.floor(stats.maxHp * 0.03), stats.maxHp);
+        // Heal Player (3% rule) - use safeMaxHp to prevent NaN
+        state.playerHp = Math.min(state.playerHp + Math.floor(safeMaxHp * 0.03), safeMaxHp);
     }
 
     handleBossLoot(state, zone, log) {
@@ -197,14 +201,14 @@ export class CombatSystem {
         }
     }
 
-    handlePlayerDeath(state, stats, zone) {
+    handlePlayerDeath(state, stats, zone, safeMaxHp) {
         this.callbacks.onFloatingText('DEATH!', 'death', 'player');
         const goldLost = Math.floor(state.gold * 0.1);
         if (goldLost > 0) {
             state.gold -= goldLost;
             this.callbacks.onFloatingText(`-${goldLost}g`, 'goldLoss', 'player');
         }
-        state.playerHp = stats.maxHp;
+        state.playerHp = safeMaxHp; // Use safeMaxHp to prevent NaN
         state.enemyHp = zone.enemyHp;
         state.enemyMaxHp = zone.enemyHp;
     }

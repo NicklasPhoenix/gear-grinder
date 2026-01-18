@@ -18,16 +18,27 @@ export function GameProvider({ children }) {
                 const saved = await window.storage.get('gear-grinder-save');
                 if (saved && saved.value) {
                     const parsed = JSON.parse(saved.value);
+                    // Sanitize stats object - ensure all stat values are valid numbers
+                    if (!parsed.stats || typeof parsed.stats !== 'object') {
+                        parsed.stats = { str: 5, int: 5, vit: 5, agi: 5, lck: 5 };
+                    } else {
+                        const defaultStats = { str: 5, int: 5, vit: 5, agi: 5, lck: 5 };
+                        for (const stat of Object.keys(defaultStats)) {
+                            if (typeof parsed.stats[stat] !== 'number' || isNaN(parsed.stats[stat])) {
+                                parsed.stats[stat] = defaultStats[stat];
+                            }
+                        }
+                    }
                     // Sanitize numeric values that might be NaN
-                    if (isNaN(parsed.playerHp) || parsed.playerHp === null) {
+                    if (typeof parsed.playerHp !== 'number' || isNaN(parsed.playerHp)) {
                         parsed.playerHp = parsed.playerMaxHp || 100;
                     }
-                    if (isNaN(parsed.enemyHp) || parsed.enemyHp === null) {
+                    if (typeof parsed.enemyHp !== 'number' || isNaN(parsed.enemyHp)) {
                         parsed.enemyHp = parsed.enemyMaxHp || 20;
                     }
-                    if (isNaN(parsed.gold)) parsed.gold = 0;
-                    if (isNaN(parsed.xp)) parsed.xp = 0;
-                    if (isNaN(parsed.level)) parsed.level = 1;
+                    if (typeof parsed.gold !== 'number' || isNaN(parsed.gold)) parsed.gold = 0;
+                    if (typeof parsed.xp !== 'number' || isNaN(parsed.xp)) parsed.xp = 0;
+                    if (typeof parsed.level !== 'number' || isNaN(parsed.level)) parsed.level = 1;
                     // Merge with default state
                     gm.state = { ...gm.state, ...parsed, combatLog: [] };
                 }
