@@ -1,5 +1,12 @@
 import { ENHANCE } from '../data/constants';
 
+/**
+ * Calculates the resource cost to enhance an item from its current plus level.
+ * Costs scale exponentially with enhancement level.
+ *
+ * @param {number} currentPlus - The item's current enhancement level (0-30+)
+ * @returns {Object} Cost object with gold, enhanceStone, blessedOrb, celestialShard
+ */
 export const getEnhanceCost = (currentPlus) => ({
     gold: Math.floor(ENHANCE.BASE_GOLD_COST * Math.pow(ENHANCE.GOLD_SCALING, currentPlus)),
     enhanceStone: Math.floor(ENHANCE.BASE_STONE_COST * Math.pow(ENHANCE.STONE_SCALING, currentPlus)),
@@ -7,6 +14,16 @@ export const getEnhanceCost = (currentPlus) => ({
     celestialShard: currentPlus >= ENHANCE.SHARD_THRESHOLD ? Math.floor(Math.pow(ENHANCE.SHARD_SCALING, currentPlus - 19)) : 0,
 });
 
+/**
+ * Calculates the success rate for enhancing an item at its current plus level.
+ * - +0 to +9: 100% success
+ * - +10 to +19: Decreases from 100% to 50%
+ * - +20 to +29: Decreases from 50% to 20%
+ * - +30+: Fixed 20% success
+ *
+ * @param {number} currentPlus - The item's current enhancement level
+ * @returns {number} Success rate as a percentage (0-100)
+ */
 export const getEnhanceSuccess = (currentPlus) => {
     if (currentPlus < ENHANCE.ORB_THRESHOLD) return ENHANCE.BASE_SUCCESS;
     if (currentPlus < ENHANCE.SHARD_THRESHOLD) {
@@ -18,16 +35,24 @@ export const getEnhanceSuccess = (currentPlus) => {
     return ENHANCE.MIN_SUCCESS_20_PLUS;
 };
 
+/**
+ * Calculates stat bonuses granted by an item's enhancement level.
+ * Bonuses scale with both enhancement level and item tier.
+ * High enhancement (+10+) provides exponential scaling.
+ * Very high enhancement (+15+) provides a damage multiplier.
+ *
+ * @param {number} plus - The item's enhancement level (0-30+)
+ * @param {number} [tier=0] - The item's tier (0-5), affects base bonus scaling
+ * @returns {Object} Bonus object with dmgBonus, hpBonus, armorBonus, effectBonus, dmgMult
+ */
 export const getEnhanceBonus = (plus, tier = 0) => {
-    // Enhancement bonuses balanced so +10 ≈ +0 next tier (slightly less)
-    // Each tier is ~1.5x stronger, so +10 should add ~40% power
     const basePerPlus = {
         dmg: ENHANCE.BASE_DMG_PER_PLUS + tier * ENHANCE.DMG_TIER_SCALING,
         hp: ENHANCE.BASE_HP_PER_PLUS + tier * ENHANCE.HP_TIER_SCALING,
         armor: ENHANCE.BASE_ARMOR_PER_PLUS + tier * ENHANCE.ARMOR_TIER_SCALING,
     };
 
-    // Slight exponential scaling at higher levels for rewarding high enhancement
+    // Exponential scaling at higher levels rewards high enhancement
     const expBonus = plus >= ENHANCE.EXP_BONUS_THRESHOLD ? Math.pow(ENHANCE.EXP_BONUS_BASE, plus - 9) : 1;
 
     return {
@@ -35,7 +60,6 @@ export const getEnhanceBonus = (plus, tier = 0) => {
         hpBonus: Math.floor(plus * basePerPlus.hp * expBonus),
         armorBonus: Math.floor(plus * basePerPlus.armor * expBonus),
         effectBonus: Math.floor(plus / ENHANCE.EFFECT_BONUS_INTERVAL) * ENHANCE.EFFECT_BONUS_VALUE,
-        // Small damage multiplier at very high enhancement
         dmgMult: plus >= ENHANCE.DAMAGE_MULT_THRESHOLD ? 1 + (plus - 14) * ENHANCE.DMG_MULT_PER_LEVEL : 1,
     };
 };

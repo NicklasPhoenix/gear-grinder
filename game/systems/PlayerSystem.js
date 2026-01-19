@@ -3,6 +3,18 @@ import { SKILLS, PRESTIGE_SKILLS } from '../data/skills';
 import { getEnhanceBonus } from '../utils/formulas';
 import { PLAYER_BASE, STAT_SCALING, LEVEL_UP, COMBAT } from '../data/constants';
 
+/**
+ * Calculates all derived combat stats for the player based on current game state.
+ * Combines base stats, gear bonuses, skills, set bonuses, and prestige bonuses.
+ *
+ * @param {Object} gameState - The current game state
+ * @param {Object} gameState.stats - Base character stats (str, int, vit, agi, lck)
+ * @param {Object} gameState.gear - Equipped gear by slot
+ * @param {number} gameState.level - Current player level
+ * @param {number[]} gameState.unlockedSkills - Array of unlocked skill IDs
+ * @param {Object} gameState.prestigeSkills - Prestige skill levels by ID
+ * @returns {Object} Calculated stats object with damage, maxHp, armor, critChance, etc.
+ */
 export const calculatePlayerStats = (gameState) => {
     const s = gameState.stats;
     // Base stats from character stats

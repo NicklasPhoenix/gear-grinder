@@ -477,9 +477,9 @@ export default function GameRenderer() {
                 if (enemyRef.current) {
                     const enemyBaseScale = Math.abs(enemyRef.current.scale.x); // Get base scale
 
-                    // Death animation
+                    // Death animation (fast: ~0.15 seconds)
                     if (animState.enemyDying) {
-                        animState.enemyDeathProgress += delta * 0.04;
+                        animState.enemyDeathProgress += delta * 0.1;
                         const progress = Math.min(1, animState.enemyDeathProgress);
 
                         // Shrink, spin, and fade out
@@ -498,18 +498,18 @@ export default function GameRenderer() {
                             enemyRef.current.rotation = 0;
                         }
                     }
-                    // Spawn animation - subtle fade in without huge scale
+                    // Spawn animation - fast fade in (~0.1 seconds)
                     else if (animState.enemySpawning) {
-                        animState.enemySpawnProgress += delta * 0.06;
+                        animState.enemySpawnProgress += delta * 0.15;
                         const progress = Math.min(1, animState.enemySpawnProgress);
 
-                        // Gentle scale up from 0.8 to 1.0 with slight overshoot
+                        // Gentle scale up from 0.9 to 1.0 with slight overshoot
                         const bounce = progress < 0.7
-                            ? 0.8 + (progress / 0.7) * 0.25
+                            ? 0.9 + (progress / 0.7) * 0.15
                             : 1.05 - (progress - 0.7) / 0.3 * 0.05;
                         const spawnScale = enemyBaseScale * bounce;
                         enemyRef.current.scale.set(spawnScale, spawnScale);
-                        enemyRef.current.alpha = progress;
+                        enemyRef.current.alpha = 0.3 + progress * 0.7; // Start at 30% alpha, not 0
                         enemyRef.current.tint = 0xffffff;
 
                         if (progress >= 1) {

@@ -4,7 +4,13 @@ import { SKILLS } from '../data/skills';
 import { calculatePlayerStats } from './PlayerSystem';
 import { PLAYER_BASE, COMBAT, DEATH_PENALTY, BOSS_DROPS, LEVEL_UP, UI } from '../data/constants';
 
+/**
+ * Handles all combat logic including damage calculation, enemy death, loot drops, and player death.
+ */
 export class CombatSystem {
+    /**
+     * @param {Object} stateManager - The game state manager (GameManager instance)
+     */
     constructor(stateManager) {
         this.stateManager = stateManager;
         this.callbacks = {
@@ -14,10 +20,19 @@ export class CombatSystem {
         };
     }
 
+    /**
+     * Sets visual callback functions for combat events.
+     * @param {Object} callbacks - Callback functions for onFloatingText, onLootDrop, onEnemyDeath
+     */
     setCallbacks(callbacks) {
         this.callbacks = { ...this.callbacks, ...callbacks };
     }
 
+    /**
+     * Processes one combat tick. Handles player attack, enemy damage, lifesteal, thorns, and death.
+     * @param {number} deltaTime - Time since last tick in milliseconds
+     * @returns {Object} Combat updates for visual feedback (lastDamage, isPlayerTurn, etc.)
+     */
     tick(deltaTime) {
         const state = this.stateManager.getState();
         const stats = calculatePlayerStats(state);
@@ -107,6 +122,14 @@ export class CombatSystem {
         return combatUpdates;
     }
 
+    /**
+     * Handles enemy death: awards gold, XP, drops materials/gear, handles boss loot, level ups.
+     * @param {Object} state - Current game state (modified in place)
+     * @param {Object} stats - Calculated player stats
+     * @param {Object} zone - Current zone data
+     * @param {Array} log - Combat log array
+     * @param {number} safeMaxHp - Validated max HP value
+     */
     handleEnemyDeath(state, stats, zone, log, safeMaxHp) {
         const goldEarned = Math.floor((zone.goldMin + Math.random() * (zone.goldMax - zone.goldMin)) * stats.goldMult);
         const xpEarned = Math.floor(zone.enemyHp / 2 * (1 + stats.xpBonus / 100));
@@ -197,6 +220,12 @@ export class CombatSystem {
         state.playerHp = Math.min(state.playerHp + Math.floor(safeMaxHp * COMBAT.HEAL_ON_KILL), safeMaxHp);
     }
 
+    /**
+     * Handles boss-specific loot: boss stones and boss gear drops.
+     * @param {Object} state - Current game state (modified in place)
+     * @param {Object} zone - Current zone data (must be a boss zone)
+     * @param {Array} log - Combat log array
+     */
     handleBossLoot(state, zone, log) {
         const bossSet = BOSS_SETS[zone.bossSet] || PRESTIGE_BOSS_SETS[zone.bossSet];
         const bossStoneInfo = BOSS_STONES[zone.bossSet];
@@ -244,6 +273,13 @@ export class CombatSystem {
         }
     }
 
+    /**
+     * Handles player death: applies gold/stone penalties and resets HP.
+     * @param {Object} state - Current game state (modified in place)
+     * @param {Object} stats - Calculated player stats
+     * @param {Object} zone - Current zone data
+     * @param {number} safeMaxHp - Validated max HP value
+     */
     handlePlayerDeath(state, stats, zone, safeMaxHp) {
         this.callbacks.onFloatingText('DEATH!', 'death', 'player');
 

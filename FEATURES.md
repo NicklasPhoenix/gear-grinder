@@ -114,11 +114,10 @@
 ---
 
 ### Feature #14: Add JSDoc Comments
-**Status:** Deferred
+**Status:** ✅ Complete
 **Location:** Core functions
 **Issue:** Lack of documentation on complex functions.
-**Solution:** Add JSDoc comments to core game functions.
-**Note:** Deferred - adding documentation to existing unchanged code is low priority. Comments should be added organically when functions are modified for other reasons.
+**Solution:** Added JSDoc comments to calculatePlayerStats (PlayerSystem.js), all enhancement functions (formulas.js), and CombatSystem class methods (tick, handleEnemyDeath, handleBossLoot, handlePlayerDeath).
 
 ---
 
@@ -166,3 +165,4 @@
 - **Feature #11:** Standardize Number Formatting - Centralized format.js utility used across all UI components
 - **Feature #12:** Remove Debug Console Logs - Cleaned up console.log from GameRenderer.jsx and GameContext.jsx
 - **Feature #13:** Extract Magic Numbers to Constants - Centralized constants.js for game balance values
+- **Feature #14:** Add JSDoc Comments - Documented core functions in PlayerSystem, formulas, and CombatSystem
