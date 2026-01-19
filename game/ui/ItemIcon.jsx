@@ -64,10 +64,22 @@ const MACE_ICONS = [1, 6, 12, 18, 24, 30, 36, 40, 44, 48];
 
 // Shield sprite options by tier (Icon1-36)
 const SHIELD_SPRITES = [1, 5, 10, 15, 20, 24, 28, 32, 35, 36];
-// Amulet sprite options by tier (Icon37-48 from the pack)
+// Amulet sprite options by tier (Icon37-48 from the pack - only these exist!)
 const AMULET_SPRITES = [37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48];
+// Boss amulet icons (must be in range 37-48)
+const BOSS_AMULET_ICONS = {
+    guardian: 37, lich: 38, dragon: 39, frost: 40, demon: 41,
+    seraph: 42, void: 43, chaos: 44, eternal: 45,
+    astral: 46, cosmic: 47, primordial: 48,
+};
 // Belt sprite options by tier (Icon1-48)
 const BELT_SPRITES = [1, 5, 10, 15, 20, 25, 30, 35, 40, 45];
+// Boss shield icons (must be in range 1-36)
+const BOSS_SHIELD_ICONS = {
+    guardian: 3, lich: 8, dragon: 12, frost: 16, demon: 20,
+    seraph: 24, void: 28, chaos: 32, eternal: 35,
+    astral: 34, cosmic: 35, primordial: 36,
+};
 
 // Magic gem icons for materials (48 available)
 const GEM_ICONS = {
@@ -161,18 +173,18 @@ export default function ItemIcon({ item, size = "full" }) {
             return { type: 'individual', url: `/assets/gloves/Icon${armorSetIcon}.png` };
         }
 
-        // Use new individual sprites for shields
+        // Use new individual sprites for shields (Icon1-36 only)
         if (item.slot === 'shield') {
-            const iconNum = isBossItem && BOSS_SET_ICONS[bossSet]
-                ? BOSS_SET_ICONS[bossSet]
+            const iconNum = isBossItem && BOSS_SHIELD_ICONS[bossSet]
+                ? BOSS_SHIELD_ICONS[bossSet]
                 : SHIELD_SPRITES[Math.min(tier, SHIELD_SPRITES.length - 1)];
             return { type: 'individual', url: `/assets/shields/Icon${iconNum}.png` };
         }
 
-        // Use new individual sprites for amulets
+        // Use new individual sprites for amulets (Icon37-48 only!)
         if (item.slot === 'amulet') {
-            const iconNum = isBossItem && BOSS_SET_ICONS[bossSet]
-                ? BOSS_SET_ICONS[bossSet]
+            const iconNum = isBossItem && BOSS_AMULET_ICONS[bossSet]
+                ? BOSS_AMULET_ICONS[bossSet]
                 : AMULET_SPRITES[Math.min(tier, AMULET_SPRITES.length - 1)];
             return { type: 'individual', url: `/assets/amulets/Icon${iconNum}.png` };
         }
