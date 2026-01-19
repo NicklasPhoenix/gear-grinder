@@ -124,9 +124,10 @@
 ## Strategic Features
 
 ### Feature #15: Achievement System
-**Status:** Pending
+**Status:** ✅ Complete
+**Location:** `game/data/achievements.js`, `game/ui/AchievementsView.jsx`, `game/ui/GameLayout.jsx`
 **Issue:** No long-term player goals beyond zone progression.
-**Solution:** Add achievements for milestones (kills, gold, enhancements, etc.).
+**Solution:** Added comprehensive achievement system with 25+ achievements across 6 categories (Combat, Wealth, Progress, Exploration, Crafting, Prestige). Achievements provide rewards (gold, materials, stat points) and are automatically tracked via state changes. Added new Achievements tab to the UI.
 
 ---
 
@@ -166,3 +167,4 @@
 - **Feature #12:** Remove Debug Console Logs - Cleaned up console.log from GameRenderer.jsx and GameContext.jsx
 - **Feature #13:** Extract Magic Numbers to Constants - Centralized constants.js for game balance values
 - **Feature #14:** Add JSDoc Comments - Documented core functions in PlayerSystem, formulas, and CombatSystem
+- **Feature #15:** Achievement System - 25+ achievements across 6 categories with rewards and UI tab

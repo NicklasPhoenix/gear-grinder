@@ -189,7 +189,9 @@ export function GameProvider({ children }) {
                     newState.blessedOrb !== lastState?.blessedOrb ||
                     newState.celestialShard !== lastState?.celestialShard ||
                     newState.prestigeLevel !== lastState?.prestigeLevel ||
-                    newState.prestigeStones !== lastState?.prestigeStones;
+                    newState.prestigeStones !== lastState?.prestigeStones ||
+                    newState.autoSalvage !== lastState?.autoSalvage ||
+                    newState.unlockedAchievements !== lastState?.unlockedAchievements;
 
                 // Only update HP state for high-frequency changes (doesn't trigger full re-render)
                 if (hpChanged) {
