@@ -58,6 +58,10 @@ export default function GameRenderer() {
         playerHitFlash: 0,
         screenShake: { x: 0, y: 0, intensity: 0 },
         lastZone: -1,
+        enemyDying: false,
+        enemyDeathProgress: 0,
+        enemySpawning: false,
+        enemySpawnProgress: 0,
     });
 
     useEffect(() => {
@@ -351,18 +355,65 @@ export default function GameRenderer() {
                 // Enemy idle animation
                 // Enemy faces left (positive X scale) - toward the player
                 if (enemyRef.current) {
-                    const breathe = Math.sin(time * 0.0025 + 1) * 0.02;
-                    const bob = Math.sin(time * 0.004 + 1) * 4;
-                    const enemyBaseScale = enemyRef.current.scale.x; // Positive scale
-                    enemyRef.current.scale.y = enemyBaseScale * (1.0 + breathe);
-                    enemyRef.current.y = 350 + bob;
+                    const enemyBaseScale = Math.abs(enemyRef.current.scale.x); // Get base scale
 
-                    // Hit flash
-                    if (animState.enemyHitFlash > 0) {
-                        animState.enemyHitFlash -= delta;
-                        enemyRef.current.tint = 0xff6666;
-                    } else {
+                    // Death animation
+                    if (animState.enemyDying) {
+                        animState.enemyDeathProgress += delta * 0.04;
+                        const progress = Math.min(1, animState.enemyDeathProgress);
+
+                        // Shrink, spin, and fade out
+                        const deathScale = enemyBaseScale * (1 - progress * 0.8);
+                        enemyRef.current.scale.set(deathScale, deathScale);
+                        enemyRef.current.rotation = progress * Math.PI * 2;
+                        enemyRef.current.alpha = 1 - progress;
+                        enemyRef.current.tint = 0xff4444;
+
+                        // When death animation completes, start spawn
+                        if (progress >= 1) {
+                            animState.enemyDying = false;
+                            animState.enemyDeathProgress = 0;
+                            animState.enemySpawning = true;
+                            animState.enemySpawnProgress = 0;
+                            enemyRef.current.rotation = 0;
+                        }
+                    }
+                    // Spawn animation
+                    else if (animState.enemySpawning) {
+                        animState.enemySpawnProgress += delta * 0.05;
+                        const progress = Math.min(1, animState.enemySpawnProgress);
+
+                        // Grow and fade in with bounce
+                        const bounce = progress < 0.7
+                            ? progress / 0.7 * 1.2
+                            : 1.2 - (progress - 0.7) / 0.3 * 0.2;
+                        const spawnScale = enemyBaseScale * bounce;
+                        enemyRef.current.scale.set(spawnScale, spawnScale);
+                        enemyRef.current.alpha = progress;
                         enemyRef.current.tint = 0xffffff;
+
+                        if (progress >= 1) {
+                            animState.enemySpawning = false;
+                            animState.enemySpawnProgress = 0;
+                            enemyRef.current.scale.set(enemyBaseScale, enemyBaseScale);
+                        }
+                    }
+                    // Normal idle
+                    else {
+                        const breathe = Math.sin(time * 0.0025 + 1) * 0.02;
+                        const bob = Math.sin(time * 0.004 + 1) * 4;
+                        enemyRef.current.scale.y = enemyBaseScale * (1.0 + breathe);
+                        enemyRef.current.y = 350 + bob;
+                        enemyRef.current.alpha = 1;
+                        enemyRef.current.rotation = 0;
+
+                        // Hit flash
+                        if (animState.enemyHitFlash > 0) {
+                            animState.enemyHitFlash -= delta;
+                            enemyRef.current.tint = 0xff6666;
+                        } else {
+                            enemyRef.current.tint = 0xffffff;
+                        }
                     }
                 }
 
@@ -443,6 +494,16 @@ export default function GameRenderer() {
                     spawnLootText(appRef.current, effectsContainerRef.current, item);
                 }, index * 150);
             });
+        });
+
+        // Listen for Enemy Death - trigger death animation
+        const cleanupDeath = gameManager.on('enemyDeath', ({ isBoss }) => {
+            animStateRef.current.enemyDying = true;
+            animStateRef.current.enemyDeathProgress = 0;
+            animStateRef.current.screenShake.intensity = isBoss ? 20 : 10;
+
+            // Spawn death particles
+            spawnHitParticles(600, 320, 0xff4444, isBoss ? 40 : 25);
         });
 
         // Particle spawn functions
@@ -545,6 +606,7 @@ export default function GameRenderer() {
         return () => {
             cleanupText();
             cleanupLoot();
+            cleanupDeath();
             if (appRef.current) {
                 appRef.current.destroy(true, { children: true, texture: true });
                 appRef.current = null;

@@ -77,6 +77,7 @@ export class GameManager {
         this.combatSystem.setCallbacks({
             onFloatingText: (text, type, target) => this.emit('floatingText', { text, type, target }),
             onLootDrop: (items) => this.emit('lootDrop', { items }),
+            onEnemyDeath: (isBoss) => this.emit('enemyDeath', { isBoss }),
         });
 
         if (this.isRunning) return;

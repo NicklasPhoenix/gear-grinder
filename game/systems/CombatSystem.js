@@ -9,6 +9,7 @@ export class CombatSystem {
         this.callbacks = {
             onFloatingText: () => { },
             onLootDrop: () => { },
+            onEnemyDeath: () => { },
         };
     }
 
@@ -151,6 +152,7 @@ export class CombatSystem {
         if (celestialShardDropped) lootItems.push({ text: `+${celestialShardDropped}${MATERIALS.celestialShard.icon}`, color: MATERIALS.celestialShard.color });
 
         this.callbacks.onLootDrop(lootItems);
+        this.callbacks.onEnemyDeath(zone.isBoss);
 
         // Level Up Check
         const xpForLevel = (level) => Math.floor(50 * Math.pow(1.3, level - 1));
