@@ -130,14 +130,29 @@ export default function InventoryView({ onHover }) {
         const setInfo = item?.bossSet ? BOSS_SETS[item.bossSet] : null;
         const stage = item?.plus > 0 ? getEnhanceStage(item.plus) : null;
 
+        // Determine border color: boss set > tier color > default
+        const getBorderStyle = () => {
+            if (!item) return {};
+            if (setInfo) {
+                return {
+                    borderColor: setInfo.color,
+                    boxShadow: `inset 0 0 12px ${setInfo.color}40, 0 0 8px ${setInfo.color}20`
+                };
+            }
+            if (tierInfo && item.tier > 0) {
+                return {
+                    borderColor: tierInfo.color,
+                    boxShadow: `inset 0 0 8px ${tierInfo.color}30`
+                };
+            }
+            return {};
+        };
+
         return (
             <div
                 className={`relative w-14 h-14 bg-slate-900/80 border-2 border-slate-700/60 rounded-lg cursor-pointer
                     hover:border-blue-500/70 hover:bg-slate-800/60 transition-all ${className}`}
-                style={item && setInfo ? {
-                    borderColor: setInfo.color,
-                    boxShadow: `inset 0 0 12px ${setInfo.color}40, 0 0 8px ${setInfo.color}20`
-                } : undefined}
+                style={getBorderStyle()}
                 onClick={() => item && handleUnequip(item)}
                 onMouseEnter={(e) => onHover && item && onHover(item, { x: e.clientX, y: e.clientY })}
                 onMouseLeave={() => onHover && onHover(null)}
@@ -275,6 +290,24 @@ export default function InventoryView({ onHover }) {
                                 const setInfo = item.bossSet ? BOSS_SETS[item.bossSet] : null;
                                 const stage = item.plus > 0 ? getEnhanceStage(item.plus) : null;
 
+                                // Determine border style: selected > boss set > tier color > default
+                                const getItemBorderStyle = () => {
+                                    if (isSelected) return {};
+                                    if (setInfo) {
+                                        return {
+                                            borderColor: setInfo.color,
+                                            boxShadow: `inset 0 0 6px ${setInfo.color}30`
+                                        };
+                                    }
+                                    if (tierInfo && item.tier > 0) {
+                                        return {
+                                            borderColor: tierInfo.color,
+                                            boxShadow: `inset 0 0 4px ${tierInfo.color}25`
+                                        };
+                                    }
+                                    return {};
+                                };
+
                                 return (
                                     <div
                                         key={item.id}
@@ -283,10 +316,7 @@ export default function InventoryView({ onHover }) {
                                                 ? 'border-red-500 bg-red-500/20'
                                                 : 'border-slate-700/40 hover:border-blue-500/50'
                                         }`}
-                                        style={!isSelected && setInfo ? {
-                                            borderColor: setInfo.color,
-                                            boxShadow: `inset 0 0 6px ${setInfo.color}30`
-                                        } : undefined}
+                                        style={getItemBorderStyle()}
                                         onClick={() => handleEquip(item)}
                                         onContextMenu={(e) => { e.preventDefault(); toggleSalvageSelection(item.id); }}
                                         onMouseEnter={(e) => onHover && onHover(item, { x: e.clientX, y: e.clientY }, true)}
