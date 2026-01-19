@@ -66,9 +66,15 @@ export default function AchievementsView() {
                     {Object.entries(achievementsByCategory).map(([category, achievements]) => (
                         <div key={category}>
                             <div
-                                className="text-xs font-bold uppercase tracking-wider mb-2 px-2"
+                                className="text-xs font-bold uppercase tracking-wider mb-2 px-2 flex items-center gap-2"
                                 style={{ color: ACHIEVEMENT_CATEGORIES[category]?.color || '#94a3b8' }}
                             >
+                                <span
+                                    className="w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold"
+                                    style={{ backgroundColor: `${ACHIEVEMENT_CATEGORIES[category]?.color || '#94a3b8'}30` }}
+                                >
+                                    {ACHIEVEMENT_CATEGORIES[category]?.icon || '?'}
+                                </span>
                                 {ACHIEVEMENT_CATEGORIES[category]?.name || category}
                             </div>
                             <div className="space-y-1.5">
@@ -79,6 +85,7 @@ export default function AchievementsView() {
                                             key={achievement.id}
                                             achievement={achievement}
                                             isUnlocked={isUnlocked}
+                                            state={state}
                                         />
                                     );
                                 })}
@@ -91,31 +98,49 @@ export default function AchievementsView() {
     );
 }
 
-function AchievementCard({ achievement, isUnlocked }) {
-    const categoryColor = ACHIEVEMENT_CATEGORIES[achievement.category]?.color || '#94a3b8';
+function AchievementCard({ achievement, isUnlocked, state }) {
+    const categoryInfo = ACHIEVEMENT_CATEGORIES[achievement.category];
+    const categoryColor = categoryInfo?.color || '#94a3b8';
+
+    // Get progress
+    let progress = 0;
+    let progressPercent = 0;
+    try {
+        progress = achievement.getProgress(state);
+        progressPercent = Math.min(100, (progress / achievement.target) * 100);
+    } catch (e) {
+        // Ignore progress errors
+    }
 
     return (
         <div
             className={`p-3 rounded-lg border-2 transition-all ${
                 isUnlocked
                     ? 'bg-slate-800/60 border-yellow-500/40'
-                    : 'bg-slate-900/40 border-slate-700/30 opacity-60'
+                    : 'bg-slate-900/40 border-slate-700/30'
             }`}
         >
             <div className="flex items-start gap-3">
-                {/* Icon */}
+                {/* Icon - category letter in colored circle */}
                 <div
-                    className={`w-10 h-10 rounded-lg flex items-center justify-center text-xl ${
+                    className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold ${
                         isUnlocked ? 'bg-yellow-500/20' : 'bg-slate-800'
                     }`}
+                    style={{ color: isUnlocked ? '#fbbf24' : categoryColor }}
                 >
-                    {isUnlocked ? achievement.icon : '?'}
+                    {isUnlocked ? (
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                    ) : (
+                        categoryInfo?.icon || '?'
+                    )}
                 </div>
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                        <span className={`font-bold ${isUnlocked ? 'text-yellow-400' : 'text-slate-400'}`}>
+                        <span className={`font-bold ${isUnlocked ? 'text-yellow-400' : 'text-slate-300'}`}>
                             {achievement.name}
                         </span>
                         {isUnlocked && (
@@ -124,10 +149,29 @@ function AchievementCard({ achievement, isUnlocked }) {
                     </div>
                     <p className="text-xs text-slate-400 mt-0.5">{achievement.description}</p>
 
+                    {/* Progress bar - only show if not unlocked */}
+                    {!isUnlocked && (
+                        <div className="mt-2">
+                            <div className="flex justify-between text-[10px] text-slate-500 mb-1">
+                                <span>Progress</span>
+                                <span>{formatWithCommas(Math.min(progress, achievement.target))} / {formatWithCommas(achievement.target)}</span>
+                            </div>
+                            <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+                                <div
+                                    className="h-full rounded-full transition-all duration-300"
+                                    style={{
+                                        width: `${progressPercent}%`,
+                                        backgroundColor: categoryColor
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    )}
+
                     {/* Rewards */}
                     <div className="flex flex-wrap gap-2 mt-2">
-                        {achievement.reward.gold && (
-                            <RewardBadge label={`+${formatWithCommas(achievement.reward.gold)}g`} color="#fbbf24" />
+                        {achievement.reward.silver && (
+                            <RewardBadge label={`+${formatWithCommas(achievement.reward.silver)}s`} color="#94a3b8" />
                         )}
                         {achievement.reward.enhanceStone && (
                             <RewardBadge label={`+${achievement.reward.enhanceStone} E.Stone`} color="#3b82f6" />

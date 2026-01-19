@@ -74,8 +74,8 @@ export default function GameLayout() {
             // Don't intercept if user is typing in an input
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
-            // Number keys 1-6 for tab switching
-            if (e.key >= '1' && e.key <= '6') {
+            // Number keys 1-7 for tab switching
+            if (e.key >= '1' && e.key <= '7') {
                 const tabIndex = parseInt(e.key) - 1;
                 if (tabIndex < TABS.length) {
                     setActiveTab(TABS[tabIndex]);
@@ -140,7 +140,7 @@ export default function GameLayout() {
     const playerStats = useMemo(() => calculatePlayerStats(state), [state]);
 
     return (
-        <div className="w-screen h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 overflow-hidden flex">
+        <div className="w-screen h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 overflow-hidden flex flex-col lg:flex-row">
             {/* Ambient background effects */}
             <div className="fixed inset-0 pointer-events-none overflow-hidden">
                 <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl" />
@@ -148,39 +148,39 @@ export default function GameLayout() {
             </div>
 
             {/* Left Panel: Game Viewport - no padding, canvas fills the space */}
-            <div className="flex-1 relative flex flex-col">
+            <div className="h-[40vh] lg:h-full lg:flex-1 relative flex flex-col">
                 {/* Top Info Bar - overlaid on canvas */}
-                <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-10">
+                <div className="absolute top-2 left-2 right-2 lg:top-4 lg:left-4 lg:right-4 flex justify-between items-start z-10">
                     {/* Zone Info + Stats */}
-                    <div className="flex flex-col gap-2">
-                        <div className="glass-card rounded-xl p-4 animate-fadeIn">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-yellow-500/20 to-orange-500/20 flex items-center justify-center">
+                    <div className="flex flex-col gap-1 lg:gap-2">
+                        <div className="glass-card rounded-lg lg:rounded-xl p-2 lg:p-4 animate-fadeIn">
+                            <div className="flex items-center gap-2 lg:gap-3">
+                                <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg bg-gradient-to-br from-yellow-500/20 to-orange-500/20 flex items-center justify-center">
                                     {currentZone.isBoss ? (
-                                        <span className="text-lg">&#128293;</span>
+                                        <span className="text-base lg:text-lg">&#128293;</span>
                                     ) : (
-                                        <svg className="w-5 h-5 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg className="w-4 h-4 lg:w-5 lg:h-5 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                         </svg>
                                     )}
                                 </div>
                                 <div>
-                                    <p className="text-xs text-slate-400 uppercase tracking-wider">Current Zone</p>
-                                    <h2 className={`font-bold text-lg ${currentZone.isBoss ? 'text-red-400' : 'text-white'}`}>
+                                    <p className="text-[10px] lg:text-xs text-slate-400 uppercase tracking-wider hidden sm:block">Current Zone</p>
+                                    <h2 className={`font-bold text-sm lg:text-lg ${currentZone.isBoss ? 'text-red-400' : 'text-white'}`}>
                                         {currentZone.name.replace(/[^a-zA-Z\s]/g, '').trim()}
                                     </h2>
                                 </div>
                             </div>
                             {currentZone.isBoss && (
-                                <div className="mt-2 px-2 py-1 bg-red-500/20 rounded text-xs text-red-400 font-bold uppercase tracking-wider text-center">
-                                    Boss Battle
+                                <div className="mt-1 lg:mt-2 px-2 py-0.5 lg:py-1 bg-red-500/20 rounded text-[10px] lg:text-xs text-red-400 font-bold uppercase tracking-wider text-center">
+                                    Boss
                                 </div>
                             )}
                         </div>
-                        {/* Stats below zone */}
-                        <div className="glass-card rounded-xl px-4 py-2 animate-fadeIn">
-                            <div className="flex items-center gap-6">
+                        {/* Stats below zone - hidden on small mobile */}
+                        <div className="glass-card rounded-lg lg:rounded-xl px-2 lg:px-4 py-1 lg:py-2 animate-fadeIn hidden sm:block">
+                            <div className="flex items-center gap-3 lg:gap-6">
                                 <StatMini label="ATK" value={Math.floor(playerStats.damage || 10)} color="text-red-400" />
                                 <StatMini label="DEF" value={Math.floor(playerStats.armor || 5)} color="text-blue-400" />
                                 <StatMini label="Kills" value={state.kills || 0} color="text-green-400" />
@@ -192,14 +192,14 @@ export default function GameLayout() {
                     </div>
 
                     {/* Currency Display - All Materials */}
-                    <div className="glass-card rounded-xl p-4 animate-fadeIn">
-                        <div className="grid grid-cols-2 gap-3">
+                    <div className="glass-card rounded-lg lg:rounded-xl p-2 lg:p-4 animate-fadeIn">
+                        <div className="grid grid-cols-2 gap-1 lg:gap-3">
                             <MaterialDisplay type="gold" value={state.gold} color="text-slate-200" />
                             <MaterialDisplay type="enhanceStone" value={state.enhanceStone} color="text-blue-400" />
-                            <MaterialDisplay type="blessedOrb" value={state.blessedOrb} color="text-purple-400" />
-                            <MaterialDisplay type="celestialShard" value={state.celestialShard} color="text-yellow-300" />
+                            <MaterialDisplay type="blessedOrb" value={state.blessedOrb} color="text-purple-400" className="hidden sm:flex" />
+                            <MaterialDisplay type="celestialShard" value={state.celestialShard} color="text-yellow-300" className="hidden sm:flex" />
                             {state.prestigeLevel > 0 && (
-                                <MaterialDisplay type="prestigeStone" value={state.prestigeStones} color="text-pink-400" />
+                                <MaterialDisplay type="prestigeStone" value={state.prestigeStones} color="text-pink-400" className="hidden sm:flex" />
                             )}
                         </div>
                         {/* Boss Stones - show if any collected */}
@@ -237,9 +237,9 @@ export default function GameLayout() {
             </div>
 
             {/* Right Panel: UI Sidebar */}
-            <div className="w-[550px] h-full flex flex-col border-l border-slate-800/50 bg-slate-900/80 backdrop-blur-sm shadow-2xl z-20">
+            <div className="w-full h-[60vh] lg:w-[550px] lg:h-full flex flex-col border-t lg:border-t-0 lg:border-l border-slate-800/50 bg-slate-900/80 backdrop-blur-sm shadow-2xl z-20">
                 {/* Tab Navigation */}
-                <div className="flex bg-slate-950/80 border-b border-slate-800/50" role="tablist" aria-label="Game sections">
+                <div className="flex overflow-x-auto custom-scrollbar bg-slate-950/80 border-b border-slate-800/50" role="tablist" aria-label="Game sections">
                     {TABS.map((tab, index) => (
                         <TabButton
                             key={tab}
@@ -363,15 +363,16 @@ const MATERIAL_NAMES = {
     prestigeStone: 'P.Stone',
 };
 
-function MaterialDisplay({ type, value, color }) {
+function MaterialDisplay({ type, value, color, className = '' }) {
     return (
-        <div className="flex items-center gap-2">
-            <div className="w-8 h-8 flex items-center justify-center">
-                <MaterialIcon type={type} size={28} />
+        <div className={`flex items-center gap-1 lg:gap-2 ${className}`}>
+            <div className="w-6 h-6 lg:w-8 lg:h-8 flex items-center justify-center">
+                <MaterialIcon type={type} size={20} className="lg:hidden" />
+                <MaterialIcon type={type} size={28} className="hidden lg:block" />
             </div>
             <div className="min-w-0">
-                <p className="text-[10px] text-slate-500 uppercase truncate">{MATERIAL_NAMES[type]}</p>
-                <p className={`text-lg font-bold ${color} leading-none`}>
+                <p className="text-[8px] lg:text-[10px] text-slate-500 uppercase truncate">{MATERIAL_NAMES[type]}</p>
+                <p className={`text-sm lg:text-lg font-bold ${color} leading-none`}>
                     {typeof value === 'number' ? formatWithCommas(value) : value}
                 </p>
             </div>
