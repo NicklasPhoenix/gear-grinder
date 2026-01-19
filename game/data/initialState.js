@@ -15,7 +15,7 @@ export const initialState = {
             plus: 0,
             effects: []
         },
-        helmet: null, armor: null, boots: null, accessory: null, shield: null, gloves: null, amulet: null
+        helmet: null, armor: null, boots: null, belt: null, shield: null, gloves: null, amulet: null
     },
     inventory: [], unlockedSkills: [], combatLog: [],
     enemyHp: 20, enemyMaxHp: 20, playerHp: 100, playerMaxHp: 100,

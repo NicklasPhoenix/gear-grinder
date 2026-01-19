@@ -176,7 +176,7 @@ export class GameManager {
             currentZone: 0,
             stats: { str: 5, int: 5, vit: 5, agi: 5, lck: 5 },
             statPoints: 0,
-            gear: { weapon: null, helmet: null, armor: null, boots: null, accessory: null, shield: null, gloves: null, amulet: null },
+            gear: { weapon: null, helmet: null, armor: null, boots: null, belt: null, shield: null, gloves: null, amulet: null },
             inventory: [],
             unlockedSkills: [],
             enemyHp: 20,

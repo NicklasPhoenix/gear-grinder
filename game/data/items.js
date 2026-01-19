@@ -5,7 +5,7 @@ export const MATERIALS = {
     prestigeStone: { name: 'P.Stone', color: '#f472b6', icon: '🌟' },
 };
 
-export const GEAR_SLOTS = ['weapon', 'helmet', 'armor', 'boots', 'accessory', 'shield', 'gloves', 'amulet'];
+export const GEAR_SLOTS = ['weapon', 'helmet', 'armor', 'boots', 'belt', 'shield', 'gloves', 'amulet'];
 
 export const TIERS = [
     // Balanced so +10 tier N ≈ +0 tier N+1 (each tier ~1.5x stronger)
@@ -33,7 +33,7 @@ export const GEAR_NAMES = {
     helmet: ['Cloth Cap', 'Leather Hood', 'Chain Coif', 'Knight Helm', 'Dragon Visor', 'Phoenix Crown', 'Halo of Light', 'Astral Circlet', 'Cosmic Crown', 'Primordial Helm'],
     armor: ['Cloth Tunic', 'Leather Vest', 'Chainmail', 'Plate Armor', 'Dragon Scale', 'Abyssal Plate', 'Radiant Aegis', 'Astral Vestments', 'Cosmic Plate', 'Primordial Armor'],
     boots: ['Sandals', 'Leather Boots', 'Chain Greaves', 'Plated Boots', 'Dragonskin Treads', 'Voidwalkers', 'Angelic Steps', 'Astral Treads', 'Cosmic Boots', 'Primordial Striders'],
-    accessory: ['Copper Ring', 'Silver Band', 'Sapphire Ring', 'Amethyst Loop', 'Phoenix Signet', 'Chaos Band', 'Ring of Eternity', 'Astral Loop', 'Cosmic Ring', 'Primordial Band'],
+    belt: ['Rope Belt', 'Leather Belt', 'Studded Belt', 'Chain Belt', 'Dragon Girdle', 'Void Sash', 'Celestial Cord', 'Astral Waistguard', 'Cosmic Belt', 'Primordial Girdle'],
     shield: ['Wooden Shield', 'Iron Buckler', 'Steel Kite', 'Tower Shield', 'Dragon Guard', 'Bulwark', 'Aegis of Dawn', 'Astral Barrier', 'Cosmic Shield', 'Primordial Bulwark'],
     gloves: ['Cloth Wraps', 'Leather Gloves', 'Chain Gauntlets', 'Plate Fists', 'Drake Claws', 'Void Grip', 'Hands of Fate', 'Astral Grasp', 'Cosmic Gauntlets', 'Primordial Fists'],
     amulet: ['Bead Necklace', 'Bronze Pendant', 'Silver Locket', 'Mystic Amulet', 'Dragon Heart', 'Soul Gem', 'Tear of the Gods', 'Astral Pendant', 'Cosmic Amulet', 'Primordial Heart'],
@@ -51,7 +51,7 @@ export const BOSS_SETS = {
             boots: { name: "Guardian's Treads", effect: { id: 'dodge', name: 'Dodge', value: 4 } },
             gloves: { name: "Guardian's Grasp", effect: { id: 'bonusDmg', name: '+DMG', value: 10 } },
             shield: { name: "Guardian's Bulwark", effect: { id: 'bonusHp', name: '+HP', value: 70 } },
-            accessory: { name: "Guardian's Signet", effect: { id: 'critChance', name: 'Crit', value: 4 } },
+            belt: { name: "Guardian's Girdle", effect: { id: 'critChance', name: 'Crit', value: 4 } },
             amulet: { name: "Guardian's Charm", effect: { id: 'lifesteal', name: 'Lifesteal', value: 2 } },
         },
         setBonuses: [
@@ -70,7 +70,7 @@ export const BOSS_SETS = {
             boots: { name: "Lich's Sandals", effect: { id: 'dodge', name: 'Dodge', value: 5 } },
             gloves: { name: "Lich's Grasp", effect: { id: 'critChance', name: 'Crit', value: 6 } },
             shield: { name: "Lich's Tome", effect: { id: 'bonusDmg', name: '+DMG', value: 20 } },
-            accessory: { name: "Lich's Phylactery", effect: { id: 'lifesteal', name: 'Lifesteal', value: 2 } },
+            belt: { name: "Lich's Sash", effect: { id: 'lifesteal', name: 'Lifesteal', value: 2 } },
             amulet: { name: "Lich's Soulstone", effect: { id: 'critDamage', name: 'Crit DMG', value: 25 } },
         },
         setBonuses: [
@@ -89,7 +89,7 @@ export const BOSS_SETS = {
             boots: { name: "Dragonborn Claws", effect: { id: 'dodge', name: 'Dodge', value: 6 } },
             gloves: { name: "Dragonborn Talons", effect: { id: 'critDamage', name: 'Crit DMG', value: 35 } },
             shield: { name: "Dragonborn Aegis", effect: { id: 'thorns', name: 'Thorns', value: 12 } },
-            accessory: { name: "Dragonborn Scale", effect: { id: 'bonusHp', name: '+HP', value: 100 } },
+            belt: { name: "Dragonborn Girdle", effect: { id: 'bonusHp', name: '+HP', value: 100 } },
             amulet: { name: "Dragonborn Heart", effect: { id: 'bonusDmg', name: '+DMG', value: 25 } },
         },
         setBonuses: [
@@ -108,7 +108,7 @@ export const BOSS_SETS = {
             boots: { name: "Frostborn Boots", effect: { id: 'dodge', name: 'Dodge', value: 5 } },
             gloves: { name: "Frostborn Grips", effect: { id: 'critChance', name: 'Crit', value: 8 } },
             shield: { name: "Frostborn Barrier", effect: { id: 'thorns', name: 'Thorns', value: 12 } },
-            accessory: { name: "Frostborn Band", effect: { id: 'lifesteal', name: 'Lifesteal', value: 3 } },
+            belt: { name: "Frostborn Girdle", effect: { id: 'lifesteal', name: 'Lifesteal', value: 3 } },
             amulet: { name: "Frostborn Pendant", effect: { id: 'critDamage', name: 'Crit DMG', value: 40 } },
         },
         setBonuses: [
@@ -127,7 +127,7 @@ export const BOSS_SETS = {
             boots: { name: "Demonheart Hooves", effect: { id: 'dodge', name: 'Dodge', value: 7 } },
             gloves: { name: "Demonheart Claws", effect: { id: 'critDamage', name: 'Crit DMG', value: 45 } },
             shield: { name: "Demonheart Ward", effect: { id: 'bonusHp', name: '+HP', value: 200 } },
-            accessory: { name: "Demonheart Ring", effect: { id: 'critChance', name: 'Crit', value: 9 } },
+            belt: { name: "Demonheart Cord", effect: { id: 'critChance', name: 'Crit', value: 9 } },
             amulet: { name: "Demonheart Soul", effect: { id: 'lifesteal', name: 'Lifesteal', value: 3 } },
         },
         setBonuses: [
@@ -146,7 +146,7 @@ export const BOSS_SETS = {
             boots: { name: "Seraphic Steps", effect: { id: 'dodge', name: 'Dodge', value: 8 } },
             gloves: { name: "Seraphic Touch", effect: { id: 'lifesteal', name: 'Lifesteal', value: 4 } },
             shield: { name: "Seraphic Bulwark", effect: { id: 'thorns', name: 'Thorns', value: 16 } },
-            accessory: { name: "Seraphic Ring", effect: { id: 'critDamage', name: 'Crit DMG', value: 50 } },
+            belt: { name: "Seraphic Sash", effect: { id: 'critDamage', name: 'Crit DMG', value: 50 } },
             amulet: { name: "Seraphic Star", effect: { id: 'bonusDmg', name: '+DMG', value: 65 } },
         },
         setBonuses: [
@@ -165,7 +165,7 @@ export const BOSS_SETS = {
             boots: { name: "Voidwalker Striders", effect: { id: 'dodge', name: 'Dodge', value: 9 } },
             gloves: { name: "Voidwalker Grips", effect: { id: 'bonusDmg', name: '+DMG', value: 90 } },
             shield: { name: "Voidwalker Veil", effect: { id: 'dodge', name: 'Dodge', value: 8 } },
-            accessory: { name: "Voidwalker Band", effect: { id: 'lifesteal', name: 'Lifesteal', value: 4 } },
+            belt: { name: "Voidwalker Cord", effect: { id: 'lifesteal', name: 'Lifesteal', value: 4 } },
             amulet: { name: "Voidwalker Core", effect: { id: 'critChance', name: 'Crit', value: 10 } },
         },
         setBonuses: [
@@ -184,7 +184,7 @@ export const BOSS_SETS = {
             boots: { name: "Chaosborn Greaves", effect: { id: 'dodge', name: 'Dodge', value: 10 } },
             gloves: { name: "Chaosborn Fists", effect: { id: 'critDamage', name: 'Crit DMG', value: 70 } },
             shield: { name: "Chaosborn Barrier", effect: { id: 'thorns', name: 'Thorns', value: 20 } },
-            accessory: { name: "Chaosborn Seal", effect: { id: 'lifesteal', name: 'Lifesteal', value: 5 } },
+            belt: { name: "Chaosborn Girdle", effect: { id: 'lifesteal', name: 'Lifesteal', value: 5 } },
             amulet: { name: "Chaosborn Essence", effect: { id: 'bonusDmg', name: '+DMG', value: 100 } },
         },
         setBonuses: [
@@ -203,7 +203,7 @@ export const BOSS_SETS = {
             boots: { name: "Eternal Walkers", effect: { id: 'dodge', name: 'Dodge', value: 11 } },
             gloves: { name: "Eternal Gauntlets", effect: { id: 'critDamage', name: 'Crit DMG', value: 85 } },
             shield: { name: "Eternal Aegis", effect: { id: 'thorns', name: 'Thorns', value: 22 } },
-            accessory: { name: "Eternal Loop", effect: { id: 'lifesteal', name: 'Lifesteal', value: 5 } },
+            belt: { name: "Eternal Waistguard", effect: { id: 'lifesteal', name: 'Lifesteal', value: 5 } },
             amulet: { name: "Eternal Heart", effect: { id: 'bonusDmg', name: '+DMG', value: 140 } },
         },
         setBonuses: [
@@ -227,7 +227,7 @@ export const GEAR_BASES = {
     helmet: { name: 'Helm', baseDmg: 0, baseHp: 20, baseArmor: 5, scaling: 'vit', desc: '+20 HP, +5 Armor per tier' },
     armor: { name: 'Plate', baseDmg: 0, baseHp: 40, baseArmor: 12, scaling: 'vit', desc: '+40 HP, +12 Armor per tier' },
     boots: { name: 'Greaves', baseDmg: 0, baseHp: 15, baseArmor: 4, scaling: 'agi', desc: '+15 HP, +4 Armor per tier' },
-    accessory: { name: 'Ring', baseDmg: 3, baseHp: 10, baseArmor: 0, scaling: 'int', desc: '+3 DMG, +10 HP per tier' },
+    belt: { name: 'Belt', baseDmg: 3, baseHp: 10, baseArmor: 0, scaling: 'int', desc: '+3 DMG, +10 HP per tier' },
     shield: { name: 'Buckler', baseDmg: 0, baseHp: 30, baseArmor: 15, scaling: 'vit', desc: '+30 HP, +15 Armor per tier' },
     gloves: { name: 'Gauntlets', baseDmg: 4, baseHp: 10, baseArmor: 3, scaling: 'str', desc: '+4 DMG, +10 HP per tier' },
     amulet: { name: 'Pendant', baseDmg: 2, baseHp: 15, baseArmor: 0, scaling: 'int', desc: '+2 DMG, +15 HP per tier' },
@@ -255,7 +255,7 @@ export const PRESTIGE_BOSS_SETS = {
             boots: { name: "Astral Treads", effect: { id: 'dodge', name: 'Dodge', value: 28 } },
             gloves: { name: "Astral Grips", effect: { id: 'critDamage', name: 'Crit DMG', value: 280 } },
             shield: { name: "Astral Ward", effect: { id: 'thorns', name: 'Thorns', value: 60 } },
-            accessory: { name: "Astral Band", effect: { id: 'lifesteal', name: 'Lifesteal', value: 14 } },
+            belt: { name: "Astral Waistguard", effect: { id: 'lifesteal', name: 'Lifesteal', value: 14 } },
             amulet: { name: "Astral Core", effect: { id: 'bonusDmg', name: '+DMG', value: 600 } },
         },
         setBonuses: [
@@ -274,7 +274,7 @@ export const PRESTIGE_BOSS_SETS = {
             boots: { name: "Cosmic Striders", effect: { id: 'dodge', name: 'Dodge', value: 32 } },
             gloves: { name: "Cosmic Gauntlets", effect: { id: 'critDamage', name: 'Crit DMG', value: 350 } },
             shield: { name: "Cosmic Barrier", effect: { id: 'thorns', name: 'Thorns', value: 80 } },
-            accessory: { name: "Cosmic Ring", effect: { id: 'critChance', name: 'Crit', value: 35 } },
+            belt: { name: "Cosmic Girdle", effect: { id: 'critChance', name: 'Crit', value: 35 } },
             amulet: { name: "Cosmic Heart", effect: { id: 'lifesteal', name: 'Lifesteal', value: 15 } },
         },
         setBonuses: [
@@ -293,7 +293,7 @@ export const PRESTIGE_BOSS_SETS = {
             boots: { name: "Primordial Steps", effect: { id: 'dodge', name: 'Dodge', value: 35 } },
             gloves: { name: "Primordial Fists", effect: { id: 'critDamage', name: 'Crit DMG', value: 500 } },
             shield: { name: "Primordial Bulwark", effect: { id: 'thorns', name: 'Thorns', value: 100 } },
-            accessory: { name: "Primordial Ring", effect: { id: 'lifesteal', name: 'Lifesteal', value: 20 } },
+            belt: { name: "Primordial Girdle", effect: { id: 'lifesteal', name: 'Lifesteal', value: 20 } },
             amulet: { name: "Primordial Essence", effect: { id: 'bonusDmg', name: '+DMG', value: 2000 } },
         },
         setBonuses: [

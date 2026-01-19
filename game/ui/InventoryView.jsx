@@ -8,10 +8,10 @@ const SLOT_NAMES = {
     helmet: 'HEAD',
     armor: 'BODY',
     boots: 'FEET',
+    belt: 'BELT',
     shield: 'OFF',
     gloves: 'HAND',
     amulet: 'NECK',
-    accessory: 'RING',
 };
 
 export default function InventoryView({ onHover }) {

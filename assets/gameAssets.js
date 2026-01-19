@@ -139,7 +139,7 @@ export const ITEM_SPRITES = {
   gloves:   { sheet: 'glove', row: 0, col: 0 },
   // Accessories
   amulet:   { sheet: 'amulet', row: 0, col: 0 },
-  accessory:{ sheet: 'ring', row: 1, col: 0 },
+  belt:     { sheet: 'armor_items', row: 6, col: 0 },
   ring:     { sheet: 'ring', row: 1, col: 0 },
   // Materials (use potion sheet)
   ore:      { sheet: 'potion', row: 1, col: 0 },
@@ -267,14 +267,11 @@ export function generateArmorIcon(slot, tier) {
       ctx.fill();
       ctx.fillRect(20, 20, 8, 12);
       break;
-    case 'accessory':
-      ctx.beginPath();
-      ctx.arc(24, 24, 8, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(24, 24, 4, 0, Math.PI * 2);
+    case 'belt':
+      ctx.fillRect(10, 20, 28, 8);
+      ctx.fillRect(22, 18, 4, 12);
       ctx.fillStyle = '#1f2937';
-      ctx.fill();
+      ctx.fillRect(22, 22, 4, 4);
       break;
     default:
       ctx.fillRect(16, 16, 16, 16);
