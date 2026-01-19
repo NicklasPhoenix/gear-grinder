@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useGame } from '../context/GameContext';
 import ItemIcon from './ItemIcon';
 import { TIERS, GEAR_SLOTS, getItemScore, getSalvageReturns, BOSS_SETS, addItemToInventory, removeOneFromStack, getEnhanceStage } from '../data/items';
+import PresetsModal from './PresetsModal';
 
 const SLOT_LABELS = {
     weapon: 'Weapon',
@@ -18,6 +19,7 @@ const SLOT_LABELS = {
 export default function InventoryView({ onHover }) {
     const { state, gameManager } = useGame();
     const [selectedForSalvage, setSelectedForSalvage] = useState(new Set());
+    const [showPresets, setShowPresets] = useState(false);
 
     const handleEquipBest = () => {
         let newGear = { ...state.gear };
@@ -197,12 +199,20 @@ export default function InventoryView({ onHover }) {
             <div className="game-panel" onMouseLeave={() => onHover && onHover(null)}>
                 <div className="game-panel-header flex justify-between items-center">
                     <span className="text-sm">Equipment</span>
-                    <button
-                        onClick={handleEquipBest}
-                        className="px-2 py-1 text-xs bg-green-600/40 hover:bg-green-600/60 text-green-300 rounded transition-colors"
-                    >
-                        EQUIP BEST
-                    </button>
+                    <div className="flex gap-1">
+                        <button
+                            onClick={() => setShowPresets(true)}
+                            className="px-2 py-1 text-xs bg-blue-600/40 hover:bg-blue-600/60 text-blue-300 rounded transition-colors"
+                        >
+                            PRESETS
+                        </button>
+                        <button
+                            onClick={handleEquipBest}
+                            className="px-2 py-1 text-xs bg-green-600/40 hover:bg-green-600/60 text-green-300 rounded transition-colors"
+                        >
+                            EQUIP BEST
+                        </button>
+                    </div>
                 </div>
                 <div className="p-4">
                     {/* Paper Doll Grid - compact 3-column layout */}
@@ -362,6 +372,9 @@ export default function InventoryView({ onHover }) {
                     Click to equip · Right-click to salvage
                 </div>
             </div>
+
+            {/* Presets Modal */}
+            {showPresets && <PresetsModal onClose={() => setShowPresets(false)} />}
         </div>
     );
 }

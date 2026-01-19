@@ -193,7 +193,8 @@ export function GameProvider({ children }) {
                     newState.autoSalvage !== lastState?.autoSalvage ||
                     newState.unlockedAchievements !== lastState?.unlockedAchievements ||
                     newState.dailyStreak !== lastState?.dailyStreak ||
-                    newState.lastDailyReward !== lastState?.lastDailyReward;
+                    newState.lastDailyReward !== lastState?.lastDailyReward ||
+                    newState.equipmentPresets !== lastState?.equipmentPresets;
 
                 // Only update HP state for high-frequency changes (doesn't trigger full re-render)
                 if (hpChanged) {

@@ -148,9 +148,10 @@
 ---
 
 ### Feature #18: Build/Equipment Presets
-**Status:** Pending
+**Status:** ✅ Complete
+**Location:** `game/ui/PresetsModal.jsx`, `game/ui/InventoryView.jsx`
 **Issue:** No way to quickly swap between equipment setups.
-**Solution:** Add save/load slots for equipment configurations.
+**Solution:** Added 5 preset slots for saving equipment configurations. PRESETS button in inventory header opens modal. Save current gear to a slot, load to swap with inventory. Mini preview shows equipped items in each preset.
 
 ---
 
@@ -172,3 +173,4 @@
 - **Feature #15:** Achievement System - 25+ achievements across 6 categories with rewards and UI tab
 - **Feature #16:** Daily Login Rewards - 7-day reward cycle with streak tracking and escalating bonuses
 - **Feature #17:** Mobile Responsiveness - Vertical layout on mobile, responsive breakpoints, touch-friendly controls
+- **Feature #18:** Build/Equipment Presets - 5 save slots for equipment configurations with quick load
