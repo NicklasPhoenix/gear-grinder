@@ -12,6 +12,19 @@ export default function EnhancementView() {
     const [autoEnhancing, setAutoEnhancing] = useState(false);
     const autoEnhanceRef = useRef(null);
 
+    // Refs for always-fresh state access (fixes stale closure in auto-enhance)
+    const stateRef = useRef(state);
+    const selectedItemRef = useRef(selectedItem);
+
+    // Keep refs in sync with state
+    useEffect(() => {
+        stateRef.current = state;
+    }, [state]);
+
+    useEffect(() => {
+        selectedItemRef.current = selectedItem;
+    }, [selectedItem]);
+
     const allItems = [
         ...Object.values(state.gear).filter(i => i),
         ...state.inventory
@@ -36,7 +49,21 @@ export default function EnhancementView() {
         }
 
         const runAutoEnhance = () => {
-            const currentItem = allItems.find(i => i.id === selectedItem.id);
+            // Use refs for always-fresh values (fixes stale closure issues)
+            const freshState = stateRef.current;
+            const freshSelectedItem = selectedItemRef.current;
+
+            if (!freshSelectedItem) {
+                setAutoEnhancing(false);
+                return;
+            }
+
+            const freshAllItems = [
+                ...Object.values(freshState.gear).filter(i => i),
+                ...freshState.inventory
+            ];
+
+            const currentItem = freshAllItems.find(i => i.id === freshSelectedItem.id);
             if (!currentItem) {
                 setAutoEnhancing(false);
                 return;
@@ -52,14 +79,15 @@ export default function EnhancementView() {
             const needsBossStone = currentItem.bossSet && currentItem.plus >= 10;
             const costs = { ...baseCosts, bossStone: needsBossStone ? 1 : 0 };
 
-            if (state.gold < costs.gold || state.enhanceStone < costs.enhanceStone) {
+            // Use fresh state values for resource checks
+            if (freshState.gold < costs.gold || freshState.enhanceStone < costs.enhanceStone) {
                 setAutoEnhancing(false);
                 gameManager.emit('floatingText', { text: 'NO RESOURCES!', type: 'death', target: 'player' });
                 return;
             }
 
-            // Check boss stone requirement
-            if (needsBossStone && (state.bossStones?.[currentItem.bossSet] || 0) < 1) {
+            // Check boss stone requirement with fresh state
+            if (needsBossStone && (freshState.bossStones?.[currentItem.bossSet] || 0) < 1) {
                 setAutoEnhancing(false);
                 gameManager.emit('floatingText', { text: 'NEED BOSS STONE!', type: 'death', target: 'player' });
                 return;
@@ -70,26 +98,29 @@ export default function EnhancementView() {
 
         autoEnhanceRef.current = setInterval(runAutoEnhance, 200);
         return () => { if (autoEnhanceRef.current) clearInterval(autoEnhanceRef.current); };
-    }, [autoEnhancing, selectedItem, autoEnhanceTarget, state.gold, state.enhanceStone]);
+    }, [autoEnhancing, autoEnhanceTarget]); // Removed state dependencies - using refs instead
 
     const doEnhance = (item, costs) => {
+        // Use ref for always-fresh state (fixes stale closure during rapid auto-enhance)
+        const freshState = stateRef.current;
+
         const successChance = getEnhanceSuccess(item.plus);
         const success = Math.random() * 100 < successChance;
-        const isInventoryItem = state.inventory.find(i => i.id === item.id);
+        const isInventoryItem = freshState.inventory.find(i => i.id === item.id);
 
         let newState = {
-            ...state,
-            gold: state.gold - costs.gold,
-            enhanceStone: state.enhanceStone - costs.enhanceStone,
-            blessedOrb: state.blessedOrb - (costs.blessedOrb || 0),
-            celestialShard: state.celestialShard - (costs.celestialShard || 0)
+            ...freshState,
+            gold: freshState.gold - costs.gold,
+            enhanceStone: freshState.enhanceStone - costs.enhanceStone,
+            blessedOrb: freshState.blessedOrb - (costs.blessedOrb || 0),
+            celestialShard: freshState.celestialShard - (costs.celestialShard || 0)
         };
 
         // Deduct boss stone if required (boss gear +10 and above)
         if (item.bossSet && item.plus >= 10 && costs.bossStone) {
             newState.bossStones = {
-                ...state.bossStones,
-                [item.bossSet]: (state.bossStones?.[item.bossSet] || 0) - costs.bossStone
+                ...freshState.bossStones,
+                [item.bossSet]: (freshState.bossStones?.[item.bossSet] || 0) - costs.bossStone
             };
         }
 
@@ -98,15 +129,15 @@ export default function EnhancementView() {
         delete newItem.count;
 
         if (isInventoryItem) {
-            let updatedInventory = removeOneFromStack(state.inventory, item.id);
+            let updatedInventory = removeOneFromStack(freshState.inventory, item.id);
             updatedInventory = addItemToInventory(updatedInventory, newItem);
             newState.inventory = updatedInventory;
         } else {
-            newState.gear = { ...state.gear, [newItem.slot]: newItem };
+            newState.gear = { ...freshState.gear, [newItem.slot]: newItem };
         }
 
         if (!success) {
-            newState.enhanceFails = (state.enhanceFails || 0) + 1;
+            newState.enhanceFails = (freshState.enhanceFails || 0) + 1;
         }
 
         gameManager.setState(newState);
