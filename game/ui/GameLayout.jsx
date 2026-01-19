@@ -47,12 +47,54 @@ const TabIcons = {
     ),
 };
 
+// Tab order for keyboard navigation
+const TABS = ['inventory', 'stats', 'enhance', 'skills', 'zone', 'prestige'];
+
 export default function GameLayout() {
     const { state } = useGame();
     const [activeTab, setActiveTab] = useState('inventory');
     const [tooltipUser, setTooltipUser] = useState(null);
     const [levelUpAnimation, setLevelUpAnimation] = useState(null);
+    const [showKeyboardHelp, setShowKeyboardHelp] = useState(false);
     const prevLevelRef = useRef(state?.level || 1);
+
+    // Keyboard navigation for tabs
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            // Don't intercept if user is typing in an input
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+            // Number keys 1-6 for tab switching
+            if (e.key >= '1' && e.key <= '6') {
+                const tabIndex = parseInt(e.key) - 1;
+                if (tabIndex < TABS.length) {
+                    setActiveTab(TABS[tabIndex]);
+                }
+                return;
+            }
+
+            // Arrow keys for tab navigation
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                const currentIndex = TABS.indexOf(activeTab);
+                let newIndex;
+                if (e.key === 'ArrowLeft') {
+                    newIndex = currentIndex > 0 ? currentIndex - 1 : TABS.length - 1;
+                } else {
+                    newIndex = currentIndex < TABS.length - 1 ? currentIndex + 1 : 0;
+                }
+                setActiveTab(TABS[newIndex]);
+                return;
+            }
+
+            // ? key for keyboard shortcuts help
+            if (e.key === '?') {
+                setShowKeyboardHelp(prev => !prev);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [activeTab]);
 
     // Detect level up
     useEffect(() => {
@@ -187,13 +229,14 @@ export default function GameLayout() {
             {/* Right Panel: UI Sidebar */}
             <div className="w-[550px] h-full flex flex-col border-l border-slate-800/50 bg-slate-900/80 backdrop-blur-sm shadow-2xl z-20">
                 {/* Tab Navigation */}
-                <div className="flex bg-slate-950/80 border-b border-slate-800/50">
-                    {['inventory', 'stats', 'enhance', 'skills', 'zone', 'prestige'].map((tab) => (
+                <div className="flex bg-slate-950/80 border-b border-slate-800/50" role="tablist" aria-label="Game sections">
+                    {TABS.map((tab, index) => (
                         <TabButton
                             key={tab}
                             active={activeTab === tab}
                             onClick={() => setActiveTab(tab)}
                             icon={TabIcons[tab]}
+                            shortcut={index + 1}
                         >
                             {tab === 'zone' ? 'Map' : tab.charAt(0).toUpperCase() + tab.slice(1)}
                         </TabButton>
@@ -220,10 +263,19 @@ export default function GameLayout() {
                             <ResetButton />
                         </div>
                         <SpeedControl />
-                        <span className="flex items-center gap-1">
-                            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                            Auto-saving
-                        </span>
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={() => setShowKeyboardHelp(true)}
+                                className="text-slate-600 hover:text-slate-400 transition-colors"
+                                aria-label="Keyboard shortcuts"
+                            >
+                                <kbd className="px-1.5 py-0.5 bg-slate-800 rounded text-[10px] font-mono">?</kbd>
+                            </button>
+                            <span className="flex items-center gap-1">
+                                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                                Auto-saving
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -233,15 +285,21 @@ export default function GameLayout() {
 
             {/* Level Up Animation Overlay */}
             {levelUpAnimation && <LevelUpOverlay level={levelUpAnimation.level} />}
+
+            {/* Keyboard Shortcuts Help */}
+            {showKeyboardHelp && <KeyboardHelpModal onClose={() => setShowKeyboardHelp(false)} />}
         </div>
     );
 }
 
-function TabButton({ children, active, onClick, icon }) {
+function TabButton({ children, active, onClick, icon, shortcut }) {
     return (
         <button
             onClick={onClick}
-            className={`flex-1 py-3 px-2 flex flex-col items-center gap-1 transition-all duration-200 relative group ${
+            role="tab"
+            aria-selected={active}
+            tabIndex={active ? 0 : -1}
+            className={`flex-1 py-3 px-2 flex flex-col items-center gap-1 transition-all duration-200 relative group focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-inset ${
                 active
                     ? 'text-white bg-gradient-to-b from-blue-600/20 to-transparent'
                     : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/50'
@@ -251,6 +309,9 @@ function TabButton({ children, active, onClick, icon }) {
                 {icon}
             </span>
             <span className="text-[10px] font-semibold uppercase tracking-wider">{children}</span>
+            {shortcut && (
+                <span className="absolute top-1 right-1 text-[8px] text-slate-600 font-mono">{shortcut}</span>
+            )}
             {active && (
                 <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-blue-500 rounded-full" />
             )}
@@ -543,6 +604,80 @@ function LevelUpOverlay({ level }) {
                 .animate-levelup-number { animation: levelup-number 3s ease-out forwards; }
                 .animate-levelup-subtitle { animation: levelup-subtitle 3s ease-out forwards; }
             `}</style>
+        </div>
+    );
+}
+
+function KeyboardHelpModal({ onClose }) {
+    // Close on Escape key
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape' || e.key === '?') {
+                onClose();
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [onClose]);
+
+    const shortcuts = [
+        { keys: ['1', '2', '3', '4', '5', '6'], action: 'Switch tabs (Inventory, Stats, Enhance, Skills, Map, Prestige)' },
+        { keys: ['\u2190', '\u2192'], action: 'Navigate between tabs' },
+        { keys: ['?'], action: 'Toggle this help menu' },
+        { keys: ['Esc'], action: 'Close this menu' },
+    ];
+
+    return (
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+            onClick={onClose}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="keyboard-help-title"
+        >
+            <div
+                className="bg-slate-800 rounded-xl border-2 border-slate-700 p-6 max-w-md w-full mx-4 shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div className="flex justify-between items-center mb-4">
+                    <h2 id="keyboard-help-title" className="text-xl font-bold text-white">
+                        Keyboard Shortcuts
+                    </h2>
+                    <button
+                        onClick={onClose}
+                        className="text-slate-400 hover:text-white transition-colors p-1"
+                        aria-label="Close"
+                    >
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div className="space-y-3">
+                    {shortcuts.map((shortcut, index) => (
+                        <div key={index} className="flex items-center gap-4">
+                            <div className="flex gap-1 min-w-[100px]">
+                                {shortcut.keys.map((key, i) => (
+                                    <kbd
+                                        key={i}
+                                        className="px-2 py-1 bg-slate-900 border border-slate-600 rounded text-sm font-mono text-slate-300"
+                                    >
+                                        {key}
+                                    </kbd>
+                                ))}
+                            </div>
+                            <span className="text-slate-400 text-sm">{shortcut.action}</span>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-slate-700 text-center">
+                    <p className="text-slate-500 text-xs">
+                        Press <kbd className="px-1.5 py-0.5 bg-slate-900 rounded text-[10px] font-mono">?</kbd> or <kbd className="px-1.5 py-0.5 bg-slate-900 rounded text-[10px] font-mono">Esc</kbd> to close
+                    </p>
+                </div>
+            </div>
         </div>
     );
 }
