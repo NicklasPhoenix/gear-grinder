@@ -55,10 +55,10 @@
 ## UX Polish
 
 ### Feature #7: Fix Tooltip Overflow
-**Status:** Pending
+**Status:** ✅ Complete
 **Location:** `game/ui/GameTooltip.jsx`
 **Issue:** Tooltips can overflow screen bounds.
-**Solution:** Add complete boundary checking for all screen edges.
+**Solution:** Added comprehensive boundary checking for all four screen edges, auto-scroll for tall tooltips, and smart positioning (left/right/above/below cursor).
 
 ---
 
@@ -158,3 +158,4 @@
 - **Feature #4:** Add Keyboard Navigation - Number keys, arrow keys, and help modal
 - **Feature #5:** Reduce Excessive Re-renders - Split contexts, smart change detection
 - **Feature #6:** Add Asset Loading Indicator - Animated progress bar during sprite loading
+- **Feature #7:** Fix Tooltip Overflow - Full boundary checking for all screen edges

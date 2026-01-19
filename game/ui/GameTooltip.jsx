@@ -98,26 +98,69 @@ export default function GameTooltip({ tooltip }) {
     const armorDiff = getDiff(hoveredStats.armor, equippedStats?.armor || 0);
     const scoreDiff = getDiff(hoveredStats.score, equippedStats?.score || 0);
 
-    // Calculate position to keep on screen
-    // Estimate tooltip height based on content (base + effects + set bonuses)
+    // Calculate position to keep on screen - complete boundary checking
+    // Estimate tooltip dimensions based on content
+    const tooltipWidth = 256; // w-64 = 16rem = 256px
     const hasSetBonuses = item.bossSet && (BOSS_SETS[item.bossSet] || PRESTIGE_BOSS_SETS[item.bossSet]);
     const estimatedHeight = 350 + (effects.length * 30) + (hasSetBonuses ? 220 : 0) + (isInventoryItem ? 100 : 0);
 
-    let style = {};
+    const screenPadding = 16;
+    const cursorOffset = 15;
 
-    // Horizontal positioning
-    if (position.x > window.innerWidth - 280) {
-        style.left = position.x - 270;
+    let style = {
+        maxHeight: `calc(100vh - ${screenPadding * 2}px)`,
+        overflowY: 'auto',
+    };
+
+    // Horizontal positioning - check both left and right edges
+    const spaceOnRight = window.innerWidth - position.x - cursorOffset - tooltipWidth;
+    const spaceOnLeft = position.x - cursorOffset - tooltipWidth;
+
+    if (spaceOnRight >= screenPadding) {
+        // Fits on right side
+        style.left = position.x + cursorOffset;
+    } else if (spaceOnLeft >= screenPadding) {
+        // Fits on left side
+        style.left = position.x - cursorOffset - tooltipWidth;
     } else {
-        style.left = position.x + 15;
+        // Center it horizontally if it doesn't fit either side
+        style.left = Math.max(screenPadding, (window.innerWidth - tooltipWidth) / 2);
     }
 
-    // Vertical positioning - if tooltip would go off bottom, position it from bottom instead
-    if (position.y + estimatedHeight > window.innerHeight - 20) {
-        // Anchor to bottom of screen with some padding
-        style.bottom = 20;
+    // Ensure left edge doesn't go off screen
+    if (style.left < screenPadding) {
+        style.left = screenPadding;
+    }
+
+    // Ensure right edge doesn't go off screen
+    if (style.left + tooltipWidth > window.innerWidth - screenPadding) {
+        style.left = window.innerWidth - screenPadding - tooltipWidth;
+    }
+
+    // Vertical positioning - check both top and bottom edges
+    const spaceBelow = window.innerHeight - position.y - cursorOffset - estimatedHeight;
+    const spaceAbove = position.y - cursorOffset - estimatedHeight;
+
+    if (spaceBelow >= screenPadding) {
+        // Fits below cursor
+        style.top = position.y + cursorOffset;
+    } else if (spaceAbove >= screenPadding) {
+        // Fits above cursor
+        style.top = position.y - cursorOffset - Math.min(estimatedHeight, window.innerHeight - screenPadding * 2);
     } else {
-        style.top = position.y + 10;
+        // Center vertically and use max height with scroll
+        style.top = screenPadding;
+        style.maxHeight = `calc(100vh - ${screenPadding * 2}px)`;
+    }
+
+    // Ensure top edge doesn't go off screen
+    if (style.top < screenPadding) {
+        style.top = screenPadding;
+    }
+
+    // Ensure bottom edge doesn't go off screen
+    if (style.top + estimatedHeight > window.innerHeight - screenPadding) {
+        style.maxHeight = `${window.innerHeight - style.top - screenPadding}px`;
     }
 
     // Get rating label based on score
