@@ -1,36 +1,68 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ZONE_BACKGROUNDS } from '../assets/gameAssets';
 
-// Map enemy types to specific sprite icons
-const MONSTER_SPRITES = {
-  Beast: [1, 2, 3, 4, 5, 6, 7, 8],           // Various beasts
-  Humanoid: [9, 10, 11, 12, 13, 14, 15, 16], // Humanoid creatures
-  Undead: [17, 18, 19, 20, 21, 22, 23, 24],  // Undead/skeletal
-  Dragon: [25, 26, 27, 28, 29, 30],          // Dragon-like
-  Elemental: [31, 32, 33, 34, 35, 36],       // Elementals
-  Demon: [37, 38, 39, 40],                   // Demons
-  Celestial: [41, 42, 43, 44],               // Celestial beings
-  Void: [45, 46, 47, 48],                    // Void creatures
-  Chaos: [1, 2, 3, 4, 5, 6],                 // Chaos (use boss sprites)
-  Abyssal: [7, 8, 9, 10],                    // Abyssal
-  Astral: [11, 12, 13, 14],                  // Astral
-  Cosmic: [15, 16, 17, 18],                  // Cosmic
-  Primordial: [19, 20, 21, 22],              // Primordial
+// Direct zone ID to monster sprite mapping (using low-level monster pack)
+// Each zone gets a unique sprite for variety
+const ZONE_MONSTER_SPRITES = {
+  // Forest (Beasts) - zones 0-3: spiders, bugs, creatures
+  0: 1,   // Forest Clearing - spider
+  1: 2,   // Dark Woods - dark spider
+  2: 3,   // Wolf Den - creature
+  3: 4,   // Ancient Grove - beast
+  // Goblins (Humanoid) - zones 5-8: pumpkin/mushroom creatures
+  5: 13,  // Goblin Outskirts
+  6: 14,  // Goblin Caves
+  7: 15,  // Goblin Stronghold - pumpkin head
+  8: 16,  // Goblin Throne
+  // Undead - zones 10-13: ghosts, skulls
+  10: 17, // Graveyard
+  11: 18, // Crypt Entrance
+  12: 19, // Bone Halls
+  13: 20, // Necropolis - rose skull
+  // Dragons - zones 15-18: reptiles, wyrms
+  15: 35, // Mountain Pass - dark spider
+  16: 36, // Dragon Foothills
+  17: 37, // Wyrm Nests
+  18: 38, // Dragon Peak
+  // Elementals - zones 20-23: golems, ice
+  20: 25, // Frozen Tundra - ice golem
+  21: 26, // Ice Caverns
+  22: 27, // Glacial Depths
+  23: 28, // Frost Citadel
+  // Demons - zones 25-28: fire, dark
+  25: 39, // Hellgate
+  26: 40, // Burning Plains - fire creature
+  27: 41, // Demon Fortress
+  28: 42, // Infernal Throne
+  // Celestial - zones 30-33: light creatures
+  30: 29, // Cloud Steps
+  31: 30, // Astral Bridge - slime
+  32: 31, // Divine Sanctum
+  33: 32, // Eternal Halls
+  // Void/Chaos - zones 35-38: dark, corrupted
+  35: 43, // Void Rift
+  36: 44, // Chaos Wastes
+  37: 45, // Primordial Abyss - pumpkin
+  38: 46, // End of All Things
+  // Prestige zones
+  40: 47, // Astral Plane
+  42: 48, // Cosmic Void
+  44: 5,  // Primordial Realm - mushroom
 };
 
-// Boss sprites - these are the chaos monster pack
-const BOSS_SPRITES = {
-  guardian: [1, 2, 3],
-  lich: [4, 5, 6],
-  dragon: [7, 8, 9],
-  frost: [10, 11, 12],
-  demon: [13, 14, 15, 16],
-  seraph: [17, 18, 19, 20],
-  void: [21, 22, 23, 24, 25],
-  chaos: [26, 27, 28, 29, 30],
-  astral: [31, 32, 33, 34],
-  cosmic: [35, 36, 37, 38],
-  primordial: [39, 40, 41, 42, 43, 44, 45, 46, 47, 48],
+// Boss zone ID to boss sprite mapping (using chaos monster pack)
+const ZONE_BOSS_SPRITES = {
+  4: 1,   // Forest Guardian - dark bird demon
+  9: 7,   // Goblin Warlord
+  14: 10, // Lich King - red demon
+  19: 15, // Ancient Dragon
+  24: 20, // Frost Titan - dark beast
+  29: 25, // Demon Lord
+  34: 30, // Seraph Commander - horned beast
+  39: 35, // The Eternal One
+  41: 40, // Astral Guardian - spider eye
+  43: 44, // Cosmic Titan
+  45: 48, // Primordial God
 };
 
 // Preload and cache sprite images
@@ -43,17 +75,15 @@ function loadSprite(path) {
   return img;
 }
 
-// Get sprite path for a zone
+// Get sprite path for a zone - direct mapping by zone ID
 function getSpritePath(zone) {
   if (!zone) return null;
 
-  if (zone.isBoss && zone.bossSet) {
-    const bossOptions = BOSS_SPRITES[zone.bossSet] || BOSS_SPRITES.guardian;
-    const spriteNum = bossOptions[zone.id % bossOptions.length];
+  if (zone.isBoss) {
+    const spriteNum = ZONE_BOSS_SPRITES[zone.id] || 1;
     return `/assets/bosses/Icon${spriteNum}.png`;
   } else {
-    const monsterOptions = MONSTER_SPRITES[zone.enemyType] || MONSTER_SPRITES.Beast;
-    const spriteNum = monsterOptions[zone.id % monsterOptions.length];
+    const spriteNum = ZONE_MONSTER_SPRITES[zone.id] || 1;
     return `/assets/monsters/Icon${spriteNum}.png`;
   }
 }
