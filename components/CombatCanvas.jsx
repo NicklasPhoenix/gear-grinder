@@ -1,5 +1,37 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ENEMY_SPRITES, ZONE_BACKGROUNDS } from '../assets/gameAssets';
+import { ZONE_BACKGROUNDS } from '../assets/gameAssets';
+
+// Map enemy types to specific sprite icons
+const MONSTER_SPRITES = {
+  Beast: [1, 2, 3, 4, 5, 6, 7, 8],           // Various beasts
+  Humanoid: [9, 10, 11, 12, 13, 14, 15, 16], // Humanoid creatures
+  Undead: [17, 18, 19, 20, 21, 22, 23, 24],  // Undead/skeletal
+  Dragon: [25, 26, 27, 28, 29, 30],          // Dragon-like
+  Elemental: [31, 32, 33, 34, 35, 36],       // Elementals
+  Demon: [37, 38, 39, 40],                   // Demons
+  Celestial: [41, 42, 43, 44],               // Celestial beings
+  Void: [45, 46, 47, 48],                    // Void creatures
+  Chaos: [1, 2, 3, 4, 5, 6],                 // Chaos (use boss sprites)
+  Abyssal: [7, 8, 9, 10],                    // Abyssal
+  Astral: [11, 12, 13, 14],                  // Astral
+  Cosmic: [15, 16, 17, 18],                  // Cosmic
+  Primordial: [19, 20, 21, 22],              // Primordial
+};
+
+// Boss sprites - these are the chaos monster pack
+const BOSS_SPRITES = {
+  guardian: [1, 2, 3],
+  lich: [4, 5, 6],
+  dragon: [7, 8, 9],
+  frost: [10, 11, 12],
+  demon: [13, 14, 15, 16],
+  seraph: [17, 18, 19, 20],
+  void: [21, 22, 23, 24, 25],
+  chaos: [26, 27, 28, 29, 30],
+  astral: [31, 32, 33, 34],
+  cosmic: [35, 36, 37, 38],
+  primordial: [39, 40, 41, 42, 43, 44, 45, 46, 47, 48],
+};
 
 export default function CombatCanvas({
   currentZone,
@@ -15,6 +47,7 @@ export default function CombatCanvas({
   const [damageNumbers, setDamageNumbers] = useState([]);
   const animationRef = useRef(null);
   const particlesRef = useRef([]);
+  const spriteCacheRef = useRef({});
 
   // Add damage numbers
   useEffect(() => {
@@ -115,76 +148,87 @@ export default function CombatCanvas({
       ctx.restore();
     }
 
+    // Get sprite image for enemy - returns cached image or loads new one
+    function getEnemySprite(zone) {
+      if (!zone) return null;
+
+      let spritePath;
+      let spriteNum;
+
+      if (zone.isBoss && zone.bossSet) {
+        // Boss uses chaos monster sprites
+        const bossOptions = BOSS_SPRITES[zone.bossSet] || BOSS_SPRITES.guardian;
+        spriteNum = bossOptions[zone.id % bossOptions.length];
+        spritePath = `/assets/bosses/Icon${spriteNum}.png`;
+      } else {
+        // Regular monster uses low-level monster sprites
+        const monsterOptions = MONSTER_SPRITES[zone.enemyType] || MONSTER_SPRITES.Beast;
+        spriteNum = monsterOptions[zone.id % monsterOptions.length];
+        spritePath = `/assets/monsters/Icon${spriteNum}.png`;
+      }
+
+      // Check cache
+      if (spriteCacheRef.current[spritePath]) {
+        return spriteCacheRef.current[spritePath];
+      }
+
+      // Load and cache
+      const img = new Image();
+      img.src = spritePath;
+      spriteCacheRef.current[spritePath] = img;
+      return img;
+    }
+
     function drawEnemy(x, y, type, scale = 1, shake = 0) {
       ctx.save();
       ctx.translate(x + shake, y);
-      ctx.scale(scale, scale);
 
-      const isBoss = type === 'Boss';
-      const size = isBoss ? 25 : 15;
+      const isBoss = zone?.isBoss;
+      const sprite = getEnemySprite(zone);
+      const spriteSize = 32; // Original sprite size
+      const displaySize = isBoss ? spriteSize * 4 : spriteSize * 3; // Scale up for visibility
 
-      // Enemy body (more menacing colors)
-      const enemyColors = {
-        'Beast': '#d97706',
-        'Humanoid': '#78716c',
-        'Boss': '#dc2626',
-        'Undead': '#6b7280',
-        'Dragon': '#ef4444',
-        'Demon': '#7f1d1d',
-        'Elemental': '#06b6d4',
-        'Celestial': '#fbbf24',
-        'Abyssal': '#312e81',
-        'Chaos': '#831843',
-        'Void': '#0c4a6e',
-      };
+      // Draw sprite if loaded
+      if (sprite && sprite.complete && sprite.naturalWidth > 0) {
+        // Add glow effect for bosses
+        if (isBoss) {
+          ctx.shadowBlur = 25;
+          ctx.shadowColor = '#dc2626';
+        } else {
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = 'rgba(0,0,0,0.5)';
+        }
 
-      ctx.fillStyle = enemyColors[type] || '#991b1b';
-
-      if (isBoss) {
-        // Boss - more intimidating
-        ctx.shadowBlur = 20;
-        ctx.shadowColor = '#dc2626';
-
-        // Large body
-        ctx.beginPath();
-        ctx.arc(0, -20, size, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Horns/spikes
-        ctx.beginPath();
-        ctx.moveTo(-15, -35);
-        ctx.lineTo(-10, -45);
-        ctx.lineTo(-5, -35);
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.moveTo(15, -35);
-        ctx.lineTo(10, -45);
-        ctx.lineTo(5, -35);
-        ctx.fill();
-
-        // Eyes
-        ctx.fillStyle = '#fef08a';
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = '#fef08a';
-        ctx.beginPath();
-        ctx.arc(-8, -22, 3, 0, Math.PI * 2);
-        ctx.arc(8, -22, 3, 0, Math.PI * 2);
-        ctx.fill();
+        // Draw the sprite centered
+        ctx.imageSmoothingEnabled = false; // Keep pixel art crisp
+        ctx.drawImage(
+          sprite,
+          -displaySize / 2,
+          -displaySize - 10, // Offset up from ground
+          displaySize,
+          displaySize
+        );
       } else {
-        // Regular enemy
+        // Fallback to simple shape while loading
+        const size = isBoss ? 25 : 15;
+        const enemyColors = {
+          'Beast': '#d97706',
+          'Humanoid': '#78716c',
+          'Boss': '#dc2626',
+          'Undead': '#6b7280',
+          'Dragon': '#ef4444',
+          'Demon': '#7f1d1d',
+          'Elemental': '#06b6d4',
+          'Celestial': '#fbbf24',
+          'Abyssal': '#312e81',
+          'Chaos': '#831843',
+          'Void': '#0c4a6e',
+        };
+        ctx.fillStyle = enemyColors[type] || '#991b1b';
         ctx.shadowBlur = 10;
         ctx.shadowColor = enemyColors[type] || '#991b1b';
-
         ctx.beginPath();
-        ctx.arc(0, -15, size, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Eyes
-        ctx.fillStyle = '#ff0000';
-        ctx.beginPath();
-        ctx.arc(-5, -15, 2, 0, Math.PI * 2);
-        ctx.arc(5, -15, 2, 0, Math.PI * 2);
+        ctx.arc(0, -displaySize/2, size * scale, 0, Math.PI * 2);
         ctx.fill();
       }
 

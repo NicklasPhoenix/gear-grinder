@@ -16,6 +16,11 @@ const SHEET_ROWS = {
     potion: 6,
 };
 
+// Shield sprite options by tier (Icon1-36)
+const SHIELD_SPRITES = [1, 5, 10, 15, 20, 24, 28, 32, 35, 36];
+// Amulet sprite options by tier (Icon37-48 from the pack)
+const AMULET_SPRITES = [37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48];
+
 export default function ItemIcon({ item, size = "full" }) {
     const iconData = useMemo(() => {
         if (!item) return null;
@@ -23,6 +28,20 @@ export default function ItemIcon({ item, size = "full" }) {
         // Materials use procedural generation
         if (item.type === 'material') {
             return { type: 'procedural', url: generateMaterialIcon(item.id || 'ore') };
+        }
+
+        // Use new individual sprites for shields
+        if (item.slot === 'shield') {
+            const tier = item.tier || 0;
+            const iconNum = SHIELD_SPRITES[Math.min(tier, SHIELD_SPRITES.length - 1)];
+            return { type: 'individual', url: `/assets/shields/Icon${iconNum}.png` };
+        }
+
+        // Use new individual sprites for amulets
+        if (item.slot === 'amulet') {
+            const tier = item.tier || 0;
+            const iconNum = AMULET_SPRITES[Math.min(tier, AMULET_SPRITES.length - 1)];
+            return { type: 'individual', url: `/assets/amulets/Icon${iconNum}.png` };
         }
 
         // Get sprite data based on weapon type or slot
@@ -38,6 +57,20 @@ export default function ItemIcon({ item, size = "full" }) {
 
     // Procedural icon (materials only)
     if (iconData.type === 'procedural') {
+        return (
+            <div className={`w-full h-full ${sizeClass} flex items-center justify-center`}>
+                <img
+                    src={iconData.url}
+                    alt={item.name || 'Item'}
+                    className="w-full h-full object-contain"
+                    style={{ imageRendering: 'pixelated' }}
+                />
+            </div>
+        );
+    }
+
+    // Individual sprite file (shields, amulets)
+    if (iconData.type === 'individual') {
         return (
             <div className={`w-full h-full ${sizeClass} flex items-center justify-center`}>
                 <img
