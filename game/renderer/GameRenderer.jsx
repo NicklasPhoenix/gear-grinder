@@ -1211,33 +1211,46 @@ function spawnFloatingText(app, container, { text, type, target }) {
     const isHeal = type === 'heal';
     const isDodge = type === 'dodge';
     const isPlayerDmg = type === 'playerDmg';
+    const isGold = type === 'gold';
+    const isXp = type === 'xp';
+    const isLoot = type === 'loot';
 
     let fillColor = '#ffffff';
-    let fontSize = 18;
+    let fontSize = 24; // Increased base size
 
     if (isCrit) {
         fillColor = '#fde047';
-        fontSize = 28;
+        fontSize = 32;
     } else if (isHeal) {
         fillColor = '#4ade80';
-        fontSize = 20;
+        fontSize = 26;
     } else if (isDodge) {
         fillColor = '#67e8f9';
-        fontSize = 16;
+        fontSize = 22;
     } else if (isPlayerDmg) {
         fillColor = '#f87171';
+        fontSize = 24;
+    } else if (isGold) {
+        fillColor = '#fbbf24';
+        fontSize = 22;
+    } else if (isXp) {
+        fillColor = '#a78bfa';
+        fontSize = 22;
+    } else if (isLoot) {
+        fillColor = '#34d399';
+        fontSize = 24;
     }
 
     const style = new PIXI.TextStyle({
         fontFamily: 'Press Start 2P',
         fontSize,
         fill: fillColor,
-        stroke: { color: '#000000', width: 4 },
+        stroke: { color: '#000000', width: 5 },
         dropShadow: {
             color: '#000000',
             distance: 3,
             blur: 4,
-            alpha: 0.8,
+            alpha: 0.9,
         },
     });
 
@@ -1252,10 +1265,10 @@ function spawnFloatingText(app, container, { text, type, target }) {
 
     container.addChild(pixiText);
 
-    let velocityY = isCrit ? -3 : -2;
-    let velocityX = (Math.random() - 0.5) * 0.8;
+    let velocityY = isCrit ? -2.5 : -1.5; // Slower upward movement
+    let velocityX = (Math.random() - 0.5) * 0.6;
     let tick = 0;
-    const scale = isCrit ? 1.5 : 1;
+    const scale = isCrit ? 1.5 : 1.2;
 
     pixiText.scale.set(0.5);
 
@@ -1271,14 +1284,14 @@ function spawnFloatingText(app, container, { text, type, target }) {
 
         pixiText.x += velocityX;
         pixiText.y += velocityY;
-        velocityY += 0.04; // Slower gravity
+        velocityY += 0.025; // Even slower gravity
 
         // Start fading much later and fade slower
-        if (tick > 70) {
-            pixiText.alpha -= 0.04;
+        if (tick > 120) {
+            pixiText.alpha -= 0.025;
         }
 
-        if (pixiText.alpha <= 0 || tick > 120) {
+        if (pixiText.alpha <= 0 || tick > 180) {
             app.ticker.remove(animate);
             pixiText.destroy();
         }
@@ -1291,56 +1304,58 @@ function spawnLootText(app, container, { text, color }) {
     if (!container) return;
 
     const style = new PIXI.TextStyle({
-        fontFamily: 'Rajdhani',
-        fontSize: 14,
+        fontFamily: 'Press Start 2P',
+        fontSize: 18, // Increased from 14
         fontWeight: 'bold',
         fill: color || '#fbbf24',
-        stroke: { color: '#000000', width: 3 },
+        stroke: { color: '#000000', width: 4 },
         dropShadow: {
             color: '#000000',
             distance: 2,
-            blur: 2,
+            blur: 3,
+            alpha: 0.9,
         },
     });
 
     const pixiText = new PIXI.Text({ text: `+ ${text}`, style });
     pixiText.anchor.set(0.5);
     pixiText.x = 600;
-    pixiText.y = 300;
+    pixiText.y = 280;
     pixiText.alpha = 0;
 
     container.addChild(pixiText);
 
-    let velocityX = (Math.random() - 0.5) * 6;
-    let velocityY = -5 - Math.random() * 3;
+    let velocityX = (Math.random() - 0.5) * 4;
+    let velocityY = -3 - Math.random() * 2; // Slower movement
     let tick = 0;
 
     const animate = () => {
         tick++;
 
         // Fade in
-        if (tick < 5) {
-            pixiText.alpha = tick / 5;
+        if (tick < 8) {
+            pixiText.alpha = tick / 8;
         }
 
         pixiText.x += velocityX;
         pixiText.y += velocityY;
-        velocityY += 0.25;
+        velocityY += 0.15; // Slower gravity
         velocityX *= 0.98;
 
-        if (pixiText.y > 380) {
-            velocityY = -velocityY * 0.5;
-            pixiText.y = 380;
-            if (Math.abs(velocityY) < 1) {
-                pixiText.alpha -= 0.03;
+        if (pixiText.y > 370) {
+            velocityY = -velocityY * 0.4;
+            pixiText.y = 370;
+            if (Math.abs(velocityY) < 0.5) {
+                pixiText.alpha -= 0.015;
             }
         }
 
-        if (tick > 50) {
-            pixiText.alpha -= 0.03;
+        // Start fading much later
+        if (tick > 100) {
+            pixiText.alpha -= 0.02;
         }
 
-        if (pixiText.alpha <= 0) {
+        if (pixiText.alpha <= 0 || tick > 200) {
             app.ticker.remove(animate);
             pixiText.destroy();
         }
