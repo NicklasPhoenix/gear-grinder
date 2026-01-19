@@ -5,6 +5,7 @@ import ItemIcon from './ItemIcon';
 import { MaterialIcon } from './MaterialIcons';
 import { TIERS, BOSS_STONES, addItemToInventory, removeOneFromStack, getEnhanceStage, generateAwakeningSubstat, isEnhanceMilestone, ENHANCE_MILESTONES } from '../data/items';
 import { formatWithCommas } from '../utils/format';
+import { audioManager } from '../systems/AudioManager';
 
 export default function EnhancementView() {
     const { state, gameManager } = useGame();
@@ -139,6 +140,7 @@ export default function EnhancementView() {
                 const newSubstat = generateAwakeningSubstat(newPlus, newItem.effects || []);
                 newItem.effects = [...(newItem.effects || []), newSubstat];
                 gameManager.emit('floatingText', { text: `AWAKENED! +${newSubstat.name}`, type: 'levelup', target: 'player' });
+                audioManager.playSfxAwakening();
             }
         }
 
@@ -158,8 +160,10 @@ export default function EnhancementView() {
 
         if (success) {
             gameManager.emit('floatingText', { text: `+${newItem.plus}!`, type: 'heal', target: 'player' });
+            audioManager.playSfxEnhanceSuccess();
         } else {
             gameManager.emit('floatingText', { text: `FAIL`, type: 'death', target: 'player' });
+            audioManager.playSfxEnhanceFail();
         }
 
         if (isInventoryItem) {

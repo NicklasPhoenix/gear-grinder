@@ -8,6 +8,7 @@ import ZoneView from './ZoneView';
 import EnhancementView from './EnhancementView';
 import PrestigeView from './PrestigeView';
 import AchievementsView from './AchievementsView';
+import SettingsView from './SettingsView';
 import DailyRewardsModal, { useDailyRewardAvailable } from './DailyRewardsModal';
 import GameTooltip from './GameTooltip';
 import { MaterialIcon, BossStoneIcon } from './MaterialIcons';
@@ -15,6 +16,7 @@ import { BOSS_STONES } from '../data/items';
 import { getZoneById } from '../data/zones';
 import { calculatePlayerStats } from '../systems/PlayerSystem';
 import { formatWithCommas } from '../utils/format';
+import { audioManager } from '../systems/AudioManager';
 
 // Icons for tabs
 const TabIcons = {
@@ -53,10 +55,16 @@ const TabIcons = {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
         </svg>
     ),
+    settings: (
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+    ),
 };
 
 // Tab order for keyboard navigation
-const TABS = ['inventory', 'stats', 'enhance', 'skills', 'zone', 'prestige', 'achievements'];
+const TABS = ['inventory', 'stats', 'enhance', 'skills', 'zone', 'prestige', 'achievements', 'settings'];
 
 export default function GameLayout() {
     const { state } = useGame();
@@ -74,8 +82,8 @@ export default function GameLayout() {
             // Don't intercept if user is typing in an input
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
-            // Number keys 1-7 for tab switching
-            if (e.key >= '1' && e.key <= '7') {
+            // Number keys 1-8 for tab switching
+            if (e.key >= '1' && e.key <= '8') {
                 const tabIndex = parseInt(e.key) - 1;
                 if (tabIndex < TABS.length) {
                     setActiveTab(TABS[tabIndex]);
@@ -118,6 +126,55 @@ export default function GameLayout() {
         }
         prevLevelRef.current = currentLevel;
     }, [state?.level]);
+
+    // Music based on current zone
+    useEffect(() => {
+        if (!state) return;
+        const zone = getZoneById(state.currentZone);
+        if (!zone) return;
+
+        // Initialize audio on first interaction
+        const handleFirstInteraction = () => {
+            audioManager.init();
+            audioManager.resume();
+
+            // Determine music type based on zone
+            if (zone.isBoss) {
+                // Prestige bosses get horror music
+                if (state.currentZone >= 40) {
+                    audioManager.playMusic('horror', state.currentZone);
+                } else {
+                    audioManager.playMusic('boss', state.currentZone);
+                }
+            } else {
+                audioManager.playMusic('zone', state.currentZone);
+            }
+
+            document.removeEventListener('click', handleFirstInteraction);
+            document.removeEventListener('keydown', handleFirstInteraction);
+        };
+
+        document.addEventListener('click', handleFirstInteraction);
+        document.addEventListener('keydown', handleFirstInteraction);
+
+        // If audio already initialized, play music immediately
+        if (audioManager.audioContext?.state === 'running') {
+            if (zone.isBoss) {
+                if (state.currentZone >= 40) {
+                    audioManager.playMusic('horror', state.currentZone);
+                } else {
+                    audioManager.playMusic('boss', state.currentZone);
+                }
+            } else {
+                audioManager.playMusic('zone', state.currentZone);
+            }
+        }
+
+        return () => {
+            document.removeEventListener('click', handleFirstInteraction);
+            document.removeEventListener('keydown', handleFirstInteraction);
+        };
+    }, [state?.currentZone]);
 
     const handleHover = (item, position, isInventoryItem = false) => {
         if (!item) {
@@ -263,6 +320,7 @@ export default function GameLayout() {
                         {activeTab === 'zone' && <ZoneView />}
                         {activeTab === 'prestige' && <PrestigeView />}
                         {activeTab === 'achievements' && <AchievementsView />}
+                        {activeTab === 'settings' && <SettingsView />}
                     </div>
                 </div>
 
@@ -649,7 +707,7 @@ function KeyboardHelpModal({ onClose }) {
     }, [onClose]);
 
     const shortcuts = [
-        { keys: ['1', '2', '3', '4', '5', '6', '7'], action: 'Switch tabs (Inventory, Stats, Enhance, Skills, Map, Prestige, Achievements)' },
+        { keys: ['1', '2', '3', '4', '5', '6', '7', '8'], action: 'Switch tabs (Inventory, Stats, Enhance, Skills, Map, Prestige, Achievements, Settings)' },
         { keys: ['\u2190', '\u2192'], action: 'Navigate between tabs' },
         { keys: ['?'], action: 'Toggle this help menu' },
         { keys: ['Esc'], action: 'Close this menu' },

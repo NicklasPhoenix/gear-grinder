@@ -3,6 +3,7 @@ import * as PIXI from 'pixi.js';
 import { useGame } from '../context/GameContext';
 import { ASSET_BASE, ENEMY_SPRITES, SPRITE_CONFIG, ZONE_BACKGROUNDS } from '../../assets/gameAssets';
 import { getZoneById } from '../data/zones';
+import { audioManager } from '../systems/AudioManager';
 
 // Direct zone ID to monster sprite mapping (using new low-level monster pack)
 const ZONE_MONSTER_SPRITES = {
@@ -628,6 +629,28 @@ export default function GameRenderer() {
             const pos = positionsRef.current;
             spawnFloatingText(appRef.current, effectsContainerRef.current, data, pos);
 
+            // Audio SFX based on event type
+            switch (data.type) {
+                case 'playerDmg':
+                    audioManager.playSfxHit();
+                    break;
+                case 'crit':
+                    audioManager.playSfxCrit();
+                    break;
+                case 'enemyDmg':
+                    audioManager.playSfxHit();
+                    break;
+                case 'heal':
+                    audioManager.playSfxHeal();
+                    break;
+                case 'dodge':
+                    audioManager.playSfxDodge();
+                    break;
+                case 'levelup':
+                    audioManager.playSfxLevelUp();
+                    break;
+            }
+
             // Combat effects
             if (data.type === 'playerDmg' || data.type === 'crit') {
                 animStateRef.current.enemyHitFlash = 8;
@@ -649,6 +672,9 @@ export default function GameRenderer() {
             if (!appRef.current || !effectsContainerRef.current) return;
             const pos = positionsRef.current;
 
+            // Coin sound for loot
+            audioManager.playSfxCoin();
+
             // Big loot explosion at enemy position
             spawnLootExplosion(pos.enemyX, pos.characterY - 55, 30);
 
@@ -665,6 +691,13 @@ export default function GameRenderer() {
             animStateRef.current.enemyDying = true;
             animStateRef.current.enemyDeathProgress = 0;
             animStateRef.current.screenShake.intensity = isBoss ? 20 : 10;
+
+            // Death SFX
+            if (isBoss) {
+                audioManager.playSfxBossDeath();
+            } else {
+                audioManager.playSfxEnemyDeath();
+            }
 
             // Spawn death particles at enemy position
             spawnHitParticles(pos.enemyX, pos.characterY - 55, 0xff4444, isBoss ? 40 : 25);
