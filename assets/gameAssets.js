@@ -119,34 +119,67 @@ export const ENEMY_SPRITES = {
 
 // Item sprites - maps item type to sprite sheet and position
 // DawnLike organizes items by category in separate sheets (8 columns each)
+// Base sprites (tier 0) - each tier uses different column/row for variety
 export const ITEM_SPRITES = {
-  // Weapons - swords from medwep sheet
-  sword:    { sheet: 'medwep', row: 0, col: 0 },
-  katana:   { sheet: 'medwep', row: 0, col: 2 },
-  axe:      { sheet: 'medwep', row: 1, col: 0 },
-  greataxe: { sheet: 'medwep', row: 1, col: 2 },
-  mace:     { sheet: 'medwep', row: 1, col: 6 },
-  // Daggers from shortwep
-  dagger:   { sheet: 'shortwep', row: 0, col: 0 },
-  // Staffs from longwep
-  staff:    { sheet: 'longwep', row: 0, col: 0 },
-  scythe:   { sheet: 'longwep', row: 2, col: 0 },
-  // Armor from armor_items
-  helmet:   { sheet: 'hat', row: 0, col: 0 },
-  armor:    { sheet: 'armor_items', row: 0, col: 0 },
-  boots:    { sheet: 'boot', row: 0, col: 0 },
-  shield:   { sheet: 'shield', row: 0, col: 0 },
-  gloves:   { sheet: 'glove', row: 0, col: 0 },
+  // Weapons - swords from medwep sheet (different columns per tier)
+  sword:    { sheet: 'medwep', row: 0, cols: [0, 1, 2, 3, 4, 5, 6, 7, 0, 1] },
+  katana:   { sheet: 'medwep', row: 0, cols: [2, 3, 4, 5, 6, 7, 0, 1, 2, 3] },
+  axe:      { sheet: 'medwep', row: 1, cols: [0, 1, 2, 3, 4, 5, 6, 7, 0, 1] },
+  greataxe: { sheet: 'medwep', row: 1, cols: [2, 3, 4, 5, 6, 7, 0, 1, 2, 3] },
+  mace:     { sheet: 'medwep', row: 1, cols: [6, 7, 0, 1, 2, 3, 4, 5, 6, 7] },
+  // Daggers from shortwep (5 rows available)
+  dagger:   { sheet: 'shortwep', rows: [0, 1, 2, 3, 4, 0, 1, 2, 3, 4], cols: [0, 2, 4, 6, 0, 2, 4, 6, 0, 2] },
+  // Staffs from longwep (7 rows available)
+  staff:    { sheet: 'longwep', rows: [0, 1, 2, 3, 4, 5, 6, 0, 1, 2], cols: [0, 2, 4, 6, 0, 2, 4, 6, 0, 2] },
+  scythe:   { sheet: 'longwep', rows: [2, 3, 4, 5, 6, 0, 1, 2, 3, 4], cols: [0, 2, 4, 6, 0, 2, 4, 6, 0, 2] },
+  // Armor pieces - different rows/cols for each tier
+  helmet:   { sheet: 'hat', rows: [0, 1, 2, 3, 4, 5, 0, 1, 2, 3], cols: [0, 1, 2, 3, 4, 5, 6, 7, 0, 1] },
+  armor:    { sheet: 'armor_items', rows: [0, 1, 2, 3, 4, 5, 6, 7, 8, 0], cols: [0, 1, 2, 3, 4, 5, 6, 7, 0, 1] },
+  legs:     { sheet: 'armor_items', rows: [0, 1, 2, 3, 4, 5, 6, 7, 8, 0], cols: [2, 3, 4, 5, 6, 7, 0, 1, 2, 3] },
+  boots:    { sheet: 'boot', rows: [0, 1, 2, 0, 1, 2, 0, 1, 2, 0], cols: [0, 1, 2, 3, 4, 5, 6, 7, 0, 1] },
+  shield:   { sheet: 'shield', row: 0, cols: [0, 1, 2, 3, 4, 5, 6, 7, 0, 1] },
+  gloves:   { sheet: 'glove', rows: [0, 1, 2, 0, 1, 2, 0, 1, 2, 0], cols: [0, 1, 2, 3, 4, 5, 6, 7, 0, 1] },
   // Accessories
-  amulet:   { sheet: 'amulet', row: 0, col: 0 },
-  belt:     { sheet: 'armor_items', row: 6, col: 0 },
-  ring:     { sheet: 'ring', row: 1, col: 0 },
+  amulet:   { sheet: 'amulet', rows: [0, 1, 2, 0, 1, 2, 0, 1, 2, 0], cols: [0, 1, 2, 3, 4, 5, 6, 7, 0, 1] },
+  belt:     { sheet: 'armor_items', rows: [6, 7, 8, 6, 7, 8, 6, 7, 8, 6], cols: [0, 1, 2, 3, 4, 5, 6, 7, 0, 1] },
+  ring:     { sheet: 'ring', rows: [0, 1, 0, 1, 0, 1, 0, 1, 0, 1], cols: [0, 1, 2, 3, 4, 5, 6, 7, 0, 1] },
   // Materials (use potion sheet)
   ore:      { sheet: 'potion', row: 1, col: 0 },
   leather:  { sheet: 'potion', row: 1, col: 2 },
   gem:      { sheet: 'potion', row: 0, col: 4 },
   potion:   { sheet: 'potion', row: 0, col: 0 },
 };
+
+// Get the sprite position for an item based on its tier
+export function getItemSpritePosition(slot, tier = 0, isBossItem = false) {
+  const sprite = ITEM_SPRITES[slot];
+  if (!sprite) return { sheet: 'armor_items', row: 0, col: 0 };
+
+  // Clamp tier to valid range
+  const t = Math.min(Math.max(0, tier), 9);
+
+  // Boss items use a different offset to look distinct
+  const bossOffset = isBossItem ? 4 : 0;
+  const effectiveTier = (t + bossOffset) % 10;
+
+  // Get row - either from rows array or single row value
+  let row = 0;
+  if (sprite.rows) {
+    row = sprite.rows[effectiveTier] || sprite.rows[0];
+  } else if (typeof sprite.row === 'number') {
+    row = sprite.row;
+  }
+
+  // Get col - either from cols array or single col value
+  let col = 0;
+  if (sprite.cols) {
+    col = sprite.cols[effectiveTier] || sprite.cols[0];
+  } else if (typeof sprite.col === 'number') {
+    col = sprite.col;
+  }
+
+  return { sheet: sprite.sheet, row, col };
+}
 
 // Procedurally generate weapon icons based on type and tier
 export function generateWeaponIcon(weaponType, tier) {

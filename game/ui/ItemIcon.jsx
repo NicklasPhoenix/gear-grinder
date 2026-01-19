@@ -33,8 +33,32 @@ const ARMOR_SET_ICONS = [
     48,  // Tier 9: Primordial (prestige)
 ];
 
+// Boss set icons - distinct from regular tier icons (using different icon numbers)
+// Each boss set gets its own unique look
+const BOSS_SET_ICONS = {
+    guardian: 3,     // Green forest guardian - distinct from tier 1 (6)
+    lich: 9,         // Purple lich - distinct from tier 2 (12)
+    dragon: 15,      // Red dragonborn - distinct from tier 3 (18)
+    frost: 21,       // Cyan frostborn - distinct from tier 4 (24)
+    demon: 27,       // Red demonheart - distinct from tier 5 (30)
+    seraph: 33,      // Gold seraphic - distinct from tier 6 (36)
+    void: 39,        // Purple voidwalker
+    chaos: 42,       // Pink chaosborn
+    eternal: 45,     // Orange eternal
+    // Prestige boss sets use high-tier icons
+    astral: 46,
+    cosmic: 47,
+    primordial: 48,
+};
+
 // Sword icons by tier (48 available)
 const SWORD_ICONS = [1, 6, 12, 18, 24, 30, 36, 40, 44, 48];
+// Boss sword icons - distinct from regular
+const BOSS_SWORD_ICONS = {
+    guardian: 4, lich: 10, dragon: 16, frost: 22, demon: 28,
+    seraph: 34, void: 38, chaos: 41, eternal: 43,
+    astral: 45, cosmic: 47, primordial: 48,
+};
 // Mace icons by tier (48 available)
 const MACE_ICONS = [1, 6, 12, 18, 24, 30, 36, 40, 44, 48];
 
@@ -64,43 +88,62 @@ export default function ItemIcon({ item, size = "full" }) {
             return { type: 'individual', url: `/assets/gems/Icon${gemIcon}.png` };
         }
 
+        // Check if this is a boss item
+        const bossSet = item.bossSet;
+        const isBossItem = !!bossSet;
+
         // === WEAPONS - Use individual sprites ===
         if (item.slot === 'weapon') {
             const weaponType = item.weaponType || 'sword';
 
-            // Swords
+            // Swords (and similar)
             if (weaponType === 'sword' || weaponType === 'katana' || weaponType === 'greataxe') {
-                const iconNum = SWORD_ICONS[Math.min(tier, SWORD_ICONS.length - 1)];
+                // Boss weapons get distinct icons
+                const iconNum = isBossItem && BOSS_SWORD_ICONS[bossSet]
+                    ? BOSS_SWORD_ICONS[bossSet]
+                    : SWORD_ICONS[Math.min(tier, SWORD_ICONS.length - 1)];
                 return { type: 'individual', url: `/assets/swords/Icon${iconNum}.png` };
             }
             // Maces
             if (weaponType === 'mace') {
-                const iconNum = MACE_ICONS[Math.min(tier, MACE_ICONS.length - 1)];
+                const iconNum = isBossItem && BOSS_SET_ICONS[bossSet]
+                    ? BOSS_SET_ICONS[bossSet]
+                    : MACE_ICONS[Math.min(tier, MACE_ICONS.length - 1)];
                 return { type: 'individual', url: `/assets/maces/Icon${iconNum}.png` };
             }
             // Staffs (using spear sprites)
             if (weaponType === 'staff') {
-                const iconNum = ARMOR_SET_ICONS[Math.min(tier, ARMOR_SET_ICONS.length - 1)];
+                const iconNum = isBossItem && BOSS_SET_ICONS[bossSet]
+                    ? BOSS_SET_ICONS[bossSet]
+                    : ARMOR_SET_ICONS[Math.min(tier, ARMOR_SET_ICONS.length - 1)];
                 return { type: 'individual', url: `/assets/staffs/Icon${iconNum}.png` };
             }
             // Daggers - use sword with offset
             if (weaponType === 'dagger') {
-                const iconNum = Math.min(tier * 5 + 2, 48); // Offset for variety
+                const iconNum = isBossItem && BOSS_SWORD_ICONS[bossSet]
+                    ? BOSS_SWORD_ICONS[bossSet]
+                    : Math.min(tier * 5 + 2, 48);
                 return { type: 'individual', url: `/assets/swords/Icon${iconNum}.png` };
             }
             // Scythes - use staffs since they're long weapons
             if (weaponType === 'scythe') {
-                const iconNum = Math.min(tier * 5 + 3, 48);
+                const iconNum = isBossItem && BOSS_SET_ICONS[bossSet]
+                    ? BOSS_SET_ICONS[bossSet]
+                    : Math.min(tier * 5 + 3, 48);
                 return { type: 'individual', url: `/assets/staffs/Icon${iconNum}.png` };
             }
             // Default to sword
-            const iconNum = SWORD_ICONS[Math.min(tier, SWORD_ICONS.length - 1)];
+            const iconNum = isBossItem && BOSS_SWORD_ICONS[bossSet]
+                ? BOSS_SWORD_ICONS[bossSet]
+                : SWORD_ICONS[Math.min(tier, SWORD_ICONS.length - 1)];
             return { type: 'individual', url: `/assets/swords/Icon${iconNum}.png` };
         }
 
         // === ARMOR PIECES - Use matching set icons ===
-        // All armor pieces of the same tier use the same icon number for matching sets
-        const armorSetIcon = ARMOR_SET_ICONS[Math.min(tier, ARMOR_SET_ICONS.length - 1)];
+        // Boss items get distinct icons, regular items use tier-based icons
+        const armorSetIcon = isBossItem && BOSS_SET_ICONS[bossSet]
+            ? BOSS_SET_ICONS[bossSet]
+            : ARMOR_SET_ICONS[Math.min(tier, ARMOR_SET_ICONS.length - 1)];
 
         if (item.slot === 'helmet') {
             return { type: 'individual', url: `/assets/helmets/Icon${armorSetIcon}.png` };
@@ -120,19 +163,25 @@ export default function ItemIcon({ item, size = "full" }) {
 
         // Use new individual sprites for shields
         if (item.slot === 'shield') {
-            const iconNum = SHIELD_SPRITES[Math.min(tier, SHIELD_SPRITES.length - 1)];
+            const iconNum = isBossItem && BOSS_SET_ICONS[bossSet]
+                ? BOSS_SET_ICONS[bossSet]
+                : SHIELD_SPRITES[Math.min(tier, SHIELD_SPRITES.length - 1)];
             return { type: 'individual', url: `/assets/shields/Icon${iconNum}.png` };
         }
 
         // Use new individual sprites for amulets
         if (item.slot === 'amulet') {
-            const iconNum = AMULET_SPRITES[Math.min(tier, AMULET_SPRITES.length - 1)];
+            const iconNum = isBossItem && BOSS_SET_ICONS[bossSet]
+                ? BOSS_SET_ICONS[bossSet]
+                : AMULET_SPRITES[Math.min(tier, AMULET_SPRITES.length - 1)];
             return { type: 'individual', url: `/assets/amulets/Icon${iconNum}.png` };
         }
 
         // Use new individual sprites for belts
         if (item.slot === 'belt') {
-            const iconNum = BELT_SPRITES[Math.min(tier, BELT_SPRITES.length - 1)];
+            const iconNum = isBossItem && BOSS_SET_ICONS[bossSet]
+                ? BOSS_SET_ICONS[bossSet]
+                : BELT_SPRITES[Math.min(tier, BELT_SPRITES.length - 1)];
             return { type: 'individual', url: `/assets/belts/Icon${iconNum}.png` };
         }
 
@@ -141,7 +190,7 @@ export default function ItemIcon({ item, size = "full" }) {
         const spriteData = ITEM_SPRITES[spriteKey] || ITEM_SPRITES.sword;
 
         return { type: 'sprite', spriteData };
-    }, [item?.id, item?.slot, item?.weaponType, item?.tier, item?.type]);
+    }, [item?.id, item?.slot, item?.weaponType, item?.tier, item?.type, item?.bossSet]);
 
     if (!item || !iconData) return null;
 
