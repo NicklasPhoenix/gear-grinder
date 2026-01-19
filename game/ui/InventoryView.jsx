@@ -150,7 +150,7 @@ export default function InventoryView({ onHover }) {
 
         return (
             <div
-                className={`relative w-16 h-16 bg-slate-900/80 border-2 border-slate-700/60 rounded-lg cursor-pointer
+                className={`relative w-20 h-20 bg-slate-900/80 border-2 border-slate-700/60 rounded-lg cursor-pointer
                     hover:border-blue-500/70 hover:bg-slate-800/60 transition-all ${className}`}
                 style={getBorderStyle()}
                 onClick={() => item && handleUnequip(item)}
@@ -211,7 +211,7 @@ export default function InventoryView({ onHover }) {
                             {/* Row 1: Amulet - Helmet - (empty) */}
                             <EquipSlot slot="amulet" />
                             <EquipSlot slot="helmet" />
-                            <div className="w-16 h-16" /> {/* spacer */}
+                            <div className="w-20 h-20" /> {/* spacer */}
 
                             {/* Row 2: Weapon - Armor - Shield */}
                             <EquipSlot slot="weapon" />
@@ -224,9 +224,9 @@ export default function InventoryView({ onHover }) {
                             <EquipSlot slot="belt" />
 
                             {/* Row 4: (empty) - Boots - (empty) */}
-                            <div className="w-16 h-16" /> {/* spacer */}
+                            <div className="w-20 h-20" /> {/* spacer */}
                             <EquipSlot slot="boots" />
-                            <div className="w-16 h-16" /> {/* spacer */}
+                            <div className="w-20 h-20" /> {/* spacer */}
                         </div>
                     </div>
                 </div>
