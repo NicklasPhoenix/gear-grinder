@@ -648,48 +648,60 @@ export default function GameRenderer() {
         };
     }, []);
 
-    // Create animated background
-    function createBackground(container) {
-        // Gradient background
-        const bg = new PIXI.Graphics();
+    // Background image ref for zone changes
+    const bgSpriteRef = useRef(null);
 
-        // Create a vertical gradient effect
-        for (let i = 0; i < 380; i += 2) {
-            const progress = i / 380;
-            const r = Math.floor(10 + progress * 15);
-            const g = Math.floor(10 + progress * 20);
-            const b = Math.floor(20 + progress * 30);
-            const color = (r << 16) | (g << 8) | b;
-            bg.rect(0, i, 800, 2);
-            bg.fill(color);
+    // Create animated background with forest image
+    async function createBackground(container) {
+        // Load forest background image
+        try {
+            const bgTexture = await PIXI.Assets.load('/assets/backgrounds/forest_01.png');
+            const bgSprite = new PIXI.Sprite(bgTexture);
+            // Scale to fit canvas (800x450) while covering
+            bgSprite.width = 800;
+            bgSprite.height = 450;
+            container.addChild(bgSprite);
+            bgSpriteRef.current = bgSprite;
+        } catch (e) {
+            console.warn('Failed to load background, using fallback gradient', e);
+            // Fallback gradient background
+            const bg = new PIXI.Graphics();
+            for (let i = 0; i < 380; i += 2) {
+                const progress = i / 380;
+                const r = Math.floor(10 + progress * 15);
+                const g = Math.floor(10 + progress * 20);
+                const b = Math.floor(20 + progress * 30);
+                const color = (r << 16) | (g << 8) | b;
+                bg.rect(0, i, 800, 2);
+                bg.fill(color);
+            }
+            container.addChild(bg);
         }
-        container.addChild(bg);
 
-        // Stars/particles in background
-        const stars = new PIXI.Graphics();
-        for (let i = 0; i < 50; i++) {
-            const x = Math.random() * 800;
-            const y = Math.random() * 350;
-            const size = Math.random() * 2;
-            const alpha = 0.3 + Math.random() * 0.5;
-            stars.circle(x, y, size);
-            stars.fill({ color: 0xffffff, alpha });
-        }
-        container.addChild(stars);
+        // Subtle darkening overlay for better character visibility
+        const overlay = new PIXI.Graphics();
+        overlay.rect(0, 0, 800, 450);
+        overlay.fill({ color: 0x000000, alpha: 0.25 });
+        container.addChild(overlay);
 
         // Vignette effect
         const vignette = new PIXI.Graphics();
-        vignette.rect(0, 0, 800, 450);
-        vignette.fill({ color: 0x000000, alpha: 0 });
         // Top gradient
-        for (let i = 0; i < 80; i++) {
+        for (let i = 0; i < 100; i++) {
             vignette.rect(0, i, 800, 1);
-            vignette.fill({ color: 0x000000, alpha: (1 - i / 80) * 0.5 });
+            vignette.fill({ color: 0x000000, alpha: (1 - i / 100) * 0.6 });
         }
         // Bottom gradient
+        for (let i = 0; i < 60; i++) {
+            vignette.rect(0, 390 + i, 800, 1);
+            vignette.fill({ color: 0x000000, alpha: (i / 60) * 0.4 });
+        }
+        // Side vignettes
         for (let i = 0; i < 50; i++) {
-            vignette.rect(0, 400 + i, 800, 1);
-            vignette.fill({ color: 0x000000, alpha: (i / 50) * 0.3 });
+            vignette.rect(i, 0, 1, 450);
+            vignette.fill({ color: 0x000000, alpha: (1 - i / 50) * 0.3 });
+            vignette.rect(800 - i, 0, 1, 450);
+            vignette.fill({ color: 0x000000, alpha: (1 - i / 50) * 0.3 });
         }
         container.addChild(vignette);
     }

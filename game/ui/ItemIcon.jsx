@@ -20,6 +20,8 @@ const SHEET_ROWS = {
 const SHIELD_SPRITES = [1, 5, 10, 15, 20, 24, 28, 32, 35, 36];
 // Amulet sprite options by tier (Icon37-48 from the pack)
 const AMULET_SPRITES = [37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48];
+// Belt sprite options by tier (Icon1-48)
+const BELT_SPRITES = [1, 5, 10, 15, 20, 25, 30, 35, 40, 45];
 
 export default function ItemIcon({ item, size = "full" }) {
     const iconData = useMemo(() => {
@@ -42,6 +44,13 @@ export default function ItemIcon({ item, size = "full" }) {
             const tier = item.tier || 0;
             const iconNum = AMULET_SPRITES[Math.min(tier, AMULET_SPRITES.length - 1)];
             return { type: 'individual', url: `/assets/amulets/Icon${iconNum}.png` };
+        }
+
+        // Use new individual sprites for belts
+        if (item.slot === 'belt') {
+            const tier = item.tier || 0;
+            const iconNum = BELT_SPRITES[Math.min(tier, BELT_SPRITES.length - 1)];
+            return { type: 'individual', url: `/assets/belts/Icon${iconNum}.png` };
         }
 
         // Get sprite data based on weapon type or slot
