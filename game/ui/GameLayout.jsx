@@ -12,6 +12,7 @@ import { MaterialIcon, BossStoneIcon } from './MaterialIcons';
 import { BOSS_STONES } from '../data/items';
 import { getZoneById } from '../data/zones';
 import { calculatePlayerStats } from '../systems/PlayerSystem';
+import { formatWithCommas } from '../utils/format';
 
 // Icons for tabs
 const TabIcons = {
@@ -323,7 +324,7 @@ function StatMini({ label, value, color }) {
     return (
         <div className="text-center">
             <p className="text-[10px] text-slate-400 uppercase tracking-wider">{label}</p>
-            <p className={`text-lg font-bold ${color}`}>{typeof value === 'number' ? value.toLocaleString() : value}</p>
+            <p className={`text-lg font-bold ${color}`}>{typeof value === 'number' ? formatWithCommas(value) : value}</p>
         </div>
     );
 }
@@ -345,7 +346,7 @@ function MaterialDisplay({ type, value, color }) {
             <div className="min-w-0">
                 <p className="text-[10px] text-slate-500 uppercase truncate">{MATERIAL_NAMES[type]}</p>
                 <p className={`text-lg font-bold ${color} leading-none`}>
-                    {typeof value === 'number' ? value.toLocaleString() : value}
+                    {typeof value === 'number' ? formatWithCommas(value) : value}
                 </p>
             </div>
         </div>
@@ -450,7 +451,7 @@ function XPBar({ level, xp }) {
                 <div className="flex-1">
                     <div className="flex justify-between text-sm text-slate-400 mb-1">
                         <span>XP</span>
-                        <span className="font-semibold">{xp.toLocaleString()} / {xpNeeded.toLocaleString()}</span>
+                        <span className="font-semibold">{formatWithCommas(xp)} / {formatWithCommas(xpNeeded)}</span>
                     </div>
                     <div className="h-4 bg-slate-800 rounded-full overflow-hidden">
                         <div

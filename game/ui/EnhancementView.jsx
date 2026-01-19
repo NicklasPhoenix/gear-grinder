@@ -4,6 +4,7 @@ import { getEnhanceCost, getEnhanceSuccess, getEnhanceBonus } from '../utils/for
 import ItemIcon from './ItemIcon';
 import { MaterialIcon } from './MaterialIcons';
 import { TIERS, BOSS_STONES, addItemToInventory, removeOneFromStack, getEnhanceStage } from '../data/items';
+import { formatWithCommas } from '../utils/format';
 
 export default function EnhancementView() {
     const { state, gameManager } = useGame();
@@ -342,7 +343,7 @@ export default function EnhancementView() {
                         <div className="flex justify-center flex-wrap gap-4 mb-4 py-3 bg-slate-900/50 rounded-lg">
                             <div className={`flex items-center gap-2 ${state.gold >= costs.gold ? 'opacity-100' : 'opacity-40'}`}>
                                 <MaterialIcon type="gold" size={24} />
-                                <span className="text-lg font-bold text-yellow-400">{costs.gold.toLocaleString()}</span>
+                                <span className="text-lg font-bold text-yellow-400">{formatWithCommas(costs.gold)}</span>
                             </div>
                             <div className={`flex items-center gap-2 ${state.enhanceStone >= costs.enhanceStone ? 'opacity-100' : 'opacity-40'}`}>
                                 <MaterialIcon type="enhanceStone" size={24} />

@@ -3,6 +3,7 @@ import { useGame } from '../context/GameContext';
 import { calculatePlayerStats } from '../systems/PlayerSystem';
 import { STATS } from '../data/stats';
 import { getZoneById } from '../data/zones';
+import { formatPercent, formatMultiplier, formatBonus, formatWithCommas, formatTime } from '../utils/format';
 
 export default function StatsView() {
     const { state, gameManager } = useGame();
@@ -140,15 +141,15 @@ export default function StatsView() {
                         <div className="space-y-1">
                             <StatRow label="Damage" value={calculated.damage} color="text-red-300" />
                             <StatRow label="Armor" value={calculated.armor} color="text-blue-300" />
-                            <StatRow label="Crit %" value={`${calculated.critChance.toFixed(1)}%`} color="text-yellow-300" />
-                            <StatRow label="Crit DMG" value={`${calculated.critDamage.toFixed(0)}%`} color="text-orange-300" />
-                            <StatRow label="Speed" value={`${calculated.speedMult.toFixed(2)}x`} color="text-cyan-300" />
-                            <StatRow label="Dodge" value={`${calculated.dodge.toFixed(1)}%`} color="text-green-300" />
-                            <StatRow label="Lifesteal" value={`${calculated.lifesteal.toFixed(1)}%`} color="text-pink-300" />
+                            <StatRow label="Crit %" value={formatPercent(calculated.critChance)} color="text-yellow-300" />
+                            <StatRow label="Crit DMG" value={formatPercent(calculated.critDamage, 0)} color="text-orange-300" />
+                            <StatRow label="Speed" value={formatMultiplier(calculated.speedMult)} color="text-cyan-300" />
+                            <StatRow label="Dodge" value={formatPercent(calculated.dodge)} color="text-green-300" />
+                            <StatRow label="Lifesteal" value={formatPercent(calculated.lifesteal)} color="text-pink-300" />
                             <StatRow label="Thorns" value={calculated.thorns || 0} color="text-purple-300" />
                             <div className="border-t border-slate-700/50 my-2 pt-2">
-                                <StatRow label="Gold %" value={`+${((calculated.goldMult - 1) * 100).toFixed(0)}%`} color="text-yellow-400" />
-                                <StatRow label="XP %" value={`+${(calculated.xpBonus || 0).toFixed(0)}%`} color="text-purple-400" />
+                                <StatRow label="Gold %" value={formatBonus((calculated.goldMult - 1) * 100)} color="text-yellow-400" />
+                                <StatRow label="XP %" value={formatBonus(calculated.xpBonus || 0)} color="text-purple-400" />
                             </div>
                         </div>
 
@@ -175,7 +176,7 @@ export default function StatsView() {
                                             <span className="text-red-300 font-mono">{avgDamage}</span>
                                         </div>
                                         <div className="flex justify-between">
-                                            <span className="text-slate-400">Critical Hit ({calculated.critChance.toFixed(1)}%)</span>
+                                            <span className="text-slate-400">Critical Hit ({formatPercent(calculated.critChance)})</span>
                                             <span className="text-yellow-300 font-mono">{Math.floor(avgCritDamage)}</span>
                                         </div>
                                         <div className="flex justify-between">
@@ -184,7 +185,7 @@ export default function StatsView() {
                                         </div>
                                         <div className="flex justify-between border-t border-slate-700/50 pt-1 mt-1">
                                             <span className="text-slate-300 font-semibold">True DPS</span>
-                                            <span className="text-green-400 font-mono font-bold">{trueDPS.toLocaleString()}</span>
+                                            <span className="text-green-400 font-mono font-bold">{formatWithCommas(trueDPS)}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -199,7 +200,7 @@ export default function StatsView() {
                                         </div>
                                         <div className="flex justify-between">
                                             <span className="text-slate-400">Armor Reduction</span>
-                                            <span className="text-blue-300 font-mono">-{(damageReduction * 100).toFixed(1)}%</span>
+                                            <span className="text-blue-300 font-mono">-{formatPercent(damageReduction, 1, false)}</span>
                                         </div>
                                         <div className="flex justify-between border-t border-slate-700/50 pt-1 mt-1">
                                             <span className="text-slate-300 font-semibold">You Take</span>
@@ -216,7 +217,7 @@ export default function StatsView() {
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-slate-400">Est. Kill Time</span>
-                                        <span className="text-green-300 font-mono">{trueDPS > 0 ? (currentZone.enemyHp / trueDPS).toFixed(1) : '?'}s</span>
+                                        <span className="text-green-300 font-mono">{formatTime(trueDPS > 0 ? currentZone.enemyHp / trueDPS : 0)}</span>
                                     </div>
                                 </div>
                             </div>

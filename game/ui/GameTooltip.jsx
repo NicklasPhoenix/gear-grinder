@@ -1,6 +1,7 @@
 import React from 'react';
 import { TIERS, GEAR_BASES, WEAPON_TYPES, PRESTIGE_WEAPONS, BOSS_SETS, PRESTIGE_BOSS_SETS, getItemScore, getEnhanceStage } from '../data/items';
 import { getEnhanceBonus } from '../utils/formulas';
+import { formatBonus } from '../utils/format';
 
 // Effect descriptions - what each effect actually does
 const EFFECT_DESCRIPTIONS = {
@@ -261,7 +262,7 @@ export default function GameTooltip({ tooltip }) {
                     <div className="mt-2 flex gap-3 text-xs">
                         {weaponBase.speedBonus !== 0 && (
                             <span className={weaponBase.speedBonus > 0 ? 'text-cyan-400' : 'text-orange-400'}>
-                                {weaponBase.speedBonus > 0 ? '+' : ''}{(weaponBase.speedBonus * 100).toFixed(0)}% Speed
+                                {formatBonus(weaponBase.speedBonus * 100)} Speed
                             </span>
                         )}
                         {weaponBase.critBonus > 0 && (
@@ -414,7 +415,7 @@ export default function GameTooltip({ tooltip }) {
                         </div>
                         <div className="text-[11px] text-slate-300 space-y-0.5">
                             {item.plus >= 10 && <div>• Requires Blessed Orbs to enhance</div>}
-                            {item.plus >= 15 && <div style={{ color: stage.color }}>• +{((enhanceBonus.dmgMult - 1) * 100).toFixed(0)}% Total Damage bonus</div>}
+                            {item.plus >= 15 && <div style={{ color: stage.color }}>• {formatBonus((enhanceBonus.dmgMult - 1) * 100)} Total Damage bonus</div>}
                             {item.plus >= 20 && <div>• Requires Celestial Shards to enhance</div>}
                         </div>
                     </div>

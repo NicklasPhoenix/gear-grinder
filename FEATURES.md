@@ -88,10 +88,10 @@
 ---
 
 ### Feature #11: Standardize Number Formatting
-**Status:** Pending
+**Status:** ✅ Complete
 **Location:** Multiple files
 **Issue:** Some use toLocaleString(), some custom formatNumber(), some nothing.
-**Solution:** Create centralized formatter utility.
+**Solution:** Created centralized `game/utils/format.js` utility with formatNumber(), formatWithCommas(), formatPercent(), formatMultiplier(), formatBonus(), and formatTime() functions. Updated ZoneView, StatsView, GameLayout, EnhancementView, and GameTooltip to use the shared utilities.
 
 ---
 
@@ -162,4 +162,5 @@
 - **Feature #7:** Fix Tooltip Overflow - Full boundary checking for all screen edges
 - **Feature #8:** Add Damage Breakdown - Expandable panel showing DPS, armor reduction, kill time
 - **Feature #10:** Add Save Validation - Schema validation, auto-repair, and save versioning
+- **Feature #11:** Standardize Number Formatting - Centralized format.js utility used across all UI components
 - **Feature #12:** Remove Debug Console Logs - Cleaned up console.log from GameRenderer.jsx and GameContext.jsx

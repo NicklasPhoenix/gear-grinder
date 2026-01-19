@@ -3,6 +3,7 @@ import { useGame } from '../context/GameContext';
 import { ZONES, PRESTIGE_ZONES, getZoneById } from '../data/zones';
 import { BOSS_SETS, PRESTIGE_BOSS_SETS } from '../data/items';
 import { MaterialIcon } from './MaterialIcons';
+import { formatNumber } from '../utils/format';
 
 export default function ZoneView() {
     const { state, gameManager } = useGame();
@@ -136,10 +137,4 @@ export default function ZoneView() {
             </div>
         </div>
     );
-}
-
-function formatNumber(num) {
-    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
-    if (num >= 1000) return (num / 1000).toFixed(0) + 'K';
-    return num.toString();
 }
