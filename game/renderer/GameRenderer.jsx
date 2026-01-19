@@ -209,21 +209,65 @@ export default function GameRenderer() {
             const sheetNames = ['player', 'humanoid', 'demon', 'undead', 'beast', 'reptile', 'elemental', 'avian', 'misc'];
             const totalAssets = sheetNames.length + 2; // +2 for background and monster
 
-            setLoadingProgress({ loaded: 0, total: totalAssets, status: 'Loading sprite sheets...' });
+            // Calculate total assets: sprite sheets + monster sprites + boss sprites
+            const monsterSpriteNums = Object.values(ZONE_MONSTER_SPRITES);
+            const bossSpriteNums = Object.values(ZONE_BOSS_SPRITES);
+            const uniqueMonsters = [...new Set(monsterSpriteNums)];
+            const uniqueBosses = [...new Set(bossSpriteNums)];
+            const totalAssetsFinal = sheetNames.length + uniqueMonsters.length + uniqueBosses.length + 1; // +1 for background
+
+            setLoadingProgress({ loaded: 0, total: totalAssetsFinal, status: 'Loading sprite sheets...' });
+
+            let loadedCount = 0;
 
             for (let i = 0; i < sheetNames.length; i++) {
                 const sheetName = sheetNames[i];
                 try {
-                    setLoadingProgress({ loaded: i, total: totalAssets, status: `Loading ${sheetName}...` });
+                    setLoadingProgress({ loaded: loadedCount, total: totalAssetsFinal, status: `Loading ${sheetName}...` });
                     const sheet = await PIXI.Assets.load(ASSET_BASE[sheetName]);
                     sheet.source.scaleMode = 'nearest';
                     spriteSheets[sheetName] = sheet;
+                    loadedCount++;
                 } catch (e) {
                     console.warn(`Failed to load sprite sheet: ${sheetName}`, e);
+                    loadedCount++;
                 }
             }
             spriteSheetRef.current = spriteSheets;
-            setLoadingProgress({ loaded: sheetNames.length, total: totalAssets, status: 'Creating environment...' });
+
+            // Pre-load ALL monster sprites to prevent loading delays during gameplay
+            setLoadingProgress({ loaded: loadedCount, total: totalAssetsFinal, status: 'Loading monsters...' });
+            for (const spriteNum of uniqueMonsters) {
+                const spritePath = `/assets/monsters/Icon${spriteNum}.png`;
+                try {
+                    setLoadingProgress({ loaded: loadedCount, total: totalAssetsFinal, status: `Loading monster ${spriteNum}...` });
+                    const texture = await PIXI.Assets.load(spritePath);
+                    texture.source.scaleMode = 'nearest';
+                    monsterTextureCache[spritePath] = texture;
+                    loadedCount++;
+                } catch (e) {
+                    console.warn(`Failed to preload monster sprite: ${spritePath}`, e);
+                    loadedCount++;
+                }
+            }
+
+            // Pre-load ALL boss sprites
+            setLoadingProgress({ loaded: loadedCount, total: totalAssetsFinal, status: 'Loading bosses...' });
+            for (const spriteNum of uniqueBosses) {
+                const spritePath = `/assets/bosses/Icon${spriteNum}.png`;
+                try {
+                    setLoadingProgress({ loaded: loadedCount, total: totalAssetsFinal, status: `Loading boss ${spriteNum}...` });
+                    const texture = await PIXI.Assets.load(spritePath);
+                    texture.source.scaleMode = 'nearest';
+                    monsterTextureCache[spritePath] = texture;
+                    loadedCount++;
+                } catch (e) {
+                    console.warn(`Failed to preload boss sprite: ${spritePath}`, e);
+                    loadedCount++;
+                }
+            }
+
+            setLoadingProgress({ loaded: loadedCount, total: totalAssetsFinal, status: 'Creating environment...' });
 
             // --- Helper to get sprite texture from the appropriate sheet ---
             const getSpriteTexture = (spriteData) => {
@@ -304,7 +348,7 @@ export default function GameRenderer() {
             enemy.baseX = enemyX;
             enemy.baseY = characterY;
 
-            // Load initial sprite based on current zone
+            // Load initial sprite based on current zone (use pre-cached texture)
             const initialZone = getZoneById(gameManager.getState()?.currentZone || 0);
             const initialSpriteNum = initialZone.isBoss
                 ? (ZONE_BOSS_SPRITES[initialZone.id] || 1)
@@ -313,13 +357,10 @@ export default function GameRenderer() {
                 ? `/assets/bosses/Icon${initialSpriteNum}.png`
                 : `/assets/monsters/Icon${initialSpriteNum}.png`;
 
-            PIXI.Assets.load(initialSpritePath).then((texture) => {
-                texture.source.scaleMode = 'nearest';
-                monsterTextureCache[initialSpritePath] = texture;
-                if (enemyRef.current) {
-                    enemyRef.current.texture = texture;
-                }
-            }).catch(err => console.warn('Failed to load initial monster sprite:', err));
+            // Use pre-cached texture (already loaded during init)
+            if (monsterTextureCache[initialSpritePath] && enemyRef.current) {
+                enemyRef.current.texture = monsterTextureCache[initialSpritePath];
+            }
 
             // --- Enemy Shadow ---
             const enemyShadow = new PIXI.Graphics();
@@ -1196,8 +1237,11 @@ export default function GameRenderer() {
                 spritePath = `/assets/monsters/Icon${spriteNum}.png`;
             }
 
-            // Load texture if not cached, then apply
-            if (!monsterTextureCache[spritePath]) {
+            // Apply texture from cache (all sprites are pre-loaded during init)
+            if (monsterTextureCache[spritePath]) {
+                enemyRef.current.texture = monsterTextureCache[spritePath];
+            } else {
+                // Fallback: load async if somehow not cached (shouldn't happen)
                 PIXI.Assets.load(spritePath).then((texture) => {
                     texture.source.scaleMode = 'nearest';
                     monsterTextureCache[spritePath] = texture;
@@ -1205,8 +1249,6 @@ export default function GameRenderer() {
                         enemyRef.current.texture = texture;
                     }
                 }).catch(err => console.warn('Failed to load monster sprite:', spritePath, err));
-            } else {
-                enemyRef.current.texture = monsterTextureCache[spritePath];
             }
 
             // Scale for 32x32 sprites - larger for bosses (increased by 1.5x)
