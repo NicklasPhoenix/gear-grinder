@@ -108,6 +108,9 @@ export default function ItemIcon({ item, size = "full" }) {
         if (item.slot === 'armor') {
             return { type: 'individual', url: `/assets/armor/Icon${armorSetIcon}.png` };
         }
+        if (item.slot === 'legs') {
+            return { type: 'individual', url: `/assets/trousers/Icon${armorSetIcon}.png` };
+        }
         if (item.slot === 'boots') {
             return { type: 'individual', url: `/assets/boots/Icon${armorSetIcon}.png` };
         }

@@ -3,15 +3,16 @@ import { useGame } from '../context/GameContext';
 import ItemIcon from './ItemIcon';
 import { TIERS, GEAR_SLOTS, getItemScore, getSalvageReturns, BOSS_SETS, addItemToInventory, removeOneFromStack, getEnhanceStage } from '../data/items';
 
-const SLOT_NAMES = {
-    weapon: 'WPN',
-    helmet: 'HEAD',
-    armor: 'BODY',
-    boots: 'FEET',
-    belt: 'BELT',
-    shield: 'OFF',
-    gloves: 'HAND',
-    amulet: 'NECK',
+const SLOT_LABELS = {
+    weapon: 'Weapon',
+    helmet: 'Head',
+    armor: 'Chest',
+    legs: 'Legs',
+    boots: 'Feet',
+    belt: 'Belt',
+    shield: 'Shield',
+    gloves: 'Hands',
+    amulet: 'Neck',
 };
 
 export default function InventoryView({ onHover }) {
@@ -122,12 +123,65 @@ export default function InventoryView({ onHover }) {
         gameManager.setState(prev => ({ ...prev, autoSalvage: !prev.autoSalvage }));
     };
 
+    // Equipment slot component for the paper doll
+    const EquipSlot = ({ slot, className = '' }) => {
+        const item = state.gear[slot];
+        const tierInfo = item ? TIERS[item.tier] : null;
+        const setInfo = item?.bossSet ? BOSS_SETS[item.bossSet] : null;
+        const stage = item?.plus > 0 ? getEnhanceStage(item.plus) : null;
+
+        return (
+            <div
+                className={`relative w-14 h-14 bg-slate-900/80 border-2 border-slate-700/60 rounded-lg cursor-pointer
+                    hover:border-blue-500/70 hover:bg-slate-800/60 transition-all ${className}`}
+                style={item && setInfo ? {
+                    borderColor: setInfo.color,
+                    boxShadow: `inset 0 0 12px ${setInfo.color}40, 0 0 8px ${setInfo.color}20`
+                } : undefined}
+                onClick={() => item && handleUnequip(item)}
+                onMouseEnter={(e) => onHover && item && onHover(item, { x: e.clientX, y: e.clientY })}
+                onMouseLeave={() => onHover && onHover(null)}
+            >
+                {item ? (
+                    <>
+                        <div className="absolute inset-1">
+                            <ItemIcon item={item} />
+                        </div>
+                        {/* Enhancement badge */}
+                        {item.plus > 0 && stage && (
+                            <div
+                                className="absolute -top-2 -right-2 px-1.5 py-0.5 text-[10px] font-bold rounded flex items-center border-2 border-black/50 z-10"
+                                style={{
+                                    backgroundColor: stage.bgColor,
+                                    color: stage.color,
+                                    boxShadow: `${stage.glow}, 0 2px 4px rgba(0,0,0,0.5)`,
+                                    textShadow: '0 1px 2px rgba(0,0,0,0.8)'
+                                }}
+                            >
+                                {stage.icon && <span className="text-[8px] mr-0.5">{stage.icon}</span>}
+                                +{item.plus}
+                            </div>
+                        )}
+                        {/* Set indicator */}
+                        {setInfo && (
+                            <div className="absolute bottom-0 left-0 right-0 h-1 rounded-b" style={{ backgroundColor: setInfo.color }} />
+                        )}
+                    </>
+                ) : (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <span className="text-[8px] text-slate-600 font-medium uppercase">{SLOT_LABELS[slot]}</span>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     return (
         <div className="h-full flex flex-col gap-2">
-            {/* Equipped Gear - Compact 2x4 grid */}
+            {/* Equipment Paper Doll Layout */}
             <div className="game-panel">
                 <div className="game-panel-header flex justify-between items-center">
-                    <span>Equipped</span>
+                    <span>Equipment</span>
                     <button
                         onClick={handleEquipBest}
                         className="px-2 py-0.5 text-[9px] bg-green-600/40 hover:bg-green-600/60 text-green-300 rounded transition-colors"
@@ -135,59 +189,41 @@ export default function InventoryView({ onHover }) {
                         EQUIP BEST
                     </button>
                 </div>
-                <div className="p-2">
-                    <div className="grid grid-cols-4 gap-1">
-                        {GEAR_SLOTS.map(slot => {
-                            const item = state.gear[slot];
-                            const tierInfo = item ? TIERS[item.tier] : null;
-                            const setInfo = item?.bossSet ? BOSS_SETS[item.bossSet] : null;
-                            const stage = item?.plus > 0 ? getEnhanceStage(item.plus) : null;
+                <div className="p-3">
+                    {/* Paper Doll Grid - positions slots like on a character */}
+                    <div className="relative flex flex-col items-center gap-1">
+                        {/* Row 1: Helmet */}
+                        <div className="flex justify-center">
+                            <EquipSlot slot="helmet" />
+                        </div>
 
-                            return (
-                                <div
-                                    key={slot}
-                                    className="relative aspect-square bg-slate-900/80 border border-slate-700/50 rounded cursor-pointer hover:border-blue-500/50 transition-colors"
-                                    style={item && setInfo ? {
-                                        borderColor: setInfo.color,
-                                        boxShadow: `inset 0 0 8px ${setInfo.color}30`
-                                    } : undefined}
-                                    onClick={() => item && handleUnequip(item)}
-                                    onMouseEnter={(e) => onHover && item && onHover(item, { x: e.clientX, y: e.clientY })}
-                                    onMouseLeave={() => onHover && onHover(null)}
-                                >
-                                    {item ? (
-                                        <>
-                                            <div className="absolute inset-1">
-                                                <ItemIcon item={item} />
-                                            </div>
-                                            {/* Enhancement badge */}
-                                            {item.plus > 0 && stage && (
-                                                <div
-                                                    className="absolute -top-2 -right-2 px-1.5 py-0.5 text-[11px] font-bold rounded flex items-center border-2 border-black/50"
-                                                    style={{
-                                                        backgroundColor: stage.bgColor,
-                                                        color: stage.color,
-                                                        boxShadow: `${stage.glow}, 0 2px 4px rgba(0,0,0,0.5)`,
-                                                        textShadow: '0 1px 2px rgba(0,0,0,0.8)'
-                                                    }}
-                                                >
-                                                    {stage.icon && <span className="text-[9px] mr-0.5">{stage.icon}</span>}
-                                                    +{item.plus}
-                                                </div>
-                                            )}
-                                            {/* Set indicator */}
-                                            {setInfo && (
-                                                <div className="absolute bottom-0 left-0 right-0 h-0.5" style={{ backgroundColor: setInfo.color }} />
-                                            )}
-                                        </>
-                                    ) : (
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                            <span className="text-[8px] text-slate-600 font-bold">{SLOT_NAMES[slot]}</span>
-                                        </div>
-                                    )}
-                                </div>
-                            );
-                        })}
+                        {/* Row 2: Amulet */}
+                        <div className="flex justify-center">
+                            <EquipSlot slot="amulet" />
+                        </div>
+
+                        {/* Row 3: Weapon - Armor - Shield */}
+                        <div className="flex items-center gap-2">
+                            <EquipSlot slot="weapon" />
+                            <EquipSlot slot="armor" />
+                            <EquipSlot slot="shield" />
+                        </div>
+
+                        {/* Row 4: Gloves - Belt */}
+                        <div className="flex items-center gap-2">
+                            <EquipSlot slot="gloves" />
+                            <EquipSlot slot="belt" />
+                        </div>
+
+                        {/* Row 5: Legs */}
+                        <div className="flex justify-center">
+                            <EquipSlot slot="legs" />
+                        </div>
+
+                        {/* Row 6: Boots */}
+                        <div className="flex justify-center">
+                            <EquipSlot slot="boots" />
+                        </div>
                     </div>
                 </div>
             </div>
