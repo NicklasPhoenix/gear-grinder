@@ -682,10 +682,10 @@ function KeyboardHelpModal({ onClose }) {
                     </button>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-4">
                     {shortcuts.map((shortcut, index) => (
-                        <div key={index} className="flex items-center gap-4">
-                            <div className="flex gap-1 min-w-[100px]">
+                        <div key={index} className="flex flex-col gap-1.5">
+                            <div className="flex flex-wrap gap-1">
                                 {shortcut.keys.map((key, i) => (
                                     <kbd
                                         key={i}

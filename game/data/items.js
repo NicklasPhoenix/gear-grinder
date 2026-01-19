@@ -272,6 +272,48 @@ export const SPECIAL_EFFECTS = [
     { id: 'dodge', name: 'Dodge', minVal: 1, maxVal: 8, color: '#06b6d4' },
 ];
 
+// Enhancement milestones that grant bonus substats
+export const ENHANCE_MILESTONES = [10, 15, 20, 25, 30];
+
+// Power multipliers for each milestone (higher milestone = stronger substat)
+const MILESTONE_POWER = {
+    10: 1.0,   // Awakened - base power
+    15: 1.5,   // Transcendent - 50% stronger
+    20: 2.5,   // Celestial - 150% stronger
+    25: 4.0,   // Celestial II - 300% stronger
+    30: 6.0,   // Celestial III - 500% stronger
+};
+
+// Generate a random awakening substat for reaching a milestone
+export function generateAwakeningSubstat(milestone, existingEffects = []) {
+    const power = MILESTONE_POWER[milestone] || 1.0;
+
+    // Filter out effects the item already has to avoid duplicates
+    const existingIds = (existingEffects || []).map(e => e.id);
+    const availableEffects = SPECIAL_EFFECTS.filter(e => !existingIds.includes(e.id));
+
+    // If all effects are taken, pick a random one to stack
+    const effectPool = availableEffects.length > 0 ? availableEffects : SPECIAL_EFFECTS;
+    const effect = effectPool[Math.floor(Math.random() * effectPool.length)];
+
+    // Calculate value based on milestone power
+    const baseValue = effect.minVal + Math.random() * (effect.maxVal - effect.minVal) * 0.5;
+    const value = Math.floor(baseValue * power);
+
+    return {
+        id: effect.id,
+        name: effect.name,
+        value: Math.min(value, effect.maxVal * power), // Cap at scaled max
+        isAwakened: true, // Mark as awakening bonus for display purposes
+        milestone: milestone, // Track which milestone granted it
+    };
+}
+
+// Check if a plus level is a milestone
+export function isEnhanceMilestone(plus) {
+    return ENHANCE_MILESTONES.includes(plus);
+}
+
 export const PRESTIGE_BOSS_SETS = {
     astral: {
         name: "Astral", color: '#38bdf8', tier: 6, statBonus: 2.5,

@@ -3,7 +3,7 @@ import { useGame } from '../context/GameContext';
 import { getEnhanceCost, getEnhanceSuccess, getEnhanceBonus } from '../utils/formulas';
 import ItemIcon from './ItemIcon';
 import { MaterialIcon } from './MaterialIcons';
-import { TIERS, BOSS_STONES, addItemToInventory, removeOneFromStack, getEnhanceStage } from '../data/items';
+import { TIERS, BOSS_STONES, addItemToInventory, removeOneFromStack, getEnhanceStage, generateAwakeningSubstat, isEnhanceMilestone, ENHANCE_MILESTONES } from '../data/items';
 import { formatWithCommas } from '../utils/format';
 
 export default function EnhancementView() {
@@ -128,6 +128,19 @@ export default function EnhancementView() {
         const newPlus = success ? item.plus + 1 : Math.max(0, item.plus - 1);
         const newItem = { ...item, plus: newPlus, id: Date.now() };
         delete newItem.count;
+
+        // Check if we just hit an enhancement milestone (awakening)
+        if (success && isEnhanceMilestone(newPlus)) {
+            // Only add substat if we crossed the milestone (weren't already at it)
+            const previousMilestones = ENHANCE_MILESTONES.filter(m => m <= item.plus);
+            const newMilestones = ENHANCE_MILESTONES.filter(m => m <= newPlus);
+            if (newMilestones.length > previousMilestones.length) {
+                // Generate a new awakening substat
+                const newSubstat = generateAwakeningSubstat(newPlus, newItem.effects || []);
+                newItem.effects = [...(newItem.effects || []), newSubstat];
+                gameManager.emit('floatingText', { text: `AWAKENED! +${newSubstat.name}`, type: 'levelup', target: 'player' });
+            }
+        }
 
         if (isInventoryItem) {
             let updatedInventory = removeOneFromStack(freshState.inventory, item.id);
@@ -338,6 +351,64 @@ export default function EnhancementView() {
                                 <div className="text-green-300 text-base font-semibold">HP +{nextStats.hpBonus}</div>
                             </div>
                         </div>
+
+                        {/* Awakening Milestones */}
+                        {(() => {
+                            const awakenedEffects = (selectedItem.effects || []).filter(e => e.isAwakened);
+                            const nextMilestone = ENHANCE_MILESTONES.find(m => m > selectedItem.plus);
+                            const achievedMilestones = ENHANCE_MILESTONES.filter(m => m <= selectedItem.plus);
+
+                            return (
+                                <div className="mb-4 p-3 bg-gradient-to-r from-orange-900/20 to-yellow-900/20 rounded-lg border border-orange-500/30">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <span className="text-yellow-400">★</span>
+                                        <span className="text-xs uppercase font-bold text-orange-300">Awakening Progress</span>
+                                    </div>
+                                    {/* Milestone dots */}
+                                    <div className="flex items-center justify-between mb-2">
+                                        {ENHANCE_MILESTONES.map((m, i) => {
+                                            const achieved = selectedItem.plus >= m;
+                                            const isNext = m === nextMilestone;
+                                            return (
+                                                <div key={m} className="flex flex-col items-center">
+                                                    <div
+                                                        className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                                                            achieved
+                                                                ? 'bg-orange-500 text-white'
+                                                                : isNext
+                                                                    ? 'bg-orange-500/30 text-orange-300 border-2 border-orange-500 animate-pulse'
+                                                                    : 'bg-slate-700/50 text-slate-500'
+                                                        }`}
+                                                    >
+                                                        {achieved ? '★' : m}
+                                                    </div>
+                                                    <span className={`text-[9px] mt-0.5 ${achieved ? 'text-orange-300' : 'text-slate-500'}`}>
+                                                        +{m}
+                                                    </span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                    {/* Existing awakened effects */}
+                                    {awakenedEffects.length > 0 && (
+                                        <div className="mt-2 pt-2 border-t border-orange-500/20 space-y-1">
+                                            {awakenedEffects.map((eff, i) => (
+                                                <div key={i} className="flex justify-between text-xs">
+                                                    <span className="text-orange-200">★ {eff.name}</span>
+                                                    <span className="text-orange-300 font-mono">+{eff.value}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                    {/* Next milestone preview */}
+                                    {nextMilestone && (
+                                        <div className="mt-2 text-center text-[10px] text-yellow-400/80">
+                                            Next awakening at +{nextMilestone} ({nextMilestone - selectedItem.plus} to go)
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })()}
 
                         {/* Cost */}
                         <div className="flex justify-center flex-wrap gap-4 mb-4 py-3 bg-slate-900/50 rounded-lg">

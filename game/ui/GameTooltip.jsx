@@ -336,11 +336,28 @@ export default function GameTooltip({ tooltip }) {
                     <div className="space-y-2">
                         {effects.map((eff, i) => {
                             const desc = EFFECT_DESCRIPTIONS[eff.id];
+                            const isAwakened = eff.isAwakened;
+                            const milestoneLabel = isAwakened ? `+${eff.milestone}` : null;
                             return (
-                                <div key={i}>
+                                <div
+                                    key={i}
+                                    className={isAwakened ? 'p-1.5 rounded bg-gradient-to-r from-orange-500/20 to-yellow-500/20 border border-orange-500/30' : ''}
+                                >
                                     <div className="flex justify-between items-center">
-                                        <span className="text-purple-300 text-sm font-bold">{eff.name}</span>
-                                        <span className="font-mono font-bold text-purple-300 text-sm">+{eff.value}</span>
+                                        <span className={`text-sm font-bold ${isAwakened ? 'text-orange-300' : 'text-purple-300'}`}>
+                                            {isAwakened && <span className="text-yellow-400 mr-1">★</span>}
+                                            {eff.name}
+                                        </span>
+                                        <div className="flex items-center gap-1.5">
+                                            {milestoneLabel && (
+                                                <span className="text-[9px] px-1 py-0.5 bg-orange-500/30 text-orange-300 rounded font-bold">
+                                                    {milestoneLabel}
+                                                </span>
+                                            )}
+                                            <span className={`font-mono font-bold text-sm ${isAwakened ? 'text-orange-300' : 'text-purple-300'}`}>
+                                                +{eff.value}
+                                            </span>
+                                        </div>
                                     </div>
                                     {desc && (
                                         <div className="text-[10px] text-slate-400 mt-0.5">{desc(eff.value)}</div>
