@@ -1,11 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useGame } from '../context/GameContext';
 import { calculatePlayerStats } from '../systems/PlayerSystem';
 import { STATS } from '../data/stats';
+import { getZoneById } from '../data/zones';
 
 export default function StatsView() {
     const { state, gameManager } = useGame();
     const calculated = calculatePlayerStats(state);
+    const [showBreakdown, setShowBreakdown] = useState(false);
+    const currentZone = getZoneById(state.currentZone);
+
+    // Calculate damage breakdown
+    const avgDamage = calculated.damage;
+    const critChance = calculated.critChance / 100;
+    const critDamage = calculated.critDamage / 100;
+    const avgCritDamage = avgDamage * critDamage;
+    const effectiveDPS = avgDamage * (1 - critChance) + avgCritDamage * critChance;
+    const attacksPerSecond = calculated.speedMult * 6; // Base 6 attacks per second
+    const trueDPS = Math.floor(effectiveDPS * attacksPerSecond);
+
+    // Enemy damage reduction from armor
+    const damageReduction = calculated.armor / (calculated.armor + 250);
+    const reducedEnemyDmg = Math.max(1, Math.floor(currentZone.enemyDmg * (1 - damageReduction)));
+    const effectiveHP = Math.floor(calculated.maxHp / (1 - damageReduction));
 
     const handleStatUp = (key, amount = 1) => {
         const toAdd = Math.min(amount, state.statPoints);
@@ -134,6 +151,76 @@ export default function StatsView() {
                                 <StatRow label="XP %" value={`+${(calculated.xpBonus || 0).toFixed(0)}%`} color="text-purple-400" />
                             </div>
                         </div>
+
+                        {/* Damage Breakdown Toggle */}
+                        <button
+                            onClick={() => setShowBreakdown(!showBreakdown)}
+                            className="w-full mt-3 py-2 px-3 bg-slate-800/50 hover:bg-slate-700/50 rounded border border-slate-700/50 flex items-center justify-between text-sm transition-colors"
+                        >
+                            <span className="text-slate-400">Damage Breakdown</span>
+                            <span className={`text-slate-500 transition-transform ${showBreakdown ? 'rotate-180' : ''}`}>
+                                &#9660;
+                            </span>
+                        </button>
+
+                        {/* Damage Breakdown Panel */}
+                        {showBreakdown && (
+                            <div className="mt-2 p-3 bg-slate-900/70 rounded border border-slate-700/50 text-xs space-y-3">
+                                {/* Damage Calculation */}
+                                <div>
+                                    <div className="text-slate-500 uppercase text-[10px] mb-1.5">Damage Output</div>
+                                    <div className="space-y-1">
+                                        <div className="flex justify-between">
+                                            <span className="text-slate-400">Base Hit</span>
+                                            <span className="text-red-300 font-mono">{avgDamage}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-slate-400">Critical Hit ({calculated.critChance.toFixed(1)}%)</span>
+                                            <span className="text-yellow-300 font-mono">{Math.floor(avgCritDamage)}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-slate-400">Avg Damage/Hit</span>
+                                            <span className="text-orange-300 font-mono">{Math.floor(effectiveDPS)}</span>
+                                        </div>
+                                        <div className="flex justify-between border-t border-slate-700/50 pt-1 mt-1">
+                                            <span className="text-slate-300 font-semibold">True DPS</span>
+                                            <span className="text-green-400 font-mono font-bold">{trueDPS.toLocaleString()}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Defense Calculation */}
+                                <div>
+                                    <div className="text-slate-500 uppercase text-[10px] mb-1.5">vs {currentZone.name}</div>
+                                    <div className="space-y-1">
+                                        <div className="flex justify-between">
+                                            <span className="text-slate-400">Enemy Base Dmg</span>
+                                            <span className="text-red-400 font-mono">{currentZone.enemyDmg}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-slate-400">Armor Reduction</span>
+                                            <span className="text-blue-300 font-mono">-{(damageReduction * 100).toFixed(1)}%</span>
+                                        </div>
+                                        <div className="flex justify-between border-t border-slate-700/50 pt-1 mt-1">
+                                            <span className="text-slate-300 font-semibold">You Take</span>
+                                            <span className="text-cyan-400 font-mono font-bold">{reducedEnemyDmg}/hit</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Time to Kill */}
+                                <div className="pt-2 border-t border-slate-700/50">
+                                    <div className="flex justify-between">
+                                        <span className="text-slate-400">Enemy HP</span>
+                                        <span className="text-slate-300 font-mono">{currentZone.enemyHp}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-slate-400">Est. Kill Time</span>
+                                        <span className="text-green-300 font-mono">{trueDPS > 0 ? (currentZone.enemyHp / trueDPS).toFixed(1) : '?'}s</span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

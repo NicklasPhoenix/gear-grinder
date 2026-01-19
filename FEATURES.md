@@ -63,10 +63,10 @@
 ---
 
 ### Feature #8: Add Damage Breakdown Tooltips
-**Status:** Pending
-**Location:** `game/systems/CombatSystem.js`
+**Status:** ✅ Complete
+**Location:** `game/ui/StatsView.jsx`
 **Issue:** Players cannot see how stats translate to damage.
-**Solution:** Show damage calculation breakdown on hover or in stats panel.
+**Solution:** Added expandable "Damage Breakdown" panel showing base hit, crit damage, true DPS, armor reduction, and estimated kill time for current zone.
 
 ---
 
@@ -159,3 +159,4 @@
 - **Feature #5:** Reduce Excessive Re-renders - Split contexts, smart change detection
 - **Feature #6:** Add Asset Loading Indicator - Animated progress bar during sprite loading
 - **Feature #7:** Fix Tooltip Overflow - Full boundary checking for all screen edges
+- **Feature #8:** Add Damage Breakdown - Expandable panel showing DPS, armor reduction, kill time
