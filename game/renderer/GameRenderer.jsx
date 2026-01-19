@@ -4,6 +4,28 @@ import { useGame } from '../context/GameContext';
 import { ASSET_BASE, ENEMY_SPRITES, SPRITE_CONFIG, ZONE_BACKGROUNDS } from '../../assets/gameAssets';
 import { getZoneById } from '../data/zones';
 
+// Direct zone ID to monster sprite mapping (using new low-level monster pack)
+const ZONE_MONSTER_SPRITES = {
+  0: 1, 1: 2, 2: 3, 3: 4,           // Forest (Beasts)
+  5: 13, 6: 14, 7: 15, 8: 16,       // Goblins (Humanoid)
+  10: 17, 11: 18, 12: 19, 13: 20,   // Undead
+  15: 35, 16: 36, 17: 37, 18: 38,   // Dragons
+  20: 25, 21: 26, 22: 27, 23: 28,   // Elementals
+  25: 39, 26: 40, 27: 41, 28: 42,   // Demons
+  30: 29, 31: 30, 32: 31, 33: 32,   // Celestial
+  35: 43, 36: 44, 37: 45, 38: 46,   // Void/Chaos
+  40: 47, 42: 48, 44: 5,            // Prestige zones
+};
+
+// Boss zone ID to boss sprite mapping (using new chaos monster pack)
+const ZONE_BOSS_SPRITES = {
+  4: 1, 9: 7, 14: 10, 19: 15, 24: 20,
+  29: 25, 34: 30, 39: 35, 41: 40, 43: 44, 45: 48,
+};
+
+// Cache for loaded monster textures
+const monsterTextureCache = {};
+
 // Particle class for ambient effects
 class Particle {
     constructor(x, y, color, size, speedX, speedY, life, gravity = 0) {
@@ -185,20 +207,32 @@ export default function GameRenderer() {
             playerGlow.fill({ color: 0x3b82f6, alpha: 0.1 });
             gameContainer.addChildAt(playerGlow, 0);
 
-            // --- Create Enemy using real sprite ---
-            // DawnLike sprites face LEFT by default, which is toward the player - no flip needed
-            const enemyData = ENEMY_SPRITES['Beast'];
-            const enemyTexture = getSpriteTexture(enemyData);
-            const enemy = enemyTexture
-                ? new PIXI.Sprite(enemyTexture)
-                : new PIXI.Graphics().rect(-8, -8, 16, 16).fill(0x22c55e);
+            // --- Create Enemy using NEW sprite PNGs ---
+            // Start with a placeholder, will be updated by state change
+            const enemy = new PIXI.Sprite(PIXI.Texture.WHITE);
             enemy.anchor.set(0.5, 1);
             enemy.x = 600;
             enemy.y = 375;
-            const enemyScale = enemyData.scale || 4;
-            enemy.scale.set(enemyScale, enemyScale); // Positive X - already faces left toward player
+            enemy.scale.set(3.5, 3.5);
             gameContainer.addChild(enemy);
             enemyRef.current = enemy;
+
+            // Load initial sprite based on current zone
+            const initialZone = getZoneById(gameManager.getState()?.currentZone || 0);
+            const initialSpriteNum = initialZone.isBoss
+                ? (ZONE_BOSS_SPRITES[initialZone.id] || 1)
+                : (ZONE_MONSTER_SPRITES[initialZone.id] || 1);
+            const initialSpritePath = initialZone.isBoss
+                ? `/assets/bosses/Icon${initialSpriteNum}.png`
+                : `/assets/monsters/Icon${initialSpriteNum}.png`;
+
+            PIXI.Assets.load(initialSpritePath).then((texture) => {
+                texture.source.scaleMode = 'nearest';
+                monsterTextureCache[initialSpritePath] = texture;
+                if (enemyRef.current) {
+                    enemyRef.current.texture = texture;
+                }
+            }).catch(err => console.warn('Failed to load initial monster sprite:', err));
 
             // --- Enemy Shadow ---
             const enemyShadow = new PIXI.Graphics();
@@ -1025,23 +1059,38 @@ export default function GameRenderer() {
             return new PIXI.Texture({ source: sheet.source, frame });
         };
 
-        // 1. Update Enemy Sprite based on Zone/Enemy Type
+        // 1. Update Enemy Sprite based on Zone/Enemy Type - using NEW sprite PNGs
         if (enemyRef.current) {
             const zone = getZoneById(state.currentZone);
-            const enemyType = zone.enemyType;
-            const spriteData = ENEMY_SPRITES[enemyType] || ENEMY_SPRITES['Beast'];
+            const zoneId = zone.id;
 
-            // Update texture from the correct sprite sheet
-            const newTexture = getSpriteTexture(spriteData);
-            if (newTexture && enemyRef.current.texture) {
-                enemyRef.current.texture = newTexture;
+            // Determine sprite path based on zone
+            let spritePath;
+            if (zone.isBoss) {
+                const spriteNum = ZONE_BOSS_SPRITES[zoneId] || 1;
+                spritePath = `/assets/bosses/Icon${spriteNum}.png`;
+            } else {
+                const spriteNum = ZONE_MONSTER_SPRITES[zoneId] || 1;
+                spritePath = `/assets/monsters/Icon${spriteNum}.png`;
             }
 
-            // Scale based on sprite data and boss status
-            // DawnLike sprites face LEFT by default - enemy already faces player (positive scale)
-            const baseScale = spriteData.scale || 4;
-            const finalScale = zone.isBoss ? baseScale * 1.3 : baseScale;
-            enemyRef.current.scale.set(finalScale, finalScale); // Positive X - faces left toward player
+            // Load texture if not cached, then apply
+            if (!monsterTextureCache[spritePath]) {
+                PIXI.Assets.load(spritePath).then((texture) => {
+                    texture.source.scaleMode = 'nearest';
+                    monsterTextureCache[spritePath] = texture;
+                    if (enemyRef.current) {
+                        enemyRef.current.texture = texture;
+                    }
+                }).catch(err => console.warn('Failed to load monster sprite:', spritePath, err));
+            } else {
+                enemyRef.current.texture = monsterTextureCache[spritePath];
+            }
+
+            // Scale for 32x32 sprites - larger for bosses
+            const baseScale = zone.isBoss ? 4.5 : 3.5;
+            const finalScale = baseScale;
+            enemyRef.current.scale.set(finalScale, finalScale);
 
             if (zone.isBoss) {
                 if (enemyRef.current.aura) {
