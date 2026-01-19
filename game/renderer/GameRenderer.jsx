@@ -92,6 +92,7 @@ export default function GameRenderer() {
     const appRef = useRef(null);
     const { gameManager, state } = useGame();
     const [isInitialized, setIsInitialized] = useState(false);
+    const [loadingProgress, setLoadingProgress] = useState({ loaded: 0, total: 10, status: 'Initializing...' });
 
     // Entities refs for updating
     const playerRef = useRef(null);
@@ -203,12 +204,17 @@ export default function GameRenderer() {
                 canvasHeight,
             };
 
-            // --- Load all character sprite sheets ---
+            // --- Load all character sprite sheets with progress tracking ---
             const spriteSheets = {};
             const sheetNames = ['player', 'humanoid', 'demon', 'undead', 'beast', 'reptile', 'elemental', 'avian', 'misc'];
+            const totalAssets = sheetNames.length + 2; // +2 for background and monster
 
-            for (const sheetName of sheetNames) {
+            setLoadingProgress({ loaded: 0, total: totalAssets, status: 'Loading sprite sheets...' });
+
+            for (let i = 0; i < sheetNames.length; i++) {
+                const sheetName = sheetNames[i];
                 try {
+                    setLoadingProgress({ loaded: i, total: totalAssets, status: `Loading ${sheetName}...` });
                     const sheet = await PIXI.Assets.load(ASSET_BASE[sheetName]);
                     sheet.source.scaleMode = 'nearest';
                     spriteSheets[sheetName] = sheet;
@@ -217,6 +223,7 @@ export default function GameRenderer() {
                 }
             }
             spriteSheetRef.current = spriteSheets;
+            setLoadingProgress({ loaded: sheetNames.length, total: totalAssets, status: 'Creating environment...' });
 
             // --- Helper to get sprite texture from the appropriate sheet ---
             const getSpriteTexture = (spriteData) => {
@@ -1252,11 +1259,39 @@ export default function GameRenderer() {
     }, [state]);
 
     return (
-        <div className="w-full h-full">
+        <div className="w-full h-full relative">
             <div
                 ref={containerRef}
                 className="w-full h-full overflow-hidden bg-black"
             />
+
+            {/* Loading Overlay */}
+            {!isInitialized && (
+                <div className="absolute inset-0 bg-slate-950 flex flex-col items-center justify-center z-10">
+                    <div className="text-center">
+                        {/* Animated sword icon */}
+                        <div className="text-6xl mb-6 animate-bounce">&#9876;</div>
+
+                        <h2 className="text-xl font-bold text-white mb-4">Loading Game</h2>
+
+                        {/* Progress bar */}
+                        <div className="w-64 h-3 bg-slate-800 rounded-full overflow-hidden mb-3">
+                            <div
+                                className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300"
+                                style={{ width: `${(loadingProgress.loaded / loadingProgress.total) * 100}%` }}
+                            />
+                        </div>
+
+                        {/* Status text */}
+                        <p className="text-slate-400 text-sm">
+                            {loadingProgress.status}
+                        </p>
+                        <p className="text-slate-500 text-xs mt-1">
+                            {loadingProgress.loaded} / {loadingProgress.total}
+                        </p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
