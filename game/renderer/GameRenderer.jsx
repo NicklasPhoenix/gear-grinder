@@ -1397,7 +1397,8 @@ function spawnFloatingText(app, container, { text, type, target }, positions = {
     const isPlayerDmg = type === 'playerDmg';
     const isEnemyDmg = type === 'enemyDmg';
     const isThorns = type === 'thorns';
-    const isGold = type === 'gold';
+    const isSilver = type === 'silver';
+    const isSilverLoss = type === 'silverLoss';
     const isXp = type === 'xp';
     const isLoot = type === 'loot';
 
@@ -1436,9 +1437,12 @@ function spawnFloatingText(app, container, { text, type, target }, positions = {
         fontSize = 18;
         offsetX = -40; // Thorns to the left of enemy
         offsetY = 30;
-    } else if (isGold) {
-        fillColor = '#fbbf24';
+    } else if (isSilver) {
+        fillColor = '#c0c0c0';
         fontSize = 22;
+    } else if (isSilverLoss) {
+        fillColor = '#ef4444';
+        fontSize = 20;
     } else if (isXp) {
         fillColor = '#a78bfa';
         fontSize = 22;

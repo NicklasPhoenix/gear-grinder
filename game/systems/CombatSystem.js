@@ -182,7 +182,7 @@ export class CombatSystem {
 
         // Visuals
         const lootItems = [];
-        lootItems.push({ text: `+${goldEarned}g`, color: '#fbbf24' });
+        lootItems.push({ text: `+${goldEarned}s`, color: '#c0c0c0' });
         lootItems.push({ text: `+${xpEarned}xp`, color: '#a855f7' });
         if (droppedGear && !state.autoSalvage) {
             const tierInfo = TIERS[droppedGear.tier] || TIERS[0];
@@ -263,8 +263,8 @@ export class CombatSystem {
                 const returns = getSalvageReturns(newBossItem, 1);
                 state.gold += returns.gold;
                 state.enhanceStone += returns.enhanceStone;
-                log.push({ type: 'autoSalvage', msg: `♻️ ${bossItem.name} salvaged! +${returns.gold}g` });
-                this.callbacks.onFloatingText(`+${returns.gold}g`, 'heal', 'player');
+                log.push({ type: 'autoSalvage', msg: `♻️ ${bossItem.name} salvaged! +${returns.gold}s` });
+                this.callbacks.onFloatingText(`+${returns.gold}s`, 'silver', 'player');
             } else {
                 // Add to inventory with stacking
                 state.inventory = addItemToInventory(state.inventory, newBossItem);
@@ -287,7 +287,7 @@ export class CombatSystem {
         const goldLost = Math.floor(state.gold * DEATH_PENALTY.GOLD_LOSS);
         if (goldLost > 0) {
             state.gold -= goldLost;
-            this.callbacks.onFloatingText(`-${goldLost}g`, 'goldLoss', 'player');
+            this.callbacks.onFloatingText(`-${goldLost}s`, 'silverLoss', 'player');
         }
 
         // Also lose some enhance stones
