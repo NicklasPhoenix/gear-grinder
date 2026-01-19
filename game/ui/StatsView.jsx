@@ -85,50 +85,58 @@ export default function StatsView() {
                 {/* Base Attributes */}
                 <div className="w-1/2 game-panel flex flex-col min-h-0">
                     <div className="game-panel-header text-sm">Attributes</div>
-                    <div className="flex-1 overflow-y-auto custom-scrollbar p-3 min-h-0 space-y-2">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar p-2 min-h-0 space-y-1.5">
                         {Object.entries(state.stats).map(([key, val]) => (
-                            <div key={key} className="flex items-center justify-between p-2 bg-slate-900/50 rounded hover:bg-slate-800/50 transition-colors">
-                                <div className="flex-1">
-                                    <div className="text-sm font-bold" style={{ color: STATS[key].color }}>{STATS[key].name}</div>
-                                    <div className="text-xs text-slate-500">{STATS[key].desc}</div>
-                                </div>
-                                <div className="flex items-center gap-1.5">
-                                    <span className="text-xl font-mono font-bold text-white w-10 text-right">{val}</span>
-                                    <button
-                                        onClick={() => handleStatUp(key, 1)}
-                                        disabled={state.statPoints <= 0}
-                                        className={`w-8 h-8 flex items-center justify-center rounded text-xs font-bold transition-all ${
-                                            state.statPoints > 0
-                                                ? 'bg-blue-600 hover:bg-blue-500 text-white'
-                                                : 'bg-slate-700 text-slate-500 cursor-not-allowed'
-                                        }`}
-                                    >
-                                        +1
-                                    </button>
-                                    <button
-                                        onClick={() => handleStatUp(key, 10)}
-                                        disabled={state.statPoints <= 0}
-                                        className={`w-10 h-8 flex items-center justify-center rounded text-xs font-bold transition-all ${
-                                            state.statPoints >= 10
-                                                ? 'bg-green-600 hover:bg-green-500 text-white'
-                                                : state.statPoints > 0
-                                                    ? 'bg-green-600/50 hover:bg-green-500/50 text-green-200'
+                            <div key={key} className="p-2 bg-slate-900/50 rounded hover:bg-slate-800/50 transition-colors">
+                                {/* Top row: Name, Value, Buttons */}
+                                <div className="flex items-center gap-2">
+                                    <span className="text-sm font-bold flex-shrink-0" style={{ color: STATS[key].color }}>
+                                        {STATS[key].name}
+                                    </span>
+                                    <span className="text-lg font-mono font-bold text-white ml-auto">
+                                        {val}
+                                    </span>
+                                    <div className="flex gap-1 flex-shrink-0">
+                                        <button
+                                            onClick={() => handleStatUp(key, 1)}
+                                            disabled={state.statPoints <= 0}
+                                            className={`px-2 py-1 rounded text-xs font-bold transition-all ${
+                                                state.statPoints > 0
+                                                    ? 'bg-blue-600 hover:bg-blue-500 text-white'
                                                     : 'bg-slate-700 text-slate-500 cursor-not-allowed'
-                                        }`}
-                                    >
-                                        +10
-                                    </button>
-                                    <button
-                                        onClick={() => handleStatUp(key, state.statPoints)}
-                                        disabled={state.statPoints <= 0}
-                                        className={`w-12 h-8 flex items-center justify-center rounded text-xs font-bold transition-all ${
-                                            state.statPoints > 0
-                                                ? 'bg-purple-600 hover:bg-purple-500 text-white'
-                                                : 'bg-slate-700 text-slate-500 cursor-not-allowed'
-                                        }`}
-                                    >
-                                        MAX
-                                    </button>
+                                            }`}
+                                        >
+                                            +1
+                                        </button>
+                                        <button
+                                            onClick={() => handleStatUp(key, 10)}
+                                            disabled={state.statPoints <= 0}
+                                            className={`px-2 py-1 rounded text-xs font-bold transition-all ${
+                                                state.statPoints >= 10
+                                                    ? 'bg-green-600 hover:bg-green-500 text-white'
+                                                    : state.statPoints > 0
+                                                        ? 'bg-green-600/50 hover:bg-green-500/50 text-green-200'
+                                                        : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                                            }`}
+                                        >
+                                            +10
+                                        </button>
+                                        <button
+                                            onClick={() => handleStatUp(key, state.statPoints)}
+                                            disabled={state.statPoints <= 0}
+                                            className={`px-2 py-1 rounded text-xs font-bold transition-all ${
+                                                state.statPoints > 0
+                                                    ? 'bg-purple-600 hover:bg-purple-500 text-white'
+                                                    : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                                            }`}
+                                        >
+                                            MAX
+                                        </button>
+                                    </div>
+                                </div>
+                                {/* Bottom row: Description */}
+                                <div className="text-[10px] text-slate-500 mt-1 leading-tight">
+                                    {STATS[key].desc}
                                 </div>
                             </div>
                         ))}
