@@ -127,6 +127,7 @@ export const calculatePlayerStats = (gameState) => {
                     if (bonus.effect.hpMult) hpMult += bonus.effect.hpMult;
                     if (bonus.effect.speedMult) speedMult += bonus.effect.speedMult;
                     if (bonus.effect.goldMult) goldMult += bonus.effect.goldMult;
+                    if (bonus.effect.matMult) matMult += bonus.effect.matMult;
                     if (bonus.effect.lifesteal) lifesteal += bonus.effect.lifesteal;
                     if (bonus.effect.critChance) critChance += bonus.effect.critChance;
                     if (bonus.effect.critDamage) critDamage += bonus.effect.critDamage;

@@ -291,6 +291,7 @@ export const PRESTIGE_BOSS_SETS = {
             { pieces: 4, desc: '+400% DMG, +300% HP', effect: { dmgMult: 4.00, hpMult: 3.00 } },
             { pieces: 6, desc: '+60% Crit, +250% Crit DMG', effect: { critChance: 60, critDamage: 250 } },
             { pieces: 8, desc: 'Astral Ascension: +600% All Stats', effect: { dmgMult: 6.0, hpMult: 6.0, speedMult: 1.0 } },
+            { pieces: 9, desc: 'SECRET: +100% Drop Rate', effect: { matMult: 2.0 }, secret: true },
         ]
     },
     cosmic: {
@@ -311,6 +312,7 @@ export const PRESTIGE_BOSS_SETS = {
             { pieces: 4, desc: '+700% DMG, +500% HP', effect: { dmgMult: 7.00, hpMult: 5.00 } },
             { pieces: 6, desc: '+50% Crit, +300% Crit DMG', effect: { critChance: 50, critDamage: 300 } },
             { pieces: 8, desc: 'Cosmic Infinity: +1200% All Stats', effect: { dmgMult: 12.0, hpMult: 12.0, speedMult: 1.5 } },
+            { pieces: 9, desc: 'SECRET: +100% Drop Rate', effect: { matMult: 2.0 }, secret: true },
         ]
     },
     primordial: {
@@ -331,6 +333,7 @@ export const PRESTIGE_BOSS_SETS = {
             { pieces: 4, desc: '+1500% DMG, +1000% HP', effect: { dmgMult: 15.00, hpMult: 10.00 } },
             { pieces: 6, desc: '+75% Crit, +500% Crit DMG', effect: { critChance: 75, critDamage: 500 } },
             { pieces: 8, desc: 'Primordial Power: +3000% All', effect: { dmgMult: 30.0, hpMult: 30.0, speedMult: 2.0 } },
+            { pieces: 9, desc: 'SECRET: +100% Drop Rate', effect: { matMult: 2.0 }, secret: true },
         ]
     },
 };
