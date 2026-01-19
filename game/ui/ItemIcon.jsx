@@ -16,6 +16,28 @@ const SHEET_ROWS = {
     potion: 6,
 };
 
+// ======= NEW INDIVIDUAL SPRITE MAPPINGS =======
+// Matching armor sets use the same icon number across all pieces
+// This ensures tier X helmet matches tier X armor matches tier X boots etc.
+// 48 icons available, spread across 10 tiers (0-9)
+const ARMOR_SET_ICONS = [
+    1,   // Tier 0: Common
+    6,   // Tier 1: Uncommon
+    12,  // Tier 2: Rare
+    18,  // Tier 3: Epic
+    24,  // Tier 4: Legendary
+    30,  // Tier 5: Mythic
+    36,  // Tier 6: Divine
+    40,  // Tier 7: Astral (prestige)
+    44,  // Tier 8: Cosmic (prestige)
+    48,  // Tier 9: Primordial (prestige)
+];
+
+// Sword icons by tier (48 available)
+const SWORD_ICONS = [1, 6, 12, 18, 24, 30, 36, 40, 44, 48];
+// Mace icons by tier (48 available)
+const MACE_ICONS = [1, 6, 12, 18, 24, 30, 36, 40, 44, 48];
+
 // Shield sprite options by tier (Icon1-36)
 const SHIELD_SPRITES = [1, 5, 10, 15, 20, 24, 28, 32, 35, 36];
 // Amulet sprite options by tier (Icon37-48 from the pack)
@@ -23,37 +45,95 @@ const AMULET_SPRITES = [37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48];
 // Belt sprite options by tier (Icon1-48)
 const BELT_SPRITES = [1, 5, 10, 15, 20, 25, 30, 35, 40, 45];
 
+// Magic gem icons for materials (48 available)
+const GEM_ICONS = {
+    enhanceStone: 1,    // Blue gem
+    blessedOrb: 13,     // Purple gem
+    celestialShard: 25, // Yellow/gold gem
+    prestigeStone: 37,  // Pink gem
+};
+
 export default function ItemIcon({ item, size = "full" }) {
     const iconData = useMemo(() => {
         if (!item) return null;
+        const tier = item.tier || 0;
 
-        // Materials use procedural generation
+        // Materials use magic gem sprites
         if (item.type === 'material') {
-            return { type: 'procedural', url: generateMaterialIcon(item.id || 'ore') };
+            const gemIcon = GEM_ICONS[item.id] || GEM_ICONS.enhanceStone;
+            return { type: 'individual', url: `/assets/gems/Icon${gemIcon}.png` };
+        }
+
+        // === WEAPONS - Use individual sprites ===
+        if (item.slot === 'weapon') {
+            const weaponType = item.weaponType || 'sword';
+
+            // Swords
+            if (weaponType === 'sword' || weaponType === 'katana' || weaponType === 'greataxe') {
+                const iconNum = SWORD_ICONS[Math.min(tier, SWORD_ICONS.length - 1)];
+                return { type: 'individual', url: `/assets/swords/Icon${iconNum}.png` };
+            }
+            // Maces
+            if (weaponType === 'mace') {
+                const iconNum = MACE_ICONS[Math.min(tier, MACE_ICONS.length - 1)];
+                return { type: 'individual', url: `/assets/maces/Icon${iconNum}.png` };
+            }
+            // Staffs (using spear sprites)
+            if (weaponType === 'staff') {
+                const iconNum = ARMOR_SET_ICONS[Math.min(tier, ARMOR_SET_ICONS.length - 1)];
+                return { type: 'individual', url: `/assets/staffs/Icon${iconNum}.png` };
+            }
+            // Daggers - use sword with offset
+            if (weaponType === 'dagger') {
+                const iconNum = Math.min(tier * 5 + 2, 48); // Offset for variety
+                return { type: 'individual', url: `/assets/swords/Icon${iconNum}.png` };
+            }
+            // Scythes - use staffs since they're long weapons
+            if (weaponType === 'scythe') {
+                const iconNum = Math.min(tier * 5 + 3, 48);
+                return { type: 'individual', url: `/assets/staffs/Icon${iconNum}.png` };
+            }
+            // Default to sword
+            const iconNum = SWORD_ICONS[Math.min(tier, SWORD_ICONS.length - 1)];
+            return { type: 'individual', url: `/assets/swords/Icon${iconNum}.png` };
+        }
+
+        // === ARMOR PIECES - Use matching set icons ===
+        // All armor pieces of the same tier use the same icon number for matching sets
+        const armorSetIcon = ARMOR_SET_ICONS[Math.min(tier, ARMOR_SET_ICONS.length - 1)];
+
+        if (item.slot === 'helmet') {
+            return { type: 'individual', url: `/assets/helmets/Icon${armorSetIcon}.png` };
+        }
+        if (item.slot === 'armor') {
+            return { type: 'individual', url: `/assets/armor/Icon${armorSetIcon}.png` };
+        }
+        if (item.slot === 'boots') {
+            return { type: 'individual', url: `/assets/boots/Icon${armorSetIcon}.png` };
+        }
+        if (item.slot === 'gloves') {
+            return { type: 'individual', url: `/assets/gloves/Icon${armorSetIcon}.png` };
         }
 
         // Use new individual sprites for shields
         if (item.slot === 'shield') {
-            const tier = item.tier || 0;
             const iconNum = SHIELD_SPRITES[Math.min(tier, SHIELD_SPRITES.length - 1)];
             return { type: 'individual', url: `/assets/shields/Icon${iconNum}.png` };
         }
 
         // Use new individual sprites for amulets
         if (item.slot === 'amulet') {
-            const tier = item.tier || 0;
             const iconNum = AMULET_SPRITES[Math.min(tier, AMULET_SPRITES.length - 1)];
             return { type: 'individual', url: `/assets/amulets/Icon${iconNum}.png` };
         }
 
         // Use new individual sprites for belts
         if (item.slot === 'belt') {
-            const tier = item.tier || 0;
             const iconNum = BELT_SPRITES[Math.min(tier, BELT_SPRITES.length - 1)];
             return { type: 'individual', url: `/assets/belts/Icon${iconNum}.png` };
         }
 
-        // Get sprite data based on weapon type or slot
+        // Fallback to sprite sheet system for anything not covered
         let spriteKey = item.weaponType || item.slot || 'sword';
         const spriteData = ITEM_SPRITES[spriteKey] || ITEM_SPRITES.sword;
 

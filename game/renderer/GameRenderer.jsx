@@ -125,7 +125,7 @@ export default function GameRenderer() {
             const canvasWidth = containerWidth;
             const canvasHeight = containerHeight;
             const centerX = canvasWidth / 2;
-            const groundY = canvasHeight - 140; // Move ground up to avoid bottom menu overlap
+            const groundY = canvasHeight - 200; // Move ground up more to avoid bottom menu overlap
 
             // Main container with shake support
             const mainContainer = new PIXI.Container();
@@ -708,9 +708,20 @@ export default function GameRenderer() {
         try {
             const bgTexture = await PIXI.Assets.load('/assets/backgrounds/forest_01.png');
             const bgSprite = new PIXI.Sprite(bgTexture);
-            // Scale to fit canvas while covering
-            bgSprite.width = width;
-            bgSprite.height = height;
+
+            // Calculate scale to cover canvas while maintaining aspect ratio (no stretching)
+            // Use the larger scale factor to ensure full coverage (overflow is fine)
+            const textureWidth = bgTexture.width;
+            const textureHeight = bgTexture.height;
+            const scaleX = width / textureWidth;
+            const scaleY = height / textureHeight;
+            const coverScale = Math.max(scaleX, scaleY);
+
+            bgSprite.scale.set(coverScale, coverScale);
+            // Center the background
+            bgSprite.x = (width - textureWidth * coverScale) / 2;
+            bgSprite.y = (height - textureHeight * coverScale) / 2;
+
             container.addChild(bgSprite);
             bgSpriteRef.current = bgSprite;
         } catch (e) {

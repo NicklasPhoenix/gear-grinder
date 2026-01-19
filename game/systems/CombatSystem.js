@@ -1,5 +1,5 @@
 import { getZoneById } from '../data/zones';
-import { BOSS_SETS, PRESTIGE_BOSS_SETS, MATERIALS, getSalvageReturns, addItemToInventory, generateGearDrop, TIERS } from '../data/items';
+import { BOSS_SETS, PRESTIGE_BOSS_SETS, BOSS_STONES, MATERIALS, getSalvageReturns, addItemToInventory, generateGearDrop, TIERS } from '../data/items';
 import { SKILLS } from '../data/skills';
 import { calculatePlayerStats } from './PlayerSystem';
 
@@ -198,7 +198,19 @@ export class CombatSystem {
 
     handleBossLoot(state, zone, log) {
         const bossSet = BOSS_SETS[zone.bossSet] || PRESTIGE_BOSS_SETS[zone.bossSet];
-        const dropChance = 0.06; // 6% drop rate - boss gear should feel earned
+        const bossStoneInfo = BOSS_STONES[zone.bossSet];
+
+        // Boss stone drops (guaranteed 1-2 per boss kill)
+        if (bossStoneInfo) {
+            const stoneCount = 1 + (Math.random() < 0.3 ? 1 : 0); // 70% = 1, 30% = 2
+            if (!state.bossStones) state.bossStones = {};
+            state.bossStones[zone.bossSet] = (state.bossStones[zone.bossSet] || 0) + stoneCount;
+            log.push({ type: 'bossStone', msg: `💎 ${bossStoneInfo.name} x${stoneCount}!` });
+            this.callbacks.onFloatingText(`+${stoneCount} ${bossStoneInfo.name}`, 'bossStone', 'player');
+        }
+
+        // Boss gear drops (6% chance)
+        const dropChance = 0.06;
         if (Math.random() < dropChance && bossSet) {
             const availableSlots = Object.keys(bossSet.items);
             const droppedSlot = availableSlots[Math.floor(Math.random() * availableSlots.length)];

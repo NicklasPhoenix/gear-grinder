@@ -3,7 +3,7 @@ import { useGame } from '../context/GameContext';
 import { getEnhanceCost, getEnhanceSuccess, getEnhanceBonus } from '../utils/formulas';
 import ItemIcon from './ItemIcon';
 import { MaterialIcon } from './MaterialIcons';
-import { TIERS, addItemToInventory, removeOneFromStack, getEnhanceStage } from '../data/items';
+import { TIERS, BOSS_STONES, addItemToInventory, removeOneFromStack, getEnhanceStage } from '../data/items';
 
 export default function EnhancementView() {
     const { state, gameManager } = useGame();
@@ -48,10 +48,20 @@ export default function EnhancementView() {
                 return;
             }
 
-            const costs = getEnhanceCost(currentItem.plus);
+            const baseCosts = getEnhanceCost(currentItem.plus);
+            const needsBossStone = currentItem.bossSet && currentItem.plus >= 10;
+            const costs = { ...baseCosts, bossStone: needsBossStone ? 1 : 0 };
+
             if (state.gold < costs.gold || state.enhanceStone < costs.enhanceStone) {
                 setAutoEnhancing(false);
                 gameManager.emit('floatingText', { text: 'NO RESOURCES!', type: 'death', target: 'player' });
+                return;
+            }
+
+            // Check boss stone requirement
+            if (needsBossStone && (state.bossStones?.[currentItem.bossSet] || 0) < 1) {
+                setAutoEnhancing(false);
+                gameManager.emit('floatingText', { text: 'NEED BOSS STONE!', type: 'death', target: 'player' });
                 return;
             }
 
@@ -74,6 +84,14 @@ export default function EnhancementView() {
             blessedOrb: state.blessedOrb - (costs.blessedOrb || 0),
             celestialShard: state.celestialShard - (costs.celestialShard || 0)
         };
+
+        // Deduct boss stone if required (boss gear +10 and above)
+        if (item.bossSet && item.plus >= 10 && costs.bossStone) {
+            newState.bossStones = {
+                ...state.bossStones,
+                [item.bossSet]: (state.bossStones?.[item.bossSet] || 0) - costs.bossStone
+            };
+        }
 
         const newPlus = success ? item.plus + 1 : Math.max(0, item.plus - 1);
         const newItem = { ...item, plus: newPlus, id: Date.now() };
@@ -128,11 +146,22 @@ export default function EnhancementView() {
         setAutoEnhanceTarget(null);
     };
 
-    const costs = selectedItem ? getEnhanceCost(selectedItem.plus) : null;
+    const baseCosts = selectedItem ? getEnhanceCost(selectedItem.plus) : null;
+    // Add boss stone cost for boss gear +10 and above
+    const needsBossStone = selectedItem?.bossSet && selectedItem.plus >= 10;
+    const bossStoneInfo = needsBossStone ? BOSS_STONES[selectedItem.bossSet] : null;
+    const costs = baseCosts ? {
+        ...baseCosts,
+        bossStone: needsBossStone ? 1 : 0,
+        bossStoneType: selectedItem?.bossSet
+    } : null;
+
     const successChance = selectedItem ? getEnhanceSuccess(selectedItem.plus) : 0;
     const currentStats = selectedItem ? getEnhanceBonus(selectedItem.plus, selectedItem.tier) : null;
     const nextStats = selectedItem ? getEnhanceBonus(selectedItem.plus + 1, selectedItem.tier) : null;
-    const canAfford = costs && state.gold >= costs.gold && state.enhanceStone >= costs.enhanceStone;
+
+    const hasBossStone = !needsBossStone || (state.bossStones?.[selectedItem?.bossSet] || 0) >= 1;
+    const canAfford = costs && state.gold >= costs.gold && state.enhanceStone >= costs.enhanceStone && hasBossStone;
 
     return (
         <div className="h-full flex gap-2">
@@ -279,7 +308,7 @@ export default function EnhancementView() {
                         </div>
 
                         {/* Cost */}
-                        <div className="flex justify-center gap-4 mb-3 py-2 bg-slate-900/50 rounded">
+                        <div className="flex justify-center flex-wrap gap-3 mb-3 py-2 bg-slate-900/50 rounded">
                             <div className={`flex items-center gap-1 ${state.gold >= costs.gold ? 'opacity-100' : 'opacity-40'}`}>
                                 <MaterialIcon type="gold" size={16} />
                                 <span className="text-sm font-bold text-yellow-400">{costs.gold.toLocaleString()}</span>
@@ -294,7 +323,29 @@ export default function EnhancementView() {
                                     <span className="text-sm font-bold text-purple-400">{costs.blessedOrb}</span>
                                 </div>
                             )}
+                            {needsBossStone && bossStoneInfo && (
+                                <div className={`flex items-center gap-1 ${hasBossStone ? 'opacity-100' : 'opacity-40'}`}>
+                                    <img
+                                        src={`/assets/gems/Icon${bossStoneInfo.gemIcon}.png`}
+                                        alt={bossStoneInfo.name}
+                                        className="w-4 h-4"
+                                        style={{ imageRendering: 'pixelated' }}
+                                    />
+                                    <span className="text-sm font-bold" style={{ color: bossStoneInfo.color }}>
+                                        1 ({state.bossStones?.[selectedItem.bossSet] || 0})
+                                    </span>
+                                </div>
+                            )}
                         </div>
+
+                        {/* Boss Stone Warning */}
+                        {needsBossStone && !hasBossStone && (
+                            <div className="mb-2 p-2 bg-red-900/30 border border-red-500/50 rounded text-center">
+                                <span className="text-xs text-red-300">
+                                    Requires {bossStoneInfo?.name} to enhance past +10
+                                </span>
+                            </div>
+                        )}
 
                         {/* Buttons */}
                         <div className="mt-auto space-y-2">

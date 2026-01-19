@@ -5,6 +5,22 @@ export const MATERIALS = {
     prestigeStone: { name: 'P.Stone', color: '#f472b6', icon: '🌟' },
 };
 
+// Boss stones - dropped by bosses, required to enhance boss gear past +10
+export const BOSS_STONES = {
+    guardian: { name: 'Guardian Stone', color: '#22c55e', bossName: 'Forest Guardian', gemIcon: 5 },
+    lich: { name: 'Lich Stone', color: '#8b5cf6', bossName: 'Goblin Warlord', gemIcon: 9 },
+    dragon: { name: 'Dragon Stone', color: '#ef4444', bossName: 'Lich King', gemIcon: 13 },
+    frost: { name: 'Frost Stone', color: '#06b6d4', bossName: 'Ancient Dragon', gemIcon: 17 },
+    demon: { name: 'Demon Stone', color: '#dc2626', bossName: 'Frost Titan', gemIcon: 21 },
+    seraph: { name: 'Seraph Stone', color: '#fbbf24', bossName: 'Demon Lord', gemIcon: 25 },
+    void: { name: 'Void Stone', color: '#7c3aed', bossName: 'Seraph Commander', gemIcon: 29 },
+    chaos: { name: 'Chaos Stone', color: '#ec4899', bossName: 'The Eternal One', gemIcon: 33 },
+    eternal: { name: 'Eternal Stone', color: '#f97316', bossName: 'Chaos Lord', gemIcon: 37 },
+    astral: { name: 'Astral Stone', color: '#38bdf8', bossName: 'Astral Guardian', gemIcon: 41 },
+    cosmic: { name: 'Cosmic Stone', color: '#a78bfa', bossName: 'Cosmic Titan', gemIcon: 44 },
+    primordial: { name: 'Primordial Stone', color: '#f472b6', bossName: 'Primordial God', gemIcon: 48 },
+};
+
 export const GEAR_SLOTS = ['weapon', 'helmet', 'armor', 'boots', 'belt', 'shield', 'gloves', 'amulet'];
 
 export const TIERS = [
