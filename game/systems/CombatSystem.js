@@ -213,7 +213,7 @@ export class CombatSystem {
                 effects: [bossItem.effect],
                 bossSet: zone.bossSet,
                 isBossItem: true,
-                weaponType: droppedSlot === 'weapon' ? 'sword' : null,
+                weaponType: droppedSlot === 'weapon' ? (bossSet.weaponType || 'sword') : null,
                 name: bossItem.name,
             };
 

@@ -5,7 +5,7 @@ import { getEnhanceBonus } from '../utils/formulas';
 export const calculatePlayerStats = (gameState) => {
     const s = gameState.stats;
     // Base stats from character stats
-    let baseDmg = 5 + s.str * 2 + s.int * 1; // STR gives more physical dmg
+    let baseDmg = 5 + s.str * 2; // STR gives physical dmg
     let baseHp = 80 + s.vit * 8; // VIT gives HP
     let armor = s.vit * 1; // Small armor from VIT
     // Reduced gold/mat multipliers - resources should feel scarce
@@ -14,10 +14,12 @@ export const calculatePlayerStats = (gameState) => {
     let critChance = 3 + s.agi * 0.5; // AGI gives crit
     let critDamage = 150 + s.lck * 2; // LCK gives crit damage
     let dodge = s.agi * 0.3; // AGI gives dodge
-    let xpBonus = 0;
+    let xpBonus = s.int * 1; // INT gives XP% bonus - learn faster
+    let magicDmgMult = 1 + s.int * 0.03; // INT gives 3% magic damage per point
 
     // Gear contributions
     let enhanceDmgMult = 1; // Cumulative enhancement damage multiplier
+    let hasIntWeapon = false; // Track if using INT-scaling weapon
 
     Object.entries(gameState.gear).forEach(([slot, gear]) => {
         if (gear) {
@@ -33,6 +35,8 @@ export const calculatePlayerStats = (gameState) => {
                     // Apply weapon type bonuses
                     speedMult += weaponDef.speedBonus;
                     critChance += weaponDef.critBonus;
+                    // Track INT weapons for magic damage multiplier
+                    if (weaponDef.scaling === 'int') hasIntWeapon = true;
                 }
             }
 
@@ -136,8 +140,11 @@ export const calculatePlayerStats = (gameState) => {
         }
     });
 
+    // Apply magic damage multiplier for INT weapons (staffs)
+    const finalDmgMult = hasIntWeapon ? dmgMult * magicDmgMult : dmgMult;
+
     return {
-        damage: Math.floor(baseDmg * dmgMult * enhanceDmgMult),
+        damage: Math.floor(baseDmg * finalDmgMult * enhanceDmgMult),
         maxHp: Math.floor(baseHp * hpMult),
         armor,
         goldMult,

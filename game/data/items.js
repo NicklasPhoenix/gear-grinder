@@ -41,8 +41,9 @@ export const GEAR_NAMES = {
 
 export const BOSS_SETS = {
     // Rebalanced: lower stat bonuses (1.2-1.4), reduced set bonuses for slower progression
+    // Each boss has a specific weapon type for build variety
     guardian: {
-        name: "Guardian's", color: '#22c55e', tier: 1, statBonus: 1.2, // Zone 4 boss
+        name: "Guardian's", color: '#22c55e', tier: 1, statBonus: 1.2, weaponType: 'sword', // Zone 4 boss - STR
         items: {
             weapon: { name: "Guardian's Greatsword", effect: { id: 'bonusDmg', name: '+DMG', value: 15 } },
             helmet: { name: "Guardian's Crown", effect: { id: 'bonusHp', name: '+HP', value: 50 } },
@@ -61,7 +62,7 @@ export const BOSS_SETS = {
         ]
     },
     lich: {
-        name: "Lich", color: '#8b5cf6', tier: 2, statBonus: 1.25, // Zone 9 boss
+        name: "Lich", color: '#8b5cf6', tier: 2, statBonus: 1.25, weaponType: 'staff', // Zone 9 boss - INT
         items: {
             weapon: { name: "Lich's Staff", effect: { id: 'critDamage', name: 'Crit DMG', value: 35 } },
             helmet: { name: "Lich's Crown", effect: { id: 'lifesteal', name: 'Lifesteal', value: 3 } },
@@ -80,7 +81,7 @@ export const BOSS_SETS = {
         ]
     },
     dragon: {
-        name: "Dragonborn", color: '#ef4444', tier: 3, statBonus: 1.25, // Zone 14 boss
+        name: "Dragonborn", color: '#ef4444', tier: 3, statBonus: 1.25, weaponType: 'dagger', // Zone 14 boss - AGI
         items: {
             weapon: { name: "Dragonborn Blade", effect: { id: 'bonusDmg', name: '+DMG', value: 30 } },
             helmet: { name: "Dragonborn Horns", effect: { id: 'critChance', name: 'Crit', value: 8 } },
@@ -99,7 +100,7 @@ export const BOSS_SETS = {
         ]
     },
     frost: {
-        name: "Frostborn", color: '#06b6d4', tier: 4, statBonus: 1.3, // Zone 19 boss
+        name: "Frostborn", color: '#06b6d4', tier: 4, statBonus: 1.3, weaponType: 'mace', // Zone 19 boss - VIT
         items: {
             weapon: { name: "Frostborn Axe", effect: { id: 'bonusDmg', name: '+DMG', value: 45 } },
             helmet: { name: "Frostborn Helm", effect: { id: 'dodge', name: 'Dodge', value: 7 } },
@@ -118,7 +119,7 @@ export const BOSS_SETS = {
         ]
     },
     demon: {
-        name: "Demonheart", color: '#dc2626', tier: 5, statBonus: 1.3, // Zone 24 boss
+        name: "Demonheart", color: '#dc2626', tier: 5, statBonus: 1.3, weaponType: 'sword', // Zone 24 boss - STR
         items: {
             weapon: { name: "Demonheart Scythe", effect: { id: 'lifesteal', name: 'Lifesteal', value: 4 } },
             helmet: { name: "Demonheart Horns", effect: { id: 'bonusDmg', name: '+DMG', value: 55 } },
@@ -137,7 +138,7 @@ export const BOSS_SETS = {
         ]
     },
     seraph: {
-        name: "Seraphic", color: '#fbbf24', tier: 6, statBonus: 1.35, // Zone 29 boss
+        name: "Seraphic", color: '#fbbf24', tier: 6, statBonus: 1.35, weaponType: 'staff', // Zone 29 boss - INT
         items: {
             weapon: { name: "Seraphic Lance", effect: { id: 'bonusDmg', name: '+DMG', value: 75 } },
             helmet: { name: "Seraphic Halo", effect: { id: 'critChance', name: 'Crit', value: 10 } },
@@ -156,7 +157,7 @@ export const BOSS_SETS = {
         ]
     },
     void: {
-        name: "Voidwalker", color: '#7c3aed', tier: 6, statBonus: 1.35, // Zone 34 boss
+        name: "Voidwalker", color: '#7c3aed', tier: 6, statBonus: 1.35, weaponType: 'dagger', // Zone 34 boss - AGI
         items: {
             weapon: { name: "Voidwalker Reaper", effect: { id: 'critDamage', name: 'Crit DMG', value: 65 } },
             helmet: { name: "Voidwalker Mask", effect: { id: 'critChance', name: 'Crit', value: 11 } },
@@ -175,7 +176,7 @@ export const BOSS_SETS = {
         ]
     },
     chaos: {
-        name: "Chaosborn", color: '#ec4899', tier: 6, statBonus: 1.4, // Zone 39 boss - Final boss
+        name: "Chaosborn", color: '#ec4899', tier: 6, statBonus: 1.4, weaponType: 'sword', // Zone 39 boss - Final boss - STR
         items: {
             weapon: { name: "Chaosborn Destroyer", effect: { id: 'bonusDmg', name: '+DMG', value: 120 } },
             helmet: { name: "Chaosborn Crown", effect: { id: 'critChance', name: 'Crit', value: 12 } },
@@ -194,7 +195,7 @@ export const BOSS_SETS = {
         ]
     },
     eternal: {
-        name: "Eternal", color: '#f97316', tier: 6, statBonus: 1.5, // Prestige only - best gear
+        name: "Eternal", color: '#f97316', tier: 6, statBonus: 1.5, weaponType: 'sword', // Prestige only - best gear
         items: {
             weapon: { name: "Eternal Annihilator", effect: { id: 'bonusDmg', name: '+DMG', value: 180 } },
             helmet: { name: "Eternal Diadem", effect: { id: 'critChance', name: 'Crit', value: 14 } },
