@@ -477,19 +477,18 @@ export default function GameRenderer() {
                 if (enemyRef.current) {
                     const enemyBaseScale = Math.abs(enemyRef.current.scale.x); // Get base scale
 
-                    // Death animation (fast: ~0.15 seconds)
+                    // Death animation - very fast (~0.05 seconds)
                     if (animState.enemyDying) {
-                        animState.enemyDeathProgress += delta * 0.1;
+                        animState.enemyDeathProgress += delta * 0.25;
                         const progress = Math.min(1, animState.enemyDeathProgress);
 
-                        // Shrink, spin, and fade out
-                        const deathScale = enemyBaseScale * (1 - progress * 0.8);
+                        // Quick shrink and fade
+                        const deathScale = enemyBaseScale * (1 - progress * 0.5);
                         enemyRef.current.scale.set(deathScale, deathScale);
-                        enemyRef.current.rotation = progress * Math.PI * 2;
                         enemyRef.current.alpha = 1 - progress;
                         enemyRef.current.tint = 0xff4444;
 
-                        // When death animation completes, start spawn
+                        // When death completes, immediately start spawn
                         if (progress >= 1) {
                             animState.enemyDying = false;
                             animState.enemyDeathProgress = 0;
@@ -498,24 +497,22 @@ export default function GameRenderer() {
                             enemyRef.current.rotation = 0;
                         }
                     }
-                    // Spawn animation - fast fade in (~0.1 seconds)
+                    // Spawn animation - instant appearance
                     else if (animState.enemySpawning) {
-                        animState.enemySpawnProgress += delta * 0.15;
+                        animState.enemySpawnProgress += delta * 0.4;
                         const progress = Math.min(1, animState.enemySpawnProgress);
 
-                        // Gentle scale up from 0.9 to 1.0 with slight overshoot
-                        const bounce = progress < 0.7
-                            ? 0.9 + (progress / 0.7) * 0.15
-                            : 1.05 - (progress - 0.7) / 0.3 * 0.05;
-                        const spawnScale = enemyBaseScale * bounce;
+                        // Quick pop-in
+                        const spawnScale = enemyBaseScale * (0.8 + progress * 0.2);
                         enemyRef.current.scale.set(spawnScale, spawnScale);
-                        enemyRef.current.alpha = 0.3 + progress * 0.7; // Start at 30% alpha, not 0
+                        enemyRef.current.alpha = 0.5 + progress * 0.5; // Start at 50% alpha
                         enemyRef.current.tint = 0xffffff;
 
                         if (progress >= 1) {
                             animState.enemySpawning = false;
                             animState.enemySpawnProgress = 0;
                             enemyRef.current.scale.set(enemyBaseScale, enemyBaseScale);
+                            enemyRef.current.alpha = 1;
                         }
                     }
                     // Normal idle
@@ -1353,25 +1350,47 @@ function spawnFloatingText(app, container, { text, type, target }, positions = {
     const isHeal = type === 'heal';
     const isDodge = type === 'dodge';
     const isPlayerDmg = type === 'playerDmg';
+    const isEnemyDmg = type === 'enemyDmg';
+    const isThorns = type === 'thorns';
     const isGold = type === 'gold';
     const isXp = type === 'xp';
     const isLoot = type === 'loot';
 
     let fillColor = '#ffffff';
-    let fontSize = 24; // Increased base size
+    let fontSize = 24;
+
+    // Position offsets to prevent overlap - different types go to different areas
+    let offsetX = 0;
+    let offsetY = 0;
 
     if (isCrit) {
         fillColor = '#fde047';
         fontSize = 32;
+        offsetY = -40; // Crits float high above
     } else if (isHeal) {
         fillColor = '#4ade80';
-        fontSize = 26;
+        fontSize = 22;
+        offsetX = -60; // Heals to the left of player
+        offsetY = 20;
     } else if (isDodge) {
         fillColor = '#67e8f9';
-        fontSize = 22;
+        fontSize = 20;
+        offsetX = 50; // Dodge to the right
+        offsetY = -20;
     } else if (isPlayerDmg) {
         fillColor = '#f87171';
         fontSize = 24;
+        offsetY = 0; // Player damage centered on enemy
+    } else if (isEnemyDmg) {
+        fillColor = '#f87171';
+        fontSize = 22;
+        offsetX = 40; // Enemy damage to the right of player
+        offsetY = 10;
+    } else if (isThorns) {
+        fillColor = '#c084fc';
+        fontSize = 18;
+        offsetX = -40; // Thorns to the left of enemy
+        offsetY = 30;
     } else if (isGold) {
         fillColor = '#fbbf24';
         fontSize = 22;
@@ -1387,23 +1406,25 @@ function spawnFloatingText(app, container, { text, type, target }, positions = {
         fontFamily: 'Press Start 2P',
         fontSize,
         fill: fillColor,
-        stroke: { color: '#000000', width: 5 },
+        stroke: { color: '#000000', width: 4 },
         dropShadow: {
             color: '#000000',
-            distance: 3,
-            blur: 4,
-            alpha: 0.9,
+            distance: 2,
+            blur: 3,
+            alpha: 0.8,
         },
     });
 
     const pixiText = new PIXI.Text({ text, style });
     pixiText.anchor.set(0.5);
-    pixiText.x = target === 'player' ? playerX : enemyX;
-    pixiText.y = characterY - 70;
 
-    // Add spread
-    pixiText.x += (Math.random() - 0.5) * 50;
-    pixiText.y += (Math.random() - 0.5) * 20;
+    // Base position based on target
+    const baseX = target === 'player' ? playerX : enemyX;
+    const baseY = characterY - 70;
+
+    // Apply type-specific offset + small random spread
+    pixiText.x = baseX + offsetX + (Math.random() - 0.5) * 30;
+    pixiText.y = baseY + offsetY + (Math.random() - 0.5) * 15;
 
     container.addChild(pixiText);
 
