@@ -163,11 +163,12 @@ export default function InventoryView({ onHover }) {
                                             {/* Enhancement badge */}
                                             {item.plus > 0 && stage && (
                                                 <div
-                                                    className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 text-[11px] font-bold rounded flex items-center"
+                                                    className="absolute -top-2 -right-2 px-1.5 py-0.5 text-[11px] font-bold rounded flex items-center border-2 border-black/50"
                                                     style={{
                                                         backgroundColor: stage.bgColor,
                                                         color: stage.color,
-                                                        boxShadow: stage.glow
+                                                        boxShadow: `${stage.glow}, 0 2px 4px rgba(0,0,0,0.5)`,
+                                                        textShadow: '0 1px 2px rgba(0,0,0,0.8)'
                                                     }}
                                                 >
                                                     {stage.icon && <span className="text-[9px] mr-0.5">{stage.icon}</span>}
@@ -268,11 +269,12 @@ export default function InventoryView({ onHover }) {
                                         {/* Enhancement badge */}
                                         {item.plus > 0 && stage && (
                                             <div
-                                                className="absolute -top-1 -right-1 px-1 py-0.5 text-[9px] font-bold rounded flex items-center"
+                                                className="absolute -top-1.5 -right-1.5 px-1 py-0.5 text-[9px] font-bold rounded flex items-center border border-black/60"
                                                 style={{
                                                     backgroundColor: stage.bgColor,
                                                     color: stage.color,
-                                                    boxShadow: stage.glow
+                                                    boxShadow: `${stage.glow}, 0 1px 3px rgba(0,0,0,0.5)`,
+                                                    textShadow: '0 1px 1px rgba(0,0,0,0.8)'
                                                 }}
                                             >
                                                 {stage.icon && <span className="text-[7px] mr-0.5">{stage.icon}</span>}
