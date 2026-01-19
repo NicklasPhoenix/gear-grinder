@@ -33,6 +33,31 @@ const BOSS_SPRITES = {
   primordial: [39, 40, 41, 42, 43, 44, 45, 46, 47, 48],
 };
 
+// Preload and cache sprite images
+const spriteCache = {};
+function loadSprite(path) {
+  if (spriteCache[path]) return spriteCache[path];
+  const img = new Image();
+  img.src = path;
+  spriteCache[path] = img;
+  return img;
+}
+
+// Get sprite path for a zone
+function getSpritePath(zone) {
+  if (!zone) return null;
+
+  if (zone.isBoss && zone.bossSet) {
+    const bossOptions = BOSS_SPRITES[zone.bossSet] || BOSS_SPRITES.guardian;
+    const spriteNum = bossOptions[zone.id % bossOptions.length];
+    return `/assets/bosses/Icon${spriteNum}.png`;
+  } else {
+    const monsterOptions = MONSTER_SPRITES[zone.enemyType] || MONSTER_SPRITES.Beast;
+    const spriteNum = monsterOptions[zone.id % monsterOptions.length];
+    return `/assets/monsters/Icon${spriteNum}.png`;
+  }
+}
+
 export default function CombatCanvas({
   currentZone,
   playerHp,
@@ -47,7 +72,20 @@ export default function CombatCanvas({
   const [damageNumbers, setDamageNumbers] = useState([]);
   const animationRef = useRef(null);
   const particlesRef = useRef([]);
-  const spriteCacheRef = useRef({});
+  const [spriteLoaded, setSpriteLoaded] = useState(false);
+
+  // Preload sprite when zone changes
+  useEffect(() => {
+    const path = getSpritePath(currentZone);
+    if (path) {
+      const img = loadSprite(path);
+      if (img.complete) {
+        setSpriteLoaded(true);
+      } else {
+        img.onload = () => setSpriteLoaded(true);
+      }
+    }
+  }, [currentZone?.id]);
 
   // Add damage numbers
   useEffect(() => {
@@ -148,45 +186,17 @@ export default function CombatCanvas({
       ctx.restore();
     }
 
-    // Get sprite image for enemy - returns cached image or loads new one
-    function getEnemySprite(zone) {
-      if (!zone) return null;
-
-      let spritePath;
-      let spriteNum;
-
-      if (zone.isBoss && zone.bossSet) {
-        // Boss uses chaos monster sprites
-        const bossOptions = BOSS_SPRITES[zone.bossSet] || BOSS_SPRITES.guardian;
-        spriteNum = bossOptions[zone.id % bossOptions.length];
-        spritePath = `/assets/bosses/Icon${spriteNum}.png`;
-      } else {
-        // Regular monster uses low-level monster sprites
-        const monsterOptions = MONSTER_SPRITES[zone.enemyType] || MONSTER_SPRITES.Beast;
-        spriteNum = monsterOptions[zone.id % monsterOptions.length];
-        spritePath = `/assets/monsters/Icon${spriteNum}.png`;
-      }
-
-      // Check cache
-      if (spriteCacheRef.current[spritePath]) {
-        return spriteCacheRef.current[spritePath];
-      }
-
-      // Load and cache
-      const img = new Image();
-      img.src = spritePath;
-      spriteCacheRef.current[spritePath] = img;
-      return img;
-    }
-
     function drawEnemy(x, y, type, scale = 1, shake = 0) {
       ctx.save();
       ctx.translate(x + shake, y);
 
       const isBoss = zone?.isBoss;
-      const sprite = getEnemySprite(zone);
-      const spriteSize = 32; // Original sprite size
-      const displaySize = isBoss ? spriteSize * 4 : spriteSize * 3; // Scale up for visibility
+      const spriteSize = 32;
+      const displaySize = isBoss ? spriteSize * 4 : spriteSize * 3;
+
+      // Try to get cached sprite
+      const spritePath = getSpritePath(zone);
+      const sprite = spritePath ? spriteCache[spritePath] : null;
 
       // Draw sprite if loaded
       if (sprite && sprite.complete && sprite.naturalWidth > 0) {
@@ -195,22 +205,21 @@ export default function CombatCanvas({
           ctx.shadowBlur = 25;
           ctx.shadowColor = '#dc2626';
         } else {
-          ctx.shadowBlur = 10;
-          ctx.shadowColor = 'rgba(0,0,0,0.5)';
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = 'rgba(0,0,0,0.6)';
         }
 
-        // Draw the sprite centered
-        ctx.imageSmoothingEnabled = false; // Keep pixel art crisp
+        // Draw the sprite centered above ground
+        ctx.imageSmoothingEnabled = false;
         ctx.drawImage(
           sprite,
           -displaySize / 2,
-          -displaySize - 10, // Offset up from ground
+          -displaySize,
           displaySize,
           displaySize
         );
       } else {
-        // Fallback to simple shape while loading
-        const size = isBoss ? 25 : 15;
+        // Fallback shape while sprite loads
         const enemyColors = {
           'Beast': '#d97706',
           'Humanoid': '#78716c',
@@ -224,11 +233,25 @@ export default function CombatCanvas({
           'Chaos': '#831843',
           'Void': '#0c4a6e',
         };
-        ctx.fillStyle = enemyColors[type] || '#991b1b';
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = enemyColors[type] || '#991b1b';
+
+        const color = enemyColors[type] || '#991b1b';
+        const size = isBoss ? 40 : 25;
+
+        // Draw body
+        ctx.fillStyle = color;
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = color;
         ctx.beginPath();
-        ctx.arc(0, -displaySize/2, size * scale, 0, Math.PI * 2);
+        ctx.arc(0, -size - 20, size, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Draw eyes
+        ctx.fillStyle = '#ff0000';
+        ctx.shadowBlur = 5;
+        ctx.shadowColor = '#ff0000';
+        ctx.beginPath();
+        ctx.arc(-size/3, -size - 25, 4, 0, Math.PI * 2);
+        ctx.arc(size/3, -size - 25, 4, 0, Math.PI * 2);
         ctx.fill();
       }
 
@@ -366,7 +389,7 @@ export default function CombatCanvas({
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [currentZone, playerHp, playerMaxHp, enemyHp, enemyMaxHp, damageNumbers, isPlayerTurn, lastDamage, lastHeal]);
+  }, [currentZone, playerHp, playerMaxHp, enemyHp, enemyMaxHp, damageNumbers, isPlayerTurn, lastDamage, lastHeal, spriteLoaded]);
 
   return (
     <canvas
