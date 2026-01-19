@@ -1317,7 +1317,7 @@ function spawnLootText(app, container, { text, color }) {
         },
     });
 
-    const pixiText = new PIXI.Text({ text: `+ ${text}`, style });
+    const pixiText = new PIXI.Text({ text, style });
     pixiText.anchor.set(0.5);
     pixiText.x = 600;
     pixiText.y = 280;
