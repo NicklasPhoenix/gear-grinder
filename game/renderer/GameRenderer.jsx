@@ -86,6 +86,17 @@ export default function GameRenderer() {
         enemySpawnProgress: 0,
     });
 
+    // Store calculated positions for access across the component
+    const positionsRef = useRef({
+        playerX: 200,
+        enemyX: 600,
+        characterY: 350,
+        centerX: 400,
+        groundY: 380,
+        canvasWidth: 800,
+        canvasHeight: 450,
+    });
+
     useEffect(() => {
         if (!containerRef.current) return;
 
@@ -142,6 +153,17 @@ export default function GameRenderer() {
             const playerX = centerX - 200;
             const enemyX = centerX + 200;
             const characterY = groundY - 25;
+
+            // Store in ref for access throughout component
+            positionsRef.current = {
+                playerX,
+                enemyX,
+                characterY,
+                centerX,
+                groundY,
+                canvasWidth,
+                canvasHeight,
+            };
 
             // --- Load all character sprite sheets ---
             const spriteSheets = {};
@@ -393,19 +415,20 @@ export default function GameRenderer() {
                 // Player idle animation (breathing + slight bob)
                 // Player faces right (negative X scale)
                 if (playerRef.current) {
+                    const pos = positionsRef.current;
                     const breathe = Math.sin(time * 0.002) * 0.02;
                     const bob = Math.sin(time * 0.003) * 3;
                     const playerBaseScale = ENEMY_SPRITES['Knight'].scale || 4;
                     playerRef.current.scale.set(-playerBaseScale, playerBaseScale * (1.0 + breathe));
-                    playerRef.current.y = (playerRef.current.baseY || characterY) - 25 + bob;
+                    playerRef.current.y = (playerRef.current.baseY || pos.characterY) - 25 + bob;
 
                     // Attack cooldown animation
                     if (animState.playerAttackCooldown > 0) {
                         animState.playerAttackCooldown -= delta;
                         const progress = animState.playerAttackCooldown / 15;
-                        playerRef.current.x = (playerRef.current.baseX || playerX) + Math.sin(progress * Math.PI) * 50;
+                        playerRef.current.x = (playerRef.current.baseX || pos.playerX) + Math.sin(progress * Math.PI) * 50;
                     } else {
-                        playerRef.current.x = playerRef.current.baseX || playerX;
+                        playerRef.current.x = playerRef.current.baseX || pos.playerX;
                     }
                 }
 
@@ -457,10 +480,11 @@ export default function GameRenderer() {
                     }
                     // Normal idle
                     else {
+                        const pos = positionsRef.current;
                         const breathe = Math.sin(time * 0.0025 + 1) * 0.02;
                         const bob = Math.sin(time * 0.004 + 1) * 4;
                         enemyRef.current.scale.y = enemyBaseScale * (1.0 + breathe);
-                        enemyRef.current.y = (enemyRef.current.baseY || characterY) - 25 + bob;
+                        enemyRef.current.y = (enemyRef.current.baseY || pos.characterY) - 25 + bob;
                         enemyRef.current.alpha = 1;
                         enemyRef.current.rotation = 0;
 
@@ -518,13 +542,11 @@ export default function GameRenderer() {
 
         init();
 
-        // Store positions for event handlers
-        const positions = { playerX, enemyX, characterY, centerX };
-
         // Listen for effects
         const cleanupText = gameManager.on('floatingText', (data) => {
             if (!appRef.current || !effectsContainerRef.current) return;
-            spawnFloatingText(appRef.current, effectsContainerRef.current, data, positions);
+            const pos = positionsRef.current;
+            spawnFloatingText(appRef.current, effectsContainerRef.current, data, pos);
 
             // Combat effects
             if (data.type === 'playerDmg' || data.type === 'crit') {
@@ -533,37 +555,39 @@ export default function GameRenderer() {
                 animStateRef.current.playerAttackCooldown = 15;
 
                 // Spawn hit particles at enemy position
-                spawnHitParticles(enemyX, characterY - 55, data.type === 'crit' ? 0xfde047 : 0xffffff, data.type === 'crit' ? 20 : 10);
+                spawnHitParticles(pos.enemyX, pos.characterY - 55, data.type === 'crit' ? 0xfde047 : 0xffffff, data.type === 'crit' ? 20 : 10);
             }
             if (data.type === 'enemyDmg') {
                 animStateRef.current.playerHitFlash = 8;
                 animStateRef.current.screenShake.intensity = 4;
-                spawnHitParticles(playerX, characterY - 55, 0xef4444, 8);
+                spawnHitParticles(pos.playerX, pos.characterY - 55, 0xef4444, 8);
             }
         });
 
         // Listen for Loot
         const cleanupLoot = gameManager.on('lootDrop', ({ items }) => {
             if (!appRef.current || !effectsContainerRef.current) return;
+            const pos = positionsRef.current;
 
             // Big loot explosion at enemy position
-            spawnLootExplosion(enemyX, characterY - 55, 30);
+            spawnLootExplosion(pos.enemyX, pos.characterY - 55, 30);
 
             items.forEach((item, index) => {
                 setTimeout(() => {
-                    spawnLootText(appRef.current, effectsContainerRef.current, item, positions);
+                    spawnLootText(appRef.current, effectsContainerRef.current, item, positionsRef.current);
                 }, index * 150);
             });
         });
 
         // Listen for Enemy Death - trigger death animation
         const cleanupDeath = gameManager.on('enemyDeath', ({ isBoss }) => {
+            const pos = positionsRef.current;
             animStateRef.current.enemyDying = true;
             animStateRef.current.enemyDeathProgress = 0;
             animStateRef.current.screenShake.intensity = isBoss ? 20 : 10;
 
             // Spawn death particles at enemy position
-            spawnHitParticles(enemyX, characterY - 55, 0xff4444, isBoss ? 40 : 25);
+            spawnHitParticles(pos.enemyX, pos.characterY - 55, 0xff4444, isBoss ? 40 : 25);
         });
 
         // Particle spawn functions
@@ -603,10 +627,11 @@ export default function GameRenderer() {
         }
 
         function spawnAmbientParticle() {
+            const pos = positionsRef.current;
             const colors = [0x3b82f6, 0x8b5cf6, 0x22c55e, 0xfbbf24];
             ambientParticlesRef.current.push(new Particle(
-                Math.random() * canvasWidth,
-                canvasHeight,
+                Math.random() * pos.canvasWidth,
+                pos.canvasHeight,
                 colors[Math.floor(Math.random() * colors.length)],
                 2 + Math.random() * 2,
                 (Math.random() - 0.5) * 0.5,
