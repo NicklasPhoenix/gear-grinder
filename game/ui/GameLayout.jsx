@@ -192,7 +192,10 @@ export default function GameLayout() {
                 {/* Footer with Speed Control */}
                 <div className="px-4 py-2 border-t border-slate-800/50 bg-slate-950/50">
                     <div className="flex justify-between items-center text-xs text-slate-500">
-                        <span>Gear Grinder v1.0</span>
+                        <div className="flex items-center gap-2">
+                            <span>Gear Grinder v1.0</span>
+                            <ResetButton />
+                        </div>
                         <SpeedControl />
                         <span className="flex items-center gap-1">
                             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
@@ -299,6 +302,36 @@ function SpeedControl() {
                 </button>
             ))}
         </div>
+    );
+}
+
+function ResetButton() {
+    const { gameManager } = useGame();
+    const [confirming, setConfirming] = useState(false);
+
+    const handleReset = () => {
+        if (!confirming) {
+            setConfirming(true);
+            setTimeout(() => setConfirming(false), 3000);
+            return;
+        }
+        if (gameManager) {
+            gameManager.resetGame();
+        }
+        setConfirming(false);
+    };
+
+    return (
+        <button
+            onClick={handleReset}
+            className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all ${
+                confirming
+                    ? 'bg-red-600 text-white'
+                    : 'bg-slate-700 text-slate-400 hover:bg-red-600/50 hover:text-red-300'
+            }`}
+        >
+            {confirming ? 'Confirm?' : 'Reset'}
+        </button>
     );
 }
 

@@ -206,4 +206,10 @@ export class GameManager {
             }
         }));
     }
+
+    // Full reset for testing - no rewards, fresh start
+    resetGame() {
+        this.setState(JSON.parse(JSON.stringify(initialState)));
+        this.emit('floatingText', { text: "GAME RESET", type: "death", target: "player" });
+    }
 }
