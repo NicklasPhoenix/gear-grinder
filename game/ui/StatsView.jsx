@@ -7,12 +7,13 @@ export default function StatsView() {
     const { state, gameManager } = useGame();
     const calculated = calculatePlayerStats(state);
 
-    const handleStatUp = (key) => {
-        if (state.statPoints > 0) {
+    const handleStatUp = (key, amount = 1) => {
+        const toAdd = Math.min(amount, state.statPoints);
+        if (toAdd > 0) {
             gameManager.setState(prev => ({
                 ...prev,
-                statPoints: prev.statPoints - 1,
-                stats: { ...prev.stats, [key]: prev.stats[key] + 1 }
+                statPoints: prev.statPoints - toAdd,
+                stats: { ...prev.stats, [key]: prev.stats[key] + toAdd }
             }));
         }
     };
@@ -61,18 +62,42 @@ export default function StatsView() {
                                     <div className="text-[11px] font-bold" style={{ color: STATS[key].color }}>{STATS[key].name}</div>
                                     <div className="text-[8px] text-slate-500">{STATS[key].desc}</div>
                                 </div>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-1">
                                     <span className="text-sm font-mono font-bold text-white w-6 text-right">{val}</span>
                                     <button
-                                        onClick={() => handleStatUp(key)}
+                                        onClick={() => handleStatUp(key, 1)}
                                         disabled={state.statPoints <= 0}
-                                        className={`w-6 h-6 flex items-center justify-center rounded text-sm font-bold transition-all ${
+                                        className={`w-6 h-6 flex items-center justify-center rounded text-[10px] font-bold transition-all ${
                                             state.statPoints > 0
                                                 ? 'bg-blue-600 hover:bg-blue-500 text-white'
                                                 : 'bg-slate-700 text-slate-500 cursor-not-allowed'
                                         }`}
                                     >
-                                        +
+                                        +1
+                                    </button>
+                                    <button
+                                        onClick={() => handleStatUp(key, 10)}
+                                        disabled={state.statPoints <= 0}
+                                        className={`w-7 h-6 flex items-center justify-center rounded text-[9px] font-bold transition-all ${
+                                            state.statPoints >= 10
+                                                ? 'bg-green-600 hover:bg-green-500 text-white'
+                                                : state.statPoints > 0
+                                                    ? 'bg-green-600/50 hover:bg-green-500/50 text-green-200'
+                                                    : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                                        }`}
+                                    >
+                                        +10
+                                    </button>
+                                    <button
+                                        onClick={() => handleStatUp(key, state.statPoints)}
+                                        disabled={state.statPoints <= 0}
+                                        className={`w-8 h-6 flex items-center justify-center rounded text-[9px] font-bold transition-all ${
+                                            state.statPoints > 0
+                                                ? 'bg-purple-600 hover:bg-purple-500 text-white'
+                                                : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                                        }`}
+                                    >
+                                        MAX
                                     </button>
                                 </div>
                             </div>
