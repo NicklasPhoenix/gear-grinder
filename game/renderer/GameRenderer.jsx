@@ -287,7 +287,8 @@ export default function GameRenderer() {
             };
 
             // --- Create animated background ---
-            createBackground(bgContainer, canvasWidth, canvasHeight);
+            const initialZone = state?.currentZone || 0;
+            createBackground(bgContainer, canvasWidth, canvasHeight, initialZone);
 
             // --- Ground/Floor ---
             const ground = new PIXI.Graphics();
@@ -343,7 +344,7 @@ export default function GameRenderer() {
             enemy.anchor.set(0.5, 1);
             enemy.x = enemyX;
             enemy.y = characterY;
-            enemy.scale.set(5, 5); // Larger enemy sprite
+            enemy.scale.set(-5, 5); // Larger enemy sprite, flipped to face left (toward player)
             gameContainer.addChild(enemy);
             enemyRef.current = enemy;
             enemy.baseX = enemyX;
@@ -528,7 +529,7 @@ export default function GameRenderer() {
 
                         // Quick shrink and fade
                         const deathScale = enemyBaseScale * (1 - progress * 0.5);
-                        enemyRef.current.scale.set(deathScale, deathScale);
+                        enemyRef.current.scale.set(-deathScale, deathScale);
                         enemyRef.current.alpha = 1 - progress;
                         enemyRef.current.tint = 0xff4444;
 
@@ -548,14 +549,14 @@ export default function GameRenderer() {
 
                         // Quick pop-in
                         const spawnScale = enemyBaseScale * (0.8 + progress * 0.2);
-                        enemyRef.current.scale.set(spawnScale, spawnScale);
+                        enemyRef.current.scale.set(-spawnScale, spawnScale);
                         enemyRef.current.alpha = 0.5 + progress * 0.5; // Start at 50% alpha
                         enemyRef.current.tint = 0xffffff;
 
                         if (progress >= 1) {
                             animState.enemySpawning = false;
                             animState.enemySpawnProgress = 0;
-                            enemyRef.current.scale.set(enemyBaseScale, enemyBaseScale);
+                            enemyRef.current.scale.set(-enemyBaseScale, enemyBaseScale);
                             enemyRef.current.alpha = 1;
                         }
                     }
@@ -823,12 +824,26 @@ export default function GameRenderer() {
 
     // Background image ref for zone changes
     const bgSpriteRef = useRef(null);
+    const bgContainerRef = useRef(null);
+
+    // Get background image path based on zone (progressive darkness)
+    function getBackgroundForZone(zoneId) {
+        // Forest zones (0-4) use forest backgrounds progressively darker
+        if (zoneId <= 4) {
+            const bgIndex = Math.min(Math.floor(zoneId / 1.25) + 1, 4);
+            return `/assets/backgrounds/forest_0${bgIndex}.png`;
+        }
+        // Later zones also use forest backgrounds (cycle through them with increasing darkness)
+        const bgIndex = Math.min((zoneId % 4) + 1, 4);
+        return `/assets/backgrounds/forest_0${bgIndex}.png`;
+    }
 
     // Create animated background with forest image
-    async function createBackground(container, width = 800, height = 600) {
-        // Load forest background image
+    async function createBackground(container, width = 800, height = 600, zoneId = 0) {
+        // Load forest background image based on zone
+        const bgPath = getBackgroundForZone(zoneId);
         try {
-            const bgTexture = await PIXI.Assets.load('/assets/backgrounds/forest_01.png');
+            const bgTexture = await PIXI.Assets.load(bgPath);
             const bgSprite = new PIXI.Sprite(bgTexture);
 
             // Calculate scale to cover canvas while maintaining aspect ratio (no stretching)
@@ -846,6 +861,7 @@ export default function GameRenderer() {
 
             container.addChild(bgSprite);
             bgSpriteRef.current = bgSprite;
+            bgContainerRef.current = container;
         } catch (e) {
             console.warn('Failed to load background, using fallback gradient', e);
             // Fallback gradient background
@@ -890,6 +906,30 @@ export default function GameRenderer() {
             vignette.fill({ color: 0x000000, alpha: (1 - i / 50) * 0.3 });
         }
         container.addChild(vignette);
+    }
+
+    // Update background texture when zone changes
+    async function updateBackground(zoneId, width = 800, height = 600) {
+        if (!bgSpriteRef.current) return;
+
+        const bgPath = getBackgroundForZone(zoneId);
+        try {
+            const bgTexture = await PIXI.Assets.load(bgPath);
+            bgSpriteRef.current.texture = bgTexture;
+
+            // Recalculate scale to cover canvas
+            const textureWidth = bgTexture.width;
+            const textureHeight = bgTexture.height;
+            const scaleX = width / textureWidth;
+            const scaleY = height / textureHeight;
+            const coverScale = Math.max(scaleX, scaleY);
+
+            bgSpriteRef.current.scale.set(coverScale, coverScale);
+            bgSpriteRef.current.x = (width - textureWidth * coverScale) / 2;
+            bgSpriteRef.current.y = (height - textureHeight * coverScale) / 2;
+        } catch (e) {
+            console.warn('Failed to update background:', e);
+        }
     }
 
     // --- Create Procedural Character Graphics ---
@@ -1289,7 +1329,7 @@ export default function GameRenderer() {
             // Scale for 32x32 sprites - larger for bosses (increased by 1.5x)
             const baseScale = zone.isBoss ? 6.5 : 5;
             enemyRef.current.baseScale = baseScale; // Store for animation reference
-            enemyRef.current.scale.set(baseScale, baseScale);
+            enemyRef.current.scale.set(-baseScale, baseScale); // Negative x to face player
             enemyRef.current.alpha = 1; // Ensure visible after zone change
 
             if (zone.isBoss) {
@@ -1321,6 +1361,11 @@ export default function GameRenderer() {
             // Update zone text
             if (effectsContainerRef.current?.parent?.zoneText) {
                 effectsContainerRef.current.parent.zoneText.text = zone.name.replace(/🔥|🌟/g, '').trim();
+            }
+
+            // Update background for zone changes
+            if (appRef.current) {
+                updateBackground(zoneId, appRef.current.screen.width, appRef.current.screen.height);
             }
         }
 
