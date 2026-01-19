@@ -36,15 +36,15 @@ export default function StatsView() {
             {/* Header */}
             <div className="game-panel">
                 <div className="game-panel-header flex justify-between items-center">
-                    <span>Stats</span>
-                    <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-green-400">
-                            Points: <span className="font-bold">{state.statPoints}</span>
+                    <span className="text-sm">Stats</span>
+                    <div className="flex items-center gap-3">
+                        <span className="text-sm text-green-400">
+                            Points: <span className="font-bold text-lg">{state.statPoints}</span>
                         </span>
-                        <button onClick={handleManualSave} className="px-2 py-0.5 text-[9px] bg-blue-600/40 hover:bg-blue-600/60 text-blue-200 rounded">
+                        <button onClick={handleManualSave} className="px-3 py-1 text-xs bg-blue-600/40 hover:bg-blue-600/60 text-blue-200 rounded font-bold">
                             SAVE
                         </button>
-                        <button onClick={handleReset} className="px-2 py-0.5 text-[9px] bg-red-600/40 hover:bg-red-600/60 text-red-200 rounded">
+                        <button onClick={handleReset} className="px-3 py-1 text-xs bg-red-600/40 hover:bg-red-600/60 text-red-200 rounded font-bold">
                             RESET
                         </button>
                     </div>
@@ -54,20 +54,20 @@ export default function StatsView() {
             <div className="flex-1 flex gap-2 min-h-0">
                 {/* Base Attributes */}
                 <div className="w-1/2 game-panel flex flex-col min-h-0">
-                    <div className="game-panel-header">Attributes</div>
-                    <div className="flex-1 overflow-y-auto custom-scrollbar p-2 min-h-0 space-y-1">
+                    <div className="game-panel-header text-sm">Attributes</div>
+                    <div className="flex-1 overflow-y-auto custom-scrollbar p-3 min-h-0 space-y-2">
                         {Object.entries(state.stats).map(([key, val]) => (
-                            <div key={key} className="flex items-center justify-between p-1.5 bg-slate-900/50 rounded hover:bg-slate-800/50 transition-colors">
-                                <div>
-                                    <div className="text-[11px] font-bold" style={{ color: STATS[key].color }}>{STATS[key].name}</div>
-                                    <div className="text-[8px] text-slate-500">{STATS[key].desc}</div>
+                            <div key={key} className="flex items-center justify-between p-2 bg-slate-900/50 rounded hover:bg-slate-800/50 transition-colors">
+                                <div className="flex-1">
+                                    <div className="text-sm font-bold" style={{ color: STATS[key].color }}>{STATS[key].name}</div>
+                                    <div className="text-xs text-slate-500">{STATS[key].desc}</div>
                                 </div>
-                                <div className="flex items-center gap-1">
-                                    <span className="text-sm font-mono font-bold text-white w-6 text-right">{val}</span>
+                                <div className="flex items-center gap-1.5">
+                                    <span className="text-xl font-mono font-bold text-white w-10 text-right">{val}</span>
                                     <button
                                         onClick={() => handleStatUp(key, 1)}
                                         disabled={state.statPoints <= 0}
-                                        className={`w-6 h-6 flex items-center justify-center rounded text-[10px] font-bold transition-all ${
+                                        className={`w-8 h-8 flex items-center justify-center rounded text-xs font-bold transition-all ${
                                             state.statPoints > 0
                                                 ? 'bg-blue-600 hover:bg-blue-500 text-white'
                                                 : 'bg-slate-700 text-slate-500 cursor-not-allowed'
@@ -78,7 +78,7 @@ export default function StatsView() {
                                     <button
                                         onClick={() => handleStatUp(key, 10)}
                                         disabled={state.statPoints <= 0}
-                                        className={`w-7 h-6 flex items-center justify-center rounded text-[9px] font-bold transition-all ${
+                                        className={`w-10 h-8 flex items-center justify-center rounded text-xs font-bold transition-all ${
                                             state.statPoints >= 10
                                                 ? 'bg-green-600 hover:bg-green-500 text-white'
                                                 : state.statPoints > 0
@@ -91,7 +91,7 @@ export default function StatsView() {
                                     <button
                                         onClick={() => handleStatUp(key, state.statPoints)}
                                         disabled={state.statPoints <= 0}
-                                        className={`w-8 h-6 flex items-center justify-center rounded text-[9px] font-bold transition-all ${
+                                        className={`w-12 h-8 flex items-center justify-center rounded text-xs font-bold transition-all ${
                                             state.statPoints > 0
                                                 ? 'bg-purple-600 hover:bg-purple-500 text-white'
                                                 : 'bg-slate-700 text-slate-500 cursor-not-allowed'
@@ -107,9 +107,9 @@ export default function StatsView() {
 
                 {/* Combat Stats */}
                 <div className="w-1/2 game-panel flex flex-col min-h-0">
-                    <div className="game-panel-header">Combat</div>
-                    <div className="flex-1 overflow-y-auto custom-scrollbar p-2 min-h-0">
-                        <div className="space-y-0.5 text-[11px]">
+                    <div className="game-panel-header text-sm">Combat</div>
+                    <div className="flex-1 overflow-y-auto custom-scrollbar p-3 min-h-0">
+                        <div className="space-y-1">
                             <StatRow label="Damage" value={calculated.damage} color="text-red-300" />
                             <StatRow label="Armor" value={calculated.armor} color="text-blue-300" />
                             <StatRow label="Crit %" value={`${calculated.critChance.toFixed(1)}%`} color="text-yellow-300" />
@@ -118,7 +118,7 @@ export default function StatsView() {
                             <StatRow label="Dodge" value={`${calculated.dodge.toFixed(1)}%`} color="text-green-300" />
                             <StatRow label="Lifesteal" value={`${calculated.lifesteal.toFixed(1)}%`} color="text-pink-300" />
                             <StatRow label="Thorns" value={calculated.thorns || 0} color="text-purple-300" />
-                            <div className="border-t border-slate-700/50 my-1 pt-1">
+                            <div className="border-t border-slate-700/50 my-2 pt-2">
                                 <StatRow label="Gold %" value={`+${((calculated.goldMult - 1) * 100).toFixed(0)}%`} color="text-yellow-400" />
                                 <StatRow label="XP %" value={`+${(calculated.xpBonus || 0).toFixed(0)}%`} color="text-purple-400" />
                             </div>
@@ -132,9 +132,9 @@ export default function StatsView() {
 
 function StatRow({ label, value, color = "text-slate-200" }) {
     return (
-        <div className="flex justify-between py-0.5 px-1 hover:bg-slate-800/30 rounded">
-            <span className="text-slate-400">{label}</span>
-            <span className={`font-mono font-bold ${color}`}>{value}</span>
+        <div className="flex justify-between py-1.5 px-2 hover:bg-slate-800/30 rounded">
+            <span className="text-sm text-slate-400">{label}</span>
+            <span className={`text-base font-mono font-bold ${color}`}>{value}</span>
         </div>
     );
 }
