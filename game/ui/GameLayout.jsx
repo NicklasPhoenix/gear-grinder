@@ -99,31 +99,44 @@ export default function GameLayout() {
             <div className="flex-1 relative flex flex-col">
                 {/* Top Info Bar - overlaid on canvas */}
                 <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-10">
-                    {/* Zone Info */}
-                    <div className="glass-card rounded-xl p-4 animate-fadeIn">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-yellow-500/20 to-orange-500/20 flex items-center justify-center">
-                                {currentZone.isBoss ? (
-                                    <span className="text-lg">&#128293;</span>
-                                ) : (
-                                    <svg className="w-5 h-5 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
+                    {/* Zone Info + Stats */}
+                    <div className="flex flex-col gap-2">
+                        <div className="glass-card rounded-xl p-4 animate-fadeIn">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-yellow-500/20 to-orange-500/20 flex items-center justify-center">
+                                    {currentZone.isBoss ? (
+                                        <span className="text-lg">&#128293;</span>
+                                    ) : (
+                                        <svg className="w-5 h-5 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                    )}
+                                </div>
+                                <div>
+                                    <p className="text-xs text-slate-400 uppercase tracking-wider">Current Zone</p>
+                                    <h2 className={`font-bold text-lg ${currentZone.isBoss ? 'text-red-400' : 'text-white'}`}>
+                                        {currentZone.name.replace(/[^a-zA-Z\s]/g, '').trim()}
+                                    </h2>
+                                </div>
+                            </div>
+                            {currentZone.isBoss && (
+                                <div className="mt-2 px-2 py-1 bg-red-500/20 rounded text-xs text-red-400 font-bold uppercase tracking-wider text-center">
+                                    Boss Battle
+                                </div>
+                            )}
+                        </div>
+                        {/* Stats below zone */}
+                        <div className="glass-card rounded-xl px-4 py-2 animate-fadeIn">
+                            <div className="flex items-center gap-6">
+                                <StatMini label="ATK" value={Math.floor(playerStats.damage || 10)} color="text-red-400" />
+                                <StatMini label="DEF" value={Math.floor(playerStats.armor || 5)} color="text-blue-400" />
+                                <StatMini label="Kills" value={state.kills || 0} color="text-green-400" />
+                                {state.prestigeLevel > 0 && (
+                                    <StatMini label="Prestige" value={state.prestigeLevel} color="text-pink-400" />
                                 )}
                             </div>
-                            <div>
-                                <p className="text-xs text-slate-400 uppercase tracking-wider">Current Zone</p>
-                                <h2 className={`font-bold text-lg ${currentZone.isBoss ? 'text-red-400' : 'text-white'}`}>
-                                    {currentZone.name.replace(/[^a-zA-Z\s]/g, '').trim()}
-                                </h2>
-                            </div>
                         </div>
-                        {currentZone.isBoss && (
-                            <div className="mt-2 px-2 py-1 bg-red-500/20 rounded text-xs text-red-400 font-bold uppercase tracking-wider text-center">
-                                Boss Battle
-                            </div>
-                        )}
                     </div>
 
                     {/* Currency Display - All Materials */}
@@ -165,20 +178,9 @@ export default function GameLayout() {
                     <GameRenderer />
                 </div>
 
-                {/* Bottom Stats Bar - overlaid on canvas */}
-                <div className="absolute bottom-4 left-4 right-4 flex justify-center z-10">
-                    <div className="glass-card rounded-xl px-6 py-3 animate-fadeIn">
-                        <div className="flex items-center gap-8">
-                            <StatMini label="Level" value={state.level || 1} color="text-purple-400" />
-                            <StatMini label="ATK" value={Math.floor(playerStats.damage || 10)} color="text-red-400" />
-                            <StatMini label="DEF" value={Math.floor(playerStats.armor || 5)} color="text-blue-400" />
-                            <StatMini label="Kills" value={state.kills || 0} color="text-green-400" />
-                            {state.prestigeLevel > 0 && (
-                                <StatMini label="Prestige" value={state.prestigeLevel} color="text-pink-400" />
-                            )}
-                        </div>
-                        <XPBar level={state.level || 1} xp={state.xp || 0} />
-                    </div>
+                {/* Bottom XP Bar - full width footer */}
+                <div className="absolute bottom-0 left-0 right-0 z-10">
+                    <XPBar level={state.level || 1} xp={state.xp || 0} />
                 </div>
             </div>
 
@@ -376,16 +378,26 @@ function XPBar({ level, xp }) {
     const progress = Math.min(100, (xp / xpNeeded) * 100);
 
     return (
-        <div className="mt-2">
-            <div className="flex justify-between text-[9px] text-slate-400 mb-0.5">
-                <span>XP</span>
-                <span>{xp.toLocaleString()} / {xpNeeded.toLocaleString()}</span>
-            </div>
-            <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-                <div
-                    className="h-full bg-gradient-to-r from-purple-600 to-purple-400 transition-all duration-300"
-                    style={{ width: `${progress}%` }}
-                />
+        <div className="bg-slate-950/90 backdrop-blur-sm border-t border-slate-800/50 px-4 py-2">
+            <div className="flex items-center gap-4">
+                {/* Level display */}
+                <div className="flex items-center gap-2 min-w-[100px]">
+                    <span className="text-sm text-slate-400 uppercase">Lv.</span>
+                    <span className="text-2xl font-bold text-purple-400">{level}</span>
+                </div>
+                {/* XP bar */}
+                <div className="flex-1">
+                    <div className="flex justify-between text-sm text-slate-400 mb-1">
+                        <span>XP</span>
+                        <span className="font-semibold">{xp.toLocaleString()} / {xpNeeded.toLocaleString()}</span>
+                    </div>
+                    <div className="h-4 bg-slate-800 rounded-full overflow-hidden">
+                        <div
+                            className="h-full bg-gradient-to-r from-purple-600 to-purple-400 transition-all duration-300"
+                            style={{ width: `${progress}%` }}
+                        />
+                    </div>
+                </div>
             </div>
         </div>
     );
