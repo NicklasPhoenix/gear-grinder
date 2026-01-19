@@ -92,18 +92,29 @@ export default function GameRenderer() {
         const app = new PIXI.Application();
 
         const init = async () => {
+            // Get container dimensions for full-size canvas
+            const containerWidth = containerRef.current.clientWidth || 800;
+            const containerHeight = containerRef.current.clientHeight || 600;
+
             await app.init({
-                width: 800,
-                height: 450,
+                width: containerWidth,
+                height: containerHeight,
                 backgroundColor: 0x0a0a0f,
                 antialias: true,
                 resolution: window.devicePixelRatio || 1,
                 autoDensity: true,
+                resizeTo: containerRef.current,
             });
 
             if (!containerRef.current) return;
             containerRef.current.appendChild(app.canvas);
             appRef.current = app;
+
+            // Store dimensions for positioning calculations
+            const canvasWidth = containerWidth;
+            const canvasHeight = containerHeight;
+            const centerX = canvasWidth / 2;
+            const groundY = canvasHeight - 70;
 
             // Main container with shake support
             const mainContainer = new PIXI.Container();
@@ -126,6 +137,11 @@ export default function GameRenderer() {
             bgContainerRef.current = bgContainer;
             particleContainerRef.current = particleContainer;
             gameContainerRef.current = gameContainer;
+
+            // Calculate positions based on canvas size
+            const playerX = centerX - 200;
+            const enemyX = centerX + 200;
+            const characterY = groundY - 25;
 
             // --- Load all character sprite sheets ---
             const spriteSheets = {};
@@ -159,23 +175,23 @@ export default function GameRenderer() {
             };
 
             // --- Create animated background ---
-            createBackground(bgContainer);
+            createBackground(bgContainer, canvasWidth, canvasHeight);
 
             // --- Ground/Floor ---
             const ground = new PIXI.Graphics();
-            ground.rect(0, 380, 800, 70);
+            ground.rect(0, groundY, canvasWidth, 70);
             ground.fill({ color: 0x1a1a2e });
-            ground.rect(0, 378, 800, 4);
+            ground.rect(0, groundY - 2, canvasWidth, 4);
             ground.fill({ color: 0x2a2a4e });
             bgContainer.addChild(ground);
 
             // Grid lines on ground for depth
             const gridLines = new PIXI.Graphics();
             gridLines.setStrokeStyle({ width: 1, color: 0x2a2a4e, alpha: 0.3 });
-            for (let i = 0; i < 20; i++) {
+            for (let i = 0; i < Math.ceil(canvasWidth / 50) + 5; i++) {
                 const x = i * 50 - 100;
-                gridLines.moveTo(x, 380);
-                gridLines.lineTo(x + 200, 450);
+                gridLines.moveTo(x, groundY);
+                gridLines.lineTo(x + 200, canvasHeight);
                 gridLines.stroke();
             }
             bgContainer.addChild(gridLines);
@@ -188,22 +204,24 @@ export default function GameRenderer() {
                 ? new PIXI.Sprite(playerTexture)
                 : new PIXI.Graphics().rect(-8, -8, 16, 16).fill(0x3b82f6);
             player.anchor.set(0.5, 1);
-            player.x = 200;
-            player.y = 375;
+            player.x = playerX;
+            player.y = characterY;
             const playerScale = playerData.scale || 4;
             player.scale.set(-playerScale, playerScale); // Negative X to face right
             gameContainer.addChild(player);
             playerRef.current = player;
+            player.baseX = playerX;
+            player.baseY = characterY;
 
             // --- Player Shadow ---
             const playerShadow = new PIXI.Graphics();
-            playerShadow.ellipse(200, 378, 25, 8);
+            playerShadow.ellipse(playerX, groundY - 2, 25, 8);
             playerShadow.fill({ color: 0x000000, alpha: 0.4 });
             gameContainer.addChildAt(playerShadow, 0);
 
             // --- Player glow effect ---
             const playerGlow = new PIXI.Graphics();
-            playerGlow.circle(200, 350, 50);
+            playerGlow.circle(playerX, characterY - 25, 50);
             playerGlow.fill({ color: 0x3b82f6, alpha: 0.1 });
             gameContainer.addChildAt(playerGlow, 0);
 
@@ -211,11 +229,13 @@ export default function GameRenderer() {
             // Start with a placeholder, will be updated by state change
             const enemy = new PIXI.Sprite(PIXI.Texture.WHITE);
             enemy.anchor.set(0.5, 1);
-            enemy.x = 600;
-            enemy.y = 375;
+            enemy.x = enemyX;
+            enemy.y = characterY;
             enemy.scale.set(3.5, 3.5);
             gameContainer.addChild(enemy);
             enemyRef.current = enemy;
+            enemy.baseX = enemyX;
+            enemy.baseY = characterY;
 
             // Load initial sprite based on current zone
             const initialZone = getZoneById(gameManager.getState()?.currentZone || 0);
@@ -236,55 +256,58 @@ export default function GameRenderer() {
 
             // --- Enemy Shadow ---
             const enemyShadow = new PIXI.Graphics();
-            enemyShadow.ellipse(600, 378, 25, 8);
+            enemyShadow.ellipse(enemyX, groundY - 2, 25, 8);
             enemyShadow.fill({ color: 0x000000, alpha: 0.4 });
             gameContainer.addChildAt(enemyShadow, 0);
 
             // --- Enemy aura for bosses ---
             const enemyAura = new PIXI.Graphics();
-            enemyAura.circle(600, 350, 60);
+            enemyAura.circle(enemyX, characterY - 25, 60);
             enemyAura.fill({ color: 0xef4444, alpha: 0 });
             gameContainer.addChildAt(enemyAura, 0);
             enemy.aura = enemyAura;
             enemy.shadow = enemyShadow;
+            enemy.shadowX = enemyX;
+            enemy.auraX = enemyX;
+            enemy.auraY = characterY - 25;
 
             // Store shadow ref
             player.shadow = playerShadow;
             player.glow = playerGlow;
 
-            // --- HP Bars (Modern style with text display) ---
+            // --- HP Bars (Modern style with text display) - 3x larger ---
             const createHpBar = (x, y, width, isPlayer) => {
                 console.log(`Creating HP bar at (${x}, ${y}), width=${width}, isPlayer=${isPlayer}`);
                 const container = new PIXI.Container();
                 container.position.set(x, y);
 
-                // Outer frame - simple rect for reliability
+                // Outer frame - simple rect for reliability (3x height: 18 -> 54)
                 const frame = new PIXI.Graphics();
-                frame.rect(-width/2 - 3, -9, width + 6, 18);
-                frame.fill({ color: 0x000000, alpha: 0.6 });
-                frame.rect(-width/2 - 3, -9, width + 6, 18);
-                frame.stroke({ width: 2, color: isPlayer ? 0x3b82f6 : 0xef4444, alpha: 0.8 });
+                frame.rect(-width/2 - 4, -27, width + 8, 54);
+                frame.fill({ color: 0x000000, alpha: 0.7 });
+                frame.rect(-width/2 - 4, -27, width + 8, 54);
+                frame.stroke({ width: 3, color: isPlayer ? 0x3b82f6 : 0xef4444, alpha: 0.8 });
                 container.addChild(frame);
 
-                // Background
+                // Background (3x height: 12 -> 36)
                 const bg = new PIXI.Graphics();
-                bg.rect(-width/2, -6, width, 12);
+                bg.rect(-width/2, -18, width, 36);
                 bg.fill(0x1f2937);
                 container.addChild(bg);
 
-                // Fill - draw initial full bar
+                // Fill - draw initial full bar (3x height: 12 -> 36)
                 const fill = new PIXI.Graphics();
-                fill.rect(-width/2, -6, width, 12);
+                fill.rect(-width/2, -18, width, 36);
                 fill.fill(isPlayer ? 0x3b82f6 : 0xef4444);
                 container.addChild(fill);
                 container.fillRef = fill;
                 container.barWidth = width;
                 container.isPlayer = isPlayer;
 
-                // HP Text overlay (shows current/max)
+                // HP Text overlay (shows current/max) - larger font
                 const hpTextStyle = new PIXI.TextStyle({
                     fontFamily: 'Rajdhani',
-                    fontSize: 10,
+                    fontSize: 20,
                     fontWeight: 'bold',
                     fill: '#ffffff',
                 });
@@ -296,24 +319,24 @@ export default function GameRenderer() {
 
                 console.log(`HP bar created, fillRef set: ${!!container.fillRef}`);
 
-                // Label
+                // Label - larger font
                 const labelStyle = new PIXI.TextStyle({
                     fontFamily: 'Rajdhani',
-                    fontSize: 10,
+                    fontSize: 14,
                     fontWeight: 'bold',
                     fill: isPlayer ? '#60a5fa' : '#f87171',
                 });
                 const label = new PIXI.Text({ text: isPlayer ? 'HERO' : 'ENEMY', style: labelStyle });
                 label.anchor.set(0.5);
-                label.y = -20;
+                label.y = -38;
                 container.addChild(label);
                 container.label = label;
 
                 return container;
             };
 
-            const playerBar = createHpBar(200, 400, 120, true);
-            const enemyBar = createHpBar(600, 400, 120, false);
+            const playerBar = createHpBar(playerX, groundY + 40, 180, true);
+            const enemyBar = createHpBar(enemyX, groundY + 40, 180, false);
             uiContainer.addChild(playerBar);
             uiContainer.addChild(enemyBar);
             playerHpBarRef.current = playerBar;
@@ -344,7 +367,7 @@ export default function GameRenderer() {
             });
             const zoneText = new PIXI.Text({ text: 'Forest Clearing', style: zoneStyle });
             zoneText.anchor.set(0.5, 0);
-            zoneText.x = 400;
+            zoneText.x = centerX;
             zoneText.y = 15;
             uiContainer.addChild(zoneText);
             uiContainer.zoneText = zoneText;
@@ -374,15 +397,15 @@ export default function GameRenderer() {
                     const bob = Math.sin(time * 0.003) * 3;
                     const playerBaseScale = ENEMY_SPRITES['Knight'].scale || 4;
                     playerRef.current.scale.set(-playerBaseScale, playerBaseScale * (1.0 + breathe));
-                    playerRef.current.y = 350 + bob;
+                    playerRef.current.y = (playerRef.current.baseY || characterY) - 25 + bob;
 
                     // Attack cooldown animation
                     if (animState.playerAttackCooldown > 0) {
                         animState.playerAttackCooldown -= delta;
                         const progress = animState.playerAttackCooldown / 15;
-                        playerRef.current.x = 200 + Math.sin(progress * Math.PI) * 50;
+                        playerRef.current.x = (playerRef.current.baseX || playerX) + Math.sin(progress * Math.PI) * 50;
                     } else {
-                        playerRef.current.x = 200;
+                        playerRef.current.x = playerRef.current.baseX || playerX;
                     }
                 }
 
@@ -437,7 +460,7 @@ export default function GameRenderer() {
                         const breathe = Math.sin(time * 0.0025 + 1) * 0.02;
                         const bob = Math.sin(time * 0.004 + 1) * 4;
                         enemyRef.current.scale.y = enemyBaseScale * (1.0 + breathe);
-                        enemyRef.current.y = 350 + bob;
+                        enemyRef.current.y = (enemyRef.current.baseY || characterY) - 25 + bob;
                         enemyRef.current.alpha = 1;
                         enemyRef.current.rotation = 0;
 
@@ -495,10 +518,13 @@ export default function GameRenderer() {
 
         init();
 
+        // Store positions for event handlers
+        const positions = { playerX, enemyX, characterY, centerX };
+
         // Listen for effects
         const cleanupText = gameManager.on('floatingText', (data) => {
             if (!appRef.current || !effectsContainerRef.current) return;
-            spawnFloatingText(appRef.current, effectsContainerRef.current, data);
+            spawnFloatingText(appRef.current, effectsContainerRef.current, data, positions);
 
             // Combat effects
             if (data.type === 'playerDmg' || data.type === 'crit') {
@@ -506,13 +532,13 @@ export default function GameRenderer() {
                 animStateRef.current.screenShake.intensity = data.type === 'crit' ? 12 : 6;
                 animStateRef.current.playerAttackCooldown = 15;
 
-                // Spawn hit particles
-                spawnHitParticles(600, 320, data.type === 'crit' ? 0xfde047 : 0xffffff, data.type === 'crit' ? 20 : 10);
+                // Spawn hit particles at enemy position
+                spawnHitParticles(enemyX, characterY - 55, data.type === 'crit' ? 0xfde047 : 0xffffff, data.type === 'crit' ? 20 : 10);
             }
             if (data.type === 'enemyDmg') {
                 animStateRef.current.playerHitFlash = 8;
                 animStateRef.current.screenShake.intensity = 4;
-                spawnHitParticles(200, 320, 0xef4444, 8);
+                spawnHitParticles(playerX, characterY - 55, 0xef4444, 8);
             }
         });
 
@@ -520,12 +546,12 @@ export default function GameRenderer() {
         const cleanupLoot = gameManager.on('lootDrop', ({ items }) => {
             if (!appRef.current || !effectsContainerRef.current) return;
 
-            // Big loot explosion
-            spawnLootExplosion(600, 320, 30);
+            // Big loot explosion at enemy position
+            spawnLootExplosion(enemyX, characterY - 55, 30);
 
             items.forEach((item, index) => {
                 setTimeout(() => {
-                    spawnLootText(appRef.current, effectsContainerRef.current, item);
+                    spawnLootText(appRef.current, effectsContainerRef.current, item, positions);
                 }, index * 150);
             });
         });
@@ -536,8 +562,8 @@ export default function GameRenderer() {
             animStateRef.current.enemyDeathProgress = 0;
             animStateRef.current.screenShake.intensity = isBoss ? 20 : 10;
 
-            // Spawn death particles
-            spawnHitParticles(600, 320, 0xff4444, isBoss ? 40 : 25);
+            // Spawn death particles at enemy position
+            spawnHitParticles(enemyX, characterY - 55, 0xff4444, isBoss ? 40 : 25);
         });
 
         // Particle spawn functions
@@ -579,8 +605,8 @@ export default function GameRenderer() {
         function spawnAmbientParticle() {
             const colors = [0x3b82f6, 0x8b5cf6, 0x22c55e, 0xfbbf24];
             ambientParticlesRef.current.push(new Particle(
-                Math.random() * 800,
-                450,
+                Math.random() * canvasWidth,
+                canvasHeight,
                 colors[Math.floor(Math.random() * colors.length)],
                 2 + Math.random() * 2,
                 (Math.random() - 0.5) * 0.5,
@@ -652,27 +678,28 @@ export default function GameRenderer() {
     const bgSpriteRef = useRef(null);
 
     // Create animated background with forest image
-    async function createBackground(container) {
+    async function createBackground(container, width = 800, height = 600) {
         // Load forest background image
         try {
             const bgTexture = await PIXI.Assets.load('/assets/backgrounds/forest_01.png');
             const bgSprite = new PIXI.Sprite(bgTexture);
-            // Scale to fit canvas (800x450) while covering
-            bgSprite.width = 800;
-            bgSprite.height = 450;
+            // Scale to fit canvas while covering
+            bgSprite.width = width;
+            bgSprite.height = height;
             container.addChild(bgSprite);
             bgSpriteRef.current = bgSprite;
         } catch (e) {
             console.warn('Failed to load background, using fallback gradient', e);
             // Fallback gradient background
             const bg = new PIXI.Graphics();
-            for (let i = 0; i < 380; i += 2) {
-                const progress = i / 380;
+            const gradientHeight = height - 70;
+            for (let i = 0; i < gradientHeight; i += 2) {
+                const progress = i / gradientHeight;
                 const r = Math.floor(10 + progress * 15);
                 const g = Math.floor(10 + progress * 20);
                 const b = Math.floor(20 + progress * 30);
                 const color = (r << 16) | (g << 8) | b;
-                bg.rect(0, i, 800, 2);
+                bg.rect(0, i, width, 2);
                 bg.fill(color);
             }
             container.addChild(bg);
@@ -680,7 +707,7 @@ export default function GameRenderer() {
 
         // Subtle darkening overlay for better character visibility
         const overlay = new PIXI.Graphics();
-        overlay.rect(0, 0, 800, 450);
+        overlay.rect(0, 0, width, height);
         overlay.fill({ color: 0x000000, alpha: 0.25 });
         container.addChild(overlay);
 
@@ -688,19 +715,20 @@ export default function GameRenderer() {
         const vignette = new PIXI.Graphics();
         // Top gradient
         for (let i = 0; i < 100; i++) {
-            vignette.rect(0, i, 800, 1);
+            vignette.rect(0, i, width, 1);
             vignette.fill({ color: 0x000000, alpha: (1 - i / 100) * 0.6 });
         }
         // Bottom gradient
+        const bottomStart = height - 60;
         for (let i = 0; i < 60; i++) {
-            vignette.rect(0, 390 + i, 800, 1);
+            vignette.rect(0, bottomStart + i, width, 1);
             vignette.fill({ color: 0x000000, alpha: (i / 60) * 0.4 });
         }
         // Side vignettes
         for (let i = 0; i < 50; i++) {
-            vignette.rect(i, 0, 1, 450);
+            vignette.rect(i, 0, 1, height);
             vignette.fill({ color: 0x000000, alpha: (1 - i / 50) * 0.3 });
-            vignette.rect(800 - i, 0, 1, 450);
+            vignette.rect(width - i, 0, 1, height);
             vignette.fill({ color: 0x000000, alpha: (1 - i / 50) * 0.3 });
         }
         container.addChild(vignette);
@@ -1106,13 +1134,16 @@ export default function GameRenderer() {
 
             if (zone.isBoss) {
                 if (enemyRef.current.aura) {
+                    const auraX = enemyRef.current.auraX || enemyRef.current.baseX || 600;
+                    const auraY = enemyRef.current.auraY || (enemyRef.current.baseY ? enemyRef.current.baseY - 25 : 350);
                     enemyRef.current.aura.clear();
-                    enemyRef.current.aura.circle(600, 350, 70);
+                    enemyRef.current.aura.circle(auraX, auraY, 70);
                     enemyRef.current.aura.fill({ color: 0xef4444, alpha: 0.15 });
                 }
                 if (enemyRef.current.shadow) {
+                    const shadowX = enemyRef.current.shadowX || enemyRef.current.baseX || 600;
                     enemyRef.current.shadow.clear();
-                    enemyRef.current.shadow.ellipse(600, 378, 35, 12);
+                    enemyRef.current.shadow.ellipse(shadowX, (enemyRef.current.baseY || 375) + 3, 35, 12);
                     enemyRef.current.shadow.fill({ color: 0x000000, alpha: 0.5 });
                 }
             } else {
@@ -1120,8 +1151,9 @@ export default function GameRenderer() {
                     enemyRef.current.aura.clear();
                 }
                 if (enemyRef.current.shadow) {
+                    const shadowX = enemyRef.current.shadowX || enemyRef.current.baseX || 600;
                     enemyRef.current.shadow.clear();
-                    enemyRef.current.shadow.ellipse(600, 378, 25, 8);
+                    enemyRef.current.shadow.ellipse(shadowX, (enemyRef.current.baseY || 375) + 3, 25, 8);
                     enemyRef.current.shadow.fill({ color: 0x000000, alpha: 0.4 });
                 }
             }
@@ -1137,25 +1169,11 @@ export default function GameRenderer() {
     }, [state]);
 
     return (
-        <div className="w-full flex justify-center">
-            <div className="relative">
-                {/* Glow effect behind canvas */}
-                <div className="absolute inset-0 bg-gradient-to-b from-blue-500/5 to-purple-500/5 blur-xl scale-110 pointer-events-none" />
-                <div
-                    ref={containerRef}
-                    className="relative border-2 border-slate-700/50 rounded-xl shadow-2xl overflow-hidden bg-black"
-                    style={{
-                        boxShadow: '0 0 60px rgba(59, 130, 246, 0.15), 0 0 100px rgba(139, 92, 246, 0.1), 0 25px 50px -12px rgba(0, 0, 0, 0.8)'
-                    }}
-                />
-                {/* Scanline effect overlay */}
-                <div
-                    className="absolute inset-0 pointer-events-none rounded-xl overflow-hidden opacity-[0.03]"
-                    style={{
-                        background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.3) 2px, rgba(0,0,0,0.3) 4px)'
-                    }}
-                />
-            </div>
+        <div className="w-full h-full">
+            <div
+                ref={containerRef}
+                className="w-full h-full overflow-hidden bg-black"
+            />
         </div>
     );
 }
@@ -1166,7 +1184,7 @@ function updateHpBar(barContainer, current, max, isPlayer) {
         return;
     }
 
-    const width = barContainer.barWidth || 120;
+    const width = barContainer.barWidth || 180;
 
     // Ensure valid values - handle NaN explicitly
     const safeMax = Math.max(1, (isNaN(max) || max === null || max === undefined) ? 100 : max);
@@ -1199,15 +1217,15 @@ function updateHpBar(barContainer, current, max, isPlayer) {
         barContainer.fillRef.destroy();
     }
 
-    // Create new fill Graphics
+    // Create new fill Graphics (3x height: 12 -> 36)
     const fill = new PIXI.Graphics();
     if (pct > 0) {
         // Main fill
-        fill.rect(-width/2, -6, barWidth, 12);
+        fill.rect(-width/2, -18, barWidth, 36);
         fill.fill(color1);
 
         // Highlight on top
-        fill.rect(-width/2, -6, barWidth, 4);
+        fill.rect(-width/2, -18, barWidth, 10);
         fill.fill({ color: 0xffffff, alpha: 0.2 });
     }
 
@@ -1216,8 +1234,10 @@ function updateHpBar(barContainer, current, max, isPlayer) {
     barContainer.fillRef = fill;
 }
 
-function spawnFloatingText(app, container, { text, type, target }) {
+function spawnFloatingText(app, container, { text, type, target }, positions = {}) {
     if (!container) return;
+
+    const { playerX = 200, enemyX = 600, characterY = 350 } = positions;
 
     const isCrit = type === 'crit';
     const isHeal = type === 'heal';
@@ -1268,8 +1288,8 @@ function spawnFloatingText(app, container, { text, type, target }) {
 
     const pixiText = new PIXI.Text({ text, style });
     pixiText.anchor.set(0.5);
-    pixiText.x = target === 'player' ? 200 : 600;
-    pixiText.y = 280;
+    pixiText.x = target === 'player' ? playerX : enemyX;
+    pixiText.y = characterY - 70;
 
     // Add spread
     pixiText.x += (Math.random() - 0.5) * 50;
@@ -1312,8 +1332,10 @@ function spawnFloatingText(app, container, { text, type, target }) {
     app.ticker.add(animate);
 }
 
-function spawnLootText(app, container, { text, color }) {
+function spawnLootText(app, container, { text, color }, positions = {}) {
     if (!container) return;
+
+    const { enemyX = 600, characterY = 350 } = positions;
 
     const style = new PIXI.TextStyle({
         fontFamily: 'Press Start 2P',
@@ -1331,8 +1353,8 @@ function spawnLootText(app, container, { text, color }) {
 
     const pixiText = new PIXI.Text({ text, style });
     pixiText.anchor.set(0.5);
-    pixiText.x = 600;
-    pixiText.y = 280;
+    pixiText.x = enemyX;
+    pixiText.y = characterY - 70;
     pixiText.alpha = 0;
 
     container.addChild(pixiText);
@@ -1354,9 +1376,10 @@ function spawnLootText(app, container, { text, color }) {
         velocityY += 0.15; // Slower gravity
         velocityX *= 0.98;
 
-        if (pixiText.y > 370) {
+        const groundLevel = (positions.characterY || 350) + 20;
+        if (pixiText.y > groundLevel) {
             velocityY = -velocityY * 0.4;
-            pixiText.y = 370;
+            pixiText.y = groundLevel;
             if (Math.abs(velocityY) < 0.5) {
                 pixiText.alpha -= 0.015;
             }

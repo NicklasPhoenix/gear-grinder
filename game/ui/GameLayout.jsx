@@ -94,9 +94,9 @@ export default function GameLayout() {
                 <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl" />
             </div>
 
-            {/* Left Panel: Game Viewport */}
-            <div className="flex-1 relative flex flex-col items-center justify-center p-6">
-                {/* Top Info Bar */}
+            {/* Left Panel: Game Viewport - no padding, canvas fills the space */}
+            <div className="flex-1 relative flex flex-col">
+                {/* Top Info Bar - overlaid on canvas */}
                 <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-10">
                     {/* Zone Info */}
                     <div className="glass-card rounded-xl p-4 animate-fadeIn">
@@ -139,13 +139,13 @@ export default function GameLayout() {
                     </div>
                 </div>
 
-                {/* Game Canvas Area */}
-                <div className="relative mt-16">
+                {/* Game Canvas Area - fills the entire left panel */}
+                <div className="flex-1 w-full">
                     <GameRenderer />
                 </div>
 
-                {/* Bottom Stats Bar */}
-                <div className="absolute bottom-4 left-4 right-4 flex justify-center">
+                {/* Bottom Stats Bar - overlaid on canvas */}
+                <div className="absolute bottom-4 left-4 right-4 flex justify-center z-10">
                     <div className="glass-card rounded-xl px-6 py-3 animate-fadeIn">
                         <div className="flex items-center gap-8">
                             <StatMini label="Level" value={state.level || 1} color="text-purple-400" />
