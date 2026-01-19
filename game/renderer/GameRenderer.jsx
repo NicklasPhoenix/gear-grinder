@@ -347,6 +347,7 @@ export default function GameRenderer() {
             enemyRef.current = enemy;
             enemy.baseX = enemyX;
             enemy.baseY = characterY;
+            enemy.baseScale = 5; // Store the base scale for animations
 
             // Load initial sprite based on current zone (use pre-cached texture)
             const initialZone = getZoneById(gameManager.getState()?.currentZone || 0);
@@ -516,7 +517,8 @@ export default function GameRenderer() {
                 // Enemy idle animation
                 // Enemy faces left (positive X scale) - toward the player
                 if (enemyRef.current) {
-                    const enemyBaseScale = Math.abs(enemyRef.current.scale.x); // Get base scale
+                    // Use stored base scale (not current scale which changes during animations)
+                    const enemyBaseScale = enemyRef.current.baseScale || 5;
 
                     // Death animation - very fast (~0.05 seconds)
                     if (animState.enemyDying) {
@@ -1253,8 +1255,9 @@ export default function GameRenderer() {
 
             // Scale for 32x32 sprites - larger for bosses (increased by 1.5x)
             const baseScale = zone.isBoss ? 6.5 : 5;
-            const finalScale = baseScale;
-            enemyRef.current.scale.set(finalScale, finalScale);
+            enemyRef.current.baseScale = baseScale; // Store for animation reference
+            enemyRef.current.scale.set(baseScale, baseScale);
+            enemyRef.current.alpha = 1; // Ensure visible after zone change
 
             if (zone.isBoss) {
                 if (enemyRef.current.aura) {
