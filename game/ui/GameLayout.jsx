@@ -8,6 +8,7 @@ import ZoneView from './ZoneView';
 import EnhancementView from './EnhancementView';
 import PrestigeView from './PrestigeView';
 import AchievementsView from './AchievementsView';
+import DailyRewardsModal, { useDailyRewardAvailable } from './DailyRewardsModal';
 import GameTooltip from './GameTooltip';
 import { MaterialIcon, BossStoneIcon } from './MaterialIcons';
 import { BOSS_STONES } from '../data/items';
@@ -63,6 +64,8 @@ export default function GameLayout() {
     const [tooltipUser, setTooltipUser] = useState(null);
     const [levelUpAnimation, setLevelUpAnimation] = useState(null);
     const [showKeyboardHelp, setShowKeyboardHelp] = useState(false);
+    const [showDailyRewards, setShowDailyRewards] = useState(false);
+    const dailyRewardAvailable = useDailyRewardAvailable();
     const prevLevelRef = useRef(state?.level || 1);
 
     // Keyboard navigation for tabs
@@ -273,6 +276,19 @@ export default function GameLayout() {
                         <SpeedControl />
                         <div className="flex items-center gap-3">
                             <button
+                                onClick={() => setShowDailyRewards(true)}
+                                className={`relative px-2 py-1 rounded text-xs transition-all ${
+                                    dailyRewardAvailable
+                                        ? 'bg-yellow-500/30 text-yellow-300 hover:bg-yellow-500/40'
+                                        : 'bg-slate-700/50 text-slate-400 hover:bg-slate-600/50'
+                                }`}
+                            >
+                                Daily
+                                {dailyRewardAvailable && (
+                                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-500 rounded-full animate-pulse" />
+                                )}
+                            </button>
+                            <button
                                 onClick={() => setShowKeyboardHelp(true)}
                                 className="text-slate-600 hover:text-slate-400 transition-colors"
                                 aria-label="Keyboard shortcuts"
@@ -296,6 +312,9 @@ export default function GameLayout() {
 
             {/* Keyboard Shortcuts Help */}
             {showKeyboardHelp && <KeyboardHelpModal onClose={() => setShowKeyboardHelp(false)} />}
+
+            {/* Daily Rewards Modal */}
+            {showDailyRewards && <DailyRewardsModal onClose={() => setShowDailyRewards(false)} />}
         </div>
     );
 }

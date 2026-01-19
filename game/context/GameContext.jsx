@@ -191,7 +191,9 @@ export function GameProvider({ children }) {
                     newState.prestigeLevel !== lastState?.prestigeLevel ||
                     newState.prestigeStones !== lastState?.prestigeStones ||
                     newState.autoSalvage !== lastState?.autoSalvage ||
-                    newState.unlockedAchievements !== lastState?.unlockedAchievements;
+                    newState.unlockedAchievements !== lastState?.unlockedAchievements ||
+                    newState.dailyStreak !== lastState?.dailyStreak ||
+                    newState.lastDailyReward !== lastState?.lastDailyReward;
 
                 // Only update HP state for high-frequency changes (doesn't trigger full re-render)
                 if (hpChanged) {

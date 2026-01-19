@@ -132,9 +132,10 @@
 ---
 
 ### Feature #16: Daily Login Rewards
-**Status:** Pending
+**Status:** ✅ Complete
+**Location:** `game/data/dailyRewards.js`, `game/ui/DailyRewardsModal.jsx`, `game/ui/GameLayout.jsx`
 **Issue:** No retention mechanic for returning players.
-**Solution:** Add daily reward system with escalating bonuses.
+**Solution:** Added 7-day reward cycle with escalating bonuses (gold, materials, stat points). Streak tracking with reset on missed days. Week 2+ multipliers increase rewards. Footer button with notification badge when reward is available.
 
 ---
 
@@ -168,3 +169,4 @@
 - **Feature #13:** Extract Magic Numbers to Constants - Centralized constants.js for game balance values
 - **Feature #14:** Add JSDoc Comments - Documented core functions in PlayerSystem, formulas, and CombatSystem
 - **Feature #15:** Achievement System - 25+ achievements across 6 categories with rewards and UI tab
+- **Feature #16:** Daily Login Rewards - 7-day reward cycle with streak tracking and escalating bonuses
