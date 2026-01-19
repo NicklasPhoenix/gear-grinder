@@ -6,6 +6,111 @@ const GameContext = createContext(null);
 // Separate context for high-frequency updates (HP bars) to prevent full tree re-renders
 const HighFrequencyContext = createContext(null);
 
+// Current save version - increment when save structure changes
+const SAVE_VERSION = 1;
+
+// Validate and sanitize a loaded save to prevent crashes
+function validateSave(parsed) {
+    const errors = [];
+    const defaults = {
+        stats: { str: 5, int: 5, vit: 5, agi: 5, lck: 5 },
+        playerHp: 100,
+        playerMaxHp: 100,
+        enemyHp: 20,
+        enemyMaxHp: 20,
+        gold: 0,
+        xp: 0,
+        level: 1,
+        kills: 0,
+        currentZone: 0,
+        statPoints: 0,
+        enhanceStone: 0,
+        blessedOrb: 0,
+        celestialShard: 0,
+        prestigeLevel: 0,
+        prestigeStones: 0,
+        inventory: [],
+        gear: {},
+        skills: [],
+        unlockedSkills: [],
+    };
+
+    // Check save version for migrations
+    if (!parsed.saveVersion) {
+        parsed.saveVersion = SAVE_VERSION;
+    }
+
+    // Validate stats object
+    if (!parsed.stats || typeof parsed.stats !== 'object') {
+        errors.push('Invalid stats object, resetting to defaults');
+        parsed.stats = { ...defaults.stats };
+    } else {
+        for (const [key, defaultVal] of Object.entries(defaults.stats)) {
+            if (typeof parsed.stats[key] !== 'number' || isNaN(parsed.stats[key]) || parsed.stats[key] < 0) {
+                errors.push(`Invalid stat ${key}, resetting to ${defaultVal}`);
+                parsed.stats[key] = defaultVal;
+            }
+        }
+    }
+
+    // Validate numeric fields
+    const numericFields = [
+        'playerHp', 'playerMaxHp', 'enemyHp', 'enemyMaxHp',
+        'gold', 'xp', 'level', 'kills', 'currentZone', 'statPoints',
+        'enhanceStone', 'blessedOrb', 'celestialShard', 'prestigeLevel', 'prestigeStones'
+    ];
+
+    for (const field of numericFields) {
+        if (typeof parsed[field] !== 'number' || isNaN(parsed[field])) {
+            errors.push(`Invalid ${field}, resetting to default`);
+            parsed[field] = defaults[field];
+        }
+        // Ensure non-negative values
+        if (parsed[field] < 0) {
+            parsed[field] = 0;
+        }
+    }
+
+    // Ensure level is at least 1
+    if (parsed.level < 1) parsed.level = 1;
+
+    // Ensure HP doesn't exceed max
+    if (parsed.playerHp > parsed.playerMaxHp) {
+        parsed.playerHp = parsed.playerMaxHp;
+    }
+    if (parsed.enemyHp > parsed.enemyMaxHp) {
+        parsed.enemyHp = parsed.enemyMaxHp;
+    }
+
+    // Validate inventory is an array
+    if (!Array.isArray(parsed.inventory)) {
+        errors.push('Invalid inventory, resetting to empty');
+        parsed.inventory = [];
+    } else {
+        // Filter out invalid items
+        parsed.inventory = parsed.inventory.filter(item =>
+            item && typeof item === 'object' && item.slot && item.name
+        );
+    }
+
+    // Validate gear is an object
+    if (!parsed.gear || typeof parsed.gear !== 'object') {
+        errors.push('Invalid gear, resetting to empty');
+        parsed.gear = {};
+    }
+
+    // Validate skills arrays
+    if (!Array.isArray(parsed.skills)) parsed.skills = [];
+    if (!Array.isArray(parsed.unlockedSkills)) parsed.unlockedSkills = [];
+
+    // Log validation errors (but don't crash)
+    if (errors.length > 0) {
+        console.warn('Save validation found issues:', errors);
+    }
+
+    return { validated: parsed, errors };
+}
+
 export function GameProvider({ children }) {
     const gameManagerRef = useRef(null);
     const [gameState, setGameState] = useState(null);
@@ -26,33 +131,28 @@ export function GameProvider({ children }) {
             try {
                 const saved = await window.storage.get('gear-grinder-save');
                 if (saved && saved.value) {
-                    const parsed = JSON.parse(saved.value);
-                    // Sanitize stats object - ensure all stat values are valid numbers
-                    if (!parsed.stats || typeof parsed.stats !== 'object') {
-                        parsed.stats = { str: 5, int: 5, vit: 5, agi: 5, lck: 5 };
-                    } else {
-                        const defaultStats = { str: 5, int: 5, vit: 5, agi: 5, lck: 5 };
-                        for (const stat of Object.keys(defaultStats)) {
-                            if (typeof parsed.stats[stat] !== 'number' || isNaN(parsed.stats[stat])) {
-                                parsed.stats[stat] = defaultStats[stat];
-                            }
+                    let parsed;
+                    try {
+                        parsed = JSON.parse(saved.value);
+                    } catch (parseError) {
+                        console.error('Save file corrupted, starting fresh:', parseError);
+                        parsed = null;
+                    }
+
+                    if (parsed) {
+                        // Validate and sanitize the loaded save
+                        const { validated, errors } = validateSave(parsed);
+
+                        if (errors.length > 0) {
+                            console.log(`Save loaded with ${errors.length} corrections applied`);
                         }
+
+                        // Merge with default state
+                        gm.state = { ...gm.state, ...validated, combatLog: [], saveVersion: SAVE_VERSION };
                     }
-                    // Sanitize numeric values that might be NaN
-                    if (typeof parsed.playerHp !== 'number' || isNaN(parsed.playerHp)) {
-                        parsed.playerHp = parsed.playerMaxHp || 100;
-                    }
-                    if (typeof parsed.enemyHp !== 'number' || isNaN(parsed.enemyHp)) {
-                        parsed.enemyHp = parsed.enemyMaxHp || 20;
-                    }
-                    if (typeof parsed.gold !== 'number' || isNaN(parsed.gold)) parsed.gold = 0;
-                    if (typeof parsed.xp !== 'number' || isNaN(parsed.xp)) parsed.xp = 0;
-                    if (typeof parsed.level !== 'number' || isNaN(parsed.level)) parsed.level = 1;
-                    // Merge with default state
-                    gm.state = { ...gm.state, ...parsed, combatLog: [] };
                 }
             } catch (e) {
-                console.error("Save load error", e);
+                console.error("Save load error, starting fresh:", e);
             }
 
             // Subscribe React state to Game Manager state
