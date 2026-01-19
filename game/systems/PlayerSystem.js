@@ -1,21 +1,25 @@
 import { TIERS, GEAR_BASES, WEAPON_TYPES, PRESTIGE_WEAPONS, BOSS_SETS, PRESTIGE_BOSS_SETS } from '../data/items';
 import { SKILLS, PRESTIGE_SKILLS } from '../data/skills';
 import { getEnhanceBonus } from '../utils/formulas';
+import { PLAYER_BASE, STAT_SCALING, LEVEL_UP, COMBAT } from '../data/constants';
 
 export const calculatePlayerStats = (gameState) => {
     const s = gameState.stats;
     // Base stats from character stats
-    let baseDmg = 5 + s.str * 2; // STR gives physical dmg
-    let baseHp = 80 + s.vit * 8; // VIT gives HP
-    let armor = s.vit * 1; // Small armor from VIT
+    let baseDmg = PLAYER_BASE.DAMAGE + s.str * STAT_SCALING.STR_DAMAGE;
+    let baseHp = PLAYER_BASE.HP + s.vit * STAT_SCALING.VIT_HP;
+    let armor = s.vit * STAT_SCALING.VIT_ARMOR;
     // Reduced gold/mat multipliers - resources should feel scarce
-    let dmgMult = 1, hpMult = 1, goldMult = 1 + s.lck * 0.005, speedMult = 1 + s.agi * 0.01, matMult = 1 + s.lck * 0.005;
+    let dmgMult = 1, hpMult = 1;
+    let goldMult = 1 + s.lck * STAT_SCALING.LCK_GOLD;
+    let speedMult = 1 + s.agi * STAT_SCALING.AGI_SPEED;
+    let matMult = 1 + s.lck * STAT_SCALING.LCK_MAT;
     let lifesteal = 0, thorns = 0;
-    let critChance = 3 + s.agi * 0.5; // AGI gives crit
-    let critDamage = 150 + s.lck * 2; // LCK gives crit damage
-    let dodge = s.agi * 0.3; // AGI gives dodge
-    let xpBonus = s.int * 1; // INT gives XP% bonus - learn faster
-    let magicDmgMult = 1 + s.int * 0.03; // INT gives 3% magic damage per point
+    let critChance = PLAYER_BASE.CRIT_CHANCE + s.agi * STAT_SCALING.AGI_CRIT_CHANCE;
+    let critDamage = PLAYER_BASE.CRIT_DAMAGE + s.lck * STAT_SCALING.LCK_CRIT_DAMAGE;
+    let dodge = s.agi * STAT_SCALING.AGI_DODGE;
+    let xpBonus = s.int * STAT_SCALING.INT_XP_BONUS;
+    let magicDmgMult = 1 + s.int * STAT_SCALING.INT_MAGIC_DAMAGE;
 
     // Gear contributions
     let enhanceDmgMult = 1; // Cumulative enhancement damage multiplier
@@ -53,9 +57,9 @@ export const calculatePlayerStats = (gameState) => {
 
             // Stat scaling bonus: gear is stronger if you have the right stat
             const scalingStat = s[gearBase.scaling] || 0;
-            const scalingBonus = 1 + scalingStat * 0.02; // +2% per stat point
+            const scalingBonus = 1 + scalingStat * STAT_SCALING.GEAR_STAT_SCALING;
             baseDmg += Math.floor(gearBase.baseDmg * tierMult * bossStatBonus * (scalingBonus - 1));
-            baseHp += Math.floor(gearBase.baseHp * tierMult * bossStatBonus * (scalingBonus - 1) * 0.5);
+            baseHp += Math.floor(gearBase.baseHp * tierMult * bossStatBonus * (scalingBonus - 1) * STAT_SCALING.GEAR_HP_SCALING);
 
             // Special effects from gear
             if (gear.effects) {
@@ -78,8 +82,8 @@ export const calculatePlayerStats = (gameState) => {
     });
 
     // Level bonus
-    baseDmg += (gameState.level - 1) * 2;
-    baseHp += (gameState.level - 1) * 8;
+    baseDmg += (gameState.level - 1) * LEVEL_UP.DAMAGE_PER_LEVEL;
+    baseHp += (gameState.level - 1) * LEVEL_UP.HP_PER_LEVEL;
 
     // Skills
     gameState.unlockedSkills.forEach(skillId => {
@@ -154,7 +158,7 @@ export const calculatePlayerStats = (gameState) => {
         critDamage,
         lifesteal,
         thorns,
-        dodge: Math.min(80, dodge), // Cap dodge at 80%
+        dodge: Math.min(COMBAT.DODGE_CAP, dodge),
         xpBonus,
     };
 };

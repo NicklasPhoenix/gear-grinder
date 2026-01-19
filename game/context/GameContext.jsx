@@ -1,29 +1,27 @@
 import React, { createContext, useContext, useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { GameManager } from '../managers/GameManager';
+import { SAVE, DEFAULTS } from '../data/constants';
 
 const GameContext = createContext(null);
 
 // Separate context for high-frequency updates (HP bars) to prevent full tree re-renders
 const HighFrequencyContext = createContext(null);
 
-// Current save version - increment when save structure changes
-const SAVE_VERSION = 1;
-
 // Validate and sanitize a loaded save to prevent crashes
 function validateSave(parsed) {
     const errors = [];
     const defaults = {
-        stats: { str: 5, int: 5, vit: 5, agi: 5, lck: 5 },
-        playerHp: 100,
-        playerMaxHp: 100,
-        enemyHp: 20,
-        enemyMaxHp: 20,
-        gold: 0,
-        xp: 0,
-        level: 1,
-        kills: 0,
-        currentZone: 0,
-        statPoints: 0,
+        stats: { ...DEFAULTS.BASE_STATS },
+        playerHp: DEFAULTS.PLAYER_HP,
+        playerMaxHp: DEFAULTS.PLAYER_MAX_HP,
+        enemyHp: DEFAULTS.ENEMY_HP,
+        enemyMaxHp: DEFAULTS.ENEMY_MAX_HP,
+        gold: DEFAULTS.GOLD,
+        xp: DEFAULTS.XP,
+        level: DEFAULTS.LEVEL,
+        kills: DEFAULTS.KILLS,
+        currentZone: DEFAULTS.CURRENT_ZONE,
+        statPoints: DEFAULTS.STAT_POINTS,
         enhanceStone: 0,
         blessedOrb: 0,
         celestialShard: 0,
@@ -37,7 +35,7 @@ function validateSave(parsed) {
 
     // Check save version for migrations
     if (!parsed.saveVersion) {
-        parsed.saveVersion = SAVE_VERSION;
+        parsed.saveVersion = SAVE.SAVE_VERSION;
     }
 
     // Validate stats object
@@ -148,7 +146,7 @@ export function GameProvider({ children }) {
                         }
 
                         // Merge with default state
-                        gm.state = { ...gm.state, ...validated, combatLog: [], saveVersion: SAVE_VERSION };
+                        gm.state = { ...gm.state, ...validated, combatLog: [], saveVersion: SAVE.SAVE_VERSION };
                     }
                 }
             } catch (e) {
@@ -227,7 +225,7 @@ export function GameProvider({ children }) {
         loadGame();
 
         // Auto Save Interval (30s)
-        const saveInterval = setInterval(saveGame, 30000);
+        const saveInterval = setInterval(saveGame, SAVE.AUTO_SAVE_INTERVAL);
 
         return () => {
             clearInterval(saveInterval);

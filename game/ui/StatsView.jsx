@@ -3,6 +3,7 @@ import { useGame } from '../context/GameContext';
 import { calculatePlayerStats } from '../systems/PlayerSystem';
 import { STATS } from '../data/stats';
 import { getZoneById } from '../data/zones';
+import { COMBAT } from '../data/constants';
 import { formatPercent, formatMultiplier, formatBonus, formatWithCommas, formatTime } from '../utils/format';
 
 export default function StatsView() {
@@ -17,11 +18,11 @@ export default function StatsView() {
     const critDamage = calculated.critDamage / 100;
     const avgCritDamage = avgDamage * critDamage;
     const effectiveDPS = avgDamage * (1 - critChance) + avgCritDamage * critChance;
-    const attacksPerSecond = calculated.speedMult * 6; // Base 6 attacks per second
+    const attacksPerSecond = calculated.speedMult * COMBAT.ATTACKS_PER_SECOND;
     const trueDPS = Math.floor(effectiveDPS * attacksPerSecond);
 
     // Enemy damage reduction from armor
-    const damageReduction = calculated.armor / (calculated.armor + 250);
+    const damageReduction = calculated.armor / (calculated.armor + COMBAT.ARMOR_CONSTANT);
     const reducedEnemyDmg = Math.max(1, Math.floor(currentZone.enemyDmg * (1 - damageReduction)));
     const effectiveHP = Math.floor(calculated.maxHp / (1 - damageReduction));
 

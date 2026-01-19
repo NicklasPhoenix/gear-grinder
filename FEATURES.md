@@ -106,10 +106,10 @@
 ---
 
 ### Feature #13: Extract Magic Numbers to Constants
-**Status:** Pending
+**Status:** ✅ Complete
 **Location:** Multiple files
 **Issue:** Magic numbers scattered throughout code (XP scaling, heal percentages, etc.).
-**Solution:** Create constants file for game configuration values.
+**Solution:** Created `game/data/constants.js` with organized constants for PLAYER_BASE, STAT_SCALING, LEVEL_UP, COMBAT, DEATH_PENALTY, BOSS_DROPS, ENHANCE, SAVE, DEFAULTS, and UI. Updated formulas.js, PlayerSystem.js, CombatSystem.js, StatsView.jsx, and GameContext.jsx to use the centralized constants.
 
 ---
 
@@ -164,3 +164,4 @@
 - **Feature #10:** Add Save Validation - Schema validation, auto-repair, and save versioning
 - **Feature #11:** Standardize Number Formatting - Centralized format.js utility used across all UI components
 - **Feature #12:** Remove Debug Console Logs - Cleaned up console.log from GameRenderer.jsx and GameContext.jsx
+- **Feature #13:** Extract Magic Numbers to Constants - Centralized constants.js for game balance values

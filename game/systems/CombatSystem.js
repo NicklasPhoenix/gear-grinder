@@ -2,6 +2,7 @@ import { getZoneById } from '../data/zones';
 import { BOSS_SETS, PRESTIGE_BOSS_SETS, BOSS_STONES, MATERIALS, getSalvageReturns, addItemToInventory, generateGearDrop, TIERS } from '../data/items';
 import { SKILLS } from '../data/skills';
 import { calculatePlayerStats } from './PlayerSystem';
+import { PLAYER_BASE, COMBAT, DEATH_PENALTY, BOSS_DROPS, LEVEL_UP, UI } from '../data/constants';
 
 export class CombatSystem {
     constructor(stateManager) {
@@ -23,11 +24,11 @@ export class CombatSystem {
 
         // Ensure stats.maxHp is valid
         const safeMaxHp = (typeof stats.maxHp === 'number' && !isNaN(stats.maxHp) && stats.maxHp > 0)
-            ? stats.maxHp : 100;
+            ? stats.maxHp : PLAYER_BASE.DEFAULT_MAX_HP;
 
         const zone = getZoneById(state.currentZone);
         let newState = { ...state };
-        let log = [...state.combatLog].slice(-4);
+        let log = [...state.combatLog].slice(-UI.COMBAT_LOG_MAX_ENTRIES);
         let combatUpdates = {}; // Track what happened for visuals
 
         // Ensure playerHp is valid before combat
@@ -39,9 +40,9 @@ export class CombatSystem {
         }
 
         // Player Turn
-        let playerDmg = stats.damage || 10;
-        let isCrit = Math.random() * 100 < (stats.critChance || 5);
-        if (isCrit) playerDmg = Math.floor(playerDmg * (stats.critDamage || 150) / 100);
+        let playerDmg = stats.damage || PLAYER_BASE.DEFAULT_DAMAGE;
+        let isCrit = Math.random() * 100 < (stats.critChance || PLAYER_BASE.DEFAULT_CRIT_CHANCE);
+        if (isCrit) playerDmg = Math.floor(playerDmg * (stats.critDamage || PLAYER_BASE.CRIT_DAMAGE) / 100);
 
         newState.enemyHp -= playerDmg;
 
@@ -57,7 +58,7 @@ export class CombatSystem {
         // Lifesteal
         if (stats.lifesteal > 0) {
             const rawHeal = Math.floor(playerDmg * stats.lifesteal / 100);
-            const healed = Math.min(rawHeal, stats.lifestealMaxHeal || 1000);
+            const healed = Math.min(rawHeal, stats.lifestealMaxHeal || COMBAT.LIFESTEAL_MAX_HEAL);
             newState.playerHp = Math.min(newState.playerHp + healed, safeMaxHp);
 
             if (healed > 0) {
@@ -77,7 +78,7 @@ export class CombatSystem {
                 this.callbacks.onFloatingText('DODGE!', 'dodge', 'player');
                 combatUpdates.lastDamage = 0; // Dodged
             } else {
-                const damageReduction = stats.armor / (stats.armor + 250);
+                const damageReduction = stats.armor / (stats.armor + COMBAT.ARMOR_CONSTANT);
                 const reducedDmg = Math.max(1, Math.floor(zone.enemyDmg * (1 - damageReduction)));
 
                 newState.playerHp -= reducedDmg;
@@ -172,11 +173,11 @@ export class CombatSystem {
         this.callbacks.onEnemyDeath(zone.isBoss);
 
         // Level Up Check
-        const xpForLevel = (level) => Math.floor(50 * Math.pow(1.3, level - 1));
+        const xpForLevel = (level) => Math.floor(LEVEL_UP.BASE_XP * Math.pow(LEVEL_UP.XP_SCALING, level - 1));
         while (state.xp >= xpForLevel(state.level)) {
             state.xp -= xpForLevel(state.level);
             state.level += 1;
-            state.statPoints = (state.statPoints || 0) + 3;
+            state.statPoints = (state.statPoints || 0) + LEVEL_UP.STAT_POINTS_PER_LEVEL;
             log.push({ type: 'level', msg: `LEVEL UP! Lv.${state.level} (+3 stat points)` });
             this.callbacks.onFloatingText('LEVEL UP!', 'levelup', 'player');
 
@@ -192,8 +193,8 @@ export class CombatSystem {
         state.enemyHp = zone.enemyHp;
         state.enemyMaxHp = zone.enemyHp;
 
-        // Heal Player (3% rule) - use safeMaxHp to prevent NaN
-        state.playerHp = Math.min(state.playerHp + Math.floor(safeMaxHp * 0.03), safeMaxHp);
+        // Heal Player - use safeMaxHp to prevent NaN
+        state.playerHp = Math.min(state.playerHp + Math.floor(safeMaxHp * COMBAT.HEAL_ON_KILL), safeMaxHp);
     }
 
     handleBossLoot(state, zone, log) {
@@ -202,16 +203,15 @@ export class CombatSystem {
 
         // Boss stone drops (guaranteed 1-2 per boss kill)
         if (bossStoneInfo) {
-            const stoneCount = 1 + (Math.random() < 0.3 ? 1 : 0); // 70% = 1, 30% = 2
+            const stoneCount = 1 + (Math.random() < BOSS_DROPS.BONUS_STONE_CHANCE ? 1 : 0);
             if (!state.bossStones) state.bossStones = {};
             state.bossStones[zone.bossSet] = (state.bossStones[zone.bossSet] || 0) + stoneCount;
             log.push({ type: 'bossStone', msg: `💎 ${bossStoneInfo.name} x${stoneCount}!` });
             this.callbacks.onFloatingText(`+${stoneCount} ${bossStoneInfo.name}`, 'bossStone', 'player');
         }
 
-        // Boss gear drops (6% chance)
-        const dropChance = 0.06;
-        if (Math.random() < dropChance && bossSet) {
+        // Boss gear drops
+        if (Math.random() < BOSS_DROPS.GEAR_DROP_CHANCE && bossSet) {
             const availableSlots = Object.keys(bossSet.items);
             const droppedSlot = availableSlots[Math.floor(Math.random() * availableSlots.length)];
             const bossItem = bossSet.items[droppedSlot];
@@ -247,15 +247,15 @@ export class CombatSystem {
     handlePlayerDeath(state, stats, zone, safeMaxHp) {
         this.callbacks.onFloatingText('DEATH!', 'death', 'player');
 
-        // Harsh death penalty: 25% gold loss
-        const goldLost = Math.floor(state.gold * 0.25);
+        // Death penalty: gold loss
+        const goldLost = Math.floor(state.gold * DEATH_PENALTY.GOLD_LOSS);
         if (goldLost > 0) {
             state.gold -= goldLost;
             this.callbacks.onFloatingText(`-${goldLost}g`, 'goldLoss', 'player');
         }
 
-        // Also lose some enhance stones (10%)
-        const stonesLost = Math.floor(state.enhanceStone * 0.10);
+        // Also lose some enhance stones
+        const stonesLost = Math.floor(state.enhanceStone * DEATH_PENALTY.STONE_LOSS);
         if (stonesLost > 0) {
             state.enhanceStone -= stonesLost;
         }
