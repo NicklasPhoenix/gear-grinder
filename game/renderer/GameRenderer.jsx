@@ -125,7 +125,7 @@ export default function GameRenderer() {
             const canvasWidth = containerWidth;
             const canvasHeight = containerHeight;
             const centerX = canvasWidth / 2;
-            const groundY = canvasHeight - 70;
+            const groundY = canvasHeight - 140; // Move ground up to avoid bottom menu overlap
 
             // Main container with shake support
             const mainContainer = new PIXI.Container();
@@ -228,7 +228,7 @@ export default function GameRenderer() {
             player.anchor.set(0.5, 1);
             player.x = playerX;
             player.y = characterY;
-            const playerScale = playerData.scale || 4;
+            const playerScale = (playerData.scale || 4) * 1.5; // 1.5x larger
             player.scale.set(-playerScale, playerScale); // Negative X to face right
             gameContainer.addChild(player);
             playerRef.current = player;
@@ -237,13 +237,13 @@ export default function GameRenderer() {
 
             // --- Player Shadow ---
             const playerShadow = new PIXI.Graphics();
-            playerShadow.ellipse(playerX, groundY - 2, 25, 8);
+            playerShadow.ellipse(playerX, groundY - 2, 35, 12);
             playerShadow.fill({ color: 0x000000, alpha: 0.4 });
             gameContainer.addChildAt(playerShadow, 0);
 
             // --- Player glow effect ---
             const playerGlow = new PIXI.Graphics();
-            playerGlow.circle(playerX, characterY - 25, 50);
+            playerGlow.circle(playerX, characterY - 40, 60);
             playerGlow.fill({ color: 0x3b82f6, alpha: 0.1 });
             gameContainer.addChildAt(playerGlow, 0);
 
@@ -253,7 +253,7 @@ export default function GameRenderer() {
             enemy.anchor.set(0.5, 1);
             enemy.x = enemyX;
             enemy.y = characterY;
-            enemy.scale.set(3.5, 3.5);
+            enemy.scale.set(5, 5); // Larger enemy sprite
             gameContainer.addChild(enemy);
             enemyRef.current = enemy;
             enemy.baseX = enemyX;
@@ -278,13 +278,13 @@ export default function GameRenderer() {
 
             // --- Enemy Shadow ---
             const enemyShadow = new PIXI.Graphics();
-            enemyShadow.ellipse(enemyX, groundY - 2, 25, 8);
+            enemyShadow.ellipse(enemyX, groundY - 2, 35, 12);
             enemyShadow.fill({ color: 0x000000, alpha: 0.4 });
             gameContainer.addChildAt(enemyShadow, 0);
 
             // --- Enemy aura for bosses ---
             const enemyAura = new PIXI.Graphics();
-            enemyAura.circle(enemyX, characterY - 25, 60);
+            enemyAura.circle(enemyX, characterY - 40, 80);
             enemyAura.fill({ color: 0xef4444, alpha: 0 });
             gameContainer.addChildAt(enemyAura, 0);
             enemy.aura = enemyAura;
@@ -418,7 +418,7 @@ export default function GameRenderer() {
                     const pos = positionsRef.current;
                     const breathe = Math.sin(time * 0.002) * 0.02;
                     const bob = Math.sin(time * 0.003) * 3;
-                    const playerBaseScale = ENEMY_SPRITES['Knight'].scale || 4;
+                    const playerBaseScale = (ENEMY_SPRITES['Knight'].scale || 4) * 1.5; // Match init scale
                     playerRef.current.scale.set(-playerBaseScale, playerBaseScale * (1.0 + breathe));
                     playerRef.current.y = (playerRef.current.baseY || pos.characterY) - 25 + bob;
 
@@ -1152,23 +1152,23 @@ export default function GameRenderer() {
                 enemyRef.current.texture = monsterTextureCache[spritePath];
             }
 
-            // Scale for 32x32 sprites - larger for bosses
-            const baseScale = zone.isBoss ? 4.5 : 3.5;
+            // Scale for 32x32 sprites - larger for bosses (increased by 1.5x)
+            const baseScale = zone.isBoss ? 6.5 : 5;
             const finalScale = baseScale;
             enemyRef.current.scale.set(finalScale, finalScale);
 
             if (zone.isBoss) {
                 if (enemyRef.current.aura) {
                     const auraX = enemyRef.current.auraX || enemyRef.current.baseX || 600;
-                    const auraY = enemyRef.current.auraY || (enemyRef.current.baseY ? enemyRef.current.baseY - 25 : 350);
+                    const auraY = enemyRef.current.auraY || (enemyRef.current.baseY ? enemyRef.current.baseY - 40 : 350);
                     enemyRef.current.aura.clear();
-                    enemyRef.current.aura.circle(auraX, auraY, 70);
+                    enemyRef.current.aura.circle(auraX, auraY, 90);
                     enemyRef.current.aura.fill({ color: 0xef4444, alpha: 0.15 });
                 }
                 if (enemyRef.current.shadow) {
                     const shadowX = enemyRef.current.shadowX || enemyRef.current.baseX || 600;
                     enemyRef.current.shadow.clear();
-                    enemyRef.current.shadow.ellipse(shadowX, (enemyRef.current.baseY || 375) + 3, 35, 12);
+                    enemyRef.current.shadow.ellipse(shadowX, (enemyRef.current.baseY || 375) + 3, 45, 15);
                     enemyRef.current.shadow.fill({ color: 0x000000, alpha: 0.5 });
                 }
             } else {
@@ -1178,7 +1178,7 @@ export default function GameRenderer() {
                 if (enemyRef.current.shadow) {
                     const shadowX = enemyRef.current.shadowX || enemyRef.current.baseX || 600;
                     enemyRef.current.shadow.clear();
-                    enemyRef.current.shadow.ellipse(shadowX, (enemyRef.current.baseY || 375) + 3, 25, 8);
+                    enemyRef.current.shadow.ellipse(shadowX, (enemyRef.current.baseY || 375) + 3, 35, 12);
                     enemyRef.current.shadow.fill({ color: 0x000000, alpha: 0.4 });
                 }
             }
