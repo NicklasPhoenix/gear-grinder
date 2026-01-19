@@ -38,9 +38,19 @@ export default function StatsView() {
     };
 
     const handleManualSave = async () => {
-        await gameManager.save();
-        const data = JSON.stringify(gameManager.state);
-        await window.storage.set('gear-grinder-save', data);
+        try {
+            const data = await gameManager.save();
+            await window.storage.set('gear-grinder-save', data);
+            console.log('Manual save completed:', {
+                zone: gameManager.state.currentZone,
+                level: gameManager.state.level,
+                gold: gameManager.state.gold,
+                kills: gameManager.state.kills,
+                timestamp: new Date().toISOString()
+            });
+        } catch (err) {
+            console.error('Save failed:', err);
+        }
     };
 
     const handleResetStats = () => {

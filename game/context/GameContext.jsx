@@ -145,6 +145,14 @@ export function GameProvider({ children }) {
                             console.warn(`Save loaded with ${errors.length} corrections applied`);
                         }
 
+                        console.log('Loading save:', {
+                            zone: validated.currentZone,
+                            level: validated.level,
+                            gold: validated.gold,
+                            kills: validated.kills,
+                            lastSaveTime: validated.lastSaveTime ? new Date(validated.lastSaveTime).toISOString() : 'never'
+                        });
+
                         // Merge with default state
                         gm.state = { ...gm.state, ...validated, combatLog: [], saveVersion: SAVE.SAVE_VERSION };
                     }
@@ -223,8 +231,17 @@ export function GameProvider({ children }) {
 
         const saveGame = async () => {
             if (!gameManagerRef.current) return;
-            const data = await gameManagerRef.current.save();
-            await window.storage.set('gear-grinder-save', data);
+            try {
+                const data = await gameManagerRef.current.save();
+                await window.storage.set('gear-grinder-save', data);
+                console.log('Auto-save:', {
+                    zone: gameManagerRef.current.state.currentZone,
+                    level: gameManagerRef.current.state.level,
+                    gold: gameManagerRef.current.state.gold
+                });
+            } catch (err) {
+                console.error('Auto-save failed:', err);
+            }
         };
 
         loadGame();
