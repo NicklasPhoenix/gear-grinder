@@ -62,21 +62,17 @@ export default function InventoryView({ onHover }) {
 
     const handleSalvage = () => {
         if (selectedForSalvage.size === 0) return;
-        let totalGold = 0, totalOre = 0, totalLeather = 0, totalStones = 0;
+        let totalGold = 0, totalStones = 0;
         const itemsToSalvage = state.inventory.filter(item => selectedForSalvage.has(item.id));
         for (const item of itemsToSalvage) {
             const returns = getSalvageReturns(item);
             totalGold += returns.gold;
-            totalOre += returns.ore;
-            totalLeather += returns.leather;
             totalStones += returns.enhanceStone;
         }
         const newInv = state.inventory.filter(item => !selectedForSalvage.has(item.id));
         gameManager.setState(prev => ({
             ...prev, inventory: newInv,
             gold: (prev.gold || 0) + totalGold,
-            ore: (prev.ore || 0) + totalOre,
-            leather: (prev.leather || 0) + totalLeather,
             enhanceStone: (prev.enhanceStone || 0) + totalStones,
         }));
         setSelectedForSalvage(new Set());
@@ -85,19 +81,15 @@ export default function InventoryView({ onHover }) {
 
     const handleSalvageAll = () => {
         if (state.inventory.length === 0) return;
-        let totalGold = 0, totalOre = 0, totalLeather = 0, totalStones = 0;
+        let totalGold = 0, totalStones = 0;
         for (const item of state.inventory) {
             const returns = getSalvageReturns(item);
             totalGold += returns.gold;
-            totalOre += returns.ore;
-            totalLeather += returns.leather;
             totalStones += returns.enhanceStone;
         }
         gameManager.setState(prev => ({
             ...prev, inventory: [],
             gold: (prev.gold || 0) + totalGold,
-            ore: (prev.ore || 0) + totalOre,
-            leather: (prev.leather || 0) + totalLeather,
             enhanceStone: (prev.enhanceStone || 0) + totalStones,
         }));
         setSelectedForSalvage(new Set());

@@ -5,7 +5,6 @@ import InventoryView from './InventoryView';
 import StatsView from './StatsView';
 import SkillsView from './SkillsView';
 import ZoneView from './ZoneView';
-import CraftingView from './CraftingView';
 import EnhancementView from './EnhancementView';
 import PrestigeView from './PrestigeView';
 import GameTooltip from './GameTooltip';
@@ -23,12 +22,6 @@ const TabIcons = {
     stats: (
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-        </svg>
-    ),
-    forge: (
-        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />
         </svg>
     ),
     enhance: (
@@ -134,10 +127,8 @@ export default function GameLayout() {
 
                     {/* Currency Display - All Materials */}
                     <div className="glass-card rounded-xl p-3 animate-fadeIn">
-                        <div className="grid grid-cols-3 gap-3">
+                        <div className="grid grid-cols-2 gap-3">
                             <MaterialDisplay type="gold" value={state.gold} color="text-yellow-400" />
-                            <MaterialDisplay type="ore" value={state.ore} color="text-slate-300" />
-                            <MaterialDisplay type="leather" value={state.leather} color="text-amber-500" />
                             <MaterialDisplay type="enhanceStone" value={state.enhanceStone} color="text-blue-400" />
                             <MaterialDisplay type="blessedOrb" value={state.blessedOrb} color="text-purple-400" />
                             <MaterialDisplay type="celestialShard" value={state.celestialShard} color="text-yellow-300" />
@@ -174,7 +165,7 @@ export default function GameLayout() {
             <div className="w-[550px] h-full flex flex-col border-l border-slate-800/50 bg-slate-900/80 backdrop-blur-sm shadow-2xl z-20">
                 {/* Tab Navigation */}
                 <div className="flex bg-slate-950/80 border-b border-slate-800/50">
-                    {['inventory', 'stats', 'forge', 'enhance', 'skills', 'zone', 'prestige'].map((tab) => (
+                    {['inventory', 'stats', 'enhance', 'skills', 'zone', 'prestige'].map((tab) => (
                         <TabButton
                             key={tab}
                             active={activeTab === tab}
@@ -191,7 +182,6 @@ export default function GameLayout() {
                     <div className="h-full animate-fadeIn">
                         {activeTab === 'inventory' && <InventoryView onHover={handleHover} />}
                         {activeTab === 'stats' && <StatsView />}
-                        {activeTab === 'forge' && <CraftingView />}
                         {activeTab === 'enhance' && <EnhancementView />}
                         {activeTab === 'skills' && <SkillsView />}
                         {activeTab === 'zone' && <ZoneView />}
@@ -253,8 +243,6 @@ function StatMini({ label, value, color }) {
 
 const MATERIAL_NAMES = {
     gold: 'Gold',
-    ore: 'Ore',
-    leather: 'Leather',
     enhanceStone: 'E.Stone',
     blessedOrb: 'B.Orb',
     celestialShard: 'C.Shard',

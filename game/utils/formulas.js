@@ -13,23 +13,24 @@ export const getEnhanceSuccess = (currentPlus) => {
 };
 
 export const getEnhanceBonus = (plus, tier = 0) => {
-    // Enhancement bonuses now scale with gear tier for meaningful progression
-    const tierMult = 1 + tier * 0.3; // Higher tier = bigger enhancement bonuses
+    // Enhancement bonuses balanced so +10 ≈ +0 next tier (slightly less)
+    // Each tier is ~1.5x stronger, so +10 should add ~40% power
+    // This means each + adds ~4% relative power
     const basePerPlus = {
-        dmg: 3 + tier * 2,      // Base 3-15 dmg per + depending on tier
-        hp: 8 + tier * 4,       // Base 8-32 HP per + depending on tier
-        armor: 1 + tier * 0.5,  // Base 1-4 armor per + depending on tier
+        dmg: 0.5 + tier * 0.3,   // Small dmg per +, scales with tier
+        hp: 2 + tier * 1,        // Small HP per +, scales with tier
+        armor: 0.2 + tier * 0.1, // Small armor per +
     };
 
-    // Exponential scaling at higher enhancement levels
-    const expBonus = plus >= 10 ? Math.pow(1.08, plus - 9) : 1;
+    // Slight exponential scaling at higher levels for rewarding high enhancement
+    const expBonus = plus >= 10 ? Math.pow(1.04, plus - 9) : 1;
 
     return {
         dmgBonus: Math.floor(plus * basePerPlus.dmg * expBonus),
         hpBonus: Math.floor(plus * basePerPlus.hp * expBonus),
         armorBonus: Math.floor(plus * basePerPlus.armor * expBonus),
-        effectBonus: Math.floor(plus / 3) * 5, // More frequent, bigger effect boost
-        // Damage multiplier at very high enhancement
-        dmgMult: plus >= 15 ? 1 + (plus - 14) * 0.03 : 1, // +3% per level above +14
+        effectBonus: Math.floor(plus / 4) * 3, // Effect boost every 4 levels
+        // Small damage multiplier at very high enhancement
+        dmgMult: plus >= 15 ? 1 + (plus - 14) * 0.02 : 1, // +2% per level above +14
     };
 };

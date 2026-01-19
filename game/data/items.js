@@ -1,6 +1,4 @@
 export const MATERIALS = {
-    ore: { name: 'Iron Ore', color: '#94a3b8', icon: '⛏️' },
-    leather: { name: 'Leather', color: '#d97706', icon: '🧶' },
     enhanceStone: { name: 'E.Stone', color: '#60a5fa', icon: '💎' },
     blessedOrb: { name: 'B.Orb', color: '#c084fc', icon: '🔮' },
     celestialShard: { name: 'C.Shard', color: '#fbbf24', icon: '✨' },
@@ -10,18 +8,18 @@ export const MATERIALS = {
 export const GEAR_SLOTS = ['weapon', 'helmet', 'armor', 'boots', 'accessory', 'shield', 'gloves', 'amulet'];
 
 export const TIERS = [
-    // Costs dramatically increased - high tier gear should be a real achievement
-    { id: 0, name: 'Common', color: '#9ca3af', statMult: 1, oreCost: 5, leatherCost: 5, goldCost: 50, zoneReq: 0 },
-    { id: 1, name: 'Uncommon', color: '#22c55e', statMult: 1.8, oreCost: 25, leatherCost: 25, goldCost: 300, zoneReq: 1 },
-    { id: 2, name: 'Rare', color: '#3b82f6', statMult: 3, oreCost: 80, leatherCost: 80, goldCost: 1500, zoneReq: 3 },
-    { id: 3, name: 'Epic', color: '#a855f7', statMult: 5, oreCost: 250, leatherCost: 250, goldCost: 8000, zoneReq: 6 },
-    { id: 4, name: 'Legendary', color: '#f97316', statMult: 8, oreCost: 800, leatherCost: 800, goldCost: 35000, zoneReq: 10 },
-    { id: 5, name: 'Mythic', color: '#ec4899', statMult: 12, oreCost: 2500, leatherCost: 2500, goldCost: 150000, zoneReq: 14 },
-    { id: 6, name: 'Divine', color: '#fbbf24', statMult: 18, oreCost: 8000, leatherCost: 8000, goldCost: 500000, zoneReq: 18 },
+    // Balanced so +10 tier N ≈ +0 tier N+1 (each tier ~1.5x stronger)
+    { id: 0, name: 'Common', color: '#9ca3af', statMult: 1.0, goldCost: 50, zoneReq: 0 },
+    { id: 1, name: 'Uncommon', color: '#22c55e', statMult: 1.5, goldCost: 200, zoneReq: 1 },
+    { id: 2, name: 'Rare', color: '#3b82f6', statMult: 2.2, goldCost: 600, zoneReq: 3 },
+    { id: 3, name: 'Epic', color: '#a855f7', statMult: 3.3, goldCost: 2000, zoneReq: 6 },
+    { id: 4, name: 'Legendary', color: '#f97316', statMult: 5.0, goldCost: 6000, zoneReq: 10 },
+    { id: 5, name: 'Mythic', color: '#ec4899', statMult: 7.5, goldCost: 20000, zoneReq: 14 },
+    { id: 6, name: 'Divine', color: '#fbbf24', statMult: 11.0, goldCost: 60000, zoneReq: 18 },
     // Prestige tiers - require prestige level to unlock
-    { id: 7, name: 'Astral', color: '#38bdf8', statMult: 28, oreCost: 20000, leatherCost: 20000, goldCost: 1500000, zoneReq: 21, prestigeReq: 1 },
-    { id: 8, name: 'Cosmic', color: '#818cf8', statMult: 42, oreCost: 50000, leatherCost: 50000, goldCost: 5000000, zoneReq: 23, prestigeReq: 2 },
-    { id: 9, name: 'Primordial', color: '#f472b6', statMult: 65, oreCost: 120000, leatherCost: 120000, goldCost: 15000000, zoneReq: 25, prestigeReq: 3 },
+    { id: 7, name: 'Astral', color: '#38bdf8', statMult: 17.0, goldCost: 200000, zoneReq: 21, prestigeReq: 1 },
+    { id: 8, name: 'Cosmic', color: '#818cf8', statMult: 25.0, goldCost: 600000, zoneReq: 23, prestigeReq: 2 },
+    { id: 9, name: 'Primordial', color: '#f472b6', statMult: 38.0, goldCost: 2000000, zoneReq: 25, prestigeReq: 3 },
 ];
 
 export const GEAR_NAMES = {
@@ -338,7 +336,7 @@ export function getItemScore(item) {
 
 // Get salvage returns for an item (multiply by count for stacked items)
 export function getSalvageReturns(item, explicitCount) {
-    if (!item) return { gold: 0, ore: 0, leather: 0, enhanceStone: 0 };
+    if (!item) return { gold: 0, enhanceStone: 0 };
 
     const tier = TIERS[item.tier] || TIERS[0];
     const plus = item.plus || 0;
@@ -346,10 +344,8 @@ export function getSalvageReturns(item, explicitCount) {
     const itemCount = explicitCount !== undefined ? explicitCount : (item.count || 1);
 
     return {
-        gold: Math.floor(((tier.goldCost || 50) * 0.3 + plus * 20) * itemCount),
-        ore: Math.floor(((tier.oreCost || 5) * 0.4 + plus * 2) * itemCount),
-        leather: Math.floor(((tier.leatherCost || 5) * 0.4 + plus * 2) * itemCount),
-        enhanceStone: Math.floor((plus * 0.5) * itemCount),
+        gold: Math.floor(((tier.goldCost || 50) * 0.4 + plus * 25) * itemCount),
+        enhanceStone: Math.floor((1 + plus * 0.5 + tier.id * 0.3) * itemCount),
     };
 }
 
@@ -446,4 +442,58 @@ export function removeOneFromStack(inventory, itemId) {
         updated[itemIndex] = { ...item, count: count - 1 };
         return updated;
     }
+}
+
+// Generate a random gear drop for a given zone tier
+export function generateGearDrop(zoneTier, zoneId) {
+    // Random slot
+    const slot = GEAR_SLOTS[Math.floor(Math.random() * GEAR_SLOTS.length)];
+
+    // Determine tier - usually zone tier, small chance for +1 tier
+    let tier = zoneTier;
+    if (Math.random() < 0.15 && tier < TIERS.length - 1) {
+        tier = Math.min(tier + 1, TIERS.length - 1);
+    }
+
+    const tierInfo = TIERS[tier];
+
+    // Generate name based on slot and tier
+    let name;
+    let weaponType = null;
+    if (slot === 'weapon') {
+        // Pick a random weapon type
+        const weaponTypes = WEAPON_TYPES;
+        const weaponTypeInfo = weaponTypes[Math.floor(Math.random() * weaponTypes.length)];
+        weaponType = weaponTypeInfo.id;
+        name = GEAR_NAMES[weaponType]?.[tier] || GEAR_NAMES.sword[tier] || 'Weapon';
+    } else {
+        name = GEAR_NAMES[slot]?.[tier] || tierInfo.name + ' ' + slot;
+    }
+
+    // Generate random effects based on tier
+    const effects = [];
+    const numEffects = Math.random() < (0.1 + tier * 0.08) ? (Math.random() < 0.3 ? 2 : 1) : 0;
+
+    if (numEffects > 0) {
+        const availableEffects = [...SPECIAL_EFFECTS];
+        for (let i = 0; i < numEffects; i++) {
+            if (availableEffects.length === 0) break;
+            const effectIndex = Math.floor(Math.random() * availableEffects.length);
+            const effect = availableEffects.splice(effectIndex, 1)[0];
+            // Scale effect value with tier
+            const tierScale = 1 + tier * 0.3;
+            const value = Math.floor(effect.minVal + Math.random() * (effect.maxVal - effect.minVal) * tierScale);
+            effects.push({ id: effect.id, name: effect.name, value: Math.min(value, effect.maxVal * 2) });
+        }
+    }
+
+    return {
+        id: Date.now() + Math.random(),
+        slot,
+        tier,
+        name,
+        plus: 0,
+        weaponType,
+        effects,
+    };
 }

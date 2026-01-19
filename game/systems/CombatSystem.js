@@ -1,5 +1,5 @@
 import { getZoneById } from '../data/zones';
-import { BOSS_SETS, PRESTIGE_BOSS_SETS, MATERIALS, getSalvageReturns, addItemToInventory } from '../data/items';
+import { BOSS_SETS, PRESTIGE_BOSS_SETS, MATERIALS, getSalvageReturns, addItemToInventory, generateGearDrop, TIERS } from '../data/items';
 import { SKILLS } from '../data/skills';
 import { calculatePlayerStats } from './PlayerSystem';
 
@@ -112,19 +112,21 @@ export class CombatSystem {
         const drops = zone.drops;
         const zoneBonus = Math.floor(state.currentZone / 2) + 1;
 
-        // Roll Drops
-        const oreDropped = Math.random() < drops.ore * stats.matMult ? Math.ceil(Math.random() * zoneBonus) : 0;
-        const leatherDropped = Math.random() < drops.leather * stats.matMult ? Math.ceil(Math.random() * zoneBonus) : 0;
+        // Roll Material Drops
         const enhanceStoneDropped = Math.random() < drops.enhanceStone ? Math.ceil(Math.random() * Math.max(1, zoneBonus / 2)) : 0;
         const blessedOrbDropped = Math.random() < drops.blessedOrb ? Math.ceil(Math.random() * Math.max(1, zoneBonus / 3)) : 0;
         const celestialShardDropped = Math.random() < drops.celestialShard ? Math.ceil(Math.random() * Math.max(1, zoneBonus / 4)) : 0;
         const prestigeStoneDropped = drops.prestigeStone && Math.random() < drops.prestigeStone ? Math.ceil(Math.random() * 2) : 0;
 
+        // Roll Gear Drop (non-boss zones only)
+        let droppedGear = null;
+        if (!zone.isBoss && zone.gearChance && Math.random() < zone.gearChance * stats.matMult) {
+            droppedGear = generateGearDrop(zone.gearTier || 0, zone.id);
+        }
+
         // Update State
         state.gold += goldEarned;
         state.totalGold += goldEarned;
-        state.ore += oreDropped;
-        state.leather += leatherDropped;
         state.enhanceStone += enhanceStoneDropped;
         state.blessedOrb += blessedOrbDropped;
         state.celestialShard += celestialShardDropped;
@@ -136,6 +138,19 @@ export class CombatSystem {
         state.zoneKills = { ...state.zoneKills };
         state.zoneKills[state.currentZone] = (state.zoneKills[state.currentZone] || 0) + 1;
 
+        // Handle gear drop
+        if (droppedGear) {
+            if (state.autoSalvage) {
+                const returns = getSalvageReturns(droppedGear, 1);
+                state.gold += returns.gold;
+                state.enhanceStone += returns.enhanceStone;
+                log.push({ type: 'autoSalvage', msg: `♻️ ${droppedGear.name} salvaged!` });
+            } else {
+                state.inventory = addItemToInventory(state.inventory, droppedGear);
+                log.push({ type: 'gearDrop', msg: `⚔️ ${droppedGear.name} dropped!` });
+            }
+        }
+
         // Boss Loot
         if (zone.isBoss && zone.bossSet) {
             this.handleBossLoot(state, zone, log);
@@ -145,8 +160,10 @@ export class CombatSystem {
         const lootItems = [];
         lootItems.push({ text: `+${goldEarned}g`, color: '#fbbf24' });
         lootItems.push({ text: `+${xpEarned}xp`, color: '#a855f7' });
-        if (oreDropped) lootItems.push({ text: `+${oreDropped}${MATERIALS.ore.icon}`, color: MATERIALS.ore.color });
-        if (leatherDropped) lootItems.push({ text: `+${leatherDropped}${MATERIALS.leather.icon}`, color: MATERIALS.leather.color });
+        if (droppedGear && !state.autoSalvage) {
+            const tierInfo = TIERS[droppedGear.tier] || TIERS[0];
+            lootItems.push({ text: `${droppedGear.name}`, color: tierInfo.color });
+        }
         if (enhanceStoneDropped) lootItems.push({ text: `+${enhanceStoneDropped}${MATERIALS.enhanceStone.icon}`, color: MATERIALS.enhanceStone.color });
         if (blessedOrbDropped) lootItems.push({ text: `+${blessedOrbDropped}${MATERIALS.blessedOrb.icon}`, color: MATERIALS.blessedOrb.color });
         if (celestialShardDropped) lootItems.push({ text: `+${celestialShardDropped}${MATERIALS.celestialShard.icon}`, color: MATERIALS.celestialShard.color });
@@ -204,8 +221,6 @@ export class CombatSystem {
             if (state.autoSalvage) {
                 const returns = getSalvageReturns(newBossItem, 1);
                 state.gold += returns.gold;
-                state.ore += returns.ore;
-                state.leather += returns.leather;
                 state.enhanceStone += returns.enhanceStone;
                 log.push({ type: 'autoSalvage', msg: `♻️ ${bossItem.name} salvaged! +${returns.gold}g` });
                 this.callbacks.onFloatingText(`+${returns.gold}g`, 'heal', 'player');
