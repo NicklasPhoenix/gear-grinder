@@ -287,8 +287,8 @@ export default function GameRenderer() {
             };
 
             // --- Create animated background ---
-            const initialZone = state?.currentZone || 0;
-            createBackground(bgContainer, canvasWidth, canvasHeight, initialZone);
+            const initialZoneId = state?.currentZone || 0;
+            createBackground(bgContainer, canvasWidth, canvasHeight, initialZoneId);
 
             // --- Ground/Floor ---
             const ground = new PIXI.Graphics();
@@ -824,7 +824,6 @@ export default function GameRenderer() {
 
     // Background image ref for zone changes
     const bgSpriteRef = useRef(null);
-    const bgContainerRef = useRef(null);
 
     // Get background image path based on zone (progressive darkness)
     function getBackgroundForZone(zoneId) {
