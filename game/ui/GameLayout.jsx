@@ -8,7 +8,8 @@ import ZoneView from './ZoneView';
 import EnhancementView from './EnhancementView';
 import PrestigeView from './PrestigeView';
 import GameTooltip from './GameTooltip';
-import { MaterialIcon } from './MaterialIcons';
+import { MaterialIcon, BossStoneIcon } from './MaterialIcons';
+import { BOSS_STONES } from '../data/items';
 import { getZoneById } from '../data/zones';
 import { calculatePlayerStats } from '../systems/PlayerSystem';
 
@@ -127,7 +128,7 @@ export default function GameLayout() {
 
                     {/* Currency Display - All Materials */}
                     <div className="glass-card rounded-xl p-3 animate-fadeIn">
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-2 gap-2">
                             <MaterialDisplay type="gold" value={state.gold} color="text-yellow-400" />
                             <MaterialDisplay type="enhanceStone" value={state.enhanceStone} color="text-blue-400" />
                             <MaterialDisplay type="blessedOrb" value={state.blessedOrb} color="text-purple-400" />
@@ -136,6 +137,26 @@ export default function GameLayout() {
                                 <MaterialDisplay type="prestigeStone" value={state.prestigeStones} color="text-pink-400" />
                             )}
                         </div>
+                        {/* Boss Stones - show if any collected */}
+                        {state.bossStones && Object.entries(state.bossStones).some(([_, v]) => v > 0) && (
+                            <div className="mt-2 pt-2 border-t border-slate-700/50">
+                                <p className="text-[8px] text-slate-500 uppercase mb-1">Boss Stones</p>
+                                <div className="flex flex-wrap gap-1.5">
+                                    {Object.entries(BOSS_STONES).map(([key, info]) => {
+                                        const count = state.bossStones?.[key] || 0;
+                                        if (count === 0) return null;
+                                        return (
+                                            <BossStoneDisplay
+                                                key={key}
+                                                bossSet={key}
+                                                value={count}
+                                                info={info}
+                                            />
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -264,6 +285,20 @@ function MaterialDisplay({ type, value, color }) {
                     {typeof value === 'number' ? value.toLocaleString() : value}
                 </p>
             </div>
+        </div>
+    );
+}
+
+function BossStoneDisplay({ bossSet, value, info }) {
+    return (
+        <div
+            className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-800/50"
+            title={info.name}
+        >
+            <BossStoneIcon bossSet={bossSet} size={16} />
+            <span className="text-xs font-bold" style={{ color: info.color }}>
+                {value}
+            </span>
         </div>
     );
 }
