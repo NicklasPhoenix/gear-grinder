@@ -144,7 +144,7 @@ export function GameProvider({ children }) {
                         const { validated, errors } = validateSave(parsed);
 
                         if (errors.length > 0) {
-                            console.log(`Save loaded with ${errors.length} corrections applied`);
+                            console.warn(`Save loaded with ${errors.length} corrections applied`);
                         }
 
                         // Merge with default state
@@ -212,10 +212,7 @@ export function GameProvider({ children }) {
             });
 
             // Process Offline
-            const offlineReport = gm.processOfflineProgress(gm.state);
-            if (offlineReport) {
-                console.log("Offline Progress:", offlineReport);
-            }
+            gm.processOfflineProgress(gm.state);
 
             // Start the loop
             gm.start();
@@ -225,7 +222,6 @@ export function GameProvider({ children }) {
             if (!gameManagerRef.current) return;
             const data = await gameManagerRef.current.save();
             await window.storage.set('gear-grinder-save', data);
-            console.log("Game Saved");
         };
 
         loadGame();

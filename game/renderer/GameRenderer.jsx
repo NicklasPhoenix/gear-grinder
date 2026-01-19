@@ -344,7 +344,6 @@ export default function GameRenderer() {
 
             // --- HP Bars (Modern style with text display) - 3x larger ---
             const createHpBar = (x, y, width, isPlayer) => {
-                console.log(`Creating HP bar at (${x}, ${y}), width=${width}, isPlayer=${isPlayer}`);
                 const container = new PIXI.Container();
                 container.position.set(x, y);
 
@@ -384,8 +383,6 @@ export default function GameRenderer() {
                 container.addChild(hpText);
                 container.hpText = hpText;
 
-                console.log(`HP bar created, fillRef set: ${!!container.fillRef}`);
-
                 // Label - larger font
                 const labelStyle = new PIXI.TextStyle({
                     fontFamily: 'Rajdhani',
@@ -414,10 +411,8 @@ export default function GameRenderer() {
 
             // Force update HP bars after PIXI has rendered at least one frame
             setTimeout(() => {
-                console.log('Forcing HP bar update after delay');
                 const gmState = gameManager.getState();
                 if (gmState && playerHpBarRef.current && enemyHpBarRef.current) {
-                    console.log('State values:', gmState.playerHp, gmState.playerMaxHp, gmState.enemyHp, gmState.enemyMaxHp);
                     updateHpBar(playerHpBarRef.current, gmState.playerHp || 100, gmState.playerMaxHp || 100, true);
                     updateHpBar(enemyHpBarRef.current, gmState.enemyHp || 20, gmState.enemyMaxHp || 20, false);
                 }
@@ -1297,10 +1292,7 @@ export default function GameRenderer() {
 }
 
 function updateHpBar(barContainer, current, max, isPlayer) {
-    if (!barContainer) {
-        console.log('HP Bar: missing container');
-        return;
-    }
+    if (!barContainer) return;
 
     const width = barContainer.barWidth || 180;
 
