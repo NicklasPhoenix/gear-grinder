@@ -198,7 +198,7 @@ export class CombatSystem {
 
     handleBossLoot(state, zone, log) {
         const bossSet = BOSS_SETS[zone.bossSet] || PRESTIGE_BOSS_SETS[zone.bossSet];
-        const dropChance = 0.20;
+        const dropChance = 0.06; // 6% drop rate - boss gear should feel earned
         if (Math.random() < dropChance && bossSet) {
             const availableSlots = Object.keys(bossSet.items);
             const droppedSlot = availableSlots[Math.floor(Math.random() * availableSlots.length)];
@@ -234,12 +234,24 @@ export class CombatSystem {
 
     handlePlayerDeath(state, stats, zone, safeMaxHp) {
         this.callbacks.onFloatingText('DEATH!', 'death', 'player');
-        const goldLost = Math.floor(state.gold * 0.1);
+
+        // Harsh death penalty: 25% gold loss
+        const goldLost = Math.floor(state.gold * 0.25);
         if (goldLost > 0) {
             state.gold -= goldLost;
             this.callbacks.onFloatingText(`-${goldLost}g`, 'goldLoss', 'player');
         }
-        state.playerHp = safeMaxHp; // Use safeMaxHp to prevent NaN
+
+        // Also lose some enhance stones (10%)
+        const stonesLost = Math.floor(state.enhanceStone * 0.10);
+        if (stonesLost > 0) {
+            state.enhanceStone -= stonesLost;
+        }
+
+        // Track deaths on this zone - if too many, suggest going back
+        state.deathsOnZone = (state.deathsOnZone || 0) + 1;
+
+        state.playerHp = safeMaxHp;
         state.enemyHp = zone.enemyHp;
         state.enemyMaxHp = zone.enemyHp;
     }

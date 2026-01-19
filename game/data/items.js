@@ -40,175 +40,176 @@ export const GEAR_NAMES = {
 };
 
 export const BOSS_SETS = {
+    // Rebalanced: lower stat bonuses (1.2-1.4), reduced set bonuses for slower progression
     guardian: {
-        name: "Guardian's", color: '#22c55e', tier: 2, statBonus: 1.5, // Zone 2 boss - Rare tier, 50% better stats
+        name: "Guardian's", color: '#22c55e', tier: 1, statBonus: 1.2, // Zone 4 boss
         items: {
-            weapon: { name: "Guardian's Greatsword", effect: { id: 'bonusDmg', name: '+DMG', value: 40 } },
-            helmet: { name: "Guardian's Crown", effect: { id: 'bonusHp', name: '+HP', value: 150 } },
-            armor: { name: "Guardian's Plate", effect: { id: 'thorns', name: 'Thorns', value: 20 } },
-            boots: { name: "Guardian's Treads", effect: { id: 'dodge', name: 'Dodge', value: 10 } },
-            gloves: { name: "Guardian's Grasp", effect: { id: 'bonusDmg', name: '+DMG', value: 25 } },
-            shield: { name: "Guardian's Bulwark", effect: { id: 'bonusHp', name: '+HP', value: 200 } },
-            accessory: { name: "Guardian's Signet", effect: { id: 'critChance', name: 'Crit', value: 8 } },
-            amulet: { name: "Guardian's Charm", effect: { id: 'lifesteal', name: 'Lifesteal', value: 4 } },
+            weapon: { name: "Guardian's Greatsword", effect: { id: 'bonusDmg', name: '+DMG', value: 15 } },
+            helmet: { name: "Guardian's Crown", effect: { id: 'bonusHp', name: '+HP', value: 50 } },
+            armor: { name: "Guardian's Plate", effect: { id: 'thorns', name: 'Thorns', value: 8 } },
+            boots: { name: "Guardian's Treads", effect: { id: 'dodge', name: 'Dodge', value: 4 } },
+            gloves: { name: "Guardian's Grasp", effect: { id: 'bonusDmg', name: '+DMG', value: 10 } },
+            shield: { name: "Guardian's Bulwark", effect: { id: 'bonusHp', name: '+HP', value: 70 } },
+            accessory: { name: "Guardian's Signet", effect: { id: 'critChance', name: 'Crit', value: 4 } },
+            amulet: { name: "Guardian's Charm", effect: { id: 'lifesteal', name: 'Lifesteal', value: 2 } },
         },
         setBonuses: [
-            { pieces: 2, desc: '+25% HP', effect: { hpMult: 0.25 } },
-            { pieces: 4, desc: '+40% DMG, +15% Thorns', effect: { dmgMult: 0.40, thorns: 15 } },
-            { pieces: 6, desc: '+30% All Stats', effect: { dmgMult: 0.30, hpMult: 0.30, speedMult: 0.20 } },
-            { pieces: 8, desc: 'Guardian Blessing: +60% HP, +20% Dodge', effect: { hpMult: 0.60, dodge: 20 } },
+            { pieces: 2, desc: '+10% HP', effect: { hpMult: 0.10 } },
+            { pieces: 4, desc: '+15% DMG, +5% Thorns', effect: { dmgMult: 0.15, thorns: 5 } },
+            { pieces: 6, desc: '+10% All Stats', effect: { dmgMult: 0.10, hpMult: 0.10, speedMult: 0.05 } },
+            { pieces: 8, desc: 'Guardian Blessing: +20% HP, +8% Dodge', effect: { hpMult: 0.20, dodge: 8 } },
         ]
     },
     lich: {
-        name: "Lich", color: '#8b5cf6', tier: 3, statBonus: 1.5, // Zone 5 boss - Epic tier
+        name: "Lich", color: '#8b5cf6', tier: 2, statBonus: 1.25, // Zone 9 boss
         items: {
-            weapon: { name: "Lich's Staff", effect: { id: 'critDamage', name: 'Crit DMG', value: 100 } },
-            helmet: { name: "Lich's Crown", effect: { id: 'lifesteal', name: 'Lifesteal', value: 8 } },
-            armor: { name: "Lich's Robes", effect: { id: 'bonusHp', name: '+HP', value: 250 } },
-            boots: { name: "Lich's Sandals", effect: { id: 'dodge', name: 'Dodge', value: 12 } },
-            gloves: { name: "Lich's Grasp", effect: { id: 'critChance', name: 'Crit', value: 18 } },
-            shield: { name: "Lich's Tome", effect: { id: 'bonusDmg', name: '+DMG', value: 60 } },
-            accessory: { name: "Lich's Phylactery", effect: { id: 'lifesteal', name: 'Lifesteal', value: 6 } },
-            amulet: { name: "Lich's Soulstone", effect: { id: 'critDamage', name: 'Crit DMG', value: 80 } },
+            weapon: { name: "Lich's Staff", effect: { id: 'critDamage', name: 'Crit DMG', value: 35 } },
+            helmet: { name: "Lich's Crown", effect: { id: 'lifesteal', name: 'Lifesteal', value: 3 } },
+            armor: { name: "Lich's Robes", effect: { id: 'bonusHp', name: '+HP', value: 90 } },
+            boots: { name: "Lich's Sandals", effect: { id: 'dodge', name: 'Dodge', value: 5 } },
+            gloves: { name: "Lich's Grasp", effect: { id: 'critChance', name: 'Crit', value: 6 } },
+            shield: { name: "Lich's Tome", effect: { id: 'bonusDmg', name: '+DMG', value: 20 } },
+            accessory: { name: "Lich's Phylactery", effect: { id: 'lifesteal', name: 'Lifesteal', value: 2 } },
+            amulet: { name: "Lich's Soulstone", effect: { id: 'critDamage', name: 'Crit DMG', value: 25 } },
         },
         setBonuses: [
-            { pieces: 2, desc: '+8% Lifesteal', effect: { lifesteal: 8 } },
-            { pieces: 4, desc: '+50% Crit DMG, +50% DMG', effect: { critDamage: 50, dmgMult: 0.50 } },
-            { pieces: 6, desc: '+15% Crit Chance, +60% HP', effect: { critChance: 15, hpMult: 0.60 } },
-            { pieces: 8, desc: 'Undeath: +12% Lifesteal, +100% Crit DMG', effect: { lifesteal: 12, critDamage: 100 } },
+            { pieces: 2, desc: '+3% Lifesteal', effect: { lifesteal: 3 } },
+            { pieces: 4, desc: '+20% Crit DMG, +15% DMG', effect: { critDamage: 20, dmgMult: 0.15 } },
+            { pieces: 6, desc: '+6% Crit Chance, +15% HP', effect: { critChance: 6, hpMult: 0.15 } },
+            { pieces: 8, desc: 'Undeath: +5% Lifesteal, +30% Crit DMG', effect: { lifesteal: 5, critDamage: 30 } },
         ]
     },
     dragon: {
-        name: "Dragonborn", color: '#ef4444', tier: 3, statBonus: 1.6, // Zone 7 boss - Epic tier, slightly better
+        name: "Dragonborn", color: '#ef4444', tier: 3, statBonus: 1.25, // Zone 14 boss
         items: {
-            weapon: { name: "Dragonborn Blade", effect: { id: 'bonusDmg', name: '+DMG', value: 80 } },
-            helmet: { name: "Dragonborn Horns", effect: { id: 'critChance', name: 'Crit', value: 20 } },
-            armor: { name: "Dragonborn Scales", effect: { id: 'bonusHp', name: '+HP', value: 350 } },
-            boots: { name: "Dragonborn Claws", effect: { id: 'dodge', name: 'Dodge', value: 14 } },
-            gloves: { name: "Dragonborn Talons", effect: { id: 'critDamage', name: 'Crit DMG', value: 90 } },
-            shield: { name: "Dragonborn Aegis", effect: { id: 'thorns', name: 'Thorns', value: 30 } },
-            accessory: { name: "Dragonborn Scale", effect: { id: 'bonusHp', name: '+HP', value: 300 } },
-            amulet: { name: "Dragonborn Heart", effect: { id: 'bonusDmg', name: '+DMG', value: 70 } },
+            weapon: { name: "Dragonborn Blade", effect: { id: 'bonusDmg', name: '+DMG', value: 30 } },
+            helmet: { name: "Dragonborn Horns", effect: { id: 'critChance', name: 'Crit', value: 8 } },
+            armor: { name: "Dragonborn Scales", effect: { id: 'bonusHp', name: '+HP', value: 130 } },
+            boots: { name: "Dragonborn Claws", effect: { id: 'dodge', name: 'Dodge', value: 6 } },
+            gloves: { name: "Dragonborn Talons", effect: { id: 'critDamage', name: 'Crit DMG', value: 35 } },
+            shield: { name: "Dragonborn Aegis", effect: { id: 'thorns', name: 'Thorns', value: 12 } },
+            accessory: { name: "Dragonborn Scale", effect: { id: 'bonusHp', name: '+HP', value: 100 } },
+            amulet: { name: "Dragonborn Heart", effect: { id: 'bonusDmg', name: '+DMG', value: 25 } },
         },
         setBonuses: [
-            { pieces: 2, desc: '+50% DMG', effect: { dmgMult: 0.50 } },
-            { pieces: 4, desc: '+40% HP, +20% Crit Chance', effect: { hpMult: 0.40, critChance: 20 } },
-            { pieces: 6, desc: '+80% Crit DMG, +25% Thorns', effect: { critDamage: 80, thorns: 25 } },
-            { pieces: 8, desc: 'Dragon Fury: +100% DMG, +50% Speed', effect: { dmgMult: 1.00, speedMult: 0.50 } },
+            { pieces: 2, desc: '+15% DMG', effect: { dmgMult: 0.15 } },
+            { pieces: 4, desc: '+12% HP, +8% Crit Chance', effect: { hpMult: 0.12, critChance: 8 } },
+            { pieces: 6, desc: '+25% Crit DMG, +10% Thorns', effect: { critDamage: 25, thorns: 10 } },
+            { pieces: 8, desc: 'Dragon Fury: +30% DMG, +15% Speed', effect: { dmgMult: 0.30, speedMult: 0.15 } },
         ]
     },
     frost: {
-        name: "Frostborn", color: '#06b6d4', tier: 4, statBonus: 1.6, // Zone 10 boss - Legendary tier
+        name: "Frostborn", color: '#06b6d4', tier: 4, statBonus: 1.3, // Zone 19 boss
         items: {
-            weapon: { name: "Frostborn Axe", effect: { id: 'bonusDmg', name: '+DMG', value: 120 } },
-            helmet: { name: "Frostborn Helm", effect: { id: 'dodge', name: 'Dodge', value: 15 } },
-            armor: { name: "Frostborn Mail", effect: { id: 'bonusHp', name: '+HP', value: 500 } },
-            boots: { name: "Frostborn Boots", effect: { id: 'dodge', name: 'Dodge', value: 12 } },
-            gloves: { name: "Frostborn Grips", effect: { id: 'critChance', name: 'Crit', value: 18 } },
-            shield: { name: "Frostborn Barrier", effect: { id: 'thorns', name: 'Thorns', value: 28 } },
-            accessory: { name: "Frostborn Band", effect: { id: 'lifesteal', name: 'Lifesteal', value: 7 } },
-            amulet: { name: "Frostborn Pendant", effect: { id: 'critDamage', name: 'Crit DMG', value: 110 } },
+            weapon: { name: "Frostborn Axe", effect: { id: 'bonusDmg', name: '+DMG', value: 45 } },
+            helmet: { name: "Frostborn Helm", effect: { id: 'dodge', name: 'Dodge', value: 7 } },
+            armor: { name: "Frostborn Mail", effect: { id: 'bonusHp', name: '+HP', value: 180 } },
+            boots: { name: "Frostborn Boots", effect: { id: 'dodge', name: 'Dodge', value: 5 } },
+            gloves: { name: "Frostborn Grips", effect: { id: 'critChance', name: 'Crit', value: 8 } },
+            shield: { name: "Frostborn Barrier", effect: { id: 'thorns', name: 'Thorns', value: 12 } },
+            accessory: { name: "Frostborn Band", effect: { id: 'lifesteal', name: 'Lifesteal', value: 3 } },
+            amulet: { name: "Frostborn Pendant", effect: { id: 'critDamage', name: 'Crit DMG', value: 40 } },
         },
         setBonuses: [
-            { pieces: 2, desc: '+20% Dodge', effect: { dodge: 20 } },
-            { pieces: 4, desc: '+70% DMG, +60% HP', effect: { dmgMult: 0.70, hpMult: 0.60 } },
-            { pieces: 6, desc: '+25% Crit, +100% Crit DMG', effect: { critChance: 25, critDamage: 100 } },
-            { pieces: 8, desc: 'Frozen Heart: +40% All Stats', effect: { dmgMult: 0.40, hpMult: 0.40, speedMult: 0.40 } },
+            { pieces: 2, desc: '+8% Dodge', effect: { dodge: 8 } },
+            { pieces: 4, desc: '+20% DMG, +18% HP', effect: { dmgMult: 0.20, hpMult: 0.18 } },
+            { pieces: 6, desc: '+10% Crit, +35% Crit DMG', effect: { critChance: 10, critDamage: 35 } },
+            { pieces: 8, desc: 'Frozen Heart: +12% All Stats', effect: { dmgMult: 0.12, hpMult: 0.12, speedMult: 0.12 } },
         ]
     },
     demon: {
-        name: "Demonheart", color: '#dc2626', tier: 4, statBonus: 1.7, // Zone 12 boss - Legendary tier
+        name: "Demonheart", color: '#dc2626', tier: 5, statBonus: 1.3, // Zone 24 boss
         items: {
-            weapon: { name: "Demonheart Scythe", effect: { id: 'lifesteal', name: 'Lifesteal', value: 10 } },
-            helmet: { name: "Demonheart Horns", effect: { id: 'bonusDmg', name: '+DMG', value: 150 } },
-            armor: { name: "Demonheart Plate", effect: { id: 'thorns', name: 'Thorns', value: 35 } },
-            boots: { name: "Demonheart Hooves", effect: { id: 'dodge', name: 'Dodge', value: 16 } },
-            gloves: { name: "Demonheart Claws", effect: { id: 'critDamage', name: 'Crit DMG', value: 120 } },
-            shield: { name: "Demonheart Ward", effect: { id: 'bonusHp', name: '+HP', value: 550 } },
-            accessory: { name: "Demonheart Ring", effect: { id: 'critChance', name: 'Crit', value: 20 } },
-            amulet: { name: "Demonheart Soul", effect: { id: 'lifesteal', name: 'Lifesteal', value: 8 } },
+            weapon: { name: "Demonheart Scythe", effect: { id: 'lifesteal', name: 'Lifesteal', value: 4 } },
+            helmet: { name: "Demonheart Horns", effect: { id: 'bonusDmg', name: '+DMG', value: 55 } },
+            armor: { name: "Demonheart Plate", effect: { id: 'thorns', name: 'Thorns', value: 15 } },
+            boots: { name: "Demonheart Hooves", effect: { id: 'dodge', name: 'Dodge', value: 7 } },
+            gloves: { name: "Demonheart Claws", effect: { id: 'critDamage', name: 'Crit DMG', value: 45 } },
+            shield: { name: "Demonheart Ward", effect: { id: 'bonusHp', name: '+HP', value: 200 } },
+            accessory: { name: "Demonheart Ring", effect: { id: 'critChance', name: 'Crit', value: 9 } },
+            amulet: { name: "Demonheart Soul", effect: { id: 'lifesteal', name: 'Lifesteal', value: 3 } },
         },
         setBonuses: [
-            { pieces: 2, desc: '+10% Lifesteal', effect: { lifesteal: 10 } },
-            { pieces: 4, desc: '+80% DMG, +30% Thorns', effect: { dmgMult: 0.80, thorns: 30 } },
-            { pieces: 6, desc: '+70% HP, +120% Crit DMG', effect: { hpMult: 0.70, critDamage: 120 } },
-            { pieces: 8, desc: 'Demonic Pact: +15% Lifesteal, +150% DMG', effect: { lifesteal: 15, dmgMult: 1.50 } },
+            { pieces: 2, desc: '+4% Lifesteal', effect: { lifesteal: 4 } },
+            { pieces: 4, desc: '+25% DMG, +12% Thorns', effect: { dmgMult: 0.25, thorns: 12 } },
+            { pieces: 6, desc: '+22% HP, +40% Crit DMG', effect: { hpMult: 0.22, critDamage: 40 } },
+            { pieces: 8, desc: 'Demonic Pact: +6% Lifesteal, +40% DMG', effect: { lifesteal: 6, dmgMult: 0.40 } },
         ]
     },
     seraph: {
-        name: "Seraphic", color: '#fbbf24', tier: 5, statBonus: 1.7, // Zone 14 boss - Mythic tier
+        name: "Seraphic", color: '#fbbf24', tier: 6, statBonus: 1.35, // Zone 29 boss
         items: {
-            weapon: { name: "Seraphic Lance", effect: { id: 'bonusDmg', name: '+DMG', value: 200 } },
-            helmet: { name: "Seraphic Halo", effect: { id: 'critChance', name: 'Crit', value: 25 } },
-            armor: { name: "Seraphic Wings", effect: { id: 'bonusHp', name: '+HP', value: 800 } },
-            boots: { name: "Seraphic Steps", effect: { id: 'dodge', name: 'Dodge', value: 18 } },
-            gloves: { name: "Seraphic Touch", effect: { id: 'lifesteal', name: 'Lifesteal', value: 9 } },
-            shield: { name: "Seraphic Bulwark", effect: { id: 'thorns', name: 'Thorns', value: 38 } },
-            accessory: { name: "Seraphic Ring", effect: { id: 'critDamage', name: 'Crit DMG', value: 140 } },
-            amulet: { name: "Seraphic Star", effect: { id: 'bonusDmg', name: '+DMG', value: 180 } },
+            weapon: { name: "Seraphic Lance", effect: { id: 'bonusDmg', name: '+DMG', value: 75 } },
+            helmet: { name: "Seraphic Halo", effect: { id: 'critChance', name: 'Crit', value: 10 } },
+            armor: { name: "Seraphic Wings", effect: { id: 'bonusHp', name: '+HP', value: 280 } },
+            boots: { name: "Seraphic Steps", effect: { id: 'dodge', name: 'Dodge', value: 8 } },
+            gloves: { name: "Seraphic Touch", effect: { id: 'lifesteal', name: 'Lifesteal', value: 4 } },
+            shield: { name: "Seraphic Bulwark", effect: { id: 'thorns', name: 'Thorns', value: 16 } },
+            accessory: { name: "Seraphic Ring", effect: { id: 'critDamage', name: 'Crit DMG', value: 50 } },
+            amulet: { name: "Seraphic Star", effect: { id: 'bonusDmg', name: '+DMG', value: 65 } },
         },
         setBonuses: [
-            { pieces: 2, desc: '+25% Crit Chance', effect: { critChance: 25 } },
-            { pieces: 4, desc: '+100% DMG, +80% HP', effect: { dmgMult: 1.00, hpMult: 0.80 } },
-            { pieces: 6, desc: '+30% All Stats', effect: { dmgMult: 0.30, hpMult: 0.30, speedMult: 0.30 } },
-            { pieces: 8, desc: 'Divine Grace: +50% All Stats, +10% Lifesteal', effect: { dmgMult: 0.50, hpMult: 0.50, speedMult: 0.50, lifesteal: 10 } },
+            { pieces: 2, desc: '+10% Crit Chance', effect: { critChance: 10 } },
+            { pieces: 4, desc: '+30% DMG, +25% HP', effect: { dmgMult: 0.30, hpMult: 0.25 } },
+            { pieces: 6, desc: '+12% All Stats', effect: { dmgMult: 0.12, hpMult: 0.12, speedMult: 0.12 } },
+            { pieces: 8, desc: 'Divine Grace: +18% All Stats, +4% Lifesteal', effect: { dmgMult: 0.18, hpMult: 0.18, speedMult: 0.18, lifesteal: 4 } },
         ]
     },
     void: {
-        name: "Voidwalker", color: '#7c3aed', tier: 5, statBonus: 1.8, // Zone 16 boss - Mythic tier
+        name: "Voidwalker", color: '#7c3aed', tier: 6, statBonus: 1.35, // Zone 34 boss
         items: {
-            weapon: { name: "Voidwalker Reaper", effect: { id: 'critDamage', name: 'Crit DMG', value: 180 } },
-            helmet: { name: "Voidwalker Mask", effect: { id: 'critChance', name: 'Crit', value: 25 } },
-            armor: { name: "Voidwalker Shroud", effect: { id: 'bonusHp', name: '+HP', value: 1000 } },
-            boots: { name: "Voidwalker Striders", effect: { id: 'dodge', name: 'Dodge', value: 20 } },
-            gloves: { name: "Voidwalker Grips", effect: { id: 'bonusDmg', name: '+DMG', value: 250 } },
-            shield: { name: "Voidwalker Veil", effect: { id: 'dodge', name: 'Dodge', value: 18 } },
-            accessory: { name: "Voidwalker Band", effect: { id: 'lifesteal', name: 'Lifesteal', value: 10 } },
-            amulet: { name: "Voidwalker Core", effect: { id: 'critChance', name: 'Crit', value: 22 } },
+            weapon: { name: "Voidwalker Reaper", effect: { id: 'critDamage', name: 'Crit DMG', value: 65 } },
+            helmet: { name: "Voidwalker Mask", effect: { id: 'critChance', name: 'Crit', value: 11 } },
+            armor: { name: "Voidwalker Shroud", effect: { id: 'bonusHp', name: '+HP', value: 350 } },
+            boots: { name: "Voidwalker Striders", effect: { id: 'dodge', name: 'Dodge', value: 9 } },
+            gloves: { name: "Voidwalker Grips", effect: { id: 'bonusDmg', name: '+DMG', value: 90 } },
+            shield: { name: "Voidwalker Veil", effect: { id: 'dodge', name: 'Dodge', value: 8 } },
+            accessory: { name: "Voidwalker Band", effect: { id: 'lifesteal', name: 'Lifesteal', value: 4 } },
+            amulet: { name: "Voidwalker Core", effect: { id: 'critChance', name: 'Crit', value: 10 } },
         },
         setBonuses: [
-            { pieces: 2, desc: '+30% Crit Chance', effect: { critChance: 30 } },
-            { pieces: 4, desc: '+120% DMG, +100% HP', effect: { dmgMult: 1.20, hpMult: 1.00 } },
-            { pieces: 6, desc: '+80% Crit DMG, +20% Dodge', effect: { critDamage: 80, dodge: 20 } },
-            { pieces: 8, desc: 'Void Embrace: +200% Crit DMG, +35% Dodge', effect: { critDamage: 200, dodge: 35 } },
+            { pieces: 2, desc: '+12% Crit Chance', effect: { critChance: 12 } },
+            { pieces: 4, desc: '+35% DMG, +30% HP', effect: { dmgMult: 0.35, hpMult: 0.30 } },
+            { pieces: 6, desc: '+30% Crit DMG, +8% Dodge', effect: { critDamage: 30, dodge: 8 } },
+            { pieces: 8, desc: 'Void Embrace: +60% Crit DMG, +12% Dodge', effect: { critDamage: 60, dodge: 12 } },
         ]
     },
     chaos: {
-        name: "Chaosborn", color: '#ec4899', tier: 6, statBonus: 1.8, // Zone 18 boss - Divine tier
+        name: "Chaosborn", color: '#ec4899', tier: 6, statBonus: 1.4, // Zone 39 boss - Final boss
         items: {
-            weapon: { name: "Chaosborn Destroyer", effect: { id: 'bonusDmg', name: '+DMG', value: 350 } },
-            helmet: { name: "Chaosborn Crown", effect: { id: 'critChance', name: 'Crit', value: 28 } },
-            armor: { name: "Chaosborn Armor", effect: { id: 'bonusHp', name: '+HP', value: 1400 } },
-            boots: { name: "Chaosborn Greaves", effect: { id: 'dodge', name: 'Dodge', value: 22 } },
-            gloves: { name: "Chaosborn Fists", effect: { id: 'critDamage', name: 'Crit DMG', value: 200 } },
-            shield: { name: "Chaosborn Barrier", effect: { id: 'thorns', name: 'Thorns', value: 45 } },
-            accessory: { name: "Chaosborn Seal", effect: { id: 'lifesteal', name: 'Lifesteal', value: 11 } },
-            amulet: { name: "Chaosborn Essence", effect: { id: 'bonusDmg', name: '+DMG', value: 300 } },
+            weapon: { name: "Chaosborn Destroyer", effect: { id: 'bonusDmg', name: '+DMG', value: 120 } },
+            helmet: { name: "Chaosborn Crown", effect: { id: 'critChance', name: 'Crit', value: 12 } },
+            armor: { name: "Chaosborn Armor", effect: { id: 'bonusHp', name: '+HP', value: 450 } },
+            boots: { name: "Chaosborn Greaves", effect: { id: 'dodge', name: 'Dodge', value: 10 } },
+            gloves: { name: "Chaosborn Fists", effect: { id: 'critDamage', name: 'Crit DMG', value: 70 } },
+            shield: { name: "Chaosborn Barrier", effect: { id: 'thorns', name: 'Thorns', value: 20 } },
+            accessory: { name: "Chaosborn Seal", effect: { id: 'lifesteal', name: 'Lifesteal', value: 5 } },
+            amulet: { name: "Chaosborn Essence", effect: { id: 'bonusDmg', name: '+DMG', value: 100 } },
         },
         setBonuses: [
-            { pieces: 2, desc: '+60% Crit DMG', effect: { critDamage: 60 } },
-            { pieces: 4, desc: '+150% DMG, +120% HP', effect: { dmgMult: 1.50, hpMult: 1.20 } },
-            { pieces: 6, desc: '+50% All Stats', effect: { dmgMult: 0.50, hpMult: 0.50, speedMult: 0.50 } },
-            { pieces: 8, desc: 'Chaos Incarnate: +250% DMG, +200% HP', effect: { dmgMult: 2.50, hpMult: 2.00 } },
+            { pieces: 2, desc: '+25% Crit DMG', effect: { critDamage: 25 } },
+            { pieces: 4, desc: '+40% DMG, +35% HP', effect: { dmgMult: 0.40, hpMult: 0.35 } },
+            { pieces: 6, desc: '+15% All Stats', effect: { dmgMult: 0.15, hpMult: 0.15, speedMult: 0.15 } },
+            { pieces: 8, desc: 'Chaos Incarnate: +60% DMG, +50% HP', effect: { dmgMult: 0.60, hpMult: 0.50 } },
         ]
     },
     eternal: {
-        name: "Eternal", color: '#f97316', tier: 6, statBonus: 2.0, // Zone 20 boss - Divine tier, best in game
+        name: "Eternal", color: '#f97316', tier: 6, statBonus: 1.5, // Prestige only - best gear
         items: {
-            weapon: { name: "Eternal Annihilator", effect: { id: 'bonusDmg', name: '+DMG', value: 500 } },
-            helmet: { name: "Eternal Diadem", effect: { id: 'critChance', name: 'Crit', value: 30 } },
-            armor: { name: "Eternal Plate", effect: { id: 'bonusHp', name: '+HP', value: 2000 } },
-            boots: { name: "Eternal Walkers", effect: { id: 'dodge', name: 'Dodge', value: 25 } },
-            gloves: { name: "Eternal Gauntlets", effect: { id: 'critDamage', name: 'Crit DMG', value: 250 } },
-            shield: { name: "Eternal Aegis", effect: { id: 'thorns', name: 'Thorns', value: 50 } },
-            accessory: { name: "Eternal Loop", effect: { id: 'lifesteal', name: 'Lifesteal', value: 12 } },
-            amulet: { name: "Eternal Heart", effect: { id: 'bonusDmg', name: '+DMG', value: 300 } },
+            weapon: { name: "Eternal Annihilator", effect: { id: 'bonusDmg', name: '+DMG', value: 180 } },
+            helmet: { name: "Eternal Diadem", effect: { id: 'critChance', name: 'Crit', value: 14 } },
+            armor: { name: "Eternal Plate", effect: { id: 'bonusHp', name: '+HP', value: 600 } },
+            boots: { name: "Eternal Walkers", effect: { id: 'dodge', name: 'Dodge', value: 11 } },
+            gloves: { name: "Eternal Gauntlets", effect: { id: 'critDamage', name: 'Crit DMG', value: 85 } },
+            shield: { name: "Eternal Aegis", effect: { id: 'thorns', name: 'Thorns', value: 22 } },
+            accessory: { name: "Eternal Loop", effect: { id: 'lifesteal', name: 'Lifesteal', value: 5 } },
+            amulet: { name: "Eternal Heart", effect: { id: 'bonusDmg', name: '+DMG', value: 140 } },
         },
         setBonuses: [
-            { pieces: 2, desc: '+80% All Stats', effect: { dmgMult: 0.80, hpMult: 0.80, speedMult: 0.30 } },
-            { pieces: 4, desc: '+200% DMG, +150% HP', effect: { dmgMult: 2.00, hpMult: 1.50 } },
-            { pieces: 6, desc: '+40% Crit Chance, +150% Crit DMG', effect: { critChance: 40, critDamage: 150 } },
-            { pieces: 8, desc: 'Eternal Power: +300% All Stats', effect: { dmgMult: 3.0, hpMult: 3.0, speedMult: 0.80 } },
+            { pieces: 2, desc: '+20% All Stats', effect: { dmgMult: 0.20, hpMult: 0.20, speedMult: 0.10 } },
+            { pieces: 4, desc: '+50% DMG, +40% HP', effect: { dmgMult: 0.50, hpMult: 0.40 } },
+            { pieces: 6, desc: '+15% Crit Chance, +50% Crit DMG', effect: { critChance: 15, critDamage: 50 } },
+            { pieces: 8, desc: 'Eternal Power: +70% All Stats', effect: { dmgMult: 0.70, hpMult: 0.70, speedMult: 0.25 } },
         ]
     },
 };
