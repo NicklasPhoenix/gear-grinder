@@ -127,9 +127,9 @@ export default function GameLayout() {
                     </div>
 
                     {/* Currency Display - All Materials */}
-                    <div className="glass-card rounded-xl p-3 animate-fadeIn">
-                        <div className="grid grid-cols-2 gap-2">
-                            <MaterialDisplay type="gold" value={state.gold} color="text-yellow-400" />
+                    <div className="glass-card rounded-xl p-4 animate-fadeIn">
+                        <div className="grid grid-cols-2 gap-3">
+                            <MaterialDisplay type="gold" value={state.gold} color="text-slate-200" />
                             <MaterialDisplay type="enhanceStone" value={state.enhanceStone} color="text-blue-400" />
                             <MaterialDisplay type="blessedOrb" value={state.blessedOrb} color="text-purple-400" />
                             <MaterialDisplay type="celestialShard" value={state.celestialShard} color="text-yellow-300" />
@@ -266,7 +266,7 @@ function StatMini({ label, value, color }) {
 }
 
 const MATERIAL_NAMES = {
-    gold: 'Gold',
+    gold: 'Silver',
     enhanceStone: 'E.Stone',
     blessedOrb: 'B.Orb',
     celestialShard: 'C.Shard',
@@ -275,13 +275,13 @@ const MATERIAL_NAMES = {
 
 function MaterialDisplay({ type, value, color }) {
     return (
-        <div className="flex items-center gap-1.5">
-            <div className="w-6 h-6 flex items-center justify-center">
-                <MaterialIcon type={type} size={20} />
+        <div className="flex items-center gap-2">
+            <div className="w-8 h-8 flex items-center justify-center">
+                <MaterialIcon type={type} size={28} />
             </div>
             <div className="min-w-0">
-                <p className="text-[9px] text-slate-500 uppercase truncate">{MATERIAL_NAMES[type]}</p>
-                <p className={`text-sm font-bold ${color} leading-none`}>
+                <p className="text-[10px] text-slate-500 uppercase truncate">{MATERIAL_NAMES[type]}</p>
+                <p className={`text-lg font-bold ${color} leading-none`}>
                     {typeof value === 'number' ? value.toLocaleString() : value}
                 </p>
             </div>
