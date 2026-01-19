@@ -179,7 +179,7 @@ export default function InventoryView({ onHover }) {
     return (
         <div className="h-full flex flex-col gap-2">
             {/* Equipment Paper Doll Layout */}
-            <div className="game-panel">
+            <div className="game-panel" onMouseLeave={() => onHover && onHover(null)}>
                 <div className="game-panel-header flex justify-between items-center">
                     <span>Equipment</span>
                     <button
@@ -229,7 +229,7 @@ export default function InventoryView({ onHover }) {
             </div>
 
             {/* Inventory Grid - Fixed height with internal scroll */}
-            <div className="flex-1 game-panel flex flex-col min-h-0">
+            <div className="flex-1 game-panel flex flex-col min-h-0" onMouseLeave={() => onHover && onHover(null)}>
                 <div className="game-panel-header flex justify-between items-center">
                     <span>Inventory ({state.inventory.length}/50)</span>
                     <div className="flex items-center gap-1">
