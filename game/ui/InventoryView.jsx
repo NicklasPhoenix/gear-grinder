@@ -163,14 +163,14 @@ export default function InventoryView({ onHover }) {
                                             {/* Enhancement badge */}
                                             {item.plus > 0 && stage && (
                                                 <div
-                                                    className="absolute -top-1 -right-1 px-1 text-[8px] font-bold rounded flex items-center"
+                                                    className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 text-[11px] font-bold rounded flex items-center"
                                                     style={{
                                                         backgroundColor: stage.bgColor,
                                                         color: stage.color,
                                                         boxShadow: stage.glow
                                                     }}
                                                 >
-                                                    {stage.icon && <span className="text-[6px] mr-0.5">{stage.icon}</span>}
+                                                    {stage.icon && <span className="text-[9px] mr-0.5">{stage.icon}</span>}
                                                     +{item.plus}
                                                 </div>
                                             )}
@@ -268,13 +268,14 @@ export default function InventoryView({ onHover }) {
                                         {/* Enhancement badge */}
                                         {item.plus > 0 && stage && (
                                             <div
-                                                className="absolute -bottom-0.5 -right-0.5 px-0.5 text-[7px] font-bold rounded flex items-center"
+                                                className="absolute -top-1 -right-1 px-1 py-0.5 text-[9px] font-bold rounded flex items-center"
                                                 style={{
                                                     backgroundColor: stage.bgColor,
-                                                    color: stage.color
+                                                    color: stage.color,
+                                                    boxShadow: stage.glow
                                                 }}
                                             >
-                                                {stage.icon && <span className="text-[5px]">{stage.icon}</span>}
+                                                {stage.icon && <span className="text-[7px] mr-0.5">{stage.icon}</span>}
                                                 +{item.plus}
                                             </div>
                                         )}
