@@ -37,10 +37,10 @@
 ## Performance
 
 ### Feature #5: Reduce Excessive Re-renders
-**Status:** Pending
+**Status:** ✅ Complete
 **Location:** `game/context/GameContext.jsx`
 **Issue:** Every state change (6x/second for HP bars) triggers full tree re-renders.
-**Solution:** Implement selective subscriptions or memoization.
+**Solution:** Split high-frequency HP updates into separate context, added smart change detection to only update full state when important values change, memoized context value.
 
 ---
 
@@ -156,3 +156,4 @@
 - **Feature #2:** Add Error Boundaries - Emergency backup and crash recovery UI
 - **Feature #3:** Fix Auto-Enhance Race Condition - Use refs for fresh state in interval callbacks
 - **Feature #4:** Add Keyboard Navigation - Number keys, arrow keys, and help modal
+- **Feature #5:** Reduce Excessive Re-renders - Split contexts, smart change detection

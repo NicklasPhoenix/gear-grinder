@@ -1,11 +1,20 @@
-import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { GameManager } from '../managers/GameManager';
 
 const GameContext = createContext(null);
 
+// Separate context for high-frequency updates (HP bars) to prevent full tree re-renders
+const HighFrequencyContext = createContext(null);
+
 export function GameProvider({ children }) {
     const gameManagerRef = useRef(null);
     const [gameState, setGameState] = useState(null);
+
+    // High-frequency state (HP values) - updated separately to prevent full tree re-renders
+    const [hpState, setHpState] = useState({ playerHp: 100, playerMaxHp: 100, enemyHp: 20, enemyMaxHp: 20 });
+
+    // Track last state snapshot for comparison
+    const lastStateRef = useRef(null);
 
     useEffect(() => {
         // Initialize Game Manager once
@@ -47,12 +56,59 @@ export function GameProvider({ children }) {
             }
 
             // Subscribe React state to Game Manager state
-            setGameState(gm.getState());
+            const initialState = gm.getState();
+            setGameState(initialState);
+            setHpState({
+                playerHp: initialState.playerHp,
+                playerMaxHp: initialState.playerMaxHp,
+                enemyHp: initialState.enemyHp,
+                enemyMaxHp: initialState.enemyMaxHp
+            });
+            lastStateRef.current = initialState;
+
             gm.subscribe((newState) => {
-                // We use a strict copy or just pass the reference if we are careful.
-                // For distinct updates, we normally clone. But GameManager might mutate deep props.
-                // Let's force a shallow clone to trigger React renders.
-                setGameState({ ...newState });
+                const lastState = lastStateRef.current;
+
+                // Check if only HP changed (high-frequency updates)
+                const hpChanged =
+                    newState.playerHp !== lastState?.playerHp ||
+                    newState.playerMaxHp !== lastState?.playerMaxHp ||
+                    newState.enemyHp !== lastState?.enemyHp ||
+                    newState.enemyMaxHp !== lastState?.enemyMaxHp;
+
+                // Check if other important state changed (low-frequency updates)
+                const otherChanged =
+                    newState.gold !== lastState?.gold ||
+                    newState.xp !== lastState?.xp ||
+                    newState.level !== lastState?.level ||
+                    newState.currentZone !== lastState?.currentZone ||
+                    newState.kills !== lastState?.kills ||
+                    newState.inventory !== lastState?.inventory ||
+                    newState.gear !== lastState?.gear ||
+                    newState.stats !== lastState?.stats ||
+                    newState.statPoints !== lastState?.statPoints ||
+                    newState.enhanceStone !== lastState?.enhanceStone ||
+                    newState.blessedOrb !== lastState?.blessedOrb ||
+                    newState.celestialShard !== lastState?.celestialShard ||
+                    newState.prestigeLevel !== lastState?.prestigeLevel ||
+                    newState.prestigeStones !== lastState?.prestigeStones;
+
+                // Only update HP state for high-frequency changes (doesn't trigger full re-render)
+                if (hpChanged) {
+                    setHpState({
+                        playerHp: newState.playerHp,
+                        playerMaxHp: newState.playerMaxHp,
+                        enemyHp: newState.enemyHp,
+                        enemyMaxHp: newState.enemyMaxHp
+                    });
+                }
+
+                // Only update full state when important things change
+                if (otherChanged) {
+                    setGameState({ ...newState });
+                }
+
+                lastStateRef.current = newState;
             });
 
             // Process Offline
@@ -84,6 +140,12 @@ export function GameProvider({ children }) {
         };
     }, []);
 
+    // Memoize context value to prevent unnecessary re-renders
+    const contextValue = useMemo(() => ({
+        gameManager: gameManagerRef.current,
+        state: gameState
+    }), [gameState]);
+
     if (!gameState || !gameManagerRef.current) {
         return (
             <div className="flex items-center justify-center h-screen bg-black text-white font-mono">
@@ -93,9 +155,11 @@ export function GameProvider({ children }) {
     }
 
     return (
-        <GameContext.Provider value={{ gameManager: gameManagerRef.current, state: gameState }}>
-            {children}
-        </GameContext.Provider>
+        <HighFrequencyContext.Provider value={hpState}>
+            <GameContext.Provider value={contextValue}>
+                {children}
+            </GameContext.Provider>
+        </HighFrequencyContext.Provider>
     );
 }
 
@@ -103,4 +167,18 @@ export const useGame = () => {
     const context = useContext(GameContext);
     if (!context) throw new Error('useGame must be used within GameProvider');
     return context;
+};
+
+// Hook for high-frequency HP updates (doesn't trigger full tree re-render)
+export const useHpState = () => {
+    const hpState = useContext(HighFrequencyContext);
+    if (!hpState) throw new Error('useHpState must be used within GameProvider');
+    return hpState;
+};
+
+// Hook for selecting specific state values (only re-renders when selected value changes)
+export const useGameSelector = (selector) => {
+    const { state } = useGame();
+    const selectedValue = useMemo(() => selector(state), [state, selector]);
+    return selectedValue;
 };
