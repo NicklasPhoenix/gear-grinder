@@ -412,15 +412,15 @@ export default function GameRenderer() {
                             enemyRef.current.rotation = 0;
                         }
                     }
-                    // Spawn animation
+                    // Spawn animation - subtle fade in without huge scale
                     else if (animState.enemySpawning) {
-                        animState.enemySpawnProgress += delta * 0.05;
+                        animState.enemySpawnProgress += delta * 0.06;
                         const progress = Math.min(1, animState.enemySpawnProgress);
 
-                        // Grow and fade in with bounce
+                        // Gentle scale up from 0.8 to 1.0 with slight overshoot
                         const bounce = progress < 0.7
-                            ? progress / 0.7 * 1.2
-                            : 1.2 - (progress - 0.7) / 0.3 * 0.2;
+                            ? 0.8 + (progress / 0.7) * 0.25
+                            : 1.05 - (progress - 0.7) / 0.3 * 0.05;
                         const spawnScale = enemyBaseScale * bounce;
                         enemyRef.current.scale.set(spawnScale, spawnScale);
                         enemyRef.current.alpha = progress;
