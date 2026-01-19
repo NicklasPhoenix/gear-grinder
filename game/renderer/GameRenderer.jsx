@@ -51,6 +51,42 @@ class Particle {
     }
 }
 
+// Graphics object pool to prevent memory leaks from constant create/destroy
+class GraphicsPool {
+    constructor(maxSize = 100) {
+        this.pool = [];
+        this.maxSize = maxSize;
+    }
+
+    acquire() {
+        if (this.pool.length > 0) {
+            const g = this.pool.pop();
+            g.clear();
+            g.visible = true;
+            return g;
+        }
+        return new PIXI.Graphics();
+    }
+
+    release(graphics) {
+        if (!graphics || graphics.destroyed) return;
+        graphics.visible = false;
+        graphics.clear();
+        if (this.pool.length < this.maxSize) {
+            this.pool.push(graphics);
+        } else {
+            graphics.destroy();
+        }
+    }
+
+    destroy() {
+        for (const g of this.pool) {
+            if (!g.destroyed) g.destroy();
+        }
+        this.pool = [];
+    }
+}
+
 export default function GameRenderer() {
     const containerRef = useRef(null);
     const appRef = useRef(null);
@@ -72,6 +108,8 @@ export default function GameRenderer() {
     // Particle system
     const particlesRef = useRef([]);
     const ambientParticlesRef = useRef([]);
+    const graphicsPoolRef = useRef(new GraphicsPool(100));
+    const activeGraphicsRef = useRef([]);
 
     // Animation state
     const animStateRef = useRef({
@@ -644,12 +682,14 @@ export default function GameRenderer() {
         function updateParticles(container) {
             if (!container) return;
 
-            // Properly destroy old graphics objects to prevent memory leaks
-            while (container.children.length > 0) {
-                const child = container.children[0];
-                container.removeChild(child);
-                child.destroy();
+            const pool = graphicsPoolRef.current;
+
+            // Return all active graphics to the pool (reuse instead of destroy)
+            for (const g of activeGraphicsRef.current) {
+                container.removeChild(g);
+                pool.release(g);
             }
+            activeGraphicsRef.current = [];
 
             // Cap particle counts to prevent memory issues
             const MAX_HIT_PARTICLES = 50;
@@ -663,25 +703,27 @@ export default function GameRenderer() {
                 ambientParticlesRef.current = ambientParticlesRef.current.slice(-MAX_AMBIENT_PARTICLES);
             }
 
-            // Update and draw hit particles
+            // Update and draw hit particles (acquire from pool)
             particlesRef.current = particlesRef.current.filter(p => {
                 if (p.update()) {
-                    const g = new PIXI.Graphics();
+                    const g = pool.acquire();
                     g.circle(p.x, p.y, p.size * p.alpha);
                     g.fill({ color: p.color, alpha: p.alpha });
                     container.addChild(g);
+                    activeGraphicsRef.current.push(g);
                     return true;
                 }
                 return false;
             });
 
-            // Update and draw ambient particles
+            // Update and draw ambient particles (acquire from pool)
             ambientParticlesRef.current = ambientParticlesRef.current.filter(p => {
                 if (p.update()) {
-                    const g = new PIXI.Graphics();
+                    const g = pool.acquire();
                     g.circle(p.x, p.y, p.size);
                     g.fill({ color: p.color, alpha: p.alpha * 0.5 });
                     container.addChild(g);
+                    activeGraphicsRef.current.push(g);
                     return true;
                 }
                 return false;
@@ -692,6 +734,11 @@ export default function GameRenderer() {
             cleanupText();
             cleanupLoot();
             cleanupDeath();
+            // Clean up graphics pool to prevent memory leaks
+            if (graphicsPoolRef.current) {
+                graphicsPoolRef.current.destroy();
+            }
+            activeGraphicsRef.current = [];
             if (appRef.current) {
                 appRef.current.destroy(true, { children: true, texture: true });
                 appRef.current = null;
