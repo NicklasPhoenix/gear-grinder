@@ -24,10 +24,21 @@ export default function StatsView() {
         await window.storage.set('gear-grinder-save', data);
     };
 
-    const handleReset = async () => {
-        if (confirm("Delete save? Cannot be undone.")) {
-            await window.storage.remove('gear-grinder-save');
-            location.reload();
+    const handleResetStats = () => {
+        // Calculate total allocated points (current stats - base stats of 5 each)
+        const baseStats = { str: 5, int: 5, vit: 5, agi: 5, lck: 5 };
+        const allocatedPoints = Object.entries(state.stats).reduce((total, [key, val]) => {
+            return total + (val - baseStats[key]);
+        }, 0);
+
+        if (allocatedPoints === 0) return;
+
+        if (confirm(`Reset all stat allocations?\n\nYou will get back ${allocatedPoints} stat points.`)) {
+            gameManager.setState(prev => ({
+                ...prev,
+                stats: { ...baseStats },
+                statPoints: prev.statPoints + allocatedPoints
+            }));
         }
     };
 
@@ -44,8 +55,8 @@ export default function StatsView() {
                         <button onClick={handleManualSave} className="px-3 py-1 text-xs bg-blue-600/40 hover:bg-blue-600/60 text-blue-200 rounded font-bold">
                             SAVE
                         </button>
-                        <button onClick={handleReset} className="px-3 py-1 text-xs bg-red-600/40 hover:bg-red-600/60 text-red-200 rounded font-bold">
-                            RESET
+                        <button onClick={handleResetStats} className="px-3 py-1 text-xs bg-orange-600/40 hover:bg-orange-600/60 text-orange-200 rounded font-bold">
+                            RESPEC
                         </button>
                     </div>
                 </div>

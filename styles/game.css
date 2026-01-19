@@ -11,6 +11,15 @@
   font-family: 'Rajdhani', sans-serif;
 }
 
+.font-exo {
+  font-family: 'Exo 2', sans-serif;
+}
+
+/* Base font for all game UI */
+body, .game-panel, .game-panel-header, button, input, select {
+  font-family: 'Exo 2', sans-serif;
+}
+
 /* ===========================================
    KEYFRAME ANIMATIONS
    =========================================== */

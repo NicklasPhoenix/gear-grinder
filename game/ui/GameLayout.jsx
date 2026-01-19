@@ -79,7 +79,7 @@ export default function GameLayout() {
         <div className="w-screen h-screen bg-slate-950 flex items-center justify-center">
             <div className="text-center">
                 <div className="spinner mx-auto mb-4" />
-                <p className="text-slate-400 font-rajdhani">Loading game...</p>
+                <p className="text-slate-400">Loading game...</p>
             </div>
         </div>
     );
@@ -88,7 +88,7 @@ export default function GameLayout() {
     const playerStats = useMemo(() => calculatePlayerStats(state), [state]);
 
     return (
-        <div className="w-screen h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 overflow-hidden flex font-rajdhani">
+        <div className="w-screen h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 overflow-hidden flex">
             {/* Ambient background effects */}
             <div className="fixed inset-0 pointer-events-none overflow-hidden">
                 <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl" />
