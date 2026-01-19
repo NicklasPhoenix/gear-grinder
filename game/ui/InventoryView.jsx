@@ -150,7 +150,7 @@ export default function InventoryView({ onHover }) {
 
         return (
             <div
-                className={`relative w-14 h-14 bg-slate-900/80 border-2 border-slate-700/60 rounded-lg cursor-pointer
+                className={`relative w-16 h-16 bg-slate-900/80 border-2 border-slate-700/60 rounded-lg cursor-pointer
                     hover:border-blue-500/70 hover:bg-slate-800/60 transition-all ${className}`}
                 style={getBorderStyle()}
                 onClick={() => item && handleUnequip(item)}
@@ -165,7 +165,7 @@ export default function InventoryView({ onHover }) {
                         {/* Enhancement badge */}
                         {item.plus > 0 && stage && (
                             <div
-                                className="absolute -top-2 -right-2 px-1.5 py-0.5 text-[10px] font-bold rounded flex items-center border-2 border-black/50 z-10"
+                                className="absolute -top-2 -right-2 px-1.5 py-0.5 text-xs font-bold rounded flex items-center border-2 border-black/50 z-10"
                                 style={{
                                     backgroundColor: stage.bgColor,
                                     color: stage.color,
@@ -173,18 +173,18 @@ export default function InventoryView({ onHover }) {
                                     textShadow: '0 1px 2px rgba(0,0,0,0.8)'
                                 }}
                             >
-                                {stage.icon && <span className="text-[8px] mr-0.5">{stage.icon}</span>}
+                                {stage.icon && <span className="text-[10px] mr-0.5">{stage.icon}</span>}
                                 +{item.plus}
                             </div>
                         )}
                         {/* Set indicator */}
                         {setInfo && (
-                            <div className="absolute bottom-0 left-0 right-0 h-1 rounded-b" style={{ backgroundColor: setInfo.color }} />
+                            <div className="absolute bottom-0 left-0 right-0 h-1.5 rounded-b" style={{ backgroundColor: setInfo.color }} />
                         )}
                     </>
                 ) : (
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className="text-[8px] text-slate-600 font-medium uppercase">{SLOT_LABELS[slot]}</span>
+                        <span className="text-[10px] text-slate-600 font-medium uppercase">{SLOT_LABELS[slot]}</span>
                     </div>
                 )}
             </div>
@@ -196,48 +196,37 @@ export default function InventoryView({ onHover }) {
             {/* Equipment Paper Doll Layout */}
             <div className="game-panel" onMouseLeave={() => onHover && onHover(null)}>
                 <div className="game-panel-header flex justify-between items-center">
-                    <span>Equipment</span>
+                    <span className="text-sm">Equipment</span>
                     <button
                         onClick={handleEquipBest}
-                        className="px-2 py-0.5 text-[9px] bg-green-600/40 hover:bg-green-600/60 text-green-300 rounded transition-colors"
+                        className="px-2 py-1 text-xs bg-green-600/40 hover:bg-green-600/60 text-green-300 rounded transition-colors"
                     >
                         EQUIP BEST
                     </button>
                 </div>
-                <div className="p-3">
-                    {/* Paper Doll Grid - positions slots like on a character */}
-                    <div className="relative flex flex-col items-center gap-1">
-                        {/* Row 1: Helmet */}
-                        <div className="flex justify-center">
-                            <EquipSlot slot="helmet" />
-                        </div>
-
-                        {/* Row 2: Amulet */}
-                        <div className="flex justify-center">
+                <div className="p-4">
+                    {/* Paper Doll Grid - compact 3-column layout */}
+                    <div className="flex justify-center">
+                        <div className="grid grid-cols-3 gap-2">
+                            {/* Row 1: Amulet - Helmet - (empty) */}
                             <EquipSlot slot="amulet" />
-                        </div>
+                            <EquipSlot slot="helmet" />
+                            <div className="w-16 h-16" /> {/* spacer */}
 
-                        {/* Row 3: Weapon - Armor - Shield */}
-                        <div className="flex items-center gap-2">
+                            {/* Row 2: Weapon - Armor - Shield */}
                             <EquipSlot slot="weapon" />
                             <EquipSlot slot="armor" />
                             <EquipSlot slot="shield" />
-                        </div>
 
-                        {/* Row 4: Gloves - Belt */}
-                        <div className="flex items-center gap-2">
+                            {/* Row 3: Gloves - Legs - Belt */}
                             <EquipSlot slot="gloves" />
-                            <EquipSlot slot="belt" />
-                        </div>
-
-                        {/* Row 5: Legs */}
-                        <div className="flex justify-center">
                             <EquipSlot slot="legs" />
-                        </div>
+                            <EquipSlot slot="belt" />
 
-                        {/* Row 6: Boots */}
-                        <div className="flex justify-center">
+                            {/* Row 4: (empty) - Boots - (empty) */}
+                            <div className="w-16 h-16" /> {/* spacer */}
                             <EquipSlot slot="boots" />
+                            <div className="w-16 h-16" /> {/* spacer */}
                         </div>
                     </div>
                 </div>
@@ -246,11 +235,11 @@ export default function InventoryView({ onHover }) {
             {/* Inventory Grid - Fixed height with internal scroll */}
             <div className="flex-1 game-panel flex flex-col min-h-0" onMouseLeave={() => onHover && onHover(null)}>
                 <div className="game-panel-header flex justify-between items-center">
-                    <span>Inventory ({state.inventory.length}/50)</span>
-                    <div className="flex items-center gap-1">
+                    <span className="text-sm">Inventory ({state.inventory.length}/50)</span>
+                    <div className="flex items-center gap-1.5">
                         <button
                             onClick={toggleAutoSalvage}
-                            className={`px-2 py-0.5 text-[9px] rounded transition-colors ${
+                            className={`px-2 py-1 text-xs rounded transition-colors ${
                                 state.autoSalvage
                                     ? 'bg-green-600/50 text-green-300'
                                     : 'bg-slate-700/50 text-slate-400 hover:bg-slate-600/50'
@@ -261,7 +250,7 @@ export default function InventoryView({ onHover }) {
                         {selectedForSalvage.size > 0 && (
                             <button
                                 onClick={handleSalvage}
-                                className="px-2 py-0.5 text-[9px] bg-red-600/40 hover:bg-red-600/60 text-red-300 rounded"
+                                className="px-2 py-1 text-xs bg-red-600/40 hover:bg-red-600/60 text-red-300 rounded"
                             >
                                 SALVAGE ({selectedForSalvage.size})
                             </button>
@@ -269,7 +258,7 @@ export default function InventoryView({ onHover }) {
                         {state.inventory.length > 0 && (
                             <button
                                 onClick={handleSalvageAll}
-                                className="px-2 py-0.5 text-[9px] bg-orange-600/40 hover:bg-orange-600/60 text-orange-300 rounded"
+                                className="px-2 py-1 text-xs bg-orange-600/40 hover:bg-orange-600/60 text-orange-300 rounded"
                             >
                                 ALL
                             </button>
@@ -277,13 +266,13 @@ export default function InventoryView({ onHover }) {
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto custom-scrollbar p-2 min-h-0">
+                <div className="flex-1 overflow-y-auto custom-scrollbar p-3 min-h-0">
                     {state.inventory.length === 0 ? (
-                        <div className="h-full flex items-center justify-center text-slate-600 text-sm">
+                        <div className="h-full flex items-center justify-center text-slate-500 text-base">
                             Empty
                         </div>
                     ) : (
-                        <div className="grid grid-cols-8 gap-1">
+                        <div className="grid grid-cols-7 gap-1.5">
                             {state.inventory.map(item => {
                                 const tierInfo = TIERS[item.tier];
                                 const isSelected = selectedForSalvage.has(item.id);
@@ -311,7 +300,7 @@ export default function InventoryView({ onHover }) {
                                 return (
                                     <div
                                         key={item.id}
-                                        className={`relative aspect-square bg-slate-900/60 border rounded cursor-pointer transition-all ${
+                                        className={`relative aspect-square bg-slate-900/60 border-2 rounded-lg cursor-pointer transition-all ${
                                             isSelected
                                                 ? 'border-red-500 bg-red-500/20'
                                                 : 'border-slate-700/40 hover:border-blue-500/50'
@@ -322,20 +311,20 @@ export default function InventoryView({ onHover }) {
                                         onMouseEnter={(e) => onHover && onHover(item, { x: e.clientX, y: e.clientY }, true)}
                                         onMouseLeave={() => onHover && onHover(null)}
                                     >
-                                        <div className="absolute inset-0.5">
+                                        <div className="absolute inset-1">
                                             <ItemIcon item={item} size="sm" />
                                         </div>
 
                                         {/* Tier indicator dot */}
                                         <div
-                                            className="absolute top-0.5 left-0.5 w-1.5 h-1.5 rounded-full"
+                                            className="absolute top-1 left-1 w-2 h-2 rounded-full"
                                             style={{ backgroundColor: tierInfo?.color || '#666' }}
                                         />
 
                                         {/* Enhancement badge */}
                                         {item.plus > 0 && stage && (
                                             <div
-                                                className="absolute -top-1.5 -right-1.5 px-1 py-0.5 text-[9px] font-bold rounded flex items-center border border-black/60"
+                                                className="absolute -top-1.5 -right-1.5 px-1 py-0.5 text-[11px] font-bold rounded flex items-center border border-black/60"
                                                 style={{
                                                     backgroundColor: stage.bgColor,
                                                     color: stage.color,
@@ -343,14 +332,14 @@ export default function InventoryView({ onHover }) {
                                                     textShadow: '0 1px 1px rgba(0,0,0,0.8)'
                                                 }}
                                             >
-                                                {stage.icon && <span className="text-[7px] mr-0.5">{stage.icon}</span>}
+                                                {stage.icon && <span className="text-[9px] mr-0.5">{stage.icon}</span>}
                                                 +{item.plus}
                                             </div>
                                         )}
 
                                         {/* Stack count */}
                                         {(item.count || 1) > 1 && (
-                                            <div className="absolute bottom-0 left-0 text-[7px] font-bold text-white bg-blue-600/90 px-0.5 rounded-tr">
+                                            <div className="absolute bottom-0 left-0 text-[10px] font-bold text-white bg-blue-600/90 px-1 rounded-tr">
                                                 x{item.count}
                                             </div>
                                         )}
@@ -358,7 +347,7 @@ export default function InventoryView({ onHover }) {
                                         {/* Selection X */}
                                         {isSelected && (
                                             <div className="absolute inset-0 flex items-center justify-center bg-red-500/30">
-                                                <span className="text-red-400 text-lg font-bold">×</span>
+                                                <span className="text-red-400 text-xl font-bold">×</span>
                                             </div>
                                         )}
                                     </div>
@@ -369,7 +358,7 @@ export default function InventoryView({ onHover }) {
                 </div>
 
                 {/* Footer hint */}
-                <div className="px-2 py-1 border-t border-slate-700/30 text-[9px] text-slate-500 text-center">
+                <div className="px-3 py-1.5 border-t border-slate-700/30 text-xs text-slate-500 text-center">
                     Click to equip · Right-click to salvage
                 </div>
             </div>
