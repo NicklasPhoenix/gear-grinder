@@ -1501,7 +1501,7 @@ function updateHpBar(barContainer, current, max, isPlayer) {
 function spawnFloatingText(app, container, { text, type, target }, positions = {}) {
     if (!container) return;
 
-    const { playerX = 200, enemyX = 600, characterY = 350 } = positions;
+    const { playerX = 200, enemyX = 600, characterY = 350, scaleFactor = 1 } = positions;
 
     const isCrit = type === 'crit';
     const isHeal = type === 'heal';
@@ -1524,30 +1524,30 @@ function spawnFloatingText(app, container, { text, type, target }, positions = {
     if (isCrit) {
         fillColor = '#fde047';
         fontSize = 32;
-        offsetY = -40; // Crits float high above
+        offsetY = -40;
     } else if (isHeal) {
         fillColor = '#4ade80';
         fontSize = 22;
-        offsetX = -60; // Heals to the left of player
+        offsetX = -60;
         offsetY = 20;
     } else if (isDodge) {
         fillColor = '#67e8f9';
         fontSize = 20;
-        offsetX = 50; // Dodge to the right
+        offsetX = 50;
         offsetY = -20;
     } else if (isPlayerDmg) {
         fillColor = '#f87171';
         fontSize = 24;
-        offsetY = 0; // Player damage centered on enemy
+        offsetY = 0;
     } else if (isEnemyDmg) {
         fillColor = '#f87171';
         fontSize = 22;
-        offsetX = 40; // Enemy damage to the right of player
+        offsetX = 40;
         offsetY = 10;
     } else if (isThorns) {
         fillColor = '#c084fc';
         fontSize = 18;
-        offsetX = -40; // Thorns to the left of enemy
+        offsetX = -40;
         offsetY = 30;
     } else if (isSilver) {
         fillColor = '#c0c0c0';
@@ -1563,15 +1563,20 @@ function spawnFloatingText(app, container, { text, type, target }, positions = {
         fontSize = 24;
     }
 
+    // Scale font size and offsets for mobile
+    fontSize = Math.round(fontSize * scaleFactor);
+    offsetX *= scaleFactor;
+    offsetY *= scaleFactor;
+
     const style = new PIXI.TextStyle({
         fontFamily: 'Press Start 2P',
         fontSize,
         fill: fillColor,
-        stroke: { color: '#000000', width: 4 },
+        stroke: { color: '#000000', width: Math.max(1, 4 * scaleFactor) },
         dropShadow: {
             color: '#000000',
-            distance: 2,
-            blur: 3,
+            distance: Math.max(1, 2 * scaleFactor),
+            blur: Math.max(1, 3 * scaleFactor),
             alpha: 0.8,
         },
     });
@@ -1581,16 +1586,16 @@ function spawnFloatingText(app, container, { text, type, target }, positions = {
 
     // Base position based on target
     const baseX = target === 'player' ? playerX : enemyX;
-    const baseY = characterY - 70;
+    const baseY = characterY - 70 * scaleFactor;
 
-    // Apply type-specific offset + small random spread
-    pixiText.x = baseX + offsetX + (Math.random() - 0.5) * 30;
-    pixiText.y = baseY + offsetY + (Math.random() - 0.5) * 15;
+    // Apply type-specific offset + small random spread (scaled)
+    pixiText.x = baseX + offsetX + (Math.random() - 0.5) * 30 * scaleFactor;
+    pixiText.y = baseY + offsetY + (Math.random() - 0.5) * 15 * scaleFactor;
 
     container.addChild(pixiText);
 
-    let velocityY = isCrit ? -2.5 : -1.5; // Slower upward movement
-    let velocityX = (Math.random() - 0.5) * 0.6;
+    let velocityY = (isCrit ? -2.5 : -1.5) * scaleFactor;
+    let velocityX = (Math.random() - 0.5) * 0.6 * scaleFactor;
     let tick = 0;
     const scale = isCrit ? 1.5 : 1.2;
 
@@ -1627,18 +1632,18 @@ function spawnFloatingText(app, container, { text, type, target }, positions = {
 function spawnLootText(app, container, { text, color }, positions = {}) {
     if (!container) return;
 
-    const { enemyX = 600, characterY = 350 } = positions;
+    const { enemyX = 600, characterY = 350, scaleFactor = 1 } = positions;
 
     const style = new PIXI.TextStyle({
         fontFamily: 'Press Start 2P',
-        fontSize: 18, // Increased from 14
+        fontSize: Math.round(18 * scaleFactor),
         fontWeight: 'bold',
         fill: color || '#fbbf24',
-        stroke: { color: '#000000', width: 4 },
+        stroke: { color: '#000000', width: Math.max(1, 4 * scaleFactor) },
         dropShadow: {
             color: '#000000',
-            distance: 2,
-            blur: 3,
+            distance: Math.max(1, 2 * scaleFactor),
+            blur: Math.max(1, 3 * scaleFactor),
             alpha: 0.9,
         },
     });
@@ -1646,13 +1651,13 @@ function spawnLootText(app, container, { text, color }, positions = {}) {
     const pixiText = new PIXI.Text({ text, style });
     pixiText.anchor.set(0.5);
     pixiText.x = enemyX;
-    pixiText.y = characterY - 70;
+    pixiText.y = characterY - 70 * scaleFactor;
     pixiText.alpha = 0;
 
     container.addChild(pixiText);
 
-    let velocityX = (Math.random() - 0.5) * 4;
-    let velocityY = -3 - Math.random() * 2; // Slower movement
+    let velocityX = (Math.random() - 0.5) * 4 * scaleFactor;
+    let velocityY = (-3 - Math.random() * 2) * scaleFactor;
     let tick = 0;
 
     const animate = () => {
