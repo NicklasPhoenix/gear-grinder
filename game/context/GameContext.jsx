@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { GameManager } from '../managers/GameManager';
 import { SAVE, DEFAULTS } from '../data/constants';
+import { BOSS_SETS, PRESTIGE_BOSS_SETS } from '../data/items';
 
 const GameContext = createContext(null);
 
@@ -23,7 +24,16 @@ const BOSS_SET_MIGRATION = {
     primordial: 'scorpion',
 };
 
-// Migrate legacy boss set names to new names
+// Helper to get the correct item name from boss set definitions
+function getBossItemName(bossSetKey, slot) {
+    const bossSet = BOSS_SETS[bossSetKey] || PRESTIGE_BOSS_SETS[bossSetKey];
+    if (bossSet && bossSet.items && bossSet.items[slot]) {
+        return bossSet.items[slot].name;
+    }
+    return null;
+}
+
+// Migrate legacy boss set names to new names (and update item names)
 function migrateBossSets(parsed) {
     let migrated = false;
 
@@ -46,28 +56,40 @@ function migrateBossSets(parsed) {
         parsed.bossStones = newBossStones;
     }
 
-    // Migrate gear bossSet values
+    // Migrate gear bossSet values and names
     if (parsed.gear) {
         for (const [slot, item] of Object.entries(parsed.gear)) {
             if (item && item.bossSet && BOSS_SET_MIGRATION.hasOwnProperty(item.bossSet)) {
                 const newSet = BOSS_SET_MIGRATION[item.bossSet];
                 if (newSet) {
-                    console.log(`Migrated gear ${item.name}: bossSet ${item.bossSet} -> ${newSet}`);
+                    const oldName = item.name;
                     item.bossSet = newSet;
+                    // Update item name from the new boss set definition
+                    const newName = getBossItemName(newSet, slot);
+                    if (newName) {
+                        item.name = newName;
+                        console.log(`Migrated gear: ${oldName} -> ${newName} (bossSet: ${newSet})`);
+                    }
                     migrated = true;
                 }
             }
         }
     }
 
-    // Migrate inventory item bossSet values
+    // Migrate inventory item bossSet values and names
     if (Array.isArray(parsed.inventory)) {
         for (const item of parsed.inventory) {
             if (item && item.bossSet && BOSS_SET_MIGRATION.hasOwnProperty(item.bossSet)) {
                 const newSet = BOSS_SET_MIGRATION[item.bossSet];
                 if (newSet) {
-                    console.log(`Migrated inventory ${item.name}: bossSet ${item.bossSet} -> ${newSet}`);
+                    const oldName = item.name;
                     item.bossSet = newSet;
+                    // Update item name from the new boss set definition
+                    const newName = getBossItemName(newSet, item.slot);
+                    if (newName) {
+                        item.name = newName;
+                        console.log(`Migrated inventory: ${oldName} -> ${newName} (bossSet: ${newSet})`);
+                    }
                     migrated = true;
                 }
             }
