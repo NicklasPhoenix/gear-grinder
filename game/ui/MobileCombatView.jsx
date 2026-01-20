@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useGame } from '../context/GameContext';
 import { formatNumber } from '../utils/format';
-import { MaterialIcon } from './MaterialIcons';
+import { MaterialIcon, BossStoneIcon } from './MaterialIcons';
+import { BOSS_STONES } from '../data/items';
 import GameRenderer from '../renderer/GameRenderer';
 
 /**
@@ -12,6 +13,7 @@ import GameRenderer from '../renderer/GameRenderer';
  */
 export default function MobileCombatView({ currentZone, state, gameManager }) {
     const isPaused = state?.combatPaused || false;
+    const [showMaterials, setShowMaterials] = useState(false);
 
     const handleToggleCombat = () => {
         if (gameManager) {
@@ -32,6 +34,10 @@ export default function MobileCombatView({ currentZone, state, gameManager }) {
         return gameManager.subscribeSpeed(setCurrentSpeed);
     }, [gameManager]);
 
+    // Get boss stones that have > 0 count
+    const bossStones = state?.bossStones || {};
+    const ownedBossStones = Object.entries(bossStones).filter(([_, count]) => count > 0);
+
     return (
         <div className="bg-slate-950 border-b border-slate-800">
             {/* Header: Zone + Currency */}
@@ -49,7 +55,11 @@ export default function MobileCombatView({ currentZone, state, gameManager }) {
                         </span>
                     )}
                 </div>
-                <div className="flex items-center gap-3">
+                {/* Tappable currency display */}
+                <button
+                    onClick={() => setShowMaterials(!showMaterials)}
+                    className="flex items-center gap-3 active:scale-95 transition-transform"
+                >
                     <div className="flex items-center gap-1">
                         <MaterialIcon type="gold" size={16} />
                         <span className="text-slate-200 text-sm font-bold">
@@ -62,8 +72,46 @@ export default function MobileCombatView({ currentZone, state, gameManager }) {
                             {formatNumber(state?.enhanceStone || 0)}
                         </span>
                     </div>
-                </div>
+                    <svg
+                        className={`w-4 h-4 text-slate-500 transition-transform ${showMaterials ? 'rotate-180' : ''}`}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
             </div>
+
+            {/* Expandable Materials Panel */}
+            {showMaterials && (
+                <div className="px-3 py-2 bg-slate-900/95 border-b border-slate-800/50 space-y-2">
+                    {/* Main currencies */}
+                    <div className="grid grid-cols-2 gap-2">
+                        <MaterialRow icon="gold" label="Gold" value={state?.gold || 0} color="text-yellow-400" />
+                        <MaterialRow icon="enhanceStone" label="E. Stones" value={state?.enhanceStone || 0} color="text-blue-400" />
+                        <MaterialRow icon="blessedOrb" label="Blessed Orbs" value={state?.blessedOrb || 0} color="text-purple-400" />
+                        <MaterialRow icon="celestialShard" label="Celestial Shards" value={state?.celestialShard || 0} color="text-pink-400" />
+                        <MaterialRow icon="prestigeStone" label="Prestige Stones" value={state?.prestigeStones || 0} color="text-fuchsia-400" />
+                    </div>
+
+                    {/* Boss Stones - only show if player has any */}
+                    {ownedBossStones.length > 0 && (
+                        <div className="pt-2 border-t border-slate-800/50">
+                            <div className="text-[10px] text-slate-500 uppercase font-bold mb-1.5">Boss Stones</div>
+                            <div className="flex flex-wrap gap-2">
+                                {ownedBossStones.map(([bossKey, count]) => (
+                                    <div key={bossKey} className="flex items-center gap-1 bg-slate-800/50 px-2 py-1 rounded">
+                                        <BossStoneIcon bossSet={bossKey} size={14} />
+                                        <span className="text-xs text-slate-300 capitalize">{bossKey}</span>
+                                        <span className="text-xs text-slate-400 font-mono">x{count}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
 
             {/* Game Canvas - The REAL renderer with sprites and animations */}
             <div className="relative h-44 w-full overflow-hidden">
@@ -116,6 +164,23 @@ export default function MobileCombatView({ currentZone, state, gameManager }) {
                     ))}
                 </div>
             </div>
+        </div>
+    );
+}
+
+/**
+ * Helper component for material rows in the expanded panel
+ */
+function MaterialRow({ icon, label, value, color }) {
+    return (
+        <div className="flex items-center justify-between bg-slate-800/30 px-2 py-1.5 rounded">
+            <div className="flex items-center gap-2">
+                <MaterialIcon type={icon} size={16} />
+                <span className="text-xs text-slate-400">{label}</span>
+            </div>
+            <span className={`text-sm font-bold font-mono ${color}`}>
+                {formatNumber(value)}
+            </span>
         </div>
     );
 }
