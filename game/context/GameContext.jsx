@@ -133,6 +133,9 @@ export function GameProvider({ children }) {
         const gm = new GameManager();
         gameManagerRef.current = gm;
 
+        // Expose for console cheats: window.gm.cheat()
+        window.gm = gm;
+
         // Load saved game (if any)
         const loadGame = async () => {
             try {
