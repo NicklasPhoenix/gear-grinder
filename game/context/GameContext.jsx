@@ -125,6 +125,9 @@ export function GameProvider({ children }) {
     // Track last state snapshot for comparison
     const lastStateRef = useRef(null);
 
+    // Track when tab was hidden for visibility-based offline progress
+    const hiddenTimeRef = useRef(null);
+
     useEffect(() => {
         // Initialize Game Manager once
         const gm = new GameManager();
@@ -263,6 +266,50 @@ export function GameProvider({ children }) {
             clearInterval(saveInterval);
             saveGame(); // Save on unmount
             gm.stop();
+        };
+    }, []);
+
+    // Handle tab visibility changes for offline progress when switching tabs
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (document.hidden) {
+                // Tab is now hidden - record the time
+                hiddenTimeRef.current = Date.now();
+            } else {
+                // Tab is now visible - check if we should process offline progress
+                if (hiddenTimeRef.current && gameManagerRef.current) {
+                    const now = Date.now();
+                    const secondsAway = Math.floor((now - hiddenTimeRef.current) / 1000);
+
+                    // Only process if away for at least 5 seconds
+                    if (secondsAway >= 5) {
+                        const gm = gameManagerRef.current;
+
+                        // Temporarily set lastSaveTime to when tab was hidden
+                        const originalLastSaveTime = gm.state.lastSaveTime;
+                        gm.state.lastSaveTime = hiddenTimeRef.current;
+
+                        const rewards = gm.processOfflineProgress(gm.state);
+
+                        // Restore original lastSaveTime (processOfflineProgress doesn't change it)
+                        gm.state.lastSaveTime = originalLastSaveTime;
+
+                        if (rewards) {
+                            setOfflineRewards(rewards);
+                            // Force state update to reflect new gold/xp
+                            setGameState({ ...gm.state });
+                        }
+                    }
+
+                    hiddenTimeRef.current = null;
+                }
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
     }, []);
 
