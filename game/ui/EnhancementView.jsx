@@ -203,10 +203,15 @@ export default function EnhancementView() {
 
     const handleEnhance = () => {
         if (!selectedItem) return;
-        const costs = getEnhanceCost(selectedItem.plus);
+        const baseCosts = getEnhanceCost(selectedItem.plus);
+        const needsBossStone = selectedItem.bossSet && selectedItem.plus >= 10;
+        const costs = { ...baseCosts, bossStone: needsBossStone ? 1 : 0 };
+
         if (state.gold < costs.gold || state.enhanceStone < costs.enhanceStone) return;
         if ((costs.blessedOrb || 0) > (state.blessedOrb || 0)) return;
         if ((costs.celestialShard || 0) > (state.celestialShard || 0)) return;
+        // Check boss stone requirement
+        if (needsBossStone && (state.bossStones?.[selectedItem.bossSet] || 0) < 1) return;
         doEnhance(selectedItem, costs);
     };
 

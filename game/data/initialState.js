@@ -5,9 +5,9 @@ export const initialState = {
     combatPaused: false, // Pause combat to take a breather
     // Boss stones - dropped by bosses, needed to enhance boss gear past +10
     bossStones: {
-        guardian: 0, lich: 0, dragon: 0, frost: 0, demon: 0,
-        seraph: 0, void: 0, chaos: 0, eternal: 0,
-        astral: 0, cosmic: 0, primordial: 0,
+        crow: 0, cerberus: 0, demon: 0, spider: 0, shadow: 0,
+        abyss: 0, behemoth: 0, darkwolf: 0,
+        tyrant: 0, inferno: 0, scorpion: 0,
     },
     // Base stats - player can allocate points
     stats: { str: 5, int: 5, vit: 5, agi: 5, lck: 5 },

@@ -7,6 +7,80 @@ const GameContext = createContext(null);
 // Separate context for high-frequency updates (HP bars) to prevent full tree re-renders
 const HighFrequencyContext = createContext(null);
 
+// Migration map: old boss set names -> new boss set names
+const BOSS_SET_MIGRATION = {
+    guardian: 'crow',
+    lich: 'cerberus',
+    dragon: 'demon',
+    frost: 'spider',
+    demon: 'shadow',      // old "demon" becomes "shadow" (new "demon" is different boss)
+    seraph: 'abyss',
+    void: 'behemoth',
+    chaos: 'darkwolf',
+    eternal: null,        // removed - no equivalent
+    astral: 'tyrant',
+    cosmic: 'inferno',
+    primordial: 'scorpion',
+};
+
+// Migrate legacy boss set names to new names
+function migrateBossSets(parsed) {
+    let migrated = false;
+
+    // Migrate bossStones object keys
+    if (parsed.bossStones) {
+        const newBossStones = {};
+        for (const [oldKey, value] of Object.entries(parsed.bossStones)) {
+            if (BOSS_SET_MIGRATION.hasOwnProperty(oldKey)) {
+                const newKey = BOSS_SET_MIGRATION[oldKey];
+                if (newKey) {
+                    newBossStones[newKey] = (newBossStones[newKey] || 0) + value;
+                    migrated = true;
+                    console.log(`Migrated bossStone: ${oldKey} -> ${newKey} (${value})`);
+                }
+            } else {
+                // Keep keys that don't need migration (already new names)
+                newBossStones[oldKey] = value;
+            }
+        }
+        parsed.bossStones = newBossStones;
+    }
+
+    // Migrate gear bossSet values
+    if (parsed.gear) {
+        for (const [slot, item] of Object.entries(parsed.gear)) {
+            if (item && item.bossSet && BOSS_SET_MIGRATION.hasOwnProperty(item.bossSet)) {
+                const newSet = BOSS_SET_MIGRATION[item.bossSet];
+                if (newSet) {
+                    console.log(`Migrated gear ${item.name}: bossSet ${item.bossSet} -> ${newSet}`);
+                    item.bossSet = newSet;
+                    migrated = true;
+                }
+            }
+        }
+    }
+
+    // Migrate inventory item bossSet values
+    if (Array.isArray(parsed.inventory)) {
+        for (const item of parsed.inventory) {
+            if (item && item.bossSet && BOSS_SET_MIGRATION.hasOwnProperty(item.bossSet)) {
+                const newSet = BOSS_SET_MIGRATION[item.bossSet];
+                if (newSet) {
+                    console.log(`Migrated inventory ${item.name}: bossSet ${item.bossSet} -> ${newSet}`);
+                    item.bossSet = newSet;
+                    migrated = true;
+                }
+            }
+        }
+    }
+
+    if (migrated) {
+        console.log('Boss set migration completed');
+    }
+
+    return parsed;
+}
+
 // Validate and sanitize a loaded save to prevent crashes
 function validateSave(parsed) {
     const errors = [];
@@ -150,6 +224,9 @@ export function GameProvider({ children }) {
                     }
 
                     if (parsed) {
+                        // Migrate legacy boss set names before validation
+                        parsed = migrateBossSets(parsed);
+
                         // Validate and sanitize the loaded save
                         const { validated, errors } = validateSave(parsed);
 
