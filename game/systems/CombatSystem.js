@@ -239,8 +239,9 @@ export class CombatSystem {
             this.callbacks.onFloatingText(`+${stoneCount} ${bossStoneInfo.name}`, 'bossStone', 'player');
         }
 
-        // Boss gear drops
-        if (Math.random() < BOSS_DROPS.GEAR_DROP_CHANCE && bossSet) {
+        // Boss gear drops (use per-zone rate if defined, otherwise fallback to constant)
+        const bossGearChance = zone.bossGearChance || BOSS_DROPS.GEAR_DROP_CHANCE;
+        if (Math.random() < bossGearChance && bossSet) {
             const availableSlots = Object.keys(bossSet.items);
             const droppedSlot = availableSlots[Math.floor(Math.random() * availableSlots.length)];
             const bossItem = bossSet.items[droppedSlot];
