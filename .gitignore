@@ -6,3 +6,4 @@ dist
 .env.*
 tmpclaude-*
 gear-grinder/
+temp_assets/
