@@ -266,21 +266,18 @@ function DesktopGameLayout() {
                     </div>
 
                     {/* Currency Display - All Materials */}
-                    <div className="glass-card rounded-lg lg:rounded-xl p-2 lg:p-4 animate-fadeIn">
-                        <div className="grid grid-cols-2 gap-1 lg:gap-3">
+                    <div className="glass-card rounded-lg lg:rounded-xl p-2 lg:p-3 animate-fadeIn min-w-[280px] lg:min-w-[320px]">
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-1">
                             <MaterialDisplay type="gold" value={state.gold} color="text-slate-200" />
                             <MaterialDisplay type="enhanceStone" value={state.enhanceStone} color="text-blue-400" />
                             <MaterialDisplay type="blessedOrb" value={state.blessedOrb} color="text-purple-400" className="hidden sm:flex" />
                             <MaterialDisplay type="celestialShard" value={state.celestialShard} color="text-yellow-300" className="hidden sm:flex" />
-                            {state.prestigeLevel > 0 && (
-                                <MaterialDisplay type="prestigeStone" value={state.prestigeStones} color="text-pink-400" className="hidden sm:flex" />
-                            )}
                         </div>
-                        {/* Boss Stones - show if any collected */}
+                        {/* Boss Stones - compact grid */}
                         {state.bossStones && Object.entries(state.bossStones).some(([_, v]) => v > 0) && (
                             <div className="mt-2 pt-2 border-t border-slate-700/50">
                                 <p className="text-[8px] text-slate-500 uppercase mb-1">Boss Stones</p>
-                                <div className="flex flex-wrap gap-1.5">
+                                <div className="grid grid-cols-5 lg:grid-cols-6 gap-1">
                                     {Object.entries(BOSS_STONES).map(([key, info]) => {
                                         const count = state.bossStones?.[key] || 0;
                                         if (count === 0) return null;
@@ -451,14 +448,13 @@ const MATERIAL_NAMES = {
 
 function MaterialDisplay({ type, value, color, className = '' }) {
     return (
-        <div className={`flex items-center gap-1 lg:gap-2 ${className}`}>
-            <div className="w-6 h-6 lg:w-8 lg:h-8 flex items-center justify-center">
-                <MaterialIcon type={type} size={20} className="lg:hidden" />
-                <MaterialIcon type={type} size={28} className="hidden lg:block" />
+        <div className={`flex items-center gap-1.5 ${className}`}>
+            <div className="w-5 h-5 lg:w-6 lg:h-6 flex-shrink-0 flex items-center justify-center">
+                <MaterialIcon type={type} size={20} />
             </div>
-            <div className="min-w-0">
-                <p className="text-[8px] lg:text-[10px] text-slate-500 uppercase truncate">{MATERIAL_NAMES[type]}</p>
-                <p className={`text-sm lg:text-lg font-bold ${color} leading-none`}>
+            <div className="min-w-[70px] lg:min-w-[90px]">
+                <p className="text-[8px] text-slate-500 uppercase">{MATERIAL_NAMES[type]}</p>
+                <p className={`text-sm lg:text-base font-bold ${color} leading-none tabular-nums`}>
                     {typeof value === 'number' ? formatWithCommas(value) : value}
                 </p>
             </div>
@@ -469,12 +465,12 @@ function MaterialDisplay({ type, value, color, className = '' }) {
 function BossStoneDisplay({ bossSet, value, info }) {
     return (
         <div
-            className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-800/50"
+            className="flex items-center gap-0.5 px-1 py-0.5 rounded bg-slate-800/60"
             title={info.name}
         >
-            <BossStoneIcon bossSet={bossSet} size={16} />
-            <span className="text-xs font-bold" style={{ color: info.color }}>
-                {value}
+            <BossStoneIcon bossSet={bossSet} size={14} />
+            <span className="text-[10px] font-bold tabular-nums min-w-[24px]" style={{ color: info.color }}>
+                {formatWithCommas(value)}
             </span>
         </div>
     );
