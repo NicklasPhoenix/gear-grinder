@@ -68,15 +68,20 @@ const TabIcons = {
 // Tab order for keyboard navigation
 const TABS = ['inventory', 'stats', 'enhance', 'skills', 'zone', 'prestige', 'achievements', 'settings'];
 
+// Router component - decides which layout to show
 export default function GameLayout() {
     const isMobilePortrait = useIsMobilePortrait();
 
-    // Render mobile layout for mobile portrait devices
+    // Render completely separate components to avoid hook issues
     if (isMobilePortrait) {
         return <MobileGameLayout />;
     }
 
-    // Desktop layout below
+    return <DesktopGameLayout />;
+}
+
+// Desktop layout as its own component with all its hooks
+function DesktopGameLayout() {
     const { state } = useGame();
     const [activeTab, setActiveTab] = useState('inventory');
     const [tooltipUser, setTooltipUser] = useState(null);

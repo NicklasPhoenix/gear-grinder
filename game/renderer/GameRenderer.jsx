@@ -135,6 +135,7 @@ export default function GameRenderer() {
         groundY: 380,
         canvasWidth: 800,
         canvasHeight: 450,
+        scaleFactor: 1,
     });
 
     useEffect(() => {
@@ -165,7 +166,8 @@ export default function GameRenderer() {
             const canvasWidth = containerWidth;
             const canvasHeight = containerHeight;
             const centerX = canvasWidth / 2;
-            const groundY = canvasHeight - 200; // Move ground up more to avoid bottom menu overlap
+            // Scale ground position relative to canvas height (use 85% of height for ground line)
+            const groundY = Math.max(canvasHeight * 0.85, canvasHeight - 70);
 
             // Main container with shake support
             const mainContainer = new PIXI.Container();
@@ -189,9 +191,11 @@ export default function GameRenderer() {
             particleContainerRef.current = particleContainer;
             gameContainerRef.current = gameContainer;
 
-            // Calculate positions based on canvas size
-            const playerX = centerX - 200;
-            const enemyX = centerX + 200;
+            // Calculate positions based on canvas size (scale for mobile)
+            // Use 25% from center for characters, with minimum spacing
+            const charSpacing = Math.min(200, canvasWidth * 0.25);
+            const playerX = centerX - charSpacing;
+            const enemyX = centerX + charSpacing;
             const characterY = groundY - 25;
 
             // Store in ref for access throughout component
@@ -203,6 +207,7 @@ export default function GameRenderer() {
                 groundY,
                 canvasWidth,
                 canvasHeight,
+                scaleFactor,
             };
 
             // --- Load all character sprite sheets with progress tracking ---
@@ -319,22 +324,24 @@ export default function GameRenderer() {
             player.anchor.set(0.5, 1);
             player.x = playerX;
             player.y = characterY;
-            const playerScale = (playerData.scale || 4) * 1.5; // 1.5x larger
+            // Scale sprites based on canvas size (smaller on mobile)
+            const scaleFactor = Math.min(1, canvasHeight / 400);
+            const playerScale = (playerData.scale || 4) * 1.5 * scaleFactor;
             player.scale.set(-playerScale, playerScale); // Negative X to face right
             gameContainer.addChild(player);
             playerRef.current = player;
             player.baseX = playerX;
             player.baseY = characterY;
 
-            // --- Player Shadow ---
+            // --- Player Shadow (scaled for mobile) ---
             const playerShadow = new PIXI.Graphics();
-            playerShadow.ellipse(playerX, groundY - 2, 35, 12);
+            playerShadow.ellipse(playerX, groundY - 2, 35 * scaleFactor, 12 * scaleFactor);
             playerShadow.fill({ color: 0x000000, alpha: 0.4 });
             gameContainer.addChildAt(playerShadow, 0);
 
-            // --- Player glow effect ---
+            // --- Player glow effect (scaled for mobile) ---
             const playerGlow = new PIXI.Graphics();
-            playerGlow.circle(playerX, characterY - 40, 60);
+            playerGlow.circle(playerX, characterY - 40 * scaleFactor, 60 * scaleFactor);
             playerGlow.fill({ color: 0x3b82f6, alpha: 0.1 });
             gameContainer.addChildAt(playerGlow, 0);
 
@@ -344,12 +351,14 @@ export default function GameRenderer() {
             enemy.anchor.set(0.5, 1);
             enemy.x = enemyX;
             enemy.y = characterY;
-            enemy.scale.set(-5, 5); // Larger enemy sprite, flipped to face left (toward player)
+            const enemyBaseScale = 5 * scaleFactor;
+            enemy.scale.set(-enemyBaseScale, enemyBaseScale); // Larger enemy sprite, flipped to face left (toward player)
             gameContainer.addChild(enemy);
             enemyRef.current = enemy;
             enemy.baseX = enemyX;
             enemy.baseY = characterY;
-            enemy.baseScale = 5; // Store the base scale for animations
+            enemy.baseScale = enemyBaseScale; // Store the base scale for animations
+            enemy.scaleFactor = scaleFactor; // Store for zone changes
 
             // Load initial sprite based on current zone (use pre-cached texture)
             const initialZone = getZoneById(gameManager.getState()?.currentZone || 0);
@@ -365,15 +374,15 @@ export default function GameRenderer() {
                 enemyRef.current.texture = monsterTextureCache[initialSpritePath];
             }
 
-            // --- Enemy Shadow ---
+            // --- Enemy Shadow (scaled for mobile) ---
             const enemyShadow = new PIXI.Graphics();
-            enemyShadow.ellipse(enemyX, groundY - 2, 35, 12);
+            enemyShadow.ellipse(enemyX, groundY - 2, 35 * scaleFactor, 12 * scaleFactor);
             enemyShadow.fill({ color: 0x000000, alpha: 0.4 });
             gameContainer.addChildAt(enemyShadow, 0);
 
-            // --- Enemy aura for bosses ---
+            // --- Enemy aura for bosses (scaled for mobile) ---
             const enemyAura = new PIXI.Graphics();
-            enemyAura.circle(enemyX, characterY - 40, 80);
+            enemyAura.circle(enemyX, characterY - 40 * scaleFactor, 80 * scaleFactor);
             enemyAura.fill({ color: 0xef4444, alpha: 0 });
             gameContainer.addChildAt(enemyAura, 0);
             enemy.aura = enemyAura;
@@ -386,38 +395,47 @@ export default function GameRenderer() {
             player.shadow = playerShadow;
             player.glow = playerGlow;
 
-            // --- HP Bars (Modern style with text display) - 3x larger ---
-            const createHpBar = (x, y, width, isPlayer) => {
+            // --- HP Bars (Modern style with text display) - scales for mobile ---
+            const createHpBar = (x, y, width, isPlayer, scale = 1) => {
                 const container = new PIXI.Container();
                 container.position.set(x, y);
 
-                // Outer frame - simple rect for reliability (3x height: 18 -> 54)
+                // Scaled heights
+                const barHeight = Math.round(36 * scale);
+                const frameHeight = Math.round(54 * scale);
+                const halfFrame = Math.round(27 * scale);
+                const halfBar = Math.round(18 * scale);
+
+                // Outer frame - simple rect for reliability
                 const frame = new PIXI.Graphics();
-                frame.rect(-width/2 - 4, -27, width + 8, 54);
+                frame.rect(-width/2 - 4, -halfFrame, width + 8, frameHeight);
                 frame.fill({ color: 0x000000, alpha: 0.7 });
-                frame.rect(-width/2 - 4, -27, width + 8, 54);
-                frame.stroke({ width: 3, color: isPlayer ? 0x3b82f6 : 0xef4444, alpha: 0.8 });
+                frame.rect(-width/2 - 4, -halfFrame, width + 8, frameHeight);
+                frame.stroke({ width: Math.max(1, 3 * scale), color: isPlayer ? 0x3b82f6 : 0xef4444, alpha: 0.8 });
                 container.addChild(frame);
 
-                // Background (3x height: 12 -> 36)
+                // Background
                 const bg = new PIXI.Graphics();
-                bg.rect(-width/2, -18, width, 36);
+                bg.rect(-width/2, -halfBar, width, barHeight);
                 bg.fill(0x1f2937);
                 container.addChild(bg);
 
-                // Fill - draw initial full bar (3x height: 12 -> 36)
+                // Fill - draw initial full bar
                 const fill = new PIXI.Graphics();
-                fill.rect(-width/2, -18, width, 36);
+                fill.rect(-width/2, -halfBar, width, barHeight);
                 fill.fill(isPlayer ? 0x3b82f6 : 0xef4444);
                 container.addChild(fill);
                 container.fillRef = fill;
                 container.barWidth = width;
+                container.barHeight = barHeight;
+                container.halfBar = halfBar;
                 container.isPlayer = isPlayer;
+                container.barScale = scale;
 
-                // HP Text overlay (shows current/max) - larger font
+                // HP Text overlay (shows current/max) - scaled font
                 const hpTextStyle = new PIXI.TextStyle({
                     fontFamily: 'Rajdhani',
-                    fontSize: 20,
+                    fontSize: Math.max(10, Math.round(20 * scale)),
                     fontWeight: 'bold',
                     fill: '#ffffff',
                 });
@@ -427,24 +445,29 @@ export default function GameRenderer() {
                 container.addChild(hpText);
                 container.hpText = hpText;
 
-                // Label - larger font
-                const labelStyle = new PIXI.TextStyle({
-                    fontFamily: 'Rajdhani',
-                    fontSize: 14,
-                    fontWeight: 'bold',
-                    fill: isPlayer ? '#60a5fa' : '#f87171',
-                });
-                const label = new PIXI.Text({ text: isPlayer ? 'HERO' : 'ENEMY', style: labelStyle });
-                label.anchor.set(0.5);
-                label.y = -38;
-                container.addChild(label);
-                container.label = label;
+                // Label - scaled font (hide on very small screens)
+                if (scale > 0.5) {
+                    const labelStyle = new PIXI.TextStyle({
+                        fontFamily: 'Rajdhani',
+                        fontSize: Math.max(8, Math.round(14 * scale)),
+                        fontWeight: 'bold',
+                        fill: isPlayer ? '#60a5fa' : '#f87171',
+                    });
+                    const label = new PIXI.Text({ text: isPlayer ? 'HERO' : 'ENEMY', style: labelStyle });
+                    label.anchor.set(0.5);
+                    label.y = Math.round(-38 * scale);
+                    container.addChild(label);
+                    container.label = label;
+                }
 
                 return container;
             };
 
-            const playerBar = createHpBar(playerX, groundY + 40, 180, true);
-            const enemyBar = createHpBar(enemyX, groundY + 40, 180, false);
+            // Scale HP bars for mobile (smaller on smaller screens)
+            const hpBarWidth = Math.min(180, canvasWidth * 0.22);
+            const hpBarY = Math.min(groundY + 40, canvasHeight - 30);
+            const playerBar = createHpBar(playerX, hpBarY, hpBarWidth, true, scaleFactor);
+            const enemyBar = createHpBar(enemyX, hpBarY, hpBarWidth, false, scaleFactor);
             uiContainer.addChild(playerBar);
             uiContainer.addChild(enemyBar);
             playerHpBarRef.current = playerBar;
@@ -462,21 +485,23 @@ export default function GameRenderer() {
                 }
             }, 100);
 
-            // --- Zone name display ---
-            const zoneStyle = new PIXI.TextStyle({
-                fontFamily: 'Press Start 2P',
-                fontSize: 12,
-                fill: '#fbbf24',
-                dropShadow: true,
-                dropShadowColor: '#000000',
-                dropShadowDistance: 2,
-            });
-            const zoneText = new PIXI.Text({ text: 'Forest Clearing', style: zoneStyle });
-            zoneText.anchor.set(0.5, 0);
-            zoneText.x = centerX;
-            zoneText.y = 15;
-            uiContainer.addChild(zoneText);
-            uiContainer.zoneText = zoneText;
+            // --- Zone name display (hide on mobile - shown in MobileCombatView header) ---
+            if (scaleFactor >= 0.8) {
+                const zoneStyle = new PIXI.TextStyle({
+                    fontFamily: 'Press Start 2P',
+                    fontSize: 12,
+                    fill: '#fbbf24',
+                    dropShadow: true,
+                    dropShadowColor: '#000000',
+                    dropShadowDistance: 2,
+                });
+                const zoneText = new PIXI.Text({ text: 'Forest Clearing', style: zoneStyle });
+                zoneText.anchor.set(0.5, 0);
+                zoneText.x = centerX;
+                zoneText.y = 15;
+                uiContainer.addChild(zoneText);
+                uiContainer.zoneText = zoneText;
+            }
 
             // --- Animation Loop ---
             app.ticker.add((ticker) => {
@@ -501,10 +526,10 @@ export default function GameRenderer() {
                 if (playerRef.current) {
                     const pos = positionsRef.current;
                     const breathe = Math.sin(time * 0.002) * 0.02;
-                    const bob = Math.sin(time * 0.003) * 3;
-                    const playerBaseScale = (ENEMY_SPRITES['Knight'].scale || 4) * 1.5; // Match init scale
+                    const bob = Math.sin(time * 0.003) * 3 * (pos.scaleFactor || 1);
+                    const playerBaseScale = (ENEMY_SPRITES['Knight'].scale || 4) * 1.5 * (pos.scaleFactor || 1);
                     playerRef.current.scale.set(-playerBaseScale, playerBaseScale * (1.0 + breathe));
-                    playerRef.current.y = (playerRef.current.baseY || pos.characterY) - 25 + bob;
+                    playerRef.current.y = (playerRef.current.baseY || pos.characterY) - 25 * (pos.scaleFactor || 1) + bob;
 
                     // Attack cooldown animation
                     if (animState.playerAttackCooldown > 0) {
@@ -564,9 +589,9 @@ export default function GameRenderer() {
                     else {
                         const pos = positionsRef.current;
                         const breathe = Math.sin(time * 0.0025 + 1) * 0.02;
-                        const bob = Math.sin(time * 0.004 + 1) * 4;
+                        const bob = Math.sin(time * 0.004 + 1) * 4 * (pos.scaleFactor || 1);
                         enemyRef.current.scale.y = enemyBaseScale * (1.0 + breathe);
-                        enemyRef.current.y = (enemyRef.current.baseY || pos.characterY) - 25 + bob;
+                        enemyRef.current.y = (enemyRef.current.baseY || pos.characterY) - 25 * (pos.scaleFactor || 1) + bob;
                         enemyRef.current.alpha = 1;
                         enemyRef.current.rotation = 0;
 
@@ -1326,7 +1351,9 @@ export default function GameRenderer() {
             }
 
             // Scale for 32x32 sprites - larger for bosses (increased by 1.5x)
-            const baseScale = zone.isBoss ? 6.5 : 5;
+            // Use stored scaleFactor for consistent mobile scaling
+            const sf = enemyRef.current.scaleFactor || 1;
+            const baseScale = (zone.isBoss ? 6.5 : 5) * sf;
             enemyRef.current.baseScale = baseScale; // Store for animation reference
             enemyRef.current.scale.set(-baseScale, baseScale); // Negative x to face player
             enemyRef.current.alpha = 1; // Ensure visible after zone change
@@ -1446,15 +1473,18 @@ function updateHpBar(barContainer, current, max, isPlayer) {
         barContainer.fillRef.destroy();
     }
 
-    // Create new fill Graphics (3x height: 12 -> 36)
+    // Create new fill Graphics (use scaled dimensions from container)
+    const barHeight = barContainer.barHeight || 36;
+    const halfBar = barContainer.halfBar || 18;
     const fill = new PIXI.Graphics();
     if (pct > 0) {
         // Main fill
-        fill.rect(-width/2, -18, barWidth, 36);
+        fill.rect(-width/2, -halfBar, barWidth, barHeight);
         fill.fill(color1);
 
         // Highlight on top
-        fill.rect(-width/2, -18, barWidth, 10);
+        const highlightHeight = Math.max(3, Math.round(10 * (barContainer.barScale || 1)));
+        fill.rect(-width/2, -halfBar, barWidth, highlightHeight);
         fill.fill({ color: 0xffffff, alpha: 0.2 });
     }
 

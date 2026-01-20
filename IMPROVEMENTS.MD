@@ -953,7 +953,9 @@ export const calculatePlayerStats = (gameState) => {
 ```
 
 **Effort:** Medium Effort
+Reddit Feedback to be addressed:
 
+Just a FYI, when enhancing equipment, if it fails and go below 10/15/20/25/30 it wont lose its bonus, and when reaching that milestone again, it will gain a new bonus - currently checking if I can just go from guardian to last boss by just enhancing that first gear set 😂
 ---
 
 ## Summary

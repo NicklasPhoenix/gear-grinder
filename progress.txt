@@ -2,7 +2,7 @@
 
 Started: 2026-01-20
 
-## Status: IN PROGRESS - Phase 2
+## Status: IN PROGRESS - Phase 4
 
 ---
 
@@ -14,16 +14,19 @@ Started: 2026-01-20
 - [x] Phase 1.1: Created useIsMobile hook (game/hooks/useIsMobile.js)
 - [x] Phase 1.2: Created MobileGameLayout shell (game/ui/MobileGameLayout.jsx)
 - [x] Phase 1.3: Updated GameLayout to route mobile vs desktop
-- [x] Phase 2.1: Created MobileCombatView component (game/ui/MobileCombatView.jsx)
+- [x] Phase 2.1: Created MobileCombatView - **FIXED: Now uses real GameRenderer with sprites!**
 - [x] Phase 3.1: Created MobileTabBar component (game/ui/MobileTabBar.jsx)
 - [x] Phase 5.1: Created MobileBottomBar component (game/ui/MobileBottomBar.jsx)
+- [x] Phase 4.1: Updated InventoryView for mobile (5-col grid, long-press salvage)
+- [x] Phase 4.3: Updated EnhancementView for mobile (vertical stack layout)
+- [x] Phase 4.5: Updated ZoneView with touch feedback
 
 ---
 
 ## Current Step
 
-- [ ] Phase 2.2: Connect combat view to game state (verify events work)
-- [ ] Phase 4: Mobile tab content optimization
+- [ ] Test mobile layout on actual device/emulator
+- [ ] Continue optimizing tab views
 
 ---
 
@@ -35,20 +38,20 @@ Started: 2026-01-20
 - [x] 1.3 Layout routing
 
 ### Phase 2: Mobile Combat View
-- [x] 2.1 MobileCombatView component
-- [ ] 2.2 Combat state connection (needs testing)
+- [x] 2.1 MobileCombatView component - Uses REAL GameRenderer!
+- [x] 2.2 Combat state connection (via GameRenderer)
 
 ### Phase 3: Mobile Tab Navigation
 - [x] 3.1 MobileTabBar component
-- [x] 3.2 Tab state management (built into MobileGameLayout)
+- [x] 3.2 Tab state management
 
 ### Phase 4: Mobile Tab Content
-- [ ] 4.1 Mobile Inventory
+- [x] 4.1 Mobile Inventory (5-col grid, touch support)
 - [ ] 4.2 Mobile Stats
-- [ ] 4.3 Mobile Enhancement
-- [ ] 4.4 Mobile Enhancement
-- [ ] 4.5 Mobile Zone/Map
-- [ ] 4.6 Mobile More Menu
+- [x] 4.3 Mobile Enhancement (vertical layout)
+- [ ] 4.4 Mobile Skills
+- [x] 4.5 Mobile Zone/Map (touch feedback)
+- [x] 4.6 Mobile More Menu (built into MobileGameLayout)
 
 ### Phase 5: Mobile Bottom Bar
 - [x] 5.1 MobileBottomBar component
@@ -66,33 +69,54 @@ Started: 2026-01-20
 
 ---
 
+## Key Fixes Made
+
+**FIX 1**: Initially made mistake of replacing PIXI.js GameRenderer with emoji
+placeholders. This has been FIXED - MobileCombatView now uses the real GameRenderer
+component with actual sprites, monsters, backgrounds, and animations.
+
+**FIX 2 - Sprites not visible**: The GameRenderer was using fixed pixel positions that
+put sprites off-screen on small mobile canvases:
+- groundY = canvasHeight - 200 → negative on 176px canvas!
+- playerX = centerX - 200 → off-screen on narrow screens!
+
+Fixed by making positions scale relative to canvas size:
+- groundY = max(canvasHeight * 0.85, canvasHeight - 70)
+- charSpacing = min(200, canvasWidth * 0.25)
+- Added scaleFactor = min(1, canvasHeight / 400) for all elements
+
+**FIX 3 - React Hook Error #310**: Caused by conditional return before all hooks.
+Fixed by splitting GameLayout into router component and DesktopGameLayout component.
+
+The canvas is displayed in a 176px height container with:
+- Zone header above (name + currency)
+- Controls below (Rest/Fight toggle + speed controls)
+
+---
+
 ## Files Created
 
 1. game/hooks/useIsMobile.js - Mobile detection hook
 2. game/ui/MobileGameLayout.jsx - Main mobile layout container
-3. game/ui/MobileCombatView.jsx - Compact battle scene
+3. game/ui/MobileCombatView.jsx - Wraps real GameRenderer for mobile
 4. game/ui/MobileTabBar.jsx - Touch-friendly tab navigation
 5. game/ui/MobileBottomBar.jsx - XP/level footer
 
 ## Files Modified
 
-1. game/ui/GameLayout.jsx - Added mobile routing
+1. game/ui/GameLayout.jsx - Added mobile routing, fixed React hooks error
+2. game/ui/InventoryView.jsx - Mobile responsive grid + touch
+3. game/ui/EnhancementView.jsx - Mobile vertical layout
+4. game/ui/ZoneView.jsx - Touch feedback
+5. game/renderer/GameRenderer.jsx - Mobile scaling for sprites, HP bars, shadows
 
 ---
 
 ## Notes
 
-- Mobile layout now renders for screen width < 768px in portrait orientation
-- Combat view uses emoji placeholders for sprites (can integrate real sprites later)
-- Tab content reuses existing desktop views (will optimize in Phase 4)
+- Mobile layout renders for screen width < 768px in portrait orientation
+- Combat view uses REAL GameRenderer with all sprites and animations
+- Inventory uses 5-column grid on mobile with long-press for salvage
+- Enhancement view stacks vertically on mobile
 - More menu provides access to Prestige/Achievements/Settings
-
----
-
-## Next Steps
-
-1. Test mobile layout in browser dev tools
-2. Optimize InventoryView for mobile (smaller grids, touch targets)
-3. Optimize other tab views
-4. Add safe area handling for notch/home indicator
 
