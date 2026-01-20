@@ -57,7 +57,10 @@ export default function MobileGameLayout() {
         return (
             <div className="w-screen h-[100dvh] bg-slate-950 flex items-center justify-center">
                 <div className="text-center">
-                    <div className="text-4xl mb-4 animate-bounce">⚔️</div>
+                    <svg className="w-12 h-12 text-slate-400 mb-4 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                     <p className="text-slate-400">Loading...</p>
                 </div>
             </div>
@@ -163,10 +166,36 @@ export default function MobileGameLayout() {
  */
 function MoreMenuContent({ onSelect, onDailyRewards }) {
     const menuItems = [
-        { id: 'prestige', label: 'Prestige', icon: '✨', description: 'Reset for permanent bonuses' },
-        { id: 'achievements', label: 'Achievements', icon: '🏆', description: 'Track your progress' },
-        { id: 'settings', label: 'Settings', icon: '⚙️', description: 'Game options' },
+        { id: 'prestige', label: 'Prestige', icon: 'prestige', description: 'Reset for permanent bonuses' },
+        { id: 'achievements', label: 'Achievements', icon: 'achievements', description: 'Track your progress' },
+        { id: 'settings', label: 'Settings', icon: 'settings', description: 'Game options' },
     ];
+
+    const MenuIcon = ({ type }) => {
+        switch (type) {
+            case 'prestige':
+                return (
+                    <svg className="w-8 h-8 text-pink-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                );
+            case 'achievements':
+                return (
+                    <svg className="w-8 h-8 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"/>
+                    </svg>
+                );
+            case 'settings':
+                return (
+                    <svg className="w-8 h-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                );
+            default:
+                return null;
+        }
+    };
 
     return (
         <div className="space-y-2">
@@ -175,7 +204,9 @@ function MoreMenuContent({ onSelect, onDailyRewards }) {
                 onClick={onDailyRewards}
                 className="w-full p-4 bg-gradient-to-r from-yellow-600/20 to-orange-600/20 border border-yellow-500/30 rounded-xl flex items-center gap-4 active:scale-[0.98] transition-transform"
             >
-                <span className="text-3xl">🎁</span>
+                <svg className="w-8 h-8 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M20 7h-1.5C18.5 4.5 16 2 12 2S5.5 4.5 5.5 7H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zM12 4c2.2 0 4 1.8 4 4H8c0-2.2 1.8-4 4-4zm0 14c-2.8 0-5-2.2-5-5s2.2-5 5-5 5 2.2 5 5-2.2 5-5 5zm3-5c0 1.7-1.3 3-3 3s-3-1.3-3-3 1.3-3 3-3 3 1.3 3 3z"/>
+                </svg>
                 <div className="text-left">
                     <div className="font-bold text-yellow-400">Daily Rewards</div>
                     <div className="text-sm text-slate-400">Claim your daily bonus</div>
@@ -189,7 +220,7 @@ function MoreMenuContent({ onSelect, onDailyRewards }) {
                     onClick={() => onSelect(item.id)}
                     className="w-full p-4 bg-slate-800/50 border border-slate-700/50 rounded-xl flex items-center gap-4 active:scale-[0.98] transition-transform"
                 >
-                    <span className="text-3xl">{item.icon}</span>
+                    <MenuIcon type={item.icon} />
                     <div className="text-left">
                         <div className="font-bold text-white">{item.label}</div>
                         <div className="text-sm text-slate-400">{item.description}</div>
