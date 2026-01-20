@@ -387,7 +387,8 @@ export const PRESTIGE_WEAPONS = [
 ];
 
 // Calculate item score for comparison (higher is better)
-export function getItemScore(item) {
+// Optional playerStats parameter enables smart weapon scoring based on stat build
+export function getItemScore(item, playerStats = null) {
     if (!item) return 0;
 
     const tier = TIERS[item.tier] || TIERS[0];
@@ -406,6 +407,26 @@ export function getItemScore(item) {
     // Boss items get bonus
     if (item.bossSet) {
         score *= 1.3;
+    }
+
+    // If player stats provided and this is a weapon, factor in stat scaling
+    if (playerStats && item.slot === 'weapon' && item.weaponType) {
+        const allWeaponTypes = [...WEAPON_TYPES, ...PRESTIGE_WEAPONS];
+        const weaponInfo = allWeaponTypes.find(w => w.id === item.weaponType);
+        if (weaponInfo?.scaling) {
+            const scalingStat = playerStats[weaponInfo.scaling] || 0;
+            // Find player's highest invested stat
+            const statValues = ['str', 'int', 'agi', 'vit'].map(s => playerStats[s] || 0);
+            const maxStat = Math.max(...statValues);
+            // If weapon scales with player's main stat, big bonus; if not, penalty
+            if (scalingStat >= maxStat * 0.8) {
+                score *= 1.5; // Weapon matches build
+            } else if (scalingStat < maxStat * 0.3) {
+                score *= 0.3; // Weapon completely mismatched (e.g., sword for INT build)
+            } else {
+                score *= 0.7; // Partial mismatch
+            }
+        }
     }
 
     return Math.floor(score);

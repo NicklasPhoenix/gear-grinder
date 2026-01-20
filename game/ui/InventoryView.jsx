@@ -70,18 +70,20 @@ export default function InventoryView({ onHover }) {
         let newGear = { ...state.gear };
         let newInv = [...state.inventory];
         let equipped = 0;
+        // Pass player stats to getItemScore for smart weapon selection
+        const playerStats = state.stats;
 
         for (const slot of GEAR_SLOTS) {
             const slotItems = newInv.filter(item => item.slot === slot);
             if (slotItems.length === 0) continue;
 
             const bestInvItem = slotItems.reduce((best, item) => {
-                return getItemScore(item) > getItemScore(best) ? item : best;
+                return getItemScore(item, playerStats) > getItemScore(best, playerStats) ? item : best;
             }, slotItems[0]);
 
             const currentEquipped = newGear[slot];
-            const currentScore = getItemScore(currentEquipped);
-            const bestScore = getItemScore(bestInvItem);
+            const currentScore = getItemScore(currentEquipped, playerStats);
+            const bestScore = getItemScore(bestInvItem, playerStats);
 
             if (bestScore > currentScore) {
                 newInv = newInv.filter(i => i.id !== bestInvItem.id);

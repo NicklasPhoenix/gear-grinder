@@ -89,6 +89,20 @@ export default function EnhancementView() {
                 return;
             }
 
+            // Check blessed orb requirement
+            if ((costs.blessedOrb || 0) > (freshState.blessedOrb || 0)) {
+                setAutoEnhancing(false);
+                gameManager.emit('floatingText', { text: 'NEED B.ORBS!', type: 'death', target: 'player' });
+                return;
+            }
+
+            // Check celestial shard requirement
+            if ((costs.celestialShard || 0) > (freshState.celestialShard || 0)) {
+                setAutoEnhancing(false);
+                gameManager.emit('floatingText', { text: 'NEED C.SHARDS!', type: 'death', target: 'player' });
+                return;
+            }
+
             // Check boss stone requirement with fresh state
             if (needsBossStone && (freshState.bossStones?.[currentItem.bossSet] || 0) < 1) {
                 setAutoEnhancing(false);
@@ -133,10 +147,10 @@ export default function EnhancementView() {
 
         // Check if we just hit an enhancement milestone (awakening)
         if (success && isEnhanceMilestone(newPlus)) {
-            // Only add substat if we crossed the milestone (weren't already at it)
-            const previousMilestones = ENHANCE_MILESTONES.filter(m => m <= item.plus);
-            const newMilestones = ENHANCE_MILESTONES.filter(m => m <= newPlus);
-            if (newMilestones.length > previousMilestones.length) {
+            // Check if item already has an awakening bonus for this milestone
+            // This prevents exploit where player drops below milestone and regains bonus
+            const alreadyHasMilestoneBonus = (newItem.effects || []).some(e => e.isAwakened && e.milestone === newPlus);
+            if (!alreadyHasMilestoneBonus) {
                 // Generate a new awakening substat
                 const newSubstat = generateAwakeningSubstat(newPlus, newItem.effects || []);
                 newItem.effects = [...(newItem.effects || []), newSubstat];
@@ -182,6 +196,8 @@ export default function EnhancementView() {
         if (!selectedItem) return;
         const costs = getEnhanceCost(selectedItem.plus);
         if (state.gold < costs.gold || state.enhanceStone < costs.enhanceStone) return;
+        if ((costs.blessedOrb || 0) > (state.blessedOrb || 0)) return;
+        if ((costs.celestialShard || 0) > (state.celestialShard || 0)) return;
         doEnhance(selectedItem, costs);
     };
 
@@ -211,7 +227,9 @@ export default function EnhancementView() {
     const nextStats = selectedItem ? getEnhanceBonus(selectedItem.plus + 1, selectedItem.tier) : null;
 
     const hasBossStone = !needsBossStone || (state.bossStones?.[selectedItem?.bossSet] || 0) >= 1;
-    const canAfford = costs && state.gold >= costs.gold && state.enhanceStone >= costs.enhanceStone && hasBossStone;
+    const hasOrbs = !costs?.blessedOrb || (state.blessedOrb || 0) >= costs.blessedOrb;
+    const hasShards = !costs?.celestialShard || (state.celestialShard || 0) >= costs.celestialShard;
+    const canAfford = costs && state.gold >= costs.gold && state.enhanceStone >= costs.enhanceStone && hasBossStone && hasOrbs && hasShards;
     const { isMobile } = useIsMobile();
 
     return (
