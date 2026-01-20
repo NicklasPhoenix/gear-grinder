@@ -501,9 +501,7 @@ export default function EnhancementView() {
                 ) : (
                     <div className="flex-1 flex items-center justify-center text-slate-600">
                         <div className="text-center">
-                            <svg className="w-16 h-16 mx-auto mb-3 opacity-30" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                            </svg>
+                            <div className="text-5xl mb-3 opacity-30">⚡</div>
                             <div className="text-base">Select an item</div>
                         </div>
                     </div>

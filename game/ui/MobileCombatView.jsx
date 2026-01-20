@@ -44,9 +44,7 @@ export default function MobileCombatView({ currentZone, state, gameManager }) {
             <div className="flex items-center justify-between px-3 py-2 border-b border-slate-800/50 bg-slate-900/80">
                 <div className="flex items-center gap-2">
                     {currentZone?.isBoss && (
-                        <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2c-1.5 4-4 6-6 7 2 1 3.5 3 4 6 .5-3 2-5 4-6-2-1-3.5-3-2-7zm-5 9c-1 2.5-2.5 4-4 5 1.5.5 2.5 2 3 4 .5-2 1.5-3.5 3-4-1.5-.5-2.5-2-2-5zm10 0c.5 3-.5 4.5-2 5 1.5.5 2.5 2 3 4 .5-2 1.5-3.5 3-4-1.5-1-3-2.5-4-5z"/>
-                        </svg>
+                        <span className="text-red-500 text-lg">🔥</span>
                     )}
                     <span className={`font-bold text-sm ${currentZone?.isBoss ? 'text-red-400' : 'text-white'}`}>
                         {currentZone?.name?.replace(/[^a-zA-Z\s]/g, '').trim() || 'Unknown'}
