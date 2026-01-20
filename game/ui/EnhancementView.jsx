@@ -501,7 +501,7 @@ export default function EnhancementView() {
                 ) : (
                     <div className="flex-1 flex items-center justify-center text-slate-600">
                         <div className="text-center">
-                            <div className="text-5xl mb-3 opacity-30">⚡</div>
+                            <img src="/assets/ui-icons/book-enhancement.png" alt="" className="w-16 h-16 mb-3 opacity-30 mx-auto" />
                             <div className="text-base">Select an item</div>
                         </div>
                     </div>

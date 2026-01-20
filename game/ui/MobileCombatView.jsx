@@ -44,7 +44,7 @@ export default function MobileCombatView({ currentZone, state, gameManager }) {
             <div className="flex items-center justify-between px-3 py-2 border-b border-slate-800/50 bg-slate-900/80">
                 <div className="flex items-center gap-2">
                     {currentZone?.isBoss && (
-                        <span className="text-red-500 text-lg">🔥</span>
+                        <img src="/assets/ui-icons/fire-shield-boss.png" alt="" className="w-5 h-5" />
                     )}
                     <span className={`font-bold text-sm ${currentZone?.isBoss ? 'text-red-400' : 'text-white'}`}>
                         {currentZone?.name?.replace(/[^a-zA-Z\s]/g, '').trim() || 'Unknown'}

@@ -57,7 +57,7 @@ export default function MobileGameLayout() {
         return (
             <div className="w-screen h-[100dvh] bg-slate-950 flex items-center justify-center">
                 <div className="text-center">
-                    <div className="text-4xl mb-4 animate-bounce">⚔️</div>
+                    <img src="/assets/ui-icons/sword-loading.png" alt="" className="w-12 h-12 mb-4 animate-bounce mx-auto" />
                     <p className="text-slate-400">Loading...</p>
                 </div>
             </div>
@@ -163,9 +163,9 @@ export default function MobileGameLayout() {
  */
 function MoreMenuContent({ onSelect, onDailyRewards }) {
     const menuItems = [
-        { id: 'prestige', label: 'Prestige', icon: '✨', description: 'Reset for permanent bonuses' },
-        { id: 'achievements', label: 'Achievements', icon: '🏆', description: 'Track your progress' },
-        { id: 'settings', label: 'Settings', icon: '⚙️', description: 'Game options' },
+        { id: 'prestige', label: 'Prestige', icon: <img src="/assets/ui-icons/star-prestige.png" alt="" className="w-8 h-8" />, description: 'Reset for permanent bonuses' },
+        { id: 'achievements', label: 'Achievements', icon: <img src="/assets/ui-icons/crown-achievements.png" alt="" className="w-8 h-8" />, description: 'Track your progress' },
+        { id: 'settings', label: 'Settings', icon: <img src="/assets/ui-icons/compass-settings.png" alt="" className="w-8 h-8" />, description: 'Game options' },
     ];
 
     return (
@@ -175,7 +175,7 @@ function MoreMenuContent({ onSelect, onDailyRewards }) {
                 onClick={onDailyRewards}
                 className="w-full p-4 bg-gradient-to-r from-yellow-600/20 to-orange-600/20 border border-yellow-500/30 rounded-xl flex items-center gap-4 active:scale-[0.98] transition-transform"
             >
-                <span className="text-3xl">🎁</span>
+                <img src="/assets/ui-icons/chest-daily-rewards.png" alt="" className="w-8 h-8" />
                 <div className="text-left">
                     <div className="font-bold text-yellow-400">Daily Rewards</div>
                     <div className="text-sm text-slate-400">Claim your daily bonus</div>
@@ -189,7 +189,7 @@ function MoreMenuContent({ onSelect, onDailyRewards }) {
                     onClick={() => onSelect(item.id)}
                     className="w-full p-4 bg-slate-800/50 border border-slate-700/50 rounded-xl flex items-center gap-4 active:scale-[0.98] transition-transform"
                 >
-                    <span className="text-3xl">{item.icon}</span>
+                    <span className="w-8 h-8 flex items-center justify-center">{item.icon}</span>
                     <div className="text-left">
                         <div className="font-bold text-white">{item.label}</div>
                         <div className="text-sm text-slate-400">{item.description}</div>

@@ -60,7 +60,7 @@ export default function PrestigeView() {
                                     : 'bg-slate-800 text-slate-600 border border-slate-700'
                                 }`}
                         >
-                            {hasBeatenLastBoss ? '🌟 Ascend Now' : 'Locked'}
+                            {hasBeatenLastBoss ? <><img src="/assets/ui-icons/star-ascend.png" alt="" className="w-5 h-5 inline-block mr-1" /> Ascend Now</> : 'Locked'}
                         </button>
                     </div>
                 </div>
@@ -170,7 +170,7 @@ export default function PrestigeView() {
                                 : 'bg-slate-800 text-slate-600 cursor-not-allowed border-2 border-slate-700'
                             }`}
                     >
-                        {hasBeatenLastBoss ? '🌟 Ascend' : 'Locked'}
+                        {hasBeatenLastBoss ? <><img src="/assets/ui-icons/star-ascend.png" alt="" className="w-6 h-6 inline-block mr-2" /> Ascend</> : 'Locked'}
                     </button>
                 </div>
             </div>

@@ -80,7 +80,7 @@ function AchievementToast({ achievement, isVisible, isExiting, onClick }) {
                     className="w-12 h-12 rounded-lg flex items-center justify-center text-2xl flex-shrink-0"
                     style={{ backgroundColor: `${category?.color || '#fbbf24'}30` }}
                 >
-                    🏆
+                    <img src="/assets/ui-icons/crown-achievements.png" alt="" className="w-8 h-8" />
                 </div>
 
                 {/* Content */}
@@ -153,8 +153,8 @@ function SkillToast({ skill, isVisible, isExiting, onClick }) {
                 }}
             >
                 {/* Icon */}
-                <div className="w-12 h-12 rounded-lg flex items-center justify-center text-2xl flex-shrink-0 bg-purple-500/30">
-                    ✨
+                <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 bg-purple-500/30">
+                    <img src="/assets/ui-icons/star-prestige.png" alt="" className="w-8 h-8" />
                 </div>
 
                 {/* Content */}

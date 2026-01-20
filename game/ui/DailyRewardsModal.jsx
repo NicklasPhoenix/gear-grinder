@@ -125,9 +125,9 @@ export default function DailyRewardsModal({ onClose }) {
                                     {isPast ? (
                                         <span className="text-green-400">✓</span>
                                     ) : isWeekly ? (
-                                        <span className="text-purple-400">🎁</span>
+                                        <img src="/assets/ui-icons/chest-daily-rewards.png" alt="" className="w-5 h-5" />
                                     ) : (
-                                        <span className="text-yellow-400">📦</span>
+                                        <img src="/assets/ui-icons/chest-gems-daily-alt.png" alt="" className="w-5 h-5" />
                                     )}
                                 </div>
                             </div>

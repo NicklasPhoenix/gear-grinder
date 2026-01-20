@@ -62,7 +62,7 @@ export default function OfflineRewardsModal({ rewards, onClose }) {
                         {/* Kills */}
                         <div className="flex items-center justify-between bg-slate-700/40 rounded-lg p-3">
                             <div className="flex items-center gap-3">
-                                <span className="text-2xl">⚔️</span>
+                                <img src="/assets/ui-icons/sword-loading.png" alt="" className="w-7 h-7" />
                                 <span className="text-slate-300">Enemies Defeated</span>
                             </div>
                             <span className="text-xl font-bold text-red-400">+{formatWithCommas(rewards.kills)}</span>
@@ -80,7 +80,7 @@ export default function OfflineRewardsModal({ rewards, onClose }) {
                         {/* XP */}
                         <div className="flex items-center justify-between bg-slate-700/40 rounded-lg p-3">
                             <div className="flex items-center gap-3">
-                                <span className="text-2xl">✨</span>
+                                <img src="/assets/ui-icons/star-prestige.png" alt="" className="w-7 h-7" />
                                 <span className="text-slate-300">Experience Gained</span>
                             </div>
                             <span className="text-xl font-bold text-blue-400">+{formatWithCommas(rewards.xp)}</span>
