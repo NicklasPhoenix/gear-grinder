@@ -184,12 +184,13 @@ export default function EnhancementView() {
         gameManager.setState(newState);
 
         // Show result on enhancement panel (not on character)
+        // Use unique key to force animation remount on each enhance
         if (resultTimeoutRef.current) clearTimeout(resultTimeoutRef.current);
         if (success) {
-            setEnhanceResult({ type: 'success', text: `+${newItem.plus}!` });
+            setEnhanceResult({ type: 'success', text: `+${newItem.plus}!`, key: Date.now() });
             audioManager.playSfxEnhanceSuccess();
         } else {
-            setEnhanceResult({ type: 'fail', text: 'FAIL' });
+            setEnhanceResult({ type: 'fail', text: 'FAIL', key: Date.now() });
             audioManager.playSfxEnhanceFail();
         }
         // Clear result after delay (longer for manual, shorter for auto)
@@ -315,7 +316,7 @@ export default function EnhancementView() {
                     <div className="flex-1 flex flex-col p-3 min-h-0 relative overflow-hidden">
                         {/* Enhancement Result Animation - flex centered */}
                         {enhanceResult && (
-                            <div className="absolute inset-0 z-10 pointer-events-none flex items-center justify-center">
+                            <div key={enhanceResult.key} className="absolute inset-0 z-10 pointer-events-none flex items-center justify-center">
                                 {/* Center anchor - all effects position relative to this */}
                                 <div className="relative">
                                     {/* Radial flash background */}
