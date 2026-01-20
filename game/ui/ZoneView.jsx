@@ -78,7 +78,7 @@ export default function ZoneView() {
                                         <div className="flex items-center gap-3 text-sm text-slate-400 mt-1">
                                             <span>HP:{formatNumber(zone.enemyHp)}</span>
                                             <span>DMG:{formatNumber(zone.enemyDmg)}</span>
-                                            <span className="text-yellow-400 font-semibold">{zone.goldMin}-{zone.goldMax}g</span>
+                                            <span className="text-slate-300 font-semibold">{zone.goldMin}-{zone.goldMax}s</span>
                                         </div>
                                     </div>
 
