@@ -1524,7 +1524,7 @@ function spawnFloatingText(app, container, { text, type, target }, positions = {
     if (isCrit) {
         fillColor = '#fde047';
         fontSize = 32;
-        offsetY = -10; // Reduced from -40 to prevent clipping at top
+        offsetY = -40;
     } else if (isHeal) {
         fillColor = '#4ade80';
         fontSize = 22;
@@ -1587,7 +1587,7 @@ function spawnFloatingText(app, container, { text, type, target }, positions = {
 
     // Base position based on target
     const baseX = target === 'player' ? playerX : enemyX;
-    const baseY = characterY - 50 * scaleFactor; // Reduced from -70 to prevent clipping at top
+    const baseY = characterY - 70 * scaleFactor;
 
     // Apply type-specific offset + small random spread (scaled)
     pixiText.x = baseX + offsetX + (Math.random() - 0.5) * 30 * scaleFactor;
@@ -1653,7 +1653,7 @@ function spawnLootText(app, container, { text, color }, positions = {}) {
     const pixiText = new PIXI.Text({ text, style });
     pixiText.anchor.set(0.5);
     pixiText.x = enemyX;
-    pixiText.y = characterY - 50 * scaleFactor; // Reduced from -70 to prevent clipping
+    pixiText.y = characterY - 70 * scaleFactor;
     pixiText.alpha = 0;
 
     container.addChild(pixiText);
