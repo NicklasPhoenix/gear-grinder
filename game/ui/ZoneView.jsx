@@ -1,7 +1,7 @@
 import React from 'react';
 import { useGame } from '../context/GameContext';
 import { ZONES, PRESTIGE_ZONES, getZoneById } from '../data/zones';
-import { BOSS_SETS, PRESTIGE_BOSS_SETS } from '../data/items';
+import { BOSS_SETS, PRESTIGE_BOSS_SETS, WEAPON_TYPES } from '../data/items';
 import { MaterialIcon } from './MaterialIcons';
 import { formatNumber } from '../utils/format';
 
@@ -104,17 +104,26 @@ export default function ZoneView() {
                                 </div>
 
                                 {/* Boss set indicator */}
-                                {zone.bossSet && (
-                                    <div
-                                        className="mt-2 text-xs px-2 py-1 rounded flex items-center gap-1.5 w-fit font-semibold"
-                                        style={{
-                                            backgroundColor: `${(BOSS_SETS[zone.bossSet] || PRESTIGE_BOSS_SETS[zone.bossSet])?.color}20`,
-                                            color: (BOSS_SETS[zone.bossSet] || PRESTIGE_BOSS_SETS[zone.bossSet])?.color
-                                        }}
-                                    >
-                                        ★ {(BOSS_SETS[zone.bossSet] || PRESTIGE_BOSS_SETS[zone.bossSet])?.name} Set
-                                    </div>
-                                )}
+                                {zone.bossSet && (() => {
+                                    const bossSet = BOSS_SETS[zone.bossSet] || PRESTIGE_BOSS_SETS[zone.bossSet];
+                                    const weaponType = WEAPON_TYPES.find(w => w.id === bossSet?.weaponType);
+                                    return (
+                                        <div
+                                            className="mt-2 text-xs px-2 py-1 rounded flex items-center gap-2 w-fit font-semibold"
+                                            style={{
+                                                backgroundColor: `${bossSet?.color}20`,
+                                                color: bossSet?.color
+                                            }}
+                                        >
+                                            <span>★ {bossSet?.name} Set</span>
+                                            {weaponType && (
+                                                <span className="text-slate-400 font-normal">
+                                                    • Drops: {weaponType.name}
+                                                </span>
+                                            )}
+                                        </div>
+                                    );
+                                })()}
 
                                 {/* Progress bar */}
                                 {zone.killsRequired > 0 && (
