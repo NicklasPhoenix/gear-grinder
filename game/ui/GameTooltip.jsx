@@ -330,44 +330,56 @@ export default function GameTooltip({ tooltip }) {
             )}
 
             {/* Special Effects */}
-            {effects.length > 0 && (
-                <div className="px-4 py-3 border-b border-slate-700/30">
-                    <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">Special Effects</div>
-                    <div className="space-y-2">
-                        {effects.map((eff, i) => {
-                            const desc = EFFECT_DESCRIPTIONS[eff.id];
-                            const isAwakened = eff.isAwakened;
-                            const milestoneLabel = isAwakened ? `+${eff.milestone}` : null;
-                            return (
-                                <div
-                                    key={i}
-                                    className={isAwakened ? 'p-1.5 rounded bg-gradient-to-r from-orange-500/20 to-yellow-500/20 border border-orange-500/30' : ''}
-                                >
-                                    <div className="flex justify-between items-center">
-                                        <span className={`text-sm font-bold ${isAwakened ? 'text-orange-300' : 'text-purple-300'}`}>
-                                            {isAwakened && <span className="text-yellow-400 mr-1">★</span>}
-                                            {eff.name}
-                                        </span>
-                                        <div className="flex items-center gap-1.5">
-                                            {milestoneLabel && (
-                                                <span className="text-[9px] px-1 py-0.5 bg-orange-500/30 text-orange-300 rounded font-bold">
-                                                    {milestoneLabel}
-                                                </span>
+            {effects.length > 0 && (() => {
+                const regularEffects = effects.filter(e => !e.isAwakened);
+                const awakenedEffects = effects.filter(e => e.isAwakened);
+
+                return (
+                    <div className="px-4 py-3 border-b border-slate-700/30">
+                        <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">Special Effects</div>
+
+                        {/* Regular effects - full display with descriptions */}
+                        {regularEffects.length > 0 && (
+                            <div className="space-y-1.5 mb-2">
+                                {regularEffects.map((eff, i) => {
+                                    const desc = EFFECT_DESCRIPTIONS[eff.id];
+                                    return (
+                                        <div key={i}>
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-sm font-bold text-purple-300">{eff.name}</span>
+                                                <span className="font-mono font-bold text-sm text-purple-300">+{eff.value}</span>
+                                            </div>
+                                            {desc && (
+                                                <div className="text-[10px] text-slate-400">{desc(eff.value)}</div>
                                             )}
-                                            <span className={`font-mono font-bold text-sm ${isAwakened ? 'text-orange-300' : 'text-purple-300'}`}>
-                                                +{eff.value}
-                                            </span>
                                         </div>
-                                    </div>
-                                    {desc && (
-                                        <div className="text-[10px] text-slate-400 mt-0.5">{desc(eff.value)}</div>
-                                    )}
+                                    );
+                                })}
+                            </div>
+                        )}
+
+                        {/* Awakened effects - compact 2-column grid */}
+                        {awakenedEffects.length > 0 && (
+                            <div className="p-2 rounded bg-gradient-to-r from-orange-500/10 to-yellow-500/10 border border-orange-500/20">
+                                <div className="text-[9px] text-orange-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                                    <span className="text-yellow-400">★</span> Awakening Bonuses
                                 </div>
-                            );
-                        })}
+                                <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+                                    {awakenedEffects.map((eff, i) => (
+                                        <div key={i} className="flex items-center justify-between text-[11px]">
+                                            <span className="text-orange-200 flex items-center gap-1">
+                                                <span className="text-[9px] text-orange-400/70">+{eff.milestone}</span>
+                                                {eff.name}
+                                            </span>
+                                            <span className="font-mono font-bold text-orange-300">+{eff.value}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
-                </div>
-            )}
+                );
+            })()}
 
             {/* Boss Set Info with Bonuses */}
             {item.bossSet && (BOSS_SETS[item.bossSet] || PRESTIGE_BOSS_SETS[item.bossSet]) && (() => {
@@ -394,7 +406,7 @@ export default function GameTooltip({ tooltip }) {
                                 {displayCount}
                             </span>
                         </div>
-                        <div className="space-y-1.5 text-[10px]">
+                        <div className="space-y-0.5 text-[10px]">
                             {bossSet.setBonuses.map((bonus, i) => {
                                 // Hide secret bonus unless it's active
                                 if (bonus.secret && equippedSetPieces < bonus.pieces) return null;
@@ -405,22 +417,22 @@ export default function GameTooltip({ tooltip }) {
                                 return (
                                     <div
                                         key={i}
-                                        className={`flex gap-2 p-1.5 rounded ${
+                                        className={`flex gap-1.5 py-0.5 px-1 rounded ${
                                             isSecretActive
-                                                ? 'bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/50'
+                                                ? 'bg-gradient-to-r from-yellow-500/20 to-orange-500/20'
                                                 : isActive
-                                                    ? 'bg-green-500/10 border border-green-500/30'
+                                                    ? 'bg-green-500/10'
                                                     : 'opacity-40'
                                         }`}
                                     >
-                                        <span className={`w-8 font-bold ${isSecretActive ? 'text-yellow-400' : isActive ? 'text-green-400' : 'text-slate-600'}`}>
-                                            {bonus.pieces}pc:
+                                        <span className={`w-6 font-bold flex-shrink-0 ${isSecretActive ? 'text-yellow-400' : isActive ? 'text-green-400' : 'text-slate-600'}`}>
+                                            {bonus.pieces}pc
                                         </span>
-                                        <span className={isSecretActive ? 'text-yellow-300 font-bold' : isActive ? 'text-green-300' : 'text-slate-500'}>
+                                        <span className={`flex-1 ${isSecretActive ? 'text-yellow-300' : isActive ? 'text-green-300' : 'text-slate-500'}`}>
                                             {bonus.desc}
                                         </span>
                                         {isActive && (
-                                            <svg className={`w-3 h-3 ml-auto flex-shrink-0 ${isSecretActive ? 'text-yellow-400' : 'text-green-400'}`} fill="currentColor" viewBox="0 0 20 20">
+                                            <svg className={`w-3 h-3 flex-shrink-0 ${isSecretActive ? 'text-yellow-400' : 'text-green-400'}`} fill="currentColor" viewBox="0 0 20 20">
                                                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                             </svg>
                                         )}
@@ -439,27 +451,25 @@ export default function GameTooltip({ tooltip }) {
                 );
             })()}
 
-            {/* Enhancement Stage Info */}
+            {/* Enhancement Stage Info - compact inline format */}
             {item.plus >= 10 && (() => {
                 const stage = getEnhanceStage(item.plus);
                 return (
                     <div
-                        className="px-4 py-2 border-t border-slate-700/30"
+                        className="px-4 py-1.5 border-t border-slate-700/30 flex items-center gap-2 flex-wrap"
                         style={{ background: `linear-gradient(135deg, ${stage.bgColor}, transparent)` }}
                     >
-                        <div className="flex items-center gap-2 mb-1">
-                            {stage.icon && (
-                                <span style={{ color: stage.color }} className="text-base">{stage.icon}</span>
-                            )}
-                            <span className="text-[10px] uppercase tracking-wider font-bold" style={{ color: stage.color }}>
-                                {stage.name} Enhancement
+                        {stage.icon && (
+                            <span style={{ color: stage.color }} className="text-sm">{stage.icon}</span>
+                        )}
+                        <span className="text-[10px] uppercase font-bold" style={{ color: stage.color }}>
+                            {stage.name}
+                        </span>
+                        {item.plus >= 15 && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ color: stage.color, backgroundColor: `${stage.color}20` }}>
+                                {formatBonus((enhanceBonus.dmgMult - 1) * 100)} DMG
                             </span>
-                        </div>
-                        <div className="text-[11px] text-slate-300 space-y-0.5">
-                            {item.plus >= 10 && <div>• Requires Blessed Orbs to enhance</div>}
-                            {item.plus >= 15 && <div style={{ color: stage.color }}>• {formatBonus((enhanceBonus.dmgMult - 1) * 100)} Total Damage bonus</div>}
-                            {item.plus >= 20 && <div>• Requires Celestial Shards to enhance</div>}
-                        </div>
+                        )}
                     </div>
                 );
             })()}
