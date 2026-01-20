@@ -4,7 +4,7 @@ import { useIsMobile } from '../hooks/useIsMobile';
 import { SKILLS } from '../data/skills';
 
 export default function SkillsView() {
-    const { state, gameManager } = useGame();
+    const { state, gameManager, addToast } = useGame();
     const { isMobile } = useIsMobile();
 
     const handleUnlock = (skill) => {
@@ -14,6 +14,13 @@ export default function SkillsView() {
                 ...prev,
                 unlockedSkills: [...prev.unlockedSkills, skill.id]
             }));
+
+            // Show toast notification for skill unlock
+            addToast('skill', {
+                name: skill.name,
+                description: `Unlocked at level ${skill.unlockLevel}`,
+                effect: skill.desc
+            });
         }
     };
 

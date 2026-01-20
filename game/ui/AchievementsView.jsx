@@ -5,7 +5,7 @@ import { ACHIEVEMENTS, ACHIEVEMENT_CATEGORIES, checkAchievements, applyAchieveme
 import { formatWithCommas } from '../utils/format';
 
 export default function AchievementsView() {
-    const { state, gameManager } = useGame();
+    const { state, gameManager, addToast } = useGame();
     const { isMobile } = useIsMobile();
     const unlockedAchievements = state.unlockedAchievements || [];
 
@@ -23,12 +23,8 @@ export default function AchievementsView() {
                         newUnlocked.push(achievement.id);
                         applyAchievementReward(newState, achievement.reward);
 
-                        // Emit floating text for achievement
-                        gameManager.emit('floatingText', {
-                            text: `Achievement: ${achievement.name}!`,
-                            type: 'achievement',
-                            target: 'player'
-                        });
+                        // Show toast notification for achievement
+                        addToast('achievement', achievement);
                     }
                 }
 
@@ -36,7 +32,7 @@ export default function AchievementsView() {
                 return newState;
             });
         }
-    }, [state.kills, state.totalGold, state.level, state.prestigeLevel, state.inventory, state.gear, state.zoneKills]);
+    }, [state.kills, state.totalGold, state.level, state.prestigeLevel, state.inventory, state.gear, state.zoneKills, addToast]);
 
     const unlockedCount = unlockedAchievements.length;
     const totalCount = ACHIEVEMENTS.length;

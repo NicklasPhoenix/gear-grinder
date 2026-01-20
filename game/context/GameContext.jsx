@@ -119,6 +119,9 @@ export function GameProvider({ children }) {
     // Offline rewards state - shown in modal when player returns
     const [offlineRewards, setOfflineRewards] = useState(null);
 
+    // Toast notifications for achievements/skills
+    const [toasts, setToasts] = useState([]);
+
     // Track last state snapshot for comparison
     const lastStateRef = useRef(null);
 
@@ -263,13 +266,26 @@ export function GameProvider({ children }) {
         };
     }, []);
 
+    // Toast management functions
+    const addToast = useCallback((type, data) => {
+        const id = Date.now() + Math.random();
+        setToasts(prev => [...prev, { id, type, data }]);
+    }, []);
+
+    const dismissToast = useCallback((id) => {
+        setToasts(prev => prev.filter(t => t.id !== id));
+    }, []);
+
     // Memoize context value to prevent unnecessary re-renders
     const contextValue = useMemo(() => ({
         gameManager: gameManagerRef.current,
         state: gameState,
         offlineRewards,
-        clearOfflineRewards: () => setOfflineRewards(null)
-    }), [gameState, offlineRewards]);
+        clearOfflineRewards: () => setOfflineRewards(null),
+        toasts,
+        addToast,
+        dismissToast
+    }), [gameState, offlineRewards, toasts, addToast, dismissToast]);
 
     if (!gameState || !gameManagerRef.current) {
         return (

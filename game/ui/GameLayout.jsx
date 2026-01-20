@@ -11,6 +11,7 @@ import AchievementsView from './AchievementsView';
 import SettingsView from './SettingsView';
 import DailyRewardsModal, { useDailyRewardAvailable } from './DailyRewardsModal';
 import OfflineRewardsModal from './OfflineRewardsModal';
+import { ToastContainer } from './ToastNotification';
 import GameTooltip from './GameTooltip';
 import { MaterialIcon, BossStoneIcon } from './MaterialIcons';
 import { BOSS_STONES } from '../data/items';
@@ -83,7 +84,7 @@ export default function GameLayout() {
 
 // Desktop layout as its own component with all its hooks
 function DesktopGameLayout() {
-    const { state, offlineRewards, clearOfflineRewards } = useGame();
+    const { state, offlineRewards, clearOfflineRewards, toasts, dismissToast } = useGame();
     const [activeTab, setActiveTab] = useState('inventory');
     const [tooltipUser, setTooltipUser] = useState(null);
     const [levelUpAnimation, setLevelUpAnimation] = useState(null);
@@ -397,6 +398,9 @@ function DesktopGameLayout() {
 
             {/* Offline Rewards Modal */}
             {offlineRewards && <OfflineRewardsModal rewards={offlineRewards} onClose={clearOfflineRewards} />}
+
+            {/* Toast Notifications */}
+            <ToastContainer toasts={toasts} onDismiss={dismissToast} />
         </div>
     );
 }
