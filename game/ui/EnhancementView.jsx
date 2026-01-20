@@ -330,44 +330,50 @@ export default function EnhancementView() {
                                 {enhanceResult.type === 'success' && [...Array(8)].map((_, i) => (
                                     <div
                                         key={i}
-                                        className="absolute left-1/2 top-1/2 w-0.5 bg-gradient-to-t from-green-400/70 to-transparent animate-enhance-ray"
-                                        style={{
-                                            height: '100px',
-                                            transformOrigin: 'center bottom',
-                                            transform: `translate(-50%, 0) rotate(${i * 45}deg) translateY(-50px)`,
-                                            animationDelay: `${i * 0.03}s`
-                                        }}
-                                    />
+                                        className="absolute left-1/2 top-1/2"
+                                        style={{ transform: `rotate(${i * 45}deg)` }}
+                                    >
+                                        <div
+                                            className="w-0.5 bg-gradient-to-t from-green-400/70 to-transparent animate-enhance-ray"
+                                            style={{
+                                                height: '100px',
+                                                transformOrigin: 'center bottom',
+                                                animationDelay: `${i * 0.03}s`
+                                            }}
+                                        />
+                                    </div>
                                 ))}
 
                                 {/* Sparkles for success - around center */}
                                 {enhanceResult.type === 'success' && [...Array(6)].map((_, i) => (
                                     <div
                                         key={`sparkle-${i}`}
-                                        className="absolute left-1/2 top-1/2 text-yellow-400 text-lg animate-enhance-sparkle"
-                                        style={{
-                                            transform: `translate(-50%, -50%) rotate(${i * 60}deg) translateY(-40px)`,
-                                            animationDelay: `${i * 0.08}s`
-                                        }}
+                                        className="absolute left-1/2 top-1/2"
+                                        style={{ transform: `translate(-50%, -50%) rotate(${i * 60}deg)` }}
                                     >
-                                        ✦
+                                        <div
+                                            className="text-yellow-400 text-lg animate-enhance-sparkle"
+                                            style={{ animationDelay: `${i * 0.08}s` }}
+                                        >
+                                            ✦
+                                        </div>
                                     </div>
                                 ))}
 
-                                {/* Main text - centered */}
-                                <div className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 ${
-                                    enhanceResult.type === 'success' ? 'animate-enhance-success' : 'animate-enhance-fail'
-                                }`}>
-                                    <div
-                                        className="text-5xl font-black tracking-wider whitespace-nowrap"
-                                        style={{
-                                            color: enhanceResult.type === 'success' ? '#4ade80' : '#ef4444',
-                                            textShadow: enhanceResult.type === 'success'
-                                                ? '0 0 20px rgba(74, 222, 128, 0.8), 0 0 40px rgba(74, 222, 128, 0.4)'
-                                                : '0 0 20px rgba(239, 68, 68, 0.8), 0 0 40px rgba(239, 68, 68, 0.4)'
-                                        }}
-                                    >
-                                        {enhanceResult.text}
+                                {/* Main text - wrapper for positioning, inner div for animation */}
+                                <div className="absolute left-1/2 top-1/2 z-20" style={{ transform: 'translate(-50%, -50%)' }}>
+                                    <div className={enhanceResult.type === 'success' ? 'animate-enhance-success' : 'animate-enhance-fail'}>
+                                        <div
+                                            className="text-5xl font-black tracking-wider whitespace-nowrap"
+                                            style={{
+                                                color: enhanceResult.type === 'success' ? '#4ade80' : '#ef4444',
+                                                textShadow: enhanceResult.type === 'success'
+                                                    ? '0 0 20px rgba(74, 222, 128, 0.8), 0 0 40px rgba(74, 222, 128, 0.4)'
+                                                    : '0 0 20px rgba(239, 68, 68, 0.8), 0 0 40px rgba(239, 68, 68, 0.4)'
+                                            }}
+                                        >
+                                            {enhanceResult.text}
+                                        </div>
                                     </div>
                                 </div>
 
@@ -379,9 +385,9 @@ export default function EnhancementView() {
                                         100% { opacity: 0; transform: translate(-50%, -50%) scale(1.3); }
                                     }
                                     @keyframes enhance-ray {
-                                        0% { opacity: 0; height: 0; }
-                                        30% { opacity: 1; height: 100px; }
-                                        100% { opacity: 0; height: 130px; }
+                                        0% { opacity: 0; transform: scaleY(0); }
+                                        30% { opacity: 1; transform: scaleY(1); }
+                                        100% { opacity: 0; transform: scaleY(1.3); }
                                     }
                                     @keyframes enhance-success {
                                         0% { opacity: 0; transform: scale(0.5); }
@@ -400,9 +406,9 @@ export default function EnhancementView() {
                                         100% { opacity: 0; }
                                     }
                                     @keyframes enhance-sparkle {
-                                        0% { opacity: 0; transform: rotate(inherit) translateY(-20px) scale(0); }
-                                        30% { opacity: 1; transform: rotate(inherit) translateY(-50px) scale(1.3); }
-                                        100% { opacity: 0; transform: rotate(inherit) translateY(-70px) scale(0); }
+                                        0% { opacity: 0; transform: translateY(-20px) scale(0); }
+                                        30% { opacity: 1; transform: translateY(-50px) scale(1.3); }
+                                        100% { opacity: 0; transform: translateY(-70px) scale(0); }
                                     }
                                     .animate-enhance-flash { animation: enhance-flash 0.8s ease-out forwards; }
                                     .animate-enhance-ray { animation: enhance-ray 0.6s ease-out forwards; }
