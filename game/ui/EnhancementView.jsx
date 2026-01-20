@@ -6,6 +6,7 @@ import { MaterialIcon } from './MaterialIcons';
 import { TIERS, BOSS_STONES, addItemToInventory, removeOneFromStack, getEnhanceStage, generateAwakeningSubstat, isEnhanceMilestone, ENHANCE_MILESTONES } from '../data/items';
 import { formatWithCommas } from '../utils/format';
 import { audioManager } from '../systems/AudioManager';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 export default function EnhancementView() {
     const { state, gameManager } = useGame();
@@ -211,11 +212,12 @@ export default function EnhancementView() {
 
     const hasBossStone = !needsBossStone || (state.bossStones?.[selectedItem?.bossSet] || 0) >= 1;
     const canAfford = costs && state.gold >= costs.gold && state.enhanceStone >= costs.enhanceStone && hasBossStone;
+    const { isMobile } = useIsMobile();
 
     return (
-        <div className="h-full flex gap-2">
-            {/* Left: Item List */}
-            <div className="w-1/3 game-panel flex flex-col min-h-0">
+        <div className={`h-full ${isMobile ? 'flex flex-col' : 'flex'} gap-2`}>
+            {/* Left/Top: Item List */}
+            <div className={`${isMobile ? 'h-40' : 'w-1/3'} game-panel flex flex-col min-h-0`}>
                 <div className="game-panel-header text-sm">Select Item</div>
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-2 min-h-0">
                     {allItems.length === 0 ? (
@@ -231,7 +233,7 @@ export default function EnhancementView() {
                                     <div
                                         key={item.id}
                                         onClick={() => { stopAutoEnhance(); setSelectedItem(item); }}
-                                        className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer border-2 transition-all ${
+                                        className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer border-2 transition-all active:scale-[0.98] ${
                                             isSelected
                                                 ? 'bg-blue-900/50 border-blue-500/70'
                                                 : 'bg-slate-800/30 border-slate-700/30 hover:border-slate-500/50'

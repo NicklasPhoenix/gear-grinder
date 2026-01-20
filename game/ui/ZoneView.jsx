@@ -50,7 +50,7 @@ export default function ZoneView() {
                                     ${isCurrent
                                         ? 'bg-yellow-900/30 border-yellow-500/60'
                                         : isUnlocked
-                                            ? 'bg-slate-800/40 border-slate-700/40 hover:border-blue-500/50 cursor-pointer'
+                                            ? 'bg-slate-800/40 border-slate-700/40 hover:border-blue-500/50 cursor-pointer active:scale-[0.98] active:bg-slate-700/40'
                                             : 'bg-slate-900/30 border-slate-800/30 opacity-50 cursor-not-allowed'
                                     }
                                 `}

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { useGame } from '../context/GameContext';
 import ItemIcon from './ItemIcon';
 import { TIERS, GEAR_SLOTS, getItemScore, getSalvageReturns, BOSS_SETS, addItemToInventory, removeOneFromStack, getEnhanceStage } from '../data/items';
 import PresetsModal from './PresetsModal';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 const SLOT_LABELS = {
     weapon: 'Weapon',
@@ -20,6 +21,29 @@ export default function InventoryView({ onHover }) {
     const { state, gameManager } = useGame();
     const [selectedForSalvage, setSelectedForSalvage] = useState(new Set());
     const [showPresets, setShowPresets] = useState(false);
+    const { isMobile } = useIsMobile();
+    const longPressTimerRef = useRef(null);
+
+    // Long press handler for mobile salvage selection
+    const handleTouchStart = useCallback((itemId) => {
+        longPressTimerRef.current = setTimeout(() => {
+            // Haptic feedback if available
+            if (navigator.vibrate) navigator.vibrate(50);
+            setSelectedForSalvage(prev => {
+                const newSet = new Set(prev);
+                if (newSet.has(itemId)) newSet.delete(itemId);
+                else newSet.add(itemId);
+                return newSet;
+            });
+        }, 500); // 500ms long press
+    }, []);
+
+    const handleTouchEnd = useCallback(() => {
+        if (longPressTimerRef.current) {
+            clearTimeout(longPressTimerRef.current);
+            longPressTimerRef.current = null;
+        }
+    }, []);
 
     const handleEquipBest = () => {
         let newGear = { ...state.gear };
@@ -152,12 +176,13 @@ export default function InventoryView({ onHover }) {
 
         return (
             <div
-                className={`relative w-20 h-20 bg-slate-900/80 border-2 border-slate-700/60 rounded-lg cursor-pointer
-                    hover:border-blue-500/70 hover:bg-slate-800/60 transition-all ${className}`}
+                className={`relative bg-slate-900/80 border-2 border-slate-700/60 rounded-lg cursor-pointer
+                    hover:border-blue-500/70 hover:bg-slate-800/60 transition-all active:scale-95 ${className}
+                    ${isMobile ? 'w-14 h-14' : 'w-20 h-20'}`}
                 style={getBorderStyle()}
                 onClick={() => item && handleUnequip(item)}
-                onMouseEnter={(e) => onHover && item && onHover(item, { x: e.clientX, y: e.clientY })}
-                onMouseLeave={() => onHover && onHover(null)}
+                onMouseEnter={(e) => !isMobile && onHover && item && onHover(item, { x: e.clientX, y: e.clientY })}
+                onMouseLeave={() => !isMobile && onHover && onHover(null)}
             >
                 {item ? (
                     <>
@@ -217,11 +242,11 @@ export default function InventoryView({ onHover }) {
                 <div className="p-4">
                     {/* Paper Doll Grid - compact 3-column layout */}
                     <div className="flex justify-center">
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className={`grid grid-cols-3 ${isMobile ? 'gap-1' : 'gap-2'}`}>
                             {/* Row 1: Amulet - Helmet - (empty) */}
                             <EquipSlot slot="amulet" />
                             <EquipSlot slot="helmet" />
-                            <div className="w-20 h-20" /> {/* spacer */}
+                            <div className={isMobile ? 'w-14 h-14' : 'w-20 h-20'} /> {/* spacer */}
 
                             {/* Row 2: Weapon - Armor - Shield */}
                             <EquipSlot slot="weapon" />
@@ -234,9 +259,9 @@ export default function InventoryView({ onHover }) {
                             <EquipSlot slot="belt" />
 
                             {/* Row 4: (empty) - Boots - (empty) */}
-                            <div className="w-20 h-20" /> {/* spacer */}
+                            <div className={isMobile ? 'w-14 h-14' : 'w-20 h-20'} /> {/* spacer */}
                             <EquipSlot slot="boots" />
-                            <div className="w-20 h-20" /> {/* spacer */}
+                            <div className={isMobile ? 'w-14 h-14' : 'w-20 h-20'} /> {/* spacer */}
                         </div>
                     </div>
                 </div>
@@ -282,7 +307,7 @@ export default function InventoryView({ onHover }) {
                             Empty
                         </div>
                     ) : (
-                        <div className="grid grid-cols-7 gap-1.5">
+                        <div className={`grid gap-1.5 ${isMobile ? 'grid-cols-5' : 'grid-cols-7'}`}>
                             {state.inventory.map(item => {
                                 const tierInfo = TIERS[item.tier];
                                 const isSelected = selectedForSalvage.has(item.id);
@@ -310,7 +335,7 @@ export default function InventoryView({ onHover }) {
                                 return (
                                     <div
                                         key={item.id}
-                                        className={`relative aspect-square bg-slate-900/60 border-2 rounded-lg cursor-pointer transition-all ${
+                                        className={`relative aspect-square bg-slate-900/60 border-2 rounded-lg cursor-pointer transition-all active:scale-95 ${
                                             isSelected
                                                 ? 'border-red-500 bg-red-500/20'
                                                 : 'border-slate-700/40 hover:border-blue-500/50'
@@ -318,8 +343,11 @@ export default function InventoryView({ onHover }) {
                                         style={getItemBorderStyle()}
                                         onClick={() => handleEquip(item)}
                                         onContextMenu={(e) => { e.preventDefault(); toggleSalvageSelection(item.id); }}
-                                        onMouseEnter={(e) => onHover && onHover(item, { x: e.clientX, y: e.clientY }, true)}
-                                        onMouseLeave={() => onHover && onHover(null)}
+                                        onTouchStart={() => handleTouchStart(item.id)}
+                                        onTouchEnd={handleTouchEnd}
+                                        onTouchCancel={handleTouchEnd}
+                                        onMouseEnter={(e) => !isMobile && onHover && onHover(item, { x: e.clientX, y: e.clientY }, true)}
+                                        onMouseLeave={() => !isMobile && onHover && onHover(null)}
                                     >
                                         <div className="absolute inset-1">
                                             <ItemIcon item={item} size="sm" />
@@ -369,7 +397,7 @@ export default function InventoryView({ onHover }) {
 
                 {/* Footer hint */}
                 <div className="px-3 py-1.5 border-t border-slate-700/30 text-xs text-slate-500 text-center">
-                    Click to equip · Right-click to salvage
+                    {isMobile ? 'Tap to equip · Long-press to salvage' : 'Click to equip · Right-click to salvage'}
                 </div>
             </div>
 
