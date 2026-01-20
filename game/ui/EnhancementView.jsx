@@ -313,65 +313,61 @@ export default function EnhancementView() {
 
                 {selectedItem ? (
                     <div className="flex-1 flex flex-col p-3 min-h-0 relative overflow-hidden">
-                        {/* Enhancement Result Animation - all elements share same center point */}
+                        {/* Enhancement Result Animation - all elements positioned at panel center */}
                         {enhanceResult && (
-                            <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
-                                {/* Container for all animation elements - centered */}
-                                <div className="relative flex items-center justify-center">
-                                    {/* Radial flash background */}
+                            <div className="absolute inset-0 z-10 pointer-events-none">
+                                {/* Radial flash background - centered */}
+                                <div
+                                    className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 animate-enhance-flash rounded-full"
+                                    style={{
+                                        background: enhanceResult.type === 'success'
+                                            ? 'radial-gradient(circle, rgba(74, 222, 128, 0.5) 0%, transparent 70%)'
+                                            : 'radial-gradient(circle, rgba(239, 68, 68, 0.4) 0%, transparent 70%)'
+                                    }}
+                                />
+
+                                {/* Rays for success - emanate from center */}
+                                {enhanceResult.type === 'success' && [...Array(8)].map((_, i) => (
                                     <div
-                                        className="absolute w-64 h-64 -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2 animate-enhance-flash rounded-full"
+                                        key={i}
+                                        className="absolute left-1/2 top-1/2 w-0.5 bg-gradient-to-t from-green-400/70 to-transparent animate-enhance-ray"
                                         style={{
-                                            background: enhanceResult.type === 'success'
-                                                ? 'radial-gradient(circle, rgba(74, 222, 128, 0.5) 0%, transparent 70%)'
-                                                : 'radial-gradient(circle, rgba(239, 68, 68, 0.4) 0%, transparent 70%)'
+                                            height: '100px',
+                                            transformOrigin: 'center bottom',
+                                            transform: `translate(-50%, 0) rotate(${i * 45}deg) translateY(-50px)`,
+                                            animationDelay: `${i * 0.03}s`
                                         }}
                                     />
+                                ))}
 
-                                    {/* Rays for success - emanate from center */}
-                                    {enhanceResult.type === 'success' && [...Array(8)].map((_, i) => (
-                                        <div
-                                            key={i}
-                                            className="absolute w-0.5 bg-gradient-to-t from-green-400/70 to-transparent animate-enhance-ray"
-                                            style={{
-                                                height: '100px',
-                                                transformOrigin: 'center bottom',
-                                                transform: `rotate(${i * 45}deg) translateY(-50px)`,
-                                                animationDelay: `${i * 0.03}s`
-                                            }}
-                                        />
-                                    ))}
+                                {/* Sparkles for success - around center */}
+                                {enhanceResult.type === 'success' && [...Array(6)].map((_, i) => (
+                                    <div
+                                        key={`sparkle-${i}`}
+                                        className="absolute left-1/2 top-1/2 text-yellow-400 text-lg animate-enhance-sparkle"
+                                        style={{
+                                            transform: `translate(-50%, -50%) rotate(${i * 60}deg) translateY(-40px)`,
+                                            animationDelay: `${i * 0.08}s`
+                                        }}
+                                    >
+                                        ✦
+                                    </div>
+                                ))}
 
-                                    {/* Sparkles for success */}
-                                    {enhanceResult.type === 'success' && [...Array(6)].map((_, i) => (
-                                        <div
-                                            key={`sparkle-${i}`}
-                                            className="absolute text-yellow-400 text-lg animate-enhance-sparkle"
-                                            style={{
-                                                transformOrigin: 'center center',
-                                                transform: `rotate(${i * 60}deg) translateY(-40px)`,
-                                                animationDelay: `${i * 0.08}s`
-                                            }}
-                                        >
-                                            ✦
-                                        </div>
-                                    ))}
-
-                                    {/* Main text - centered */}
-                                    <div className={`relative z-20 ${
-                                        enhanceResult.type === 'success' ? 'animate-enhance-success' : 'animate-enhance-fail'
-                                    }`}>
-                                        <div
-                                            className="text-5xl font-black tracking-wider"
-                                            style={{
-                                                color: enhanceResult.type === 'success' ? '#4ade80' : '#ef4444',
-                                                textShadow: enhanceResult.type === 'success'
-                                                    ? '0 0 20px rgba(74, 222, 128, 0.8), 0 0 40px rgba(74, 222, 128, 0.4)'
-                                                    : '0 0 20px rgba(239, 68, 68, 0.8), 0 0 40px rgba(239, 68, 68, 0.4)'
-                                            }}
-                                        >
-                                            {enhanceResult.text}
-                                        </div>
+                                {/* Main text - centered */}
+                                <div className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 ${
+                                    enhanceResult.type === 'success' ? 'animate-enhance-success' : 'animate-enhance-fail'
+                                }`}>
+                                    <div
+                                        className="text-5xl font-black tracking-wider whitespace-nowrap"
+                                        style={{
+                                            color: enhanceResult.type === 'success' ? '#4ade80' : '#ef4444',
+                                            textShadow: enhanceResult.type === 'success'
+                                                ? '0 0 20px rgba(74, 222, 128, 0.8), 0 0 40px rgba(74, 222, 128, 0.4)'
+                                                : '0 0 20px rgba(239, 68, 68, 0.8), 0 0 40px rgba(239, 68, 68, 0.4)'
+                                        }}
+                                    >
+                                        {enhanceResult.text}
                                     </div>
                                 </div>
 
