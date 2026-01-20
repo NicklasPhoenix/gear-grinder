@@ -128,6 +128,34 @@ function migrateBossSets(parsed) {
         }
     }
 
+    // Second pass: Fix items that have new bossSet but old names
+    // (This handles saves where bossSet was migrated but name wasn't)
+    if (parsed.gear) {
+        for (const [slot, item] of Object.entries(parsed.gear)) {
+            if (item && item.bossSet && item.isBossItem) {
+                const expectedName = getBossItemName(item.bossSet, slot);
+                if (expectedName && item.name !== expectedName) {
+                    console.log(`[Migration] Fixing gear name: ${item.name} -> ${expectedName}`);
+                    item.name = expectedName;
+                    migrated = true;
+                }
+            }
+        }
+    }
+
+    if (Array.isArray(parsed.inventory)) {
+        for (const item of parsed.inventory) {
+            if (item && item.bossSet && item.isBossItem) {
+                const expectedName = getBossItemName(item.bossSet, item.slot);
+                if (expectedName && item.name !== expectedName) {
+                    console.log(`[Migration] Fixing inventory name: ${item.name} -> ${expectedName}`);
+                    item.name = expectedName;
+                    migrated = true;
+                }
+            }
+        }
+    }
+
     if (migrated) {
         console.log('Boss set migration completed');
     }
