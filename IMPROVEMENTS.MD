@@ -4,6 +4,94 @@ A detailed technical review of the Gear Grinder incremental RPG game built with 
 
 ---
 
+## Reddit Community Feedback (January 2026)
+
+### Key Pain Points from Players
+
+1. **No Class Fantasy / Build Identity** (serayne92)
+   - "No attachment to the character, nothing to get into, no class fantasy"
+   - "Skills feel like I'm on rails with no customization or builds"
+   - "Even down to the UI design reminds me of a ton of idle rpg games I've played lately"
+   - Compared unfavorably to "Idle Looter" which had similar issues
+
+2. **Low Gear Drop Rate** (Embarrassed-Buy-8634)
+   - "For having 'gear' in the name you sure get very little gear, like maybe one every few minutes"
+
+3. **Boss Stones Purpose Unclear** (Significant-Term2509)
+   - Players don't understand what Guardian/Lich stones do
+   - Need better tooltips/explanations
+
+4. **Mobile Broken** (N8UrM8IsGr8, perpterds)
+   - "Tried it on iPhone Safari and it's not usable"
+   - Multiple users requesting mobile support
+
+5. **Generic UI / BI Dashboard Look**
+   - Current Tailwind-based UI looks like business intelligence dashboard, not a game
+   - Needs actual game UI assets to feel like a real game
+
+---
+
+## Current Priority Roadmap
+
+### Priority 1: Mobile App (CRITICAL)
+**Goal:** Make the game work as a native-feeling mobile app (iOS/Android)
+
+**Options to evaluate:**
+1. **Capacitor/Cordova** - Wrap existing React app in native shell
+2. **React Native rebuild** - More work but better native feel
+3. **PWA (Progressive Web App)** - Easiest, but limited app store presence
+4. **Tauri Mobile** - Rust-based, smaller bundles, newer option
+
+**Key mobile requirements:**
+- Touch-friendly UI (larger tap targets, swipe gestures)
+- Responsive layout that works on phone screens
+- Offline capability
+- Push notifications for idle rewards
+- App store deployment (Google Play, Apple App Store)
+
+### Priority 2: UI Overhaul
+**Goal:** Replace Tailwind dashboard look with actual game UI assets
+
+**Approach:**
+- Source game UI asset packs (itch.io, craftpix, etc.)
+- Replace panels, buttons, frames with pixel art / fantasy themed assets
+- Keep React component structure, just restyle
+- Consider UI frameworks like `react-game-ui` or custom sprites
+
+### Priority 3: Class System / Build Diversity
+**Goal:** Give players meaningful choices and class fantasy
+
+**Ideas:**
+- 3 starting classes: Warrior (STR), Mage (INT), Rogue (AGI)
+- Class-specific skill trees
+- Different viable builds within each class
+- Respec option with cost
+
+### Priority 4: Increase Gear Drops
+**Goal:** Live up to the "Gear Grinder" name
+
+**Changes needed:**
+- Significantly increase base drop rates
+- Add gear from regular enemies, not just bosses
+- More variety in gear stats/effects
+- Gear comparison improvements
+
+### Priority 5: UX Clarity
+**Goal:** Make game systems understandable
+
+**Tasks:**
+- Boss stone tooltips explaining their purpose
+- Better onboarding/tutorial hints
+- Damage breakdown visibility
+- Clear indication of what stats do
+
+### Priority 6: Story/Lore (Later)
+**Goal:** Give players narrative context
+
+**Can be added last without blocking other work**
+
+---
+
 ## Executive Summary
 
 Gear Grinder is a well-structured incremental RPG with solid foundations. The game has good separation of concerns with dedicated systems for combat, player stats, and state management. However, there are opportunities for improvement in code quality, performance, UX polish, and game design that would significantly enhance the player experience.
