@@ -9,7 +9,9 @@ const GameContext = createContext(null);
 const HighFrequencyContext = createContext(null);
 
 // Migration map: old boss set names -> new boss set names
+// Includes variations (capitalized, suffixed) to catch all legacy items
 const BOSS_SET_MIGRATION = {
+    // Base names
     guardian: 'crow',
     lich: 'cerberus',
     dragon: 'demon',
@@ -22,6 +24,26 @@ const BOSS_SET_MIGRATION = {
     astral: 'tyrant',
     cosmic: 'inferno',
     primordial: 'scorpion',
+    // Capitalized variations
+    Guardian: 'crow',
+    Lich: 'cerberus',
+    Dragon: 'demon',
+    Frost: 'spider',
+    Demon: 'shadow',
+    Seraph: 'abyss',
+    Void: 'behemoth',
+    Chaos: 'darkwolf',
+    Eternal: null,
+    Astral: 'tyrant',
+    Cosmic: 'inferno',
+    Primordial: 'scorpion',
+    // Suffixed variations (e.g., "frostborn", "lichborn")
+    frostborn: 'spider',
+    lichborn: 'cerberus',
+    dragonborn: 'demon',
+    Frostborn: 'spider',
+    Lichborn: 'cerberus',
+    Dragonborn: 'demon',
 };
 
 // Helper to get the correct item name from boss set definitions
@@ -59,18 +81,23 @@ function migrateBossSets(parsed) {
     // Migrate gear bossSet values and names
     if (parsed.gear) {
         for (const [slot, item] of Object.entries(parsed.gear)) {
-            if (item && item.bossSet && BOSS_SET_MIGRATION.hasOwnProperty(item.bossSet)) {
-                const newSet = BOSS_SET_MIGRATION[item.bossSet];
-                if (newSet) {
-                    const oldName = item.name;
-                    item.bossSet = newSet;
-                    // Update item name from the new boss set definition
-                    const newName = getBossItemName(newSet, slot);
-                    if (newName) {
-                        item.name = newName;
-                        console.log(`Migrated gear: ${oldName} -> ${newName} (bossSet: ${newSet})`);
+            if (item && item.bossSet) {
+                console.log(`[Migration] Found gear with bossSet: "${item.bossSet}" (${item.name})`);
+                if (BOSS_SET_MIGRATION.hasOwnProperty(item.bossSet)) {
+                    const newSet = BOSS_SET_MIGRATION[item.bossSet];
+                    if (newSet) {
+                        const oldName = item.name;
+                        item.bossSet = newSet;
+                        // Update item name from the new boss set definition
+                        const newName = getBossItemName(newSet, slot);
+                        if (newName) {
+                            item.name = newName;
+                            console.log(`Migrated gear: ${oldName} -> ${newName} (bossSet: ${newSet})`);
+                        }
+                        migrated = true;
                     }
-                    migrated = true;
+                } else {
+                    console.log(`[Migration] No mapping for bossSet: "${item.bossSet}"`);
                 }
             }
         }
@@ -79,18 +106,23 @@ function migrateBossSets(parsed) {
     // Migrate inventory item bossSet values and names
     if (Array.isArray(parsed.inventory)) {
         for (const item of parsed.inventory) {
-            if (item && item.bossSet && BOSS_SET_MIGRATION.hasOwnProperty(item.bossSet)) {
-                const newSet = BOSS_SET_MIGRATION[item.bossSet];
-                if (newSet) {
-                    const oldName = item.name;
-                    item.bossSet = newSet;
-                    // Update item name from the new boss set definition
-                    const newName = getBossItemName(newSet, item.slot);
-                    if (newName) {
-                        item.name = newName;
-                        console.log(`Migrated inventory: ${oldName} -> ${newName} (bossSet: ${newSet})`);
+            if (item && item.bossSet) {
+                console.log(`[Migration] Found inventory item with bossSet: "${item.bossSet}" (${item.name})`);
+                if (BOSS_SET_MIGRATION.hasOwnProperty(item.bossSet)) {
+                    const newSet = BOSS_SET_MIGRATION[item.bossSet];
+                    if (newSet) {
+                        const oldName = item.name;
+                        item.bossSet = newSet;
+                        // Update item name from the new boss set definition
+                        const newName = getBossItemName(newSet, item.slot);
+                        if (newName) {
+                            item.name = newName;
+                            console.log(`Migrated inventory: ${oldName} -> ${newName} (bossSet: ${newSet})`);
+                        }
+                        migrated = true;
                     }
-                    migrated = true;
+                } else {
+                    console.log(`[Migration] No mapping for bossSet: "${item.bossSet}"`);
                 }
             }
         }
