@@ -166,6 +166,8 @@ export default function GameRenderer() {
             const canvasWidth = containerWidth;
             const canvasHeight = containerHeight;
             const centerX = canvasWidth / 2;
+            // Scale factor for mobile (smaller canvas = smaller elements)
+            const scaleFactor = Math.min(1, canvasHeight / 400);
             // Scale ground position relative to canvas height (use 85% of height for ground line)
             const groundY = Math.max(canvasHeight * 0.85, canvasHeight - 70);
 
@@ -325,7 +327,6 @@ export default function GameRenderer() {
             player.x = playerX;
             player.y = characterY;
             // Scale sprites based on canvas size (smaller on mobile)
-            const scaleFactor = Math.min(1, canvasHeight / 400);
             const playerScale = (playerData.scale || 4) * 1.5 * scaleFactor;
             player.scale.set(-playerScale, playerScale); // Negative X to face right
             gameContainer.addChild(player);
