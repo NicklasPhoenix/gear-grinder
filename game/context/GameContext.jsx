@@ -116,6 +116,9 @@ export function GameProvider({ children }) {
     // High-frequency state (HP values) - updated separately to prevent full tree re-renders
     const [hpState, setHpState] = useState({ playerHp: 100, playerMaxHp: 100, enemyHp: 20, enemyMaxHp: 20 });
 
+    // Offline rewards state - shown in modal when player returns
+    const [offlineRewards, setOfflineRewards] = useState(null);
+
     // Track last state snapshot for comparison
     const lastStateRef = useRef(null);
 
@@ -223,8 +226,11 @@ export function GameProvider({ children }) {
                 lastStateRef.current = newState;
             });
 
-            // Process Offline
-            gm.processOfflineProgress(gm.state);
+            // Process Offline - capture rewards to show in modal
+            const rewards = gm.processOfflineProgress(gm.state);
+            if (rewards) {
+                setOfflineRewards(rewards);
+            }
 
             // Start the loop
             gm.start();
@@ -260,8 +266,10 @@ export function GameProvider({ children }) {
     // Memoize context value to prevent unnecessary re-renders
     const contextValue = useMemo(() => ({
         gameManager: gameManagerRef.current,
-        state: gameState
-    }), [gameState]);
+        state: gameState,
+        offlineRewards,
+        clearOfflineRewards: () => setOfflineRewards(null)
+    }), [gameState, offlineRewards]);
 
     if (!gameState || !gameManagerRef.current) {
         return (

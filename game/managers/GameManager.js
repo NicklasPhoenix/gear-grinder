@@ -135,12 +135,7 @@ export class GameManager {
         this.state.xp += xpGain;
         this.state.totalGold += goldGain;
 
-        setTimeout(() => {
-            this.emit('floatingText', { x: 400, y: 150, text: `WELCOME BACK!`, color: '#ffffff' });
-            this.emit('floatingText', { x: 400, y: 200, text: `OFFLINE: +${goldGain} Gold`, color: '#fbbf24' });
-            this.emit('floatingText', { x: 400, y: 230, text: `+${kills} Kills`, color: '#ef4444' });
-        }, 1500);
-
+        // Return rewards for modal display (floating text removed in favor of modal)
         return { time: secondsOffline, kills, gold: goldGain, xp: xpGain };
     }
 

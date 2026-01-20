@@ -10,6 +10,7 @@ import PrestigeView from './PrestigeView';
 import AchievementsView from './AchievementsView';
 import SettingsView from './SettingsView';
 import DailyRewardsModal, { useDailyRewardAvailable } from './DailyRewardsModal';
+import OfflineRewardsModal from './OfflineRewardsModal';
 import GameTooltip from './GameTooltip';
 import { MaterialIcon, BossStoneIcon } from './MaterialIcons';
 import { BOSS_STONES } from '../data/items';
@@ -82,7 +83,7 @@ export default function GameLayout() {
 
 // Desktop layout as its own component with all its hooks
 function DesktopGameLayout() {
-    const { state } = useGame();
+    const { state, offlineRewards, clearOfflineRewards } = useGame();
     const [activeTab, setActiveTab] = useState('inventory');
     const [tooltipUser, setTooltipUser] = useState(null);
     const [levelUpAnimation, setLevelUpAnimation] = useState(null);
@@ -393,6 +394,9 @@ function DesktopGameLayout() {
 
             {/* Daily Rewards Modal */}
             {showDailyRewards && <DailyRewardsModal onClose={() => setShowDailyRewards(false)} />}
+
+            {/* Offline Rewards Modal */}
+            {offlineRewards && <OfflineRewardsModal rewards={offlineRewards} onClose={clearOfflineRewards} />}
         </div>
     );
 }
