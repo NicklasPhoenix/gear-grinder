@@ -66,7 +66,7 @@ export const DEATH_PENALTY = {
 
 // === BOSS DROPS ===
 export const BOSS_DROPS = {
-    GEAR_DROP_CHANCE: 0.12,     // 12% chance for boss gear
+    GEAR_DROP_CHANCE: 0.24,     // 24% chance for boss gear
     BONUS_STONE_CHANCE: 0.30,   // 30% chance for bonus boss stone
 };
 
