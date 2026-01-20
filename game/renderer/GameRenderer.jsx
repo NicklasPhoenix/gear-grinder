@@ -1579,6 +1579,7 @@ function spawnFloatingText(app, container, { text, type, target }, positions = {
             blur: Math.max(1, 3 * scaleFactor),
             alpha: 0.8,
         },
+        padding: Math.ceil(10 * scaleFactor), // Prevent text clipping from stroke/shadow
     });
 
     const pixiText = new PIXI.Text({ text, style });
@@ -1646,6 +1647,7 @@ function spawnLootText(app, container, { text, color }, positions = {}) {
             blur: Math.max(1, 3 * scaleFactor),
             alpha: 0.9,
         },
+        padding: Math.ceil(10 * scaleFactor), // Prevent text clipping from stroke/shadow
     });
 
     const pixiText = new PIXI.Text({ text, style });
