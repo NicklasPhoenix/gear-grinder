@@ -1,9 +1,30 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { useGame } from '../context/GameContext';
 import ItemIcon from './ItemIcon';
-import { TIERS, GEAR_SLOTS, getItemScore, getSalvageReturns, BOSS_SETS, addItemToInventory, removeOneFromStack, getEnhanceStage } from '../data/items';
+import { TIERS, GEAR_SLOTS, GEAR_BASES, WEAPON_TYPES, PRESTIGE_WEAPONS, getItemScore, getSalvageReturns, BOSS_SETS, PRESTIGE_BOSS_SETS, addItemToInventory, removeOneFromStack, getEnhanceStage } from '../data/items';
+import { getEnhanceBonus } from '../utils/formulas';
 import PresetsModal from './PresetsModal';
 import { useIsMobile } from '../hooks/useIsMobile';
+
+// Calculate item stats for display
+function calculateItemStats(item) {
+    if (!item) return { dmg: 0, hp: 0, armor: 0 };
+    const tierData = TIERS[item.tier] || TIERS[0];
+    const gearBase = GEAR_BASES[item.slot] || { baseDmg: 0, baseHp: 0, baseArmor: 0 };
+    let weaponBase = gearBase;
+    if (item.slot === 'weapon' && item.weaponType) {
+        const weaponDef = WEAPON_TYPES.find(w => w.id === item.weaponType) || PRESTIGE_WEAPONS.find(w => w.id === item.weaponType);
+        if (weaponDef) weaponBase = { ...gearBase, ...weaponDef };
+    }
+    const tierMult = tierData.statMult || 1;
+    const bossBonus = item.isBossItem && item.statBonus ? item.statBonus : 1;
+    const enhanceBonus = getEnhanceBonus(item.plus || 0, item.tier);
+    return {
+        dmg: Math.floor((weaponBase.baseDmg || 0) * tierMult * bossBonus) + (enhanceBonus.dmgBonus || 0),
+        hp: Math.floor((weaponBase.baseHp || 0) * tierMult * bossBonus) + (enhanceBonus.hpBonus || 0),
+        armor: Math.floor((weaponBase.baseArmor || 0) * tierMult * bossBonus) + (enhanceBonus.armorBonus || 0),
+    };
+}
 
 const SLOT_LABELS = {
     weapon: 'Weapon',
@@ -301,34 +322,132 @@ export default function InventoryView({ onHover }) {
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto custom-scrollbar p-3 min-h-0">
+                <div className="flex-1 overflow-y-auto custom-scrollbar p-2 min-h-0">
                     {state.inventory.length === 0 ? (
                         <div className="h-full flex items-center justify-center text-slate-500 text-base">
                             Empty
                         </div>
+                    ) : isMobile ? (
+                        /* MOBILE: Full item cards with all stats */
+                        <div className="space-y-2">
+                            {state.inventory.map(item => {
+                                const tierInfo = TIERS[item.tier];
+                                const isSelected = selectedForSalvage.has(item.id);
+                                const setInfo = item.bossSet ? (BOSS_SETS[item.bossSet] || PRESTIGE_BOSS_SETS[item.bossSet]) : null;
+                                const stage = item.plus > 0 ? getEnhanceStage(item.plus) : null;
+                                const stats = calculateItemStats(item);
+                                const effects = item.effects || [];
+
+                                return (
+                                    <div
+                                        key={item.id}
+                                        className={`relative bg-slate-900/80 rounded-lg border-2 overflow-hidden ${
+                                            isSelected ? 'border-red-500 bg-red-900/30' : 'border-slate-700/60'
+                                        }`}
+                                        style={!isSelected && tierInfo ? { borderColor: tierInfo.color + '80' } : {}}
+                                    >
+                                        {/* Header: Icon + Name + Tier */}
+                                        <div className="flex items-center gap-2 p-2 border-b border-slate-700/50" style={{ background: `linear-gradient(135deg, ${tierInfo?.color || '#666'}15, transparent)` }}>
+                                            <div className="w-10 h-10 flex-shrink-0">
+                                                <ItemIcon item={item} size="sm" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="font-bold text-sm truncate" style={{ color: tierInfo?.color || '#fff' }}>
+                                                    {item.name}
+                                                    {item.plus > 0 && stage && (
+                                                        <span className="ml-1 text-xs px-1 rounded" style={{ backgroundColor: stage.bgColor, color: stage.color }}>
+                                                            +{item.plus}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className="text-[10px] text-slate-400 flex items-center gap-1">
+                                                    <span style={{ color: tierInfo?.color }}>{tierInfo?.name}</span>
+                                                    <span>·</span>
+                                                    <span className="capitalize">{item.slot}</span>
+                                                    {item.weaponType && <><span>·</span><span className="capitalize">{item.weaponType}</span></>}
+                                                </div>
+                                            </div>
+                                            <div className="text-right text-[10px] text-slate-500">
+                                                PWR<br/><span className="text-sm font-bold text-slate-300">{getItemScore(item)}</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Stats Row */}
+                                        <div className="flex gap-1 p-2 text-[10px]">
+                                            {stats.dmg > 0 && (
+                                                <div className="flex-1 bg-red-500/20 rounded px-1.5 py-1 text-center">
+                                                    <div className="text-red-400">DMG</div>
+                                                    <div className="font-bold text-red-300">+{stats.dmg}</div>
+                                                </div>
+                                            )}
+                                            {stats.hp > 0 && (
+                                                <div className="flex-1 bg-green-500/20 rounded px-1.5 py-1 text-center">
+                                                    <div className="text-green-400">HP</div>
+                                                    <div className="font-bold text-green-300">+{stats.hp}</div>
+                                                </div>
+                                            )}
+                                            {stats.armor > 0 && (
+                                                <div className="flex-1 bg-blue-500/20 rounded px-1.5 py-1 text-center">
+                                                    <div className="text-blue-400">ARM</div>
+                                                    <div className="font-bold text-blue-300">+{stats.armor}</div>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Effects */}
+                                        {effects.length > 0 && (
+                                            <div className="px-2 pb-1 flex flex-wrap gap-1">
+                                                {effects.map((eff, i) => (
+                                                    <span key={i} className="text-[9px] px-1.5 py-0.5 bg-purple-500/20 text-purple-300 rounded">
+                                                        {eff.name} +{eff.value}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {/* Set Bonus Info */}
+                                        {setInfo && (
+                                            <div className="px-2 pb-1">
+                                                <div className="text-[9px] px-1.5 py-0.5 rounded inline-block" style={{ backgroundColor: setInfo.color + '20', color: setInfo.color }}>
+                                                    {setInfo.name} Set
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Action Buttons */}
+                                        <div className="flex border-t border-slate-700/50">
+                                            <button
+                                                onClick={() => handleEquip(item)}
+                                                className="flex-1 py-2 text-xs font-bold text-green-400 bg-green-500/10 active:bg-green-500/30"
+                                            >
+                                                EQUIP
+                                            </button>
+                                            <button
+                                                onClick={() => toggleSalvageSelection(item.id)}
+                                                className={`flex-1 py-2 text-xs font-bold border-l border-slate-700/50 ${
+                                                    isSelected ? 'text-white bg-red-500' : 'text-red-400 bg-red-500/10 active:bg-red-500/30'
+                                                }`}
+                                            >
+                                                {isSelected ? 'SELECTED' : 'SALVAGE'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
                     ) : (
-                        <div className={`grid gap-1.5 ${isMobile ? 'grid-cols-5' : 'grid-cols-7'}`}>
+                        /* DESKTOP: Compact grid with tooltips */
+                        <div className="grid gap-1.5 grid-cols-7">
                             {state.inventory.map(item => {
                                 const tierInfo = TIERS[item.tier];
                                 const isSelected = selectedForSalvage.has(item.id);
                                 const setInfo = item.bossSet ? BOSS_SETS[item.bossSet] : null;
                                 const stage = item.plus > 0 ? getEnhanceStage(item.plus) : null;
 
-                                // Determine border style: selected > boss set > tier color > default
                                 const getItemBorderStyle = () => {
                                     if (isSelected) return {};
-                                    if (setInfo) {
-                                        return {
-                                            borderColor: setInfo.color,
-                                            boxShadow: `inset 0 0 6px ${setInfo.color}30`
-                                        };
-                                    }
-                                    if (tierInfo && item.tier > 0) {
-                                        return {
-                                            borderColor: tierInfo.color,
-                                            boxShadow: `inset 0 0 4px ${tierInfo.color}25`
-                                        };
-                                    }
+                                    if (setInfo) return { borderColor: setInfo.color, boxShadow: `inset 0 0 6px ${setInfo.color}30` };
+                                    if (tierInfo && item.tier > 0) return { borderColor: tierInfo.color, boxShadow: `inset 0 0 4px ${tierInfo.color}25` };
                                     return {};
                                 };
 
@@ -336,53 +455,27 @@ export default function InventoryView({ onHover }) {
                                     <div
                                         key={item.id}
                                         className={`relative aspect-square bg-slate-900/60 border-2 rounded-lg cursor-pointer transition-all active:scale-95 ${
-                                            isSelected
-                                                ? 'border-red-500 bg-red-500/20'
-                                                : 'border-slate-700/40 hover:border-blue-500/50'
+                                            isSelected ? 'border-red-500 bg-red-500/20' : 'border-slate-700/40 hover:border-blue-500/50'
                                         }`}
                                         style={getItemBorderStyle()}
                                         onClick={() => handleEquip(item)}
                                         onContextMenu={(e) => { e.preventDefault(); toggleSalvageSelection(item.id); }}
-                                        onTouchStart={() => handleTouchStart(item.id)}
-                                        onTouchEnd={handleTouchEnd}
-                                        onTouchCancel={handleTouchEnd}
-                                        onMouseEnter={(e) => !isMobile && onHover && onHover(item, { x: e.clientX, y: e.clientY }, true)}
-                                        onMouseLeave={() => !isMobile && onHover && onHover(null)}
+                                        onMouseEnter={(e) => onHover && onHover(item, { x: e.clientX, y: e.clientY }, true)}
+                                        onMouseLeave={() => onHover && onHover(null)}
                                     >
                                         <div className="absolute inset-1">
                                             <ItemIcon item={item} size="sm" />
                                         </div>
-
-                                        {/* Tier indicator dot */}
-                                        <div
-                                            className="absolute top-1 left-1 w-2 h-2 rounded-full"
-                                            style={{ backgroundColor: tierInfo?.color || '#666' }}
-                                        />
-
-                                        {/* Enhancement badge */}
+                                        <div className="absolute top-1 left-1 w-2 h-2 rounded-full" style={{ backgroundColor: tierInfo?.color || '#666' }} />
                                         {item.plus > 0 && stage && (
-                                            <div
-                                                className="absolute -top-1.5 -right-1.5 px-1 py-0.5 text-[11px] font-bold rounded flex items-center border border-black/60"
-                                                style={{
-                                                    backgroundColor: stage.bgColor,
-                                                    color: stage.color,
-                                                    boxShadow: `${stage.glow}, 0 1px 3px rgba(0,0,0,0.5)`,
-                                                    textShadow: '0 1px 1px rgba(0,0,0,0.8)'
-                                                }}
-                                            >
-                                                {stage.icon && <span className="text-[9px] mr-0.5">{stage.icon}</span>}
-                                                +{item.plus}
+                                            <div className="absolute -top-1.5 -right-1.5 px-1 py-0.5 text-[11px] font-bold rounded flex items-center border border-black/60"
+                                                style={{ backgroundColor: stage.bgColor, color: stage.color, boxShadow: `${stage.glow}, 0 1px 3px rgba(0,0,0,0.5)` }}>
+                                                {stage.icon && <span className="text-[9px] mr-0.5">{stage.icon}</span>}+{item.plus}
                                             </div>
                                         )}
-
-                                        {/* Stack count */}
                                         {(item.count || 1) > 1 && (
-                                            <div className="absolute bottom-0 left-0 text-[10px] font-bold text-white bg-blue-600/90 px-1 rounded-tr">
-                                                x{item.count}
-                                            </div>
+                                            <div className="absolute bottom-0 left-0 text-[10px] font-bold text-white bg-blue-600/90 px-1 rounded-tr">x{item.count}</div>
                                         )}
-
-                                        {/* Selection X */}
                                         {isSelected && (
                                             <div className="absolute inset-0 flex items-center justify-center bg-red-500/30">
                                                 <span className="text-red-400 text-xl font-bold">×</span>
