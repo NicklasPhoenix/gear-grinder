@@ -1391,7 +1391,7 @@ export default function GameRenderer() {
 
             // Update zone text
             if (effectsContainerRef.current?.parent?.zoneText) {
-                effectsContainerRef.current.parent.zoneText.text = zone.name.replace(/🔥|🌟/g, '').trim();
+                effectsContainerRef.current.parent.zoneText.text = zone.name;
             }
 
             // Update background for zone changes

@@ -168,10 +168,10 @@ export class CombatSystem {
                 const returns = getSalvageReturns(droppedGear, 1);
                 state.gold += returns.gold;
                 state.enhanceStone += returns.enhanceStone;
-                log.push({ type: 'autoSalvage', msg: `♻️ ${droppedGear.name} salvaged!` });
+                log.push({ type: 'autoSalvage', msg: `${droppedGear.name} salvaged!` });
             } else {
                 state.inventory = addItemToInventory(state.inventory, droppedGear);
-                log.push({ type: 'gearDrop', msg: `⚔️ ${droppedGear.name} dropped!` });
+                log.push({ type: 'gearDrop', msg: `${droppedGear.name} dropped!` });
             }
         }
 
@@ -235,7 +235,7 @@ export class CombatSystem {
             const stoneCount = 1 + (Math.random() < BOSS_DROPS.BONUS_STONE_CHANCE ? 1 : 0);
             if (!state.bossStones) state.bossStones = {};
             state.bossStones[zone.bossSet] = (state.bossStones[zone.bossSet] || 0) + stoneCount;
-            log.push({ type: 'bossStone', msg: `💎 ${bossStoneInfo.name} x${stoneCount}!` });
+            log.push({ type: 'bossStone', msg: `${bossStoneInfo.name} x${stoneCount}!` });
             this.callbacks.onFloatingText(`+${stoneCount} ${bossStoneInfo.name}`, 'bossStone', 'player');
         }
 
@@ -269,7 +269,7 @@ export class CombatSystem {
             } else {
                 // Add to inventory with stacking
                 state.inventory = addItemToInventory(state.inventory, newBossItem);
-                log.push({ type: 'bossLoot', msg: `⚡ ${bossItem.name} obtained!` });
+                log.push({ type: 'bossLoot', msg: `${bossItem.name} obtained!` });
             }
         }
     }

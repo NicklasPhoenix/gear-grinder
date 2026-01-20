@@ -956,6 +956,13 @@ export const calculatePlayerStats = (gameState) => {
 Reddit Feedback to be addressed:
 
 Just a FYI, when enhancing equipment, if it fails and go below 10/15/20/25/30 it wont lose its bonus, and when reaching that milestone again, it will gain a new bonus - currently checking if I can just go from guardian to last boss by just enhancing that first gear set 😂
+
+
+Found a bug when enhancing - didnt really pay attention before, but noticed now that you arent required to have any b.orbs - it will just go negative, but on reload it gets set back to 0 so yeah
+
+Same with C.shards
+
+As a side note, the equip best gear button is horrible. There are a few meaningful gear choices you can make here, but the equip best button ignores them and equips trash - e.g., will equip a sword when you are specced into int, dividing your damage by 10.
 ---
 
 ## Summary

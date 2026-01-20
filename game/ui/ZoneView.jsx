@@ -69,7 +69,7 @@ export default function ZoneView() {
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2">
                                             <span className={`text-base font-bold truncate ${zone.isBoss ? 'text-red-300' : 'text-white'}`}>
-                                                {zone.name.replace(/[^a-zA-Z\s]/g, '').trim()}
+                                                {zone.name}
                                             </span>
                                             {zone.prestigeReq > 0 && (
                                                 <span className="px-1.5 py-0.5 text-xs bg-pink-500/30 text-pink-300 rounded font-bold">P{zone.prestigeReq}</span>

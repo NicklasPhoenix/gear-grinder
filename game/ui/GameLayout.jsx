@@ -242,7 +242,7 @@ function DesktopGameLayout() {
                                 <div>
                                     <p className="text-[10px] lg:text-xs text-slate-400 uppercase tracking-wider hidden sm:block">Current Zone</p>
                                     <h2 className={`font-bold text-sm lg:text-lg ${currentZone.isBoss ? 'text-red-400' : 'text-white'}`}>
-                                        {currentZone.name.replace(/[^a-zA-Z\s]/g, '').trim()}
+                                        {currentZone.name}
                                     </h2>
                                 </div>
                             </div>

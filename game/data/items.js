@@ -1,8 +1,8 @@
 export const MATERIALS = {
-    enhanceStone: { name: 'E.Stone', color: '#60a5fa', icon: '💎' },
-    blessedOrb: { name: 'B.Orb', color: '#c084fc', icon: '🔮' },
-    celestialShard: { name: 'C.Shard', color: '#fbbf24', icon: '✨' },
-    prestigeStone: { name: 'P.Stone', color: '#f472b6', icon: '🌟' },
+    enhanceStone: { name: 'E.Stone', color: '#60a5fa' },
+    blessedOrb: { name: 'B.Orb', color: '#c084fc' },
+    celestialShard: { name: 'C.Shard', color: '#fbbf24' },
+    prestigeStone: { name: 'P.Stone', color: '#f472b6' },
 };
 
 // Boss stones - dropped by bosses, required to enhance boss gear past +10
