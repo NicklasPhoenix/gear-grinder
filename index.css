@@ -17,6 +17,11 @@
     font-family: 'Rajdhani', sans-serif;
   }
 
+  /* Eliminate 300ms touch delay on mobile */
+  button, a, [role="button"], input, select, textarea, label, .touchable {
+    touch-action: manipulation;
+  }
+
   /* Prevent text selection in game */
   .no-select {
     user-select: none;
