@@ -175,7 +175,7 @@ export default function StatsView() {
                             <MobileStatRow label="Thorns" value={calculated.thorns || 0} color="text-purple-300" />
                         </div>
                         <div className="border-t border-slate-700/50 mt-2 pt-2 grid grid-cols-2 gap-x-4 gap-y-1">
-                            <MobileStatRow label="Silver %" value={formatBonus((calculated.goldMult - 1) * 100)} color="text-yellow-400" />
+                            <MobileStatRow label="Silver %" value={formatBonus((calculated.goldMult - 1) * 100)} color="text-slate-300" />
                             <MobileStatRow label="XP %" value={formatBonus(calculated.xpBonus || 0)} color="text-purple-400" />
                         </div>
                     </div>
@@ -351,7 +351,7 @@ export default function StatsView() {
                             <StatRow label="Lifesteal" value={formatPercent(calculated.lifesteal)} color="text-pink-300" />
                             <StatRow label="Thorns" value={calculated.thorns || 0} color="text-purple-300" />
                             <div className="border-t border-slate-700/50 my-2 pt-2">
-                                <StatRow label="Silver %" value={formatBonus((calculated.goldMult - 1) * 100)} color="text-yellow-400" />
+                                <StatRow label="Silver %" value={formatBonus((calculated.goldMult - 1) * 100)} color="text-slate-300" />
                                 <StatRow label="XP %" value={formatBonus(calculated.xpBonus || 0)} color="text-purple-400" />
                             </div>
                         </div>
