@@ -15,16 +15,11 @@ export const getEnhanceCost = (currentPlus) => ({
 });
 
 /**
- * Calculates the success rate for enhancing an item at its current plus level.
- * - +0 to +9: 100% success
- * - +10 to +19: Decreases from 100% to 50%
- * - +20 to +29: Decreases from 50% to 20%
- * - +30+: Fixed 20% success
- *
+ * Calculates the base success rate for enhancing an item (without pity bonus).
  * @param {number} currentPlus - The item's current enhancement level
- * @returns {number} Success rate as a percentage (0-100)
+ * @returns {number} Base success rate as a percentage (0-100)
  */
-export const getEnhanceSuccess = (currentPlus) => {
+export const getBaseEnhanceSuccess = (currentPlus) => {
     if (currentPlus < ENHANCE.ORB_THRESHOLD) return ENHANCE.BASE_SUCCESS;
     if (currentPlus < ENHANCE.SHARD_THRESHOLD) {
         return Math.max(ENHANCE.MIN_SUCCESS_10_20, ENHANCE.BASE_SUCCESS - (currentPlus - 9) * ENHANCE.SUCCESS_DECREASE_PER_LEVEL);
@@ -33,6 +28,37 @@ export const getEnhanceSuccess = (currentPlus) => {
         return Math.max(ENHANCE.MIN_SUCCESS_20_PLUS, ENHANCE.MIN_SUCCESS_10_20 - (currentPlus - 19) * ENHANCE.SUCCESS_DECREASE_AFTER_20);
     }
     return ENHANCE.MIN_SUCCESS_20_PLUS;
+};
+
+/**
+ * Calculates the success rate for enhancing an item at its current plus level.
+ * Includes pity system bonus from consecutive failures.
+ * - +0 to +9: 100% success
+ * - +10 to +19: Decreases from 100% to 50%
+ * - +20 to +29: Decreases from 50% to 20%
+ * - +30+: Fixed 20% success
+ * - Pity: +3% per consecutive fail, up to +60% max
+ *
+ * @param {number} currentPlus - The item's current enhancement level
+ * @param {number} [failStreak=0] - Consecutive failures for pity bonus
+ * @returns {number} Success rate as a percentage (0-100)
+ */
+export const getEnhanceSuccess = (currentPlus, failStreak = 0) => {
+    const baseSuccess = getBaseEnhanceSuccess(currentPlus);
+    const pityBonus = Math.min(
+        failStreak * ENHANCE.PITY_BONUS_PER_FAIL,
+        ENHANCE.PITY_MAX_BONUS
+    );
+    return Math.min(100, baseSuccess + pityBonus);
+};
+
+/**
+ * Calculates just the pity bonus from consecutive failures.
+ * @param {number} failStreak - Consecutive failures
+ * @returns {number} Pity bonus percentage
+ */
+export const getPityBonus = (failStreak) => {
+    return Math.min(failStreak * ENHANCE.PITY_BONUS_PER_FAIL, ENHANCE.PITY_MAX_BONUS);
 };
 
 /**

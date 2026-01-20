@@ -92,6 +92,10 @@ export const ENHANCE = {
     SHARD_THRESHOLD: 20,    // Need celestial shards at +20
     DAMAGE_MULT_THRESHOLD: 15, // Damage multiplier starts at +15
 
+    // Pity system - increases success chance after consecutive failures
+    PITY_BONUS_PER_FAIL: 3,   // +3% success per consecutive fail
+    PITY_MAX_BONUS: 60,       // Cap at +60% bonus (so 20% base can reach 80%)
+
     // Stat bonuses per plus
     BASE_DMG_PER_PLUS: 0.5,
     DMG_TIER_SCALING: 0.3,

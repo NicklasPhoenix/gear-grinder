@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useGame } from '../context/GameContext';
-import { getEnhanceCost, getEnhanceSuccess, getEnhanceBonus } from '../utils/formulas';
+import { getEnhanceCost, getEnhanceSuccess, getEnhanceBonus, getPityBonus, getBaseEnhanceSuccess } from '../utils/formulas';
 import ItemIcon from './ItemIcon';
 import { MaterialIcon } from './MaterialIcons';
 import { TIERS, BOSS_STONES, addItemToInventory, removeOneFromStack, getEnhanceStage, generateAwakeningSubstat, isEnhanceMilestone, ENHANCE_MILESTONES } from '../data/items';
@@ -121,7 +121,9 @@ export default function EnhancementView() {
         // Use ref for always-fresh state (fixes stale closure during rapid auto-enhance)
         const freshState = stateRef.current;
 
-        const successChance = getEnhanceSuccess(item.plus);
+        // Calculate success with pity bonus from consecutive failures
+        const failStreak = freshState.enhanceFailStreak || 0;
+        const successChance = getEnhanceSuccess(item.plus, failStreak);
         const success = Math.random() * 100 < successChance;
         const isInventoryItem = freshState.inventory.find(i => i.id === item.id);
 
@@ -130,7 +132,9 @@ export default function EnhancementView() {
             gold: freshState.gold - costs.gold,
             enhanceStone: freshState.enhanceStone - costs.enhanceStone,
             blessedOrb: freshState.blessedOrb - (costs.blessedOrb || 0),
-            celestialShard: freshState.celestialShard - (costs.celestialShard || 0)
+            celestialShard: freshState.celestialShard - (costs.celestialShard || 0),
+            // Pity system: reset on success, increment on fail
+            enhanceFailStreak: success ? 0 : failStreak + 1
         };
 
         // Deduct boss stone if required (boss gear +10 and above)
@@ -236,7 +240,10 @@ export default function EnhancementView() {
         bossStoneType: selectedItem?.bossSet
     } : null;
 
-    const successChance = selectedItem ? getEnhanceSuccess(selectedItem.plus) : 0;
+    const failStreak = state.enhanceFailStreak || 0;
+    const pityBonus = getPityBonus(failStreak);
+    const baseSuccessChance = selectedItem ? getBaseEnhanceSuccess(selectedItem.plus) : 0;
+    const successChance = selectedItem ? getEnhanceSuccess(selectedItem.plus, failStreak) : 0;
     const currentStats = selectedItem ? getEnhanceBonus(selectedItem.plus, selectedItem.tier) : null;
     const nextStats = selectedItem ? getEnhanceBonus(selectedItem.plus + 1, selectedItem.tier) : null;
 
@@ -361,19 +368,33 @@ export default function EnhancementView() {
                             <div className="flex justify-between text-xs text-slate-400 mb-1">
                                 <span className="uppercase font-semibold">Success Rate</span>
                                 <span className={`font-bold text-sm ${successChance > 80 ? 'text-green-400' : successChance > 50 ? 'text-yellow-400' : successChance > 20 ? 'text-orange-400' : 'text-red-400'}`}>
-                                    {successChance}%
+                                    {baseSuccessChance}%{pityBonus > 0 && <span className="text-cyan-400"> +{pityBonus}%</span>}
                                 </span>
                             </div>
-                            <div className="h-3 bg-slate-800 rounded-lg overflow-hidden">
+                            <div className="h-3 bg-slate-800 rounded-lg overflow-hidden relative">
+                                {/* Base success (darker) */}
                                 <div
-                                    className={`h-full transition-all duration-300 ${
+                                    className={`h-full absolute left-0 top-0 transition-all duration-300 ${
                                         successChance > 80 ? 'bg-green-500' :
                                         successChance > 50 ? 'bg-yellow-500' :
                                         successChance > 20 ? 'bg-orange-500' : 'bg-red-500'
                                     }`}
-                                    style={{ width: `${successChance}%` }}
+                                    style={{ width: `${baseSuccessChance}%` }}
                                 />
+                                {/* Pity bonus (lighter/cyan overlay) */}
+                                {pityBonus > 0 && (
+                                    <div
+                                        className="h-full absolute top-0 bg-cyan-400 transition-all duration-300"
+                                        style={{ left: `${baseSuccessChance}%`, width: `${pityBonus}%` }}
+                                    />
+                                )}
                             </div>
+                            {/* Pity streak info */}
+                            {failStreak > 0 && (
+                                <div className="text-[10px] text-cyan-400 mt-1 text-center">
+                                    Pity: {failStreak} fails (+{pityBonus}% bonus)
+                                </div>
+                            )}
                         </div>
 
                         {/* Stats Preview */}

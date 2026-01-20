@@ -26,7 +26,7 @@ export const initialState = {
     },
     inventory: [], unlockedSkills: [], combatLog: [],
     enemyHp: 20, enemyMaxHp: 20, playerHp: 100, playerMaxHp: 100,
-    kills: 0, totalGold: 0, enhanceFails: 0,
+    kills: 0, totalGold: 0, enhanceFails: 0, enhanceFailStreak: 0, // failStreak for pity system
     zoneKills: {}, // Track kills per zone: { 0: 50, 1: 30, ... }
     // Prestige system
     prestigeLevel: 0,
