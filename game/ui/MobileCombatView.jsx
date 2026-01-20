@@ -88,7 +88,7 @@ export default function MobileCombatView({ currentZone, state, gameManager }) {
                 <div className="px-3 py-2 bg-slate-900/95 border-b border-slate-800/50 space-y-2">
                     {/* Main currencies */}
                     <div className="grid grid-cols-2 gap-2">
-                        <MaterialRow icon="gold" label="Gold" value={state?.gold || 0} color="text-yellow-400" />
+                        <MaterialRow icon="gold" label="Silver" value={state?.gold || 0} color="text-slate-300" />
                         <MaterialRow icon="enhanceStone" label="E. Stones" value={state?.enhanceStone || 0} color="text-blue-400" />
                         <MaterialRow icon="blessedOrb" label="Blessed Orbs" value={state?.blessedOrb || 0} color="text-purple-400" />
                         <MaterialRow icon="celestialShard" label="Celestial Shards" value={state?.celestialShard || 0} color="text-pink-400" />
