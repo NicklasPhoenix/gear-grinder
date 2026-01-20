@@ -89,7 +89,7 @@ export default function MobileTabBar({ tabs, activeTab, onTabChange, moreSubTab,
                         <button
                             key={tabId}
                             onClick={() => onTabChange(tabId)}
-                            className={`flex-1 flex flex-col items-center justify-center py-2 px-1 min-h-[56px] transition-colors active:bg-slate-800 ${
+                            className={`relative flex-1 flex flex-col items-center justify-center py-2 px-1 min-h-[56px] transition-all active:scale-95 active:bg-slate-800 ${
                                 isActive
                                     ? 'text-blue-400 bg-slate-800/50'
                                     : 'text-slate-500'

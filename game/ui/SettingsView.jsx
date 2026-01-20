@@ -11,10 +11,10 @@ function VolumeSlider({ label, value, onChange, muted, onToggleMute, icon }) {
                 </div>
                 <button
                     onClick={onToggleMute}
-                    className={`px-3 py-1 rounded text-sm font-bold transition-all ${
+                    className={`px-3 py-2 rounded text-sm font-bold transition-all active:scale-95 ${
                         muted
-                            ? 'bg-red-500/30 text-red-400 hover:bg-red-500/40'
-                            : 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
+                            ? 'bg-red-500/30 text-red-400 hover:bg-red-500/40 active:bg-red-500/50'
+                            : 'bg-green-500/20 text-green-400 hover:bg-green-500/30 active:bg-green-500/40'
                     }`}
                 >
                     {muted ? 'MUTED' : 'ON'}
@@ -154,13 +154,13 @@ export default function SettingsView() {
                         <div className="flex gap-3 pt-2">
                             <button
                                 onClick={handleTestMusic}
-                                className="flex-1 py-2 bg-purple-600/30 hover:bg-purple-600/50 text-purple-300 rounded-lg font-semibold transition-all"
+                                className="flex-1 py-3 bg-purple-600/30 hover:bg-purple-600/50 active:bg-purple-600/60 active:scale-95 text-purple-300 rounded-lg font-semibold transition-all"
                             >
                                 {audioManager.currentMusic && !audioManager.currentMusic?.paused ? 'Stop Music' : 'Test Music'}
                             </button>
                             <button
                                 onClick={handleTestSfx}
-                                className="flex-1 py-2 bg-blue-600/30 hover:bg-blue-600/50 text-blue-300 rounded-lg font-semibold transition-all"
+                                className="flex-1 py-3 bg-blue-600/30 hover:bg-blue-600/50 active:bg-blue-600/60 active:scale-95 text-blue-300 rounded-lg font-semibold transition-all"
                             >
                                 Test SFX
                             </button>

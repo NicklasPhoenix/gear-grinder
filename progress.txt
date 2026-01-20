@@ -59,8 +59,8 @@ Started: 2026-01-20
 - [x] 5.1 MobileBottomBar component
 
 ### Phase 6: Polish
-- [ ] 6.1 Safe area handling
-- [ ] 6.2 Touch feedback
+- [x] 6.1 Safe area handling (viewport-fit=cover, CSS utilities)
+- [x] 6.2 Touch feedback (touch-action: manipulation, active:scale-95)
 - [ ] 6.3 Performance
 - [ ] 6.4 Cross-browser testing
 

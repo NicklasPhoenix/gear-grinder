@@ -1,10 +1,12 @@
 import React, { useEffect } from 'react';
 import { useGame } from '../context/GameContext';
+import { useIsMobile } from '../hooks/useIsMobile';
 import { ACHIEVEMENTS, ACHIEVEMENT_CATEGORIES, checkAchievements, applyAchievementReward } from '../data/achievements';
 import { formatWithCommas } from '../utils/format';
 
 export default function AchievementsView() {
     const { state, gameManager } = useGame();
+    const { isMobile } = useIsMobile();
     const unlockedAchievements = state.unlockedAchievements || [];
 
     // Check for new achievements
@@ -48,6 +50,56 @@ export default function AchievementsView() {
         achievementsByCategory[achievement.category].push(achievement);
     }
 
+    // Mobile layout
+    if (isMobile) {
+        return (
+            <div className="flex flex-col gap-2">
+                {/* Header */}
+                <div className="flex items-center justify-between px-1 py-2 border-b border-slate-800">
+                    <span className="font-bold text-slate-300 text-sm">Achievements</span>
+                    <span className="text-sm text-yellow-400 font-bold">
+                        {unlockedCount}/{totalCount}
+                    </span>
+                </div>
+
+                {/* Achievement List */}
+                <div className="space-y-3">
+                    {Object.entries(achievementsByCategory).map(([category, achievements]) => (
+                        <div key={category}>
+                            <div
+                                className="text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-2"
+                                style={{ color: ACHIEVEMENT_CATEGORIES[category]?.color || '#94a3b8' }}
+                            >
+                                <span
+                                    className="w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold"
+                                    style={{ backgroundColor: `${ACHIEVEMENT_CATEGORIES[category]?.color || '#94a3b8'}30` }}
+                                >
+                                    {ACHIEVEMENT_CATEGORIES[category]?.icon || '?'}
+                                </span>
+                                {ACHIEVEMENT_CATEGORIES[category]?.name || category}
+                            </div>
+                            <div className="space-y-2">
+                                {achievements.map(achievement => {
+                                    const isUnlocked = unlockedAchievements.includes(achievement.id);
+                                    return (
+                                        <AchievementCard
+                                            key={achievement.id}
+                                            achievement={achievement}
+                                            isUnlocked={isUnlocked}
+                                            state={state}
+                                            isMobile={true}
+                                        />
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
+    // Desktop layout
     return (
         <div className="h-full flex flex-col gap-2">
             {/* Header */}
@@ -98,7 +150,7 @@ export default function AchievementsView() {
     );
 }
 
-function AchievementCard({ achievement, isUnlocked, state }) {
+function AchievementCard({ achievement, isUnlocked, state, isMobile }) {
     const categoryInfo = ACHIEVEMENT_CATEGORIES[achievement.category];
     const categoryColor = categoryInfo?.color || '#94a3b8';
 
@@ -114,7 +166,7 @@ function AchievementCard({ achievement, isUnlocked, state }) {
 
     return (
         <div
-            className={`p-3 rounded-lg border-2 transition-all ${
+            className={`p-3 rounded-lg border transition-all ${
                 isUnlocked
                     ? 'bg-slate-800/60 border-yellow-500/40'
                     : 'bg-slate-900/40 border-slate-700/30'
@@ -123,13 +175,13 @@ function AchievementCard({ achievement, isUnlocked, state }) {
             <div className="flex items-start gap-3">
                 {/* Icon - category letter in colored circle */}
                 <div
-                    className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold ${
+                    className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} rounded-lg flex items-center justify-center text-sm font-bold flex-shrink-0 ${
                         isUnlocked ? 'bg-yellow-500/20' : 'bg-slate-800'
                     }`}
                     style={{ color: isUnlocked ? '#fbbf24' : categoryColor }}
                 >
                     {isUnlocked ? (
-                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className={isMobile ? 'w-4 h-4' : 'w-5 h-5'} fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
                     ) : (
@@ -139,15 +191,15 @@ function AchievementCard({ achievement, isUnlocked, state }) {
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                        <span className={`font-bold ${isUnlocked ? 'text-yellow-400' : 'text-slate-300'}`}>
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <span className={`font-bold ${isMobile ? 'text-sm' : ''} ${isUnlocked ? 'text-yellow-400' : 'text-slate-300'}`}>
                             {achievement.name}
                         </span>
                         {isUnlocked && (
-                            <span className="text-xs text-green-400">Completed</span>
+                            <span className="text-[10px] text-green-400 font-bold">DONE</span>
                         )}
                     </div>
-                    <p className="text-xs text-slate-400 mt-0.5">{achievement.description}</p>
+                    <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-slate-400 mt-0.5`}>{achievement.description}</p>
 
                     {/* Progress bar - only show if not unlocked */}
                     {!isUnlocked && (
@@ -156,7 +208,7 @@ function AchievementCard({ achievement, isUnlocked, state }) {
                                 <span>Progress</span>
                                 <span>{formatWithCommas(Math.min(progress, achievement.target))} / {formatWithCommas(achievement.target)}</span>
                             </div>
-                            <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+                            <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
                                 <div
                                     className="h-full rounded-full transition-all duration-300"
                                     style={{
@@ -169,24 +221,24 @@ function AchievementCard({ achievement, isUnlocked, state }) {
                     )}
 
                     {/* Rewards */}
-                    <div className="flex flex-wrap gap-2 mt-2">
+                    <div className="flex flex-wrap gap-1 mt-2">
                         {achievement.reward.silver && (
                             <RewardBadge label={`+${formatWithCommas(achievement.reward.silver)}s`} color="#94a3b8" />
                         )}
                         {achievement.reward.enhanceStone && (
-                            <RewardBadge label={`+${achievement.reward.enhanceStone} E.Stone`} color="#3b82f6" />
+                            <RewardBadge label={`+${achievement.reward.enhanceStone} E.St`} color="#3b82f6" />
                         )}
                         {achievement.reward.blessedOrb && (
                             <RewardBadge label={`+${achievement.reward.blessedOrb} B.Orb`} color="#a855f7" />
                         )}
                         {achievement.reward.celestialShard && (
-                            <RewardBadge label={`+${achievement.reward.celestialShard} C.Shard`} color="#ec4899" />
+                            <RewardBadge label={`+${achievement.reward.celestialShard} C.Sh`} color="#ec4899" />
                         )}
                         {achievement.reward.statPoints && (
-                            <RewardBadge label={`+${achievement.reward.statPoints} Stat Pts`} color="#22c55e" />
+                            <RewardBadge label={`+${achievement.reward.statPoints} Pts`} color="#22c55e" />
                         )}
                         {achievement.reward.prestigeStones && (
-                            <RewardBadge label={`+${achievement.reward.prestigeStones} P.Stone`} color="#f472b6" />
+                            <RewardBadge label={`+${achievement.reward.prestigeStones} P.St`} color="#f472b6" />
                         )}
                     </div>
                 </div>
