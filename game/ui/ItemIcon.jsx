@@ -36,28 +36,27 @@ const ARMOR_SET_ICONS = [
 // Boss set icons - distinct from regular tier icons (using different icon numbers)
 // Each boss set gets its own unique look
 const BOSS_SET_ICONS = {
-    guardian: 3,     // Green forest guardian - distinct from tier 1 (6)
-    lich: 9,         // Purple lich - distinct from tier 2 (12)
-    dragon: 15,      // Red dragonborn - distinct from tier 3 (18)
-    frost: 21,       // Cyan frostborn - distinct from tier 4 (24)
-    demon: 27,       // Red demonheart - distinct from tier 5 (30)
-    seraph: 33,      // Gold seraphic - distinct from tier 6 (36)
-    void: 39,        // Purple voidwalker
-    chaos: 42,       // Pink chaosborn
-    eternal: 45,     // Orange eternal
-    // Prestige boss sets use high-tier icons
-    astral: 46,
-    cosmic: 47,
-    primordial: 48,
+    crow: 3,         // Crow Demon - tier 1 boss
+    cerberus: 9,     // Cerberus - tier 2 boss
+    demon: 15,       // Demon Lord - tier 3 boss
+    spider: 21,      // Spider Matriarch - tier 4 boss
+    shadow: 27,      // Shadow Wolf Alpha - tier 5 boss
+    abyss: 33,       // Eye of the Abyss - tier 6 boss
+    behemoth: 39,    // Horned Behemoth
+    darkwolf: 42,    // Dark Wolf King
+    // Prestige boss sets
+    tyrant: 45,      // Eye Tyrant
+    inferno: 46,     // Inferno Fox
+    scorpion: 48,    // Scorpion King
 };
 
 // Sword icons by tier (48 available)
 const SWORD_ICONS = [1, 6, 12, 18, 24, 30, 36, 40, 44, 48];
 // Boss sword icons - distinct from regular
 const BOSS_SWORD_ICONS = {
-    guardian: 4, lich: 10, dragon: 16, frost: 22, demon: 28,
-    seraph: 34, void: 38, chaos: 41, eternal: 43,
-    astral: 45, cosmic: 47, primordial: 48,
+    crow: 4, cerberus: 10, demon: 16, spider: 22, shadow: 28,
+    abyss: 34, behemoth: 38, darkwolf: 41,
+    tyrant: 43, inferno: 45, scorpion: 48,
 };
 // Mace icons by tier (48 available)
 const MACE_ICONS = [1, 6, 12, 18, 24, 30, 36, 40, 44, 48];
@@ -68,17 +67,17 @@ const SHIELD_SPRITES = [1, 5, 10, 15, 20, 24, 28, 32, 35, 36];
 const AMULET_SPRITES = [37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48];
 // Boss amulet icons (must be in range 37-48)
 const BOSS_AMULET_ICONS = {
-    guardian: 37, lich: 38, dragon: 39, frost: 40, demon: 41,
-    seraph: 42, void: 43, chaos: 44, eternal: 45,
-    astral: 46, cosmic: 47, primordial: 48,
+    crow: 37, cerberus: 38, demon: 39, spider: 40, shadow: 41,
+    abyss: 42, behemoth: 43, darkwolf: 44,
+    tyrant: 45, inferno: 46, scorpion: 48,
 };
 // Belt sprite options by tier (Icon1-48)
 const BELT_SPRITES = [1, 5, 10, 15, 20, 25, 30, 35, 40, 45];
 // Boss shield icons (must be in range 1-36)
 const BOSS_SHIELD_ICONS = {
-    guardian: 3, lich: 8, dragon: 12, frost: 16, demon: 20,
-    seraph: 24, void: 28, chaos: 32, eternal: 35,
-    astral: 34, cosmic: 35, primordial: 36,
+    crow: 3, cerberus: 8, demon: 12, spider: 16, shadow: 20,
+    abyss: 24, behemoth: 28, darkwolf: 32,
+    tyrant: 34, inferno: 35, scorpion: 36,
 };
 
 // Magic gem icons for materials (48 available)
