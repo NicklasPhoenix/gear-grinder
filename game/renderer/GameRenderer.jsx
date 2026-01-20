@@ -170,10 +170,10 @@ export default function GameRenderer() {
             const scaleFactor = Math.min(1, canvasHeight / 400);
             // Scale ground position relative to canvas height
             // On mobile (small canvas): use 75% of height
-            // On desktop (large canvas): keep 120px from bottom for HP bars + padding
+            // On desktop (large canvas): keep 160px from bottom for HP bars + padding
             const groundY = scaleFactor < 1
                 ? canvasHeight * 0.75
-                : canvasHeight - 120;
+                : canvasHeight - 160;
 
             // Main container with shake support
             const mainContainer = new PIXI.Container();
