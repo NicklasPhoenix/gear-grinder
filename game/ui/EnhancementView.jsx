@@ -125,8 +125,8 @@ export default function EnhancementView() {
         // Use ref for always-fresh state (fixes stale closure during rapid auto-enhance)
         const freshState = stateRef.current;
 
-        // Calculate success with pity bonus from consecutive failures
-        const failStreak = freshState.enhanceFailStreak || 0;
+        // Calculate success with pity bonus from consecutive failures (per-item)
+        const failStreak = item.failStreak || 0;
         const successChance = getEnhanceSuccess(item.plus, failStreak);
         const success = Math.random() * 100 < successChance;
         const isInventoryItem = freshState.inventory.find(i => i.id === item.id);
@@ -136,9 +136,7 @@ export default function EnhancementView() {
             gold: freshState.gold - costs.gold,
             enhanceStone: freshState.enhanceStone - costs.enhanceStone,
             blessedOrb: freshState.blessedOrb - (costs.blessedOrb || 0),
-            celestialShard: freshState.celestialShard - (costs.celestialShard || 0),
-            // Pity system: reset on success, increment on fail
-            enhanceFailStreak: success ? 0 : failStreak + 1
+            celestialShard: freshState.celestialShard - (costs.celestialShard || 0)
         };
 
         // Deduct boss stone if required (boss gear +10 and above)
@@ -151,7 +149,13 @@ export default function EnhancementView() {
 
         // No downgrade on failure - you keep your level, just don't progress
         const newPlus = success ? item.plus + 1 : item.plus;
-        const newItem = { ...item, plus: newPlus, id: Date.now() };
+        const newItem = {
+            ...item,
+            plus: newPlus,
+            id: Date.now(),
+            // Per-item pity: reset on success, increment on fail
+            failStreak: success ? 0 : failStreak + 1
+        };
         delete newItem.count;
 
         // Handle awakening bonuses on milestone success
@@ -237,7 +241,7 @@ export default function EnhancementView() {
         bossStoneType: selectedItem?.bossSet
     } : null;
 
-    const failStreak = state.enhanceFailStreak || 0;
+    const failStreak = selectedItem?.failStreak || 0;
     const pityBonus = getPityBonus(failStreak);
     const baseSuccessChance = selectedItem ? getBaseEnhanceSuccess(selectedItem.plus) : 0;
     const successChance = selectedItem ? getEnhanceSuccess(selectedItem.plus, failStreak) : 0;
