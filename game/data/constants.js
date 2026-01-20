@@ -53,7 +53,6 @@ export const LEVEL_UP = {
 export const COMBAT = {
     ARMOR_CONSTANT: 250,      // Armor / (Armor + CONSTANT) = damage reduction
     ATTACKS_PER_SECOND: 6,    // Base attack speed
-    LIFESTEAL_MAX_HEAL: 1000, // Cap on lifesteal per hit
     HEAL_ON_KILL: 0.03,       // 3% max HP healed on enemy kill
     DODGE_CAP: 80,            // Maximum dodge chance
 };

@@ -70,10 +70,9 @@ export class CombatSystem {
         combatUpdates.lastDamage = playerDmg;
         combatUpdates.isPlayerTurn = true;
 
-        // Lifesteal
+        // Lifesteal (no cap - scales with endgame damage)
         if (stats.lifesteal > 0) {
-            const rawHeal = Math.floor(playerDmg * stats.lifesteal / 100);
-            const healed = Math.min(rawHeal, stats.lifestealMaxHeal || COMBAT.LIFESTEAL_MAX_HEAL);
+            const healed = Math.floor(playerDmg * stats.lifesteal / 100);
             newState.playerHp = Math.min(newState.playerHp + healed, safeMaxHp);
 
             if (healed > 0) {
