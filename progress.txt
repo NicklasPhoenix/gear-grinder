@@ -2,7 +2,7 @@
 
 Started: 2026-01-20
 
-## Status: IN PROGRESS - Phase 4
+## Status: IN PROGRESS - Phase 4 COMPLETE, Phase 6 Next
 
 ---
 
@@ -17,16 +17,18 @@ Started: 2026-01-20
 - [x] Phase 2.1: Created MobileCombatView - **FIXED: Now uses real GameRenderer with sprites!**
 - [x] Phase 3.1: Created MobileTabBar component (game/ui/MobileTabBar.jsx)
 - [x] Phase 5.1: Created MobileBottomBar component (game/ui/MobileBottomBar.jsx)
-- [x] Phase 4.1: Updated InventoryView for mobile (5-col grid, long-press salvage)
+- [x] Phase 4.1: Updated InventoryView for mobile (5-col grid, long-press salvage, full item cards)
+- [x] Phase 4.2: Updated StatsView for mobile (vertical layout, touch-friendly buttons)
 - [x] Phase 4.3: Updated EnhancementView for mobile (vertical stack layout)
+- [x] Phase 4.4: Updated SkillsView for mobile (touch-friendly unlock buttons)
 - [x] Phase 4.5: Updated ZoneView with touch feedback
 
 ---
 
 ## Current Step
 
+- [ ] Phase 6: Polish (safe areas, touch feedback, performance, cross-browser)
 - [ ] Test mobile layout on actual device/emulator
-- [ ] Continue optimizing tab views
 
 ---
 
@@ -45,11 +47,11 @@ Started: 2026-01-20
 - [x] 3.1 MobileTabBar component
 - [x] 3.2 Tab state management
 
-### Phase 4: Mobile Tab Content
-- [x] 4.1 Mobile Inventory (5-col grid, touch support)
-- [ ] 4.2 Mobile Stats
+### Phase 4: Mobile Tab Content - COMPLETE
+- [x] 4.1 Mobile Inventory (5-col grid, touch support, full item cards with comparison)
+- [x] 4.2 Mobile Stats (vertical layout, touch-friendly buttons, 2-col combat stats)
 - [x] 4.3 Mobile Enhancement (vertical layout)
-- [ ] 4.4 Mobile Skills
+- [x] 4.4 Mobile Skills (touch-friendly unlock buttons)
 - [x] 4.5 Mobile Zone/Map (touch feedback)
 - [x] 4.6 Mobile More Menu (built into MobileGameLayout)
 
@@ -105,10 +107,12 @@ The canvas is displayed in a 176px height container with:
 ## Files Modified
 
 1. game/ui/GameLayout.jsx - Added mobile routing, fixed React hooks error
-2. game/ui/InventoryView.jsx - Mobile responsive grid + touch
+2. game/ui/InventoryView.jsx - Mobile responsive grid + touch, full item cards with stats/comparison
 3. game/ui/EnhancementView.jsx - Mobile vertical layout
 4. game/ui/ZoneView.jsx - Touch feedback
-5. game/renderer/GameRenderer.jsx - Mobile scaling for sprites, HP bars, shadows
+5. game/renderer/GameRenderer.jsx - Mobile scaling for sprites, HP bars, shadows, floating text
+6. game/ui/StatsView.jsx - Mobile vertical layout, touch-friendly buttons, 2-col combat stats
+7. game/ui/SkillsView.jsx - Mobile touch-friendly unlock buttons
 
 ---
 
@@ -116,7 +120,9 @@ The canvas is displayed in a 176px height container with:
 
 - Mobile layout renders for screen width < 768px in portrait orientation
 - Combat view uses REAL GameRenderer with all sprites and animations
-- Inventory uses 5-column grid on mobile with long-press for salvage
+- Inventory shows full item cards with stats, set bonuses, and comparison to equipped
+- Stats view shows attributes in vertical list, combat stats in 2-column grid
+- Skills view has larger touch-friendly unlock buttons
 - Enhancement view stacks vertically on mobile
 - More menu provides access to Prestige/Achievements/Settings
 
