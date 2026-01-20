@@ -313,83 +313,79 @@ export default function EnhancementView() {
 
                 {selectedItem ? (
                     <div className="flex-1 flex flex-col p-3 min-h-0 relative overflow-hidden">
-                        {/* Enhancement Result Animation */}
+                        {/* Enhancement Result Animation - all elements share same center point */}
                         {enhanceResult && (
-                            <>
-                                {/* Radial flash background */}
-                                <div
-                                    className="absolute inset-0 z-10 pointer-events-none animate-enhance-flash"
-                                    style={{
-                                        background: enhanceResult.type === 'success'
-                                            ? 'radial-gradient(circle at center, rgba(74, 222, 128, 0.4) 0%, transparent 70%)'
-                                            : 'radial-gradient(circle at center, rgba(239, 68, 68, 0.3) 0%, transparent 70%)'
-                                    }}
-                                />
-
-                                {/* Rays for success */}
-                                {enhanceResult.type === 'success' && (
-                                    <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
-                                        {[...Array(8)].map((_, i) => (
-                                            <div
-                                                key={i}
-                                                className="absolute w-0.5 bg-gradient-to-t from-green-400/60 to-transparent animate-enhance-ray"
-                                                style={{
-                                                    height: '40%',
-                                                    transformOrigin: 'bottom center',
-                                                    transform: `rotate(${i * 45}deg)`,
-                                                    animationDelay: `${i * 0.03}s`
-                                                }}
-                                            />
-                                        ))}
-                                    </div>
-                                )}
-
-                                {/* Main text */}
-                                <div className={`absolute inset-0 flex items-center justify-center z-20 pointer-events-none ${
-                                    enhanceResult.type === 'success' ? 'animate-enhance-success' : 'animate-enhance-fail'
-                                }`}>
+                            <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+                                {/* Container for all animation elements - centered */}
+                                <div className="relative flex items-center justify-center">
+                                    {/* Radial flash background */}
                                     <div
-                                        className="text-4xl font-black tracking-wider"
+                                        className="absolute w-64 h-64 -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2 animate-enhance-flash rounded-full"
                                         style={{
-                                            color: enhanceResult.type === 'success' ? '#4ade80' : '#ef4444',
-                                            textShadow: enhanceResult.type === 'success'
-                                                ? '0 0 20px rgba(74, 222, 128, 0.8), 0 0 40px rgba(74, 222, 128, 0.4)'
-                                                : '0 0 20px rgba(239, 68, 68, 0.8), 0 0 40px rgba(239, 68, 68, 0.4)'
+                                            background: enhanceResult.type === 'success'
+                                                ? 'radial-gradient(circle, rgba(74, 222, 128, 0.5) 0%, transparent 70%)'
+                                                : 'radial-gradient(circle, rgba(239, 68, 68, 0.4) 0%, transparent 70%)'
                                         }}
-                                    >
-                                        {enhanceResult.text}
+                                    />
+
+                                    {/* Rays for success - emanate from center */}
+                                    {enhanceResult.type === 'success' && [...Array(8)].map((_, i) => (
+                                        <div
+                                            key={i}
+                                            className="absolute w-0.5 bg-gradient-to-t from-green-400/70 to-transparent animate-enhance-ray"
+                                            style={{
+                                                height: '100px',
+                                                transformOrigin: 'center bottom',
+                                                transform: `rotate(${i * 45}deg) translateY(-50px)`,
+                                                animationDelay: `${i * 0.03}s`
+                                            }}
+                                        />
+                                    ))}
+
+                                    {/* Sparkles for success */}
+                                    {enhanceResult.type === 'success' && [...Array(6)].map((_, i) => (
+                                        <div
+                                            key={`sparkle-${i}`}
+                                            className="absolute text-yellow-400 text-lg animate-enhance-sparkle"
+                                            style={{
+                                                transformOrigin: 'center center',
+                                                transform: `rotate(${i * 60}deg) translateY(-40px)`,
+                                                animationDelay: `${i * 0.08}s`
+                                            }}
+                                        >
+                                            ✦
+                                        </div>
+                                    ))}
+
+                                    {/* Main text - centered */}
+                                    <div className={`relative z-20 ${
+                                        enhanceResult.type === 'success' ? 'animate-enhance-success' : 'animate-enhance-fail'
+                                    }`}>
+                                        <div
+                                            className="text-5xl font-black tracking-wider"
+                                            style={{
+                                                color: enhanceResult.type === 'success' ? '#4ade80' : '#ef4444',
+                                                textShadow: enhanceResult.type === 'success'
+                                                    ? '0 0 20px rgba(74, 222, 128, 0.8), 0 0 40px rgba(74, 222, 128, 0.4)'
+                                                    : '0 0 20px rgba(239, 68, 68, 0.8), 0 0 40px rgba(239, 68, 68, 0.4)'
+                                            }}
+                                        >
+                                            {enhanceResult.text}
+                                        </div>
                                     </div>
                                 </div>
-
-                                {/* Sparkles for success */}
-                                {enhanceResult.type === 'success' && (
-                                    <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
-                                        {[...Array(6)].map((_, i) => (
-                                            <div
-                                                key={i}
-                                                className="absolute text-yellow-400 text-lg animate-enhance-sparkle"
-                                                style={{
-                                                    transform: `rotate(${i * 60}deg) translateY(-50px)`,
-                                                    animationDelay: `${i * 0.08}s`
-                                                }}
-                                            >
-                                                ✦
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
 
                                 {/* CSS for animations */}
                                 <style>{`
                                     @keyframes enhance-flash {
-                                        0% { opacity: 0; }
-                                        20% { opacity: 1; }
-                                        100% { opacity: 0; }
+                                        0% { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
+                                        20% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                                        100% { opacity: 0; transform: translate(-50%, -50%) scale(1.3); }
                                     }
                                     @keyframes enhance-ray {
                                         0% { opacity: 0; height: 0; }
-                                        30% { opacity: 1; height: 40%; }
-                                        100% { opacity: 0; height: 50%; }
+                                        30% { opacity: 1; height: 100px; }
+                                        100% { opacity: 0; height: 130px; }
                                     }
                                     @keyframes enhance-success {
                                         0% { opacity: 0; transform: scale(0.5); }
@@ -400,17 +396,17 @@ export default function EnhancementView() {
                                     }
                                     @keyframes enhance-fail {
                                         0% { opacity: 0; transform: scale(0.8); }
-                                        15% { opacity: 1; transform: scale(1.05) translateX(-3px); }
-                                        30% { transform: scale(1) translateX(3px); }
-                                        45% { transform: translateX(-2px); }
-                                        60% { transform: translateX(2px); }
+                                        15% { opacity: 1; transform: scale(1.05) translateX(-4px); }
+                                        30% { transform: scale(1) translateX(4px); }
+                                        45% { transform: translateX(-3px); }
+                                        60% { transform: translateX(3px); }
                                         75% { opacity: 1; transform: translateX(0); }
                                         100% { opacity: 0; }
                                     }
                                     @keyframes enhance-sparkle {
-                                        0% { opacity: 0; transform: rotate(var(--r, 0deg)) translateY(-30px) scale(0); }
-                                        30% { opacity: 1; transform: rotate(var(--r, 0deg)) translateY(-60px) scale(1.2); }
-                                        100% { opacity: 0; transform: rotate(var(--r, 0deg)) translateY(-80px) scale(0); }
+                                        0% { opacity: 0; transform: rotate(inherit) translateY(-20px) scale(0); }
+                                        30% { opacity: 1; transform: rotate(inherit) translateY(-50px) scale(1.3); }
+                                        100% { opacity: 0; transform: rotate(inherit) translateY(-70px) scale(0); }
                                     }
                                     .animate-enhance-flash { animation: enhance-flash 0.8s ease-out forwards; }
                                     .animate-enhance-ray { animation: enhance-ray 0.6s ease-out forwards; }
@@ -418,7 +414,7 @@ export default function EnhancementView() {
                                     .animate-enhance-fail { animation: enhance-fail 0.6s ease-out forwards; }
                                     .animate-enhance-sparkle { animation: enhance-sparkle 0.7s ease-out forwards; }
                                 `}</style>
-                            </>
+                            </div>
                         )}
                         {/* Selected Item Display */}
                         <div className="flex items-center gap-3 mb-2">
