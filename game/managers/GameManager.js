@@ -228,17 +228,27 @@ export class GameManager {
 
     // Admin cheat for testing - gives tons of resources
     cheat() {
-        this.setState(prev => ({
-            ...prev,
-            gold: prev.gold + 9999999,
-            enhanceStone: prev.enhanceStone + 99999,
-            blessedOrb: prev.blessedOrb + 9999,
-            celestialShard: prev.celestialShard + 999,
-            prestigeStones: prev.prestigeStones + 999,
-            statPoints: prev.statPoints + 500,
-            level: Math.max(prev.level, 100),
-        }));
-        console.log('🎮 CHEAT ACTIVATED: +9.9M gold, +99K enhance stones, +9K orbs, +999 shards, +999 prestige stones, +500 stat points, level 100');
+        this.setState(prev => {
+            // Add 99 of each boss stone
+            const bossStones = { ...prev.bossStones };
+            const bossStoneKeys = ['crow', 'cerberus', 'demon', 'spider', 'shadow', 'abyss', 'behemoth', 'darkwolf', 'tyrant', 'inferno', 'scorpion'];
+            for (const key of bossStoneKeys) {
+                bossStones[key] = (bossStones[key] || 0) + 99;
+            }
+
+            return {
+                ...prev,
+                gold: prev.gold + 9999999,
+                enhanceStone: prev.enhanceStone + 99999,
+                blessedOrb: prev.blessedOrb + 9999,
+                celestialShard: prev.celestialShard + 999,
+                prestigeStones: prev.prestigeStones + 999,
+                statPoints: prev.statPoints + 500,
+                level: Math.max(prev.level, 100),
+                bossStones,
+            };
+        });
+        console.log('🎮 CHEAT ACTIVATED: +9.9M gold, +99K enhance stones, +9K orbs, +999 shards, +999 prestige stones, +500 stat points, +99 each boss stone, level 100');
         this.emit('floatingText', { text: "CHEATS ON!", type: "levelup", target: "player" });
     }
 }
