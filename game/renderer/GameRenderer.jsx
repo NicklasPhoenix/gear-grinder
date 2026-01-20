@@ -5,23 +5,32 @@ import { ASSET_BASE, ENEMY_SPRITES, SPRITE_CONFIG, ZONE_BACKGROUNDS } from '../.
 import { getZoneById } from '../data/zones';
 import { audioManager } from '../systems/AudioManager';
 
-// Direct zone ID to monster sprite mapping (using new low-level monster pack)
+// Direct zone ID to monster sprite mapping (descriptive names)
 const ZONE_MONSTER_SPRITES = {
-  0: 1, 1: 2, 2: 3, 3: 4,           // Forest (Beasts)
-  5: 13, 6: 14, 7: 15, 8: 16,       // Goblins (Humanoid)
-  10: 17, 11: 18, 12: 19, 13: 20,   // Undead
-  15: 35, 16: 36, 17: 37, 18: 38,   // Dragons
-  20: 25, 21: 26, 22: 27, 23: 28,   // Elementals
-  25: 39, 26: 40, 27: 41, 28: 42,   // Demons
-  30: 29, 31: 30, 32: 31, 33: 32,   // Celestial
-  35: 43, 36: 44, 37: 45, 38: 46,   // Void/Chaos
-  40: 47, 42: 48, 44: 5,            // Prestige zones
+  // Forest region - zones 0-3
+  0: 'spider_red', 1: 'spider_dark', 2: 'mushroom', 3: 'ape',
+  // Swamp region - zones 5-8
+  5: 'flower_blue', 6: 'imp', 7: 'pumpkin', 8: 'beetle_orange',
+  // Undead region - zones 10-13
+  10: 'frog', 11: 'flower_pink', 12: 'crystal_ice', 13: 'rose_skull',
+  // Shadow region - zones 15-18
+  15: 'spider_shadow', 16: 'spider_black', 17: 'crow', 18: 'bat_dark',
+  // Ice region - zones 20-23
+  20: 'golem_ice', 21: 'slime_yellow', 22: 'slime_face', 23: 'slime_blob',
+  // Fire region - zones 25-28
+  25: 'mantis', 26: 'golem_stone', 27: 'owl', 28: 'hornet',
+  // Celestial region - zones 30-33
+  30: 'slime_green', 31: 'slime_arms', 32: 'wolf', 33: 'bat_purple',
+  // Chaos region - zones 35-38
+  35: 'hellhound', 36: 'dwarf', 37: 'pumpkin_evil', 38: 'bear',
+  // Prestige zones
+  40: 'cockatrice', 42: 'toad', 44: 'shaman',
 };
 
-// Boss zone ID to boss sprite mapping (using new chaos monster pack)
+// Boss zone ID to boss sprite mapping (descriptive names)
 const ZONE_BOSS_SPRITES = {
-  4: 1, 9: 7, 14: 10, 19: 15, 24: 20,
-  29: 25, 34: 30, 39: 35, 41: 40, 43: 44, 45: 48,
+  4: 'crow_demon', 9: 'cerberus', 14: 'demon_lord', 19: 'spider_eye', 24: 'shadow_wolf',
+  29: 'eye_spider', 34: 'horned_beast', 39: 'dark_wolf', 41: 'eye_tyrant', 43: 'fire_fox', 45: 'scorpion_king',
 };
 
 // Cache for loaded monster textures
@@ -222,10 +231,10 @@ export default function GameRenderer() {
             const totalAssets = sheetNames.length + 2; // +2 for background and monster
 
             // Calculate total assets: sprite sheets + monster sprites + boss sprites
-            const monsterSpriteNums = Object.values(ZONE_MONSTER_SPRITES);
-            const bossSpriteNums = Object.values(ZONE_BOSS_SPRITES);
-            const uniqueMonsters = [...new Set(monsterSpriteNums)];
-            const uniqueBosses = [...new Set(bossSpriteNums)];
+            const monsterSpriteNames = Object.values(ZONE_MONSTER_SPRITES);
+            const bossSpriteNames = Object.values(ZONE_BOSS_SPRITES);
+            const uniqueMonsters = [...new Set(monsterSpriteNames)];
+            const uniqueBosses = [...new Set(bossSpriteNames)];
             const totalAssetsFinal = sheetNames.length + uniqueMonsters.length + uniqueBosses.length + 1; // +1 for background
 
             setLoadingProgress({ loaded: 0, total: totalAssetsFinal, status: 'Loading sprite sheets...' });
@@ -249,10 +258,10 @@ export default function GameRenderer() {
 
             // Pre-load ALL monster sprites to prevent loading delays during gameplay
             setLoadingProgress({ loaded: loadedCount, total: totalAssetsFinal, status: 'Loading monsters...' });
-            for (const spriteNum of uniqueMonsters) {
-                const spritePath = `/assets/monsters/Icon${spriteNum}.png`;
+            for (const spriteName of uniqueMonsters) {
+                const spritePath = `/assets/monsters/${spriteName}.png`;
                 try {
-                    setLoadingProgress({ loaded: loadedCount, total: totalAssetsFinal, status: `Loading monster ${spriteNum}...` });
+                    setLoadingProgress({ loaded: loadedCount, total: totalAssetsFinal, status: `Loading ${spriteName}...` });
                     const texture = await PIXI.Assets.load(spritePath);
                     texture.source.scaleMode = 'nearest';
                     monsterTextureCache[spritePath] = texture;
@@ -265,10 +274,10 @@ export default function GameRenderer() {
 
             // Pre-load ALL boss sprites
             setLoadingProgress({ loaded: loadedCount, total: totalAssetsFinal, status: 'Loading bosses...' });
-            for (const spriteNum of uniqueBosses) {
-                const spritePath = `/assets/bosses/Icon${spriteNum}.png`;
+            for (const spriteName of uniqueBosses) {
+                const spritePath = `/assets/bosses/${spriteName}.png`;
                 try {
-                    setLoadingProgress({ loaded: loadedCount, total: totalAssetsFinal, status: `Loading boss ${spriteNum}...` });
+                    setLoadingProgress({ loaded: loadedCount, total: totalAssetsFinal, status: `Loading ${spriteName}...` });
                     const texture = await PIXI.Assets.load(spritePath);
                     texture.source.scaleMode = 'nearest';
                     monsterTextureCache[spritePath] = texture;
@@ -367,12 +376,12 @@ export default function GameRenderer() {
 
             // Load initial sprite based on current zone (use pre-cached texture)
             const initialZone = getZoneById(gameManager.getState()?.currentZone || 0);
-            const initialSpriteNum = initialZone.isBoss
-                ? (ZONE_BOSS_SPRITES[initialZone.id] || 1)
-                : (ZONE_MONSTER_SPRITES[initialZone.id] || 1);
+            const initialSpriteName = initialZone.isBoss
+                ? (ZONE_BOSS_SPRITES[initialZone.id] || 'crow_demon')
+                : (ZONE_MONSTER_SPRITES[initialZone.id] || 'spider_red');
             const initialSpritePath = initialZone.isBoss
-                ? `/assets/bosses/Icon${initialSpriteNum}.png`
-                : `/assets/monsters/Icon${initialSpriteNum}.png`;
+                ? `/assets/bosses/${initialSpriteName}.png`
+                : `/assets/monsters/${initialSpriteName}.png`;
 
             // Use pre-cached texture (already loaded during init)
             if (monsterTextureCache[initialSpritePath] && enemyRef.current) {
@@ -1334,11 +1343,11 @@ export default function GameRenderer() {
             // Determine sprite path based on zone
             let spritePath;
             if (zone.isBoss) {
-                const spriteNum = ZONE_BOSS_SPRITES[zoneId] || 1;
-                spritePath = `/assets/bosses/Icon${spriteNum}.png`;
+                const spriteName = ZONE_BOSS_SPRITES[zoneId] || 'crow_demon';
+                spritePath = `/assets/bosses/${spriteName}.png`;
             } else {
-                const spriteNum = ZONE_MONSTER_SPRITES[zoneId] || 1;
-                spritePath = `/assets/monsters/Icon${spriteNum}.png`;
+                const spriteName = ZONE_MONSTER_SPRITES[zoneId] || 'spider_red';
+                spritePath = `/assets/monsters/${spriteName}.png`;
             }
 
             // Apply texture from cache (all sprites are pre-loaded during init)

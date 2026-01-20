@@ -1,68 +1,67 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ZONE_BACKGROUNDS } from '../assets/gameAssets';
 
-// Direct zone ID to monster sprite mapping (using low-level monster pack)
-// Each zone gets a unique sprite for variety
+// Direct zone ID to monster sprite mapping (descriptive names)
 const ZONE_MONSTER_SPRITES = {
-  // Forest (Beasts) - zones 0-3: spiders, bugs, creatures
-  0: 1,   // Forest Clearing - spider
-  1: 2,   // Dark Woods - dark spider
-  2: 3,   // Wolf Den - creature
-  3: 4,   // Ancient Grove - beast
-  // Goblins (Humanoid) - zones 5-8: pumpkin/mushroom creatures
-  5: 13,  // Goblin Outskirts
-  6: 14,  // Goblin Caves
-  7: 15,  // Goblin Stronghold - pumpkin head
-  8: 16,  // Goblin Throne
-  // Undead - zones 10-13: ghosts, skulls
-  10: 17, // Graveyard
-  11: 18, // Crypt Entrance
-  12: 19, // Bone Halls
-  13: 20, // Necropolis - rose skull
-  // Dragons - zones 15-18: reptiles, wyrms
-  15: 35, // Mountain Pass - dark spider
-  16: 36, // Dragon Foothills
-  17: 37, // Wyrm Nests
-  18: 38, // Dragon Peak
-  // Elementals - zones 20-23: golems, ice
-  20: 25, // Frozen Tundra - ice golem
-  21: 26, // Ice Caverns
-  22: 27, // Glacial Depths
-  23: 28, // Frost Citadel
-  // Demons - zones 25-28: fire, dark
-  25: 39, // Hellgate
-  26: 40, // Burning Plains - fire creature
-  27: 41, // Demon Fortress
-  28: 42, // Infernal Throne
-  // Celestial - zones 30-33: light creatures
-  30: 29, // Cloud Steps
-  31: 30, // Astral Bridge - slime
-  32: 31, // Divine Sanctum
-  33: 32, // Eternal Halls
-  // Void/Chaos - zones 35-38: dark, corrupted
-  35: 43, // Void Rift
-  36: 44, // Chaos Wastes
-  37: 45, // Primordial Abyss - pumpkin
-  38: 46, // End of All Things
+  // Forest region - zones 0-3
+  0: 'spider_red',      // Spider Den
+  1: 'spider_dark',     // Dark Hollow
+  2: 'mushroom',        // Fungal Grove
+  3: 'ape',             // Primal Woods
+  // Swamp region - zones 5-8
+  5: 'flower_blue',     // Blooming Marsh
+  6: 'imp',             // Imp Hollow
+  7: 'pumpkin',         // Pumpkin Patch
+  8: 'beetle_orange',   // Beetle Burrow
+  // Undead region - zones 10-13
+  10: 'frog',           // Murky Swamp
+  11: 'flower_pink',    // Poison Garden
+  12: 'crystal_ice',    // Crystal Caves
+  13: 'rose_skull',     // Skull Garden
+  // Shadow region - zones 15-18
+  15: 'spider_shadow',  // Shadow Webs
+  16: 'spider_black',   // Arachnid Lair
+  17: 'crow',           // Crow's Nest
+  18: 'bat_dark',       // Bat Hollow
+  // Ice region - zones 20-23
+  20: 'golem_ice',      // Frozen Wastes
+  21: 'slime_yellow',   // Slime Pools
+  22: 'slime_face',     // Ooze Caverns
+  23: 'slime_blob',     // Slime Pits
+  // Fire region - zones 25-28
+  25: 'mantis',         // Mantis Hive
+  26: 'golem_stone',    // Golem Quarry
+  27: 'owl',            // Owl's Perch
+  28: 'hornet',         // Hornet's Nest
+  // Celestial region - zones 30-33
+  30: 'slime_green',    // Slime Wastes
+  31: 'slime_arms',     // Gelatinous Depths
+  32: 'wolf',           // Wolf Territory
+  33: 'bat_purple',     // Vampire Den
+  // Chaos region - zones 35-38
+  35: 'hellhound',      // Hellhound Lair
+  36: 'dwarf',          // Dwarven Mines
+  37: 'pumpkin_evil',   // Cursed Fields
+  38: 'bear',           // Bear's Domain
   // Prestige zones
-  40: 47, // Astral Plane
-  42: 48, // Cosmic Void
-  44: 5,  // Primordial Realm - mushroom
+  40: 'cockatrice',     // Cockatrice Roost
+  42: 'toad',           // Giant Toad Marsh
+  44: 'shaman',         // Shaman's Sanctum
 };
 
-// Boss zone ID to boss sprite mapping (using chaos monster pack)
+// Boss zone ID to boss sprite mapping (descriptive names)
 const ZONE_BOSS_SPRITES = {
-  4: 1,   // Forest Guardian - dark bird demon
-  9: 7,   // Goblin Warlord
-  14: 10, // Lich King - red demon
-  19: 15, // Ancient Dragon
-  24: 20, // Frost Titan - dark beast
-  29: 25, // Demon Lord
-  34: 30, // Seraph Commander - horned beast
-  39: 35, // The Eternal One
-  41: 40, // Astral Guardian - spider eye
-  43: 44, // Cosmic Titan
-  45: 48, // Primordial God
+  4: 'crow_demon',      // The Crow Demon
+  9: 'cerberus',        // Cerberus
+  14: 'demon_lord',     // Demon Lord
+  19: 'spider_eye',     // Spider Matriarch
+  24: 'shadow_wolf',    // Shadow Wolf Alpha
+  29: 'eye_spider',     // Eye of the Abyss
+  34: 'horned_beast',   // Horned Behemoth
+  39: 'dark_wolf',      // Dark Wolf King
+  41: 'eye_tyrant',     // Eye Tyrant
+  43: 'fire_fox',       // Inferno Fox
+  45: 'scorpion_king',  // Scorpion King
 };
 
 // Preload and cache sprite images
@@ -80,11 +79,11 @@ function getSpritePath(zone) {
   if (!zone) return null;
 
   if (zone.isBoss) {
-    const spriteNum = ZONE_BOSS_SPRITES[zone.id] || 1;
-    return `/assets/bosses/Icon${spriteNum}.png`;
+    const spriteName = ZONE_BOSS_SPRITES[zone.id] || 'crow_demon';
+    return `/assets/bosses/${spriteName}.png`;
   } else {
-    const spriteNum = ZONE_MONSTER_SPRITES[zone.id] || 1;
-    return `/assets/monsters/Icon${spriteNum}.png`;
+    const spriteName = ZONE_MONSTER_SPRITES[zone.id] || 'spider_red';
+    return `/assets/monsters/${spriteName}.png`;
   }
 }
 

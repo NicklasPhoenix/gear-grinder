@@ -7,18 +7,17 @@ export const MATERIALS = {
 
 // Boss stones - dropped by bosses, required to enhance boss gear past +10
 export const BOSS_STONES = {
-    guardian: { name: 'Guardian Stone', color: '#22c55e', bossName: 'Forest Guardian', gemIcon: 5 },
-    lich: { name: 'Lich Stone', color: '#8b5cf6', bossName: 'Goblin Warlord', gemIcon: 9 },
-    dragon: { name: 'Dragon Stone', color: '#ef4444', bossName: 'Lich King', gemIcon: 13 },
-    frost: { name: 'Frost Stone', color: '#06b6d4', bossName: 'Ancient Dragon', gemIcon: 17 },
-    demon: { name: 'Demon Stone', color: '#dc2626', bossName: 'Frost Titan', gemIcon: 21 },
-    seraph: { name: 'Seraph Stone', color: '#fbbf24', bossName: 'Demon Lord', gemIcon: 25 },
-    void: { name: 'Void Stone', color: '#7c3aed', bossName: 'Seraph Commander', gemIcon: 29 },
-    chaos: { name: 'Chaos Stone', color: '#ec4899', bossName: 'The Eternal One', gemIcon: 33 },
-    eternal: { name: 'Eternal Stone', color: '#f97316', bossName: 'Chaos Lord', gemIcon: 37 },
-    astral: { name: 'Astral Stone', color: '#38bdf8', bossName: 'Astral Guardian', gemIcon: 41 },
-    cosmic: { name: 'Cosmic Stone', color: '#a78bfa', bossName: 'Cosmic Titan', gemIcon: 44 },
-    primordial: { name: 'Primordial Stone', color: '#f472b6', bossName: 'Primordial God', gemIcon: 48 },
+    crow: { name: 'Crow Stone', color: '#22c55e', bossName: 'Crow Demon', gemIcon: 5 },
+    cerberus: { name: 'Cerberus Stone', color: '#8b5cf6', bossName: 'Cerberus', gemIcon: 9 },
+    demon: { name: 'Demon Stone', color: '#ef4444', bossName: 'Demon Lord', gemIcon: 13 },
+    spider: { name: 'Spider Stone', color: '#06b6d4', bossName: 'Spider Matriarch', gemIcon: 17 },
+    shadow: { name: 'Shadow Stone', color: '#dc2626', bossName: 'Shadow Wolf Alpha', gemIcon: 21 },
+    abyss: { name: 'Abyss Stone', color: '#fbbf24', bossName: 'Eye of the Abyss', gemIcon: 25 },
+    behemoth: { name: 'Behemoth Stone', color: '#7c3aed', bossName: 'Horned Behemoth', gemIcon: 29 },
+    darkwolf: { name: 'Dark Wolf Stone', color: '#ec4899', bossName: 'Dark Wolf King', gemIcon: 33 },
+    tyrant: { name: 'Tyrant Stone', color: '#38bdf8', bossName: 'Eye Tyrant', gemIcon: 41 },
+    inferno: { name: 'Inferno Stone', color: '#a78bfa', bossName: 'Inferno Fox', gemIcon: 44 },
+    scorpion: { name: 'Scorpion Stone', color: '#f472b6', bossName: 'Scorpion King', gemIcon: 48 },
 };
 
 export const GEAR_SLOTS = ['weapon', 'helmet', 'armor', 'legs', 'boots', 'belt', 'shield', 'gloves', 'amulet'];
@@ -59,164 +58,164 @@ export const GEAR_NAMES = {
 export const BOSS_SETS = {
     // Rebalanced: lower stat bonuses (1.2-1.4), reduced set bonuses for slower progression
     // Each boss has a specific weapon type for build variety
-    guardian: {
-        name: "Guardian's", color: '#22c55e', tier: 1, statBonus: 1.2, weaponType: 'sword', // Zone 4 boss - STR
+    crow: {
+        name: "Crow Demon", color: '#22c55e', tier: 1, statBonus: 1.2, weaponType: 'sword', // Zone 4 boss - STR
         items: {
-            weapon: { name: "Guardian's Greatsword", effect: { id: 'bonusDmg', name: '+DMG', value: 15 } },
-            helmet: { name: "Guardian's Crown", effect: { id: 'bonusHp', name: '+HP', value: 50 } },
-            armor: { name: "Guardian's Plate", effect: { id: 'thorns', name: 'Thorns', value: 8 } },
-            legs: { name: "Guardian's Legguards", effect: { id: 'bonusHp', name: '+HP', value: 40 } },
-            boots: { name: "Guardian's Treads", effect: { id: 'dodge', name: 'Dodge', value: 4 } },
-            gloves: { name: "Guardian's Grasp", effect: { id: 'bonusDmg', name: '+DMG', value: 10 } },
-            shield: { name: "Guardian's Bulwark", effect: { id: 'bonusHp', name: '+HP', value: 70 } },
-            belt: { name: "Guardian's Girdle", effect: { id: 'critChance', name: 'Crit', value: 4 } },
-            amulet: { name: "Guardian's Charm", effect: { id: 'lifesteal', name: 'Lifesteal', value: 2 } },
+            weapon: { name: "Crow Demon Talon", effect: { id: 'bonusDmg', name: '+DMG', value: 15 } },
+            helmet: { name: "Crow Demon Crown", effect: { id: 'bonusHp', name: '+HP', value: 50 } },
+            armor: { name: "Crow Demon Wings", effect: { id: 'thorns', name: 'Thorns', value: 8 } },
+            legs: { name: "Crow Demon Greaves", effect: { id: 'bonusHp', name: '+HP', value: 40 } },
+            boots: { name: "Crow Demon Claws", effect: { id: 'dodge', name: 'Dodge', value: 4 } },
+            gloves: { name: "Crow Demon Grasp", effect: { id: 'bonusDmg', name: '+DMG', value: 10 } },
+            shield: { name: "Crow Demon Ward", effect: { id: 'bonusHp', name: '+HP', value: 70 } },
+            belt: { name: "Crow Demon Girdle", effect: { id: 'critChance', name: 'Crit', value: 4 } },
+            amulet: { name: "Crow Demon Feather", effect: { id: 'lifesteal', name: 'Lifesteal', value: 2 } },
         },
         setBonuses: [
             { pieces: 2, desc: '+10% HP', effect: { hpMult: 0.10 } },
             { pieces: 4, desc: '+15% DMG, +5% Thorns', effect: { dmgMult: 0.15, thorns: 5 } },
             { pieces: 6, desc: '+10% All Stats', effect: { dmgMult: 0.10, hpMult: 0.10, speedMult: 0.05 } },
-            { pieces: 8, desc: 'Guardian Blessing: +20% HP, +8% Dodge', effect: { hpMult: 0.20, dodge: 8 } },
+            { pieces: 8, desc: 'Crow Flight: +20% HP, +8% Dodge', effect: { hpMult: 0.20, dodge: 8 } },
         ]
     },
-    lich: {
-        name: "Lich", color: '#8b5cf6', tier: 2, statBonus: 1.25, weaponType: 'staff', // Zone 9 boss - INT
+    cerberus: {
+        name: "Cerberus", color: '#8b5cf6', tier: 2, statBonus: 1.25, weaponType: 'staff', // Zone 9 boss - INT
         items: {
-            weapon: { name: "Lich's Staff", effect: { id: 'critDamage', name: 'Crit DMG', value: 35 } },
-            helmet: { name: "Lich's Crown", effect: { id: 'lifesteal', name: 'Lifesteal', value: 3 } },
-            armor: { name: "Lich's Robes", effect: { id: 'bonusHp', name: '+HP', value: 90 } },
-            legs: { name: "Lich's Leggings", effect: { id: 'critChance', name: 'Crit', value: 4 } },
-            boots: { name: "Lich's Sandals", effect: { id: 'dodge', name: 'Dodge', value: 5 } },
-            gloves: { name: "Lich's Grasp", effect: { id: 'critChance', name: 'Crit', value: 6 } },
-            shield: { name: "Lich's Tome", effect: { id: 'bonusDmg', name: '+DMG', value: 20 } },
-            belt: { name: "Lich's Sash", effect: { id: 'lifesteal', name: 'Lifesteal', value: 2 } },
-            amulet: { name: "Lich's Soulstone", effect: { id: 'critDamage', name: 'Crit DMG', value: 25 } },
+            weapon: { name: "Cerberus Fang", effect: { id: 'critDamage', name: 'Crit DMG', value: 35 } },
+            helmet: { name: "Cerberus Skull", effect: { id: 'lifesteal', name: 'Lifesteal', value: 3 } },
+            armor: { name: "Cerberus Hide", effect: { id: 'bonusHp', name: '+HP', value: 90 } },
+            legs: { name: "Cerberus Greaves", effect: { id: 'critChance', name: 'Crit', value: 4 } },
+            boots: { name: "Cerberus Paws", effect: { id: 'dodge', name: 'Dodge', value: 5 } },
+            gloves: { name: "Cerberus Claws", effect: { id: 'critChance', name: 'Crit', value: 6 } },
+            shield: { name: "Cerberus Guard", effect: { id: 'bonusDmg', name: '+DMG', value: 20 } },
+            belt: { name: "Cerberus Chain", effect: { id: 'lifesteal', name: 'Lifesteal', value: 2 } },
+            amulet: { name: "Cerberus Heart", effect: { id: 'critDamage', name: 'Crit DMG', value: 25 } },
         },
         setBonuses: [
             { pieces: 2, desc: '+3% Lifesteal', effect: { lifesteal: 3 } },
             { pieces: 4, desc: '+20% Crit DMG, +15% DMG', effect: { critDamage: 20, dmgMult: 0.15 } },
             { pieces: 6, desc: '+6% Crit Chance, +15% HP', effect: { critChance: 6, hpMult: 0.15 } },
-            { pieces: 8, desc: 'Undeath: +5% Lifesteal, +30% Crit DMG', effect: { lifesteal: 5, critDamage: 30 } },
+            { pieces: 8, desc: 'Hellhound Fury: +5% Lifesteal, +30% Crit DMG', effect: { lifesteal: 5, critDamage: 30 } },
         ]
     },
-    dragon: {
-        name: "Dragonborn", color: '#ef4444', tier: 3, statBonus: 1.25, weaponType: 'dagger', // Zone 14 boss - AGI
+    demon: {
+        name: "Demon Lord", color: '#ef4444', tier: 3, statBonus: 1.25, weaponType: 'dagger', // Zone 14 boss - AGI
         items: {
-            weapon: { name: "Dragonborn Blade", effect: { id: 'bonusDmg', name: '+DMG', value: 30 } },
-            helmet: { name: "Dragonborn Horns", effect: { id: 'critChance', name: 'Crit', value: 8 } },
-            armor: { name: "Dragonborn Scales", effect: { id: 'bonusHp', name: '+HP', value: 130 } },
-            legs: { name: "Dragonborn Legguards", effect: { id: 'bonusDmg', name: '+DMG', value: 20 } },
-            boots: { name: "Dragonborn Claws", effect: { id: 'dodge', name: 'Dodge', value: 6 } },
-            gloves: { name: "Dragonborn Talons", effect: { id: 'critDamage', name: 'Crit DMG', value: 35 } },
-            shield: { name: "Dragonborn Aegis", effect: { id: 'thorns', name: 'Thorns', value: 12 } },
-            belt: { name: "Dragonborn Girdle", effect: { id: 'bonusHp', name: '+HP', value: 100 } },
-            amulet: { name: "Dragonborn Heart", effect: { id: 'bonusDmg', name: '+DMG', value: 25 } },
+            weapon: { name: "Demon Lord Blade", effect: { id: 'bonusDmg', name: '+DMG', value: 30 } },
+            helmet: { name: "Demon Lord Crown", effect: { id: 'critChance', name: 'Crit', value: 8 } },
+            armor: { name: "Demon Lord Plate", effect: { id: 'bonusHp', name: '+HP', value: 130 } },
+            legs: { name: "Demon Lord Greaves", effect: { id: 'bonusDmg', name: '+DMG', value: 20 } },
+            boots: { name: "Demon Lord Hooves", effect: { id: 'dodge', name: 'Dodge', value: 6 } },
+            gloves: { name: "Demon Lord Claws", effect: { id: 'critDamage', name: 'Crit DMG', value: 35 } },
+            shield: { name: "Demon Lord Aegis", effect: { id: 'thorns', name: 'Thorns', value: 12 } },
+            belt: { name: "Demon Lord Girdle", effect: { id: 'bonusHp', name: '+HP', value: 100 } },
+            amulet: { name: "Demon Lord Heart", effect: { id: 'bonusDmg', name: '+DMG', value: 25 } },
         },
         setBonuses: [
             { pieces: 2, desc: '+15% DMG', effect: { dmgMult: 0.15 } },
             { pieces: 4, desc: '+12% HP, +8% Crit Chance', effect: { hpMult: 0.12, critChance: 8 } },
             { pieces: 6, desc: '+25% Crit DMG, +10% Thorns', effect: { critDamage: 25, thorns: 10 } },
-            { pieces: 8, desc: 'Dragon Fury: +30% DMG, +15% Speed', effect: { dmgMult: 0.30, speedMult: 0.15 } },
+            { pieces: 8, desc: 'Demon Fury: +30% DMG, +15% Speed', effect: { dmgMult: 0.30, speedMult: 0.15 } },
         ]
     },
-    frost: {
-        name: "Frostborn", color: '#06b6d4', tier: 4, statBonus: 1.3, weaponType: 'mace', // Zone 19 boss - VIT
+    spider: {
+        name: "Spider Matriarch", color: '#06b6d4', tier: 4, statBonus: 1.3, weaponType: 'mace', // Zone 19 boss - VIT
         items: {
-            weapon: { name: "Frostborn Axe", effect: { id: 'bonusDmg', name: '+DMG', value: 45 } },
-            helmet: { name: "Frostborn Helm", effect: { id: 'dodge', name: 'Dodge', value: 7 } },
-            armor: { name: "Frostborn Mail", effect: { id: 'bonusHp', name: '+HP', value: 180 } },
-            legs: { name: "Frostborn Leggings", effect: { id: 'bonusHp', name: '+HP', value: 120 } },
-            boots: { name: "Frostborn Boots", effect: { id: 'dodge', name: 'Dodge', value: 5 } },
-            gloves: { name: "Frostborn Grips", effect: { id: 'critChance', name: 'Crit', value: 8 } },
-            shield: { name: "Frostborn Barrier", effect: { id: 'thorns', name: 'Thorns', value: 12 } },
-            belt: { name: "Frostborn Girdle", effect: { id: 'lifesteal', name: 'Lifesteal', value: 3 } },
-            amulet: { name: "Frostborn Pendant", effect: { id: 'critDamage', name: 'Crit DMG', value: 40 } },
+            weapon: { name: "Matriarch Fang", effect: { id: 'bonusDmg', name: '+DMG', value: 45 } },
+            helmet: { name: "Matriarch Crown", effect: { id: 'dodge', name: 'Dodge', value: 7 } },
+            armor: { name: "Matriarch Carapace", effect: { id: 'bonusHp', name: '+HP', value: 180 } },
+            legs: { name: "Matriarch Legguards", effect: { id: 'bonusHp', name: '+HP', value: 120 } },
+            boots: { name: "Matriarch Treads", effect: { id: 'dodge', name: 'Dodge', value: 5 } },
+            gloves: { name: "Matriarch Spinnerets", effect: { id: 'critChance', name: 'Crit', value: 8 } },
+            shield: { name: "Matriarch Web", effect: { id: 'thorns', name: 'Thorns', value: 12 } },
+            belt: { name: "Matriarch Silk", effect: { id: 'lifesteal', name: 'Lifesteal', value: 3 } },
+            amulet: { name: "Matriarch Eye", effect: { id: 'critDamage', name: 'Crit DMG', value: 40 } },
         },
         setBonuses: [
             { pieces: 2, desc: '+8% Dodge', effect: { dodge: 8 } },
             { pieces: 4, desc: '+20% DMG, +18% HP', effect: { dmgMult: 0.20, hpMult: 0.18 } },
             { pieces: 6, desc: '+10% Crit, +35% Crit DMG', effect: { critChance: 10, critDamage: 35 } },
-            { pieces: 8, desc: 'Frozen Heart: +12% All Stats', effect: { dmgMult: 0.12, hpMult: 0.12, speedMult: 0.12 } },
+            { pieces: 8, desc: 'Spider Sense: +12% All Stats', effect: { dmgMult: 0.12, hpMult: 0.12, speedMult: 0.12 } },
         ]
     },
-    demon: {
-        name: "Demonheart", color: '#dc2626', tier: 5, statBonus: 1.3, weaponType: 'sword', // Zone 24 boss - STR
+    shadow: {
+        name: "Shadow Wolf", color: '#dc2626', tier: 5, statBonus: 1.3, weaponType: 'sword', // Zone 24 boss - STR
         items: {
-            weapon: { name: "Demonheart Scythe", effect: { id: 'lifesteal', name: 'Lifesteal', value: 4 } },
-            helmet: { name: "Demonheart Horns", effect: { id: 'bonusDmg', name: '+DMG', value: 55 } },
-            armor: { name: "Demonheart Plate", effect: { id: 'thorns', name: 'Thorns', value: 15 } },
-            legs: { name: "Demonheart Greaves", effect: { id: 'lifesteal', name: 'Lifesteal', value: 2 } },
-            boots: { name: "Demonheart Hooves", effect: { id: 'dodge', name: 'Dodge', value: 7 } },
-            gloves: { name: "Demonheart Claws", effect: { id: 'critDamage', name: 'Crit DMG', value: 45 } },
-            shield: { name: "Demonheart Ward", effect: { id: 'bonusHp', name: '+HP', value: 200 } },
-            belt: { name: "Demonheart Cord", effect: { id: 'critChance', name: 'Crit', value: 9 } },
-            amulet: { name: "Demonheart Soul", effect: { id: 'lifesteal', name: 'Lifesteal', value: 3 } },
+            weapon: { name: "Shadow Wolf Fang", effect: { id: 'lifesteal', name: 'Lifesteal', value: 4 } },
+            helmet: { name: "Shadow Wolf Mask", effect: { id: 'bonusDmg', name: '+DMG', value: 55 } },
+            armor: { name: "Shadow Wolf Hide", effect: { id: 'thorns', name: 'Thorns', value: 15 } },
+            legs: { name: "Shadow Wolf Greaves", effect: { id: 'lifesteal', name: 'Lifesteal', value: 2 } },
+            boots: { name: "Shadow Wolf Treads", effect: { id: 'dodge', name: 'Dodge', value: 7 } },
+            gloves: { name: "Shadow Wolf Claws", effect: { id: 'critDamage', name: 'Crit DMG', value: 45 } },
+            shield: { name: "Shadow Wolf Guard", effect: { id: 'bonusHp', name: '+HP', value: 200 } },
+            belt: { name: "Shadow Wolf Cord", effect: { id: 'critChance', name: 'Crit', value: 9 } },
+            amulet: { name: "Shadow Wolf Heart", effect: { id: 'lifesteal', name: 'Lifesteal', value: 3 } },
         },
         setBonuses: [
             { pieces: 2, desc: '+4% Lifesteal', effect: { lifesteal: 4 } },
             { pieces: 4, desc: '+25% DMG, +12% Thorns', effect: { dmgMult: 0.25, thorns: 12 } },
             { pieces: 6, desc: '+22% HP, +40% Crit DMG', effect: { hpMult: 0.22, critDamage: 40 } },
-            { pieces: 8, desc: 'Demonic Pact: +6% Lifesteal, +40% DMG', effect: { lifesteal: 6, dmgMult: 0.40 } },
+            { pieces: 8, desc: 'Shadow Pact: +6% Lifesteal, +40% DMG', effect: { lifesteal: 6, dmgMult: 0.40 } },
         ]
     },
-    seraph: {
-        name: "Seraphic", color: '#fbbf24', tier: 6, statBonus: 1.35, weaponType: 'staff', // Zone 29 boss - INT
+    abyss: {
+        name: "Abyssal Eye", color: '#fbbf24', tier: 6, statBonus: 1.35, weaponType: 'staff', // Zone 29 boss - INT
         items: {
-            weapon: { name: "Seraphic Lance", effect: { id: 'bonusDmg', name: '+DMG', value: 75 } },
-            helmet: { name: "Seraphic Halo", effect: { id: 'critChance', name: 'Crit', value: 10 } },
-            armor: { name: "Seraphic Wings", effect: { id: 'bonusHp', name: '+HP', value: 280 } },
-            legs: { name: "Seraphic Greaves", effect: { id: 'bonusDmg', name: '+DMG', value: 55 } },
-            boots: { name: "Seraphic Steps", effect: { id: 'dodge', name: 'Dodge', value: 8 } },
-            gloves: { name: "Seraphic Touch", effect: { id: 'lifesteal', name: 'Lifesteal', value: 4 } },
-            shield: { name: "Seraphic Bulwark", effect: { id: 'thorns', name: 'Thorns', value: 16 } },
-            belt: { name: "Seraphic Sash", effect: { id: 'critDamage', name: 'Crit DMG', value: 50 } },
-            amulet: { name: "Seraphic Star", effect: { id: 'bonusDmg', name: '+DMG', value: 65 } },
+            weapon: { name: "Abyssal Staff", effect: { id: 'bonusDmg', name: '+DMG', value: 75 } },
+            helmet: { name: "Abyssal Gaze", effect: { id: 'critChance', name: 'Crit', value: 10 } },
+            armor: { name: "Abyssal Shroud", effect: { id: 'bonusHp', name: '+HP', value: 280 } },
+            legs: { name: "Abyssal Greaves", effect: { id: 'bonusDmg', name: '+DMG', value: 55 } },
+            boots: { name: "Abyssal Treads", effect: { id: 'dodge', name: 'Dodge', value: 8 } },
+            gloves: { name: "Abyssal Touch", effect: { id: 'lifesteal', name: 'Lifesteal', value: 4 } },
+            shield: { name: "Abyssal Ward", effect: { id: 'thorns', name: 'Thorns', value: 16 } },
+            belt: { name: "Abyssal Sash", effect: { id: 'critDamage', name: 'Crit DMG', value: 50 } },
+            amulet: { name: "Abyssal Core", effect: { id: 'bonusDmg', name: '+DMG', value: 65 } },
         },
         setBonuses: [
             { pieces: 2, desc: '+10% Crit Chance', effect: { critChance: 10 } },
             { pieces: 4, desc: '+30% DMG, +25% HP', effect: { dmgMult: 0.30, hpMult: 0.25 } },
             { pieces: 6, desc: '+12% All Stats', effect: { dmgMult: 0.12, hpMult: 0.12, speedMult: 0.12 } },
-            { pieces: 8, desc: 'Divine Grace: +18% All Stats, +4% Lifesteal', effect: { dmgMult: 0.18, hpMult: 0.18, speedMult: 0.18, lifesteal: 4 } },
+            { pieces: 8, desc: 'Abyss Gaze: +18% All Stats, +4% Lifesteal', effect: { dmgMult: 0.18, hpMult: 0.18, speedMult: 0.18, lifesteal: 4 } },
         ]
     },
-    void: {
-        name: "Voidwalker", color: '#7c3aed', tier: 6, statBonus: 1.35, weaponType: 'dagger', // Zone 34 boss - AGI
+    behemoth: {
+        name: "Behemoth", color: '#7c3aed', tier: 6, statBonus: 1.35, weaponType: 'dagger', // Zone 34 boss - AGI
         items: {
-            weapon: { name: "Voidwalker Reaper", effect: { id: 'critDamage', name: 'Crit DMG', value: 65 } },
-            helmet: { name: "Voidwalker Mask", effect: { id: 'critChance', name: 'Crit', value: 11 } },
-            armor: { name: "Voidwalker Shroud", effect: { id: 'bonusHp', name: '+HP', value: 350 } },
-            legs: { name: "Voidwalker Leggings", effect: { id: 'critChance', name: 'Crit', value: 8 } },
-            boots: { name: "Voidwalker Striders", effect: { id: 'dodge', name: 'Dodge', value: 9 } },
-            gloves: { name: "Voidwalker Grips", effect: { id: 'bonusDmg', name: '+DMG', value: 90 } },
-            shield: { name: "Voidwalker Veil", effect: { id: 'dodge', name: 'Dodge', value: 8 } },
-            belt: { name: "Voidwalker Cord", effect: { id: 'lifesteal', name: 'Lifesteal', value: 4 } },
-            amulet: { name: "Voidwalker Core", effect: { id: 'critChance', name: 'Crit', value: 10 } },
+            weapon: { name: "Behemoth Horn", effect: { id: 'critDamage', name: 'Crit DMG', value: 65 } },
+            helmet: { name: "Behemoth Skull", effect: { id: 'critChance', name: 'Crit', value: 11 } },
+            armor: { name: "Behemoth Hide", effect: { id: 'bonusHp', name: '+HP', value: 350 } },
+            legs: { name: "Behemoth Legguards", effect: { id: 'critChance', name: 'Crit', value: 8 } },
+            boots: { name: "Behemoth Hooves", effect: { id: 'dodge', name: 'Dodge', value: 9 } },
+            gloves: { name: "Behemoth Fists", effect: { id: 'bonusDmg', name: '+DMG', value: 90 } },
+            shield: { name: "Behemoth Barrier", effect: { id: 'dodge', name: 'Dodge', value: 8 } },
+            belt: { name: "Behemoth Girdle", effect: { id: 'lifesteal', name: 'Lifesteal', value: 4 } },
+            amulet: { name: "Behemoth Heart", effect: { id: 'critChance', name: 'Crit', value: 10 } },
         },
         setBonuses: [
             { pieces: 2, desc: '+12% Crit Chance', effect: { critChance: 12 } },
             { pieces: 4, desc: '+35% DMG, +30% HP', effect: { dmgMult: 0.35, hpMult: 0.30 } },
             { pieces: 6, desc: '+30% Crit DMG, +8% Dodge', effect: { critDamage: 30, dodge: 8 } },
-            { pieces: 8, desc: 'Void Embrace: +60% Crit DMG, +12% Dodge', effect: { critDamage: 60, dodge: 12 } },
+            { pieces: 8, desc: 'Behemoth Might: +60% Crit DMG, +12% Dodge', effect: { critDamage: 60, dodge: 12 } },
         ]
     },
-    chaos: {
-        name: "Chaosborn", color: '#ec4899', tier: 6, statBonus: 1.4, weaponType: 'sword', // Zone 39 boss - Final boss - STR
+    darkwolf: {
+        name: "Dark Wolf King", color: '#ec4899', tier: 6, statBonus: 1.4, weaponType: 'sword', // Zone 39 boss - Final boss - STR
         items: {
-            weapon: { name: "Chaosborn Destroyer", effect: { id: 'bonusDmg', name: '+DMG', value: 120 } },
-            helmet: { name: "Chaosborn Crown", effect: { id: 'critChance', name: 'Crit', value: 12 } },
-            armor: { name: "Chaosborn Armor", effect: { id: 'bonusHp', name: '+HP', value: 450 } },
-            legs: { name: "Chaosborn Legguards", effect: { id: 'critDamage', name: 'Crit DMG', value: 50 } },
-            boots: { name: "Chaosborn Greaves", effect: { id: 'dodge', name: 'Dodge', value: 10 } },
-            gloves: { name: "Chaosborn Fists", effect: { id: 'critDamage', name: 'Crit DMG', value: 70 } },
-            shield: { name: "Chaosborn Barrier", effect: { id: 'thorns', name: 'Thorns', value: 20 } },
-            belt: { name: "Chaosborn Girdle", effect: { id: 'lifesteal', name: 'Lifesteal', value: 5 } },
-            amulet: { name: "Chaosborn Essence", effect: { id: 'bonusDmg', name: '+DMG', value: 100 } },
+            weapon: { name: "Wolf King Fang", effect: { id: 'bonusDmg', name: '+DMG', value: 120 } },
+            helmet: { name: "Wolf King Crown", effect: { id: 'critChance', name: 'Crit', value: 12 } },
+            armor: { name: "Wolf King Pelt", effect: { id: 'bonusHp', name: '+HP', value: 450 } },
+            legs: { name: "Wolf King Legguards", effect: { id: 'critDamage', name: 'Crit DMG', value: 50 } },
+            boots: { name: "Wolf King Treads", effect: { id: 'dodge', name: 'Dodge', value: 10 } },
+            gloves: { name: "Wolf King Claws", effect: { id: 'critDamage', name: 'Crit DMG', value: 70 } },
+            shield: { name: "Wolf King Barrier", effect: { id: 'thorns', name: 'Thorns', value: 20 } },
+            belt: { name: "Wolf King Girdle", effect: { id: 'lifesteal', name: 'Lifesteal', value: 5 } },
+            amulet: { name: "Wolf King Heart", effect: { id: 'bonusDmg', name: '+DMG', value: 100 } },
         },
         setBonuses: [
             { pieces: 2, desc: '+25% Crit DMG', effect: { critDamage: 25 } },
             { pieces: 4, desc: '+40% DMG, +35% HP', effect: { dmgMult: 0.40, hpMult: 0.35 } },
             { pieces: 6, desc: '+15% All Stats', effect: { dmgMult: 0.15, hpMult: 0.15, speedMult: 0.15 } },
-            { pieces: 8, desc: 'Chaos Incarnate: +60% DMG, +50% HP', effect: { dmgMult: 0.60, hpMult: 0.50 } },
+            { pieces: 8, desc: 'Wolf King Fury: +60% DMG, +50% HP', effect: { dmgMult: 0.60, hpMult: 0.50 } },
         ]
     },
     eternal: {
@@ -315,66 +314,66 @@ export function isEnhanceMilestone(plus) {
 }
 
 export const PRESTIGE_BOSS_SETS = {
-    astral: {
-        name: "Astral", color: '#38bdf8', tier: 6, statBonus: 2.5,
+    tyrant: {
+        name: "Eye Tyrant", color: '#38bdf8', tier: 6, statBonus: 2.5,
         items: {
-            weapon: { name: "Astral Blade", effect: { id: 'bonusDmg', name: '+DMG', value: 800 } },
-            helmet: { name: "Astral Crown", effect: { id: 'critChance', name: 'Crit', value: 35 } },
-            armor: { name: "Astral Vestments", effect: { id: 'bonusHp', name: '+HP', value: 4000 } },
-            legs: { name: "Astral Legguards", effect: { id: 'bonusDmg', name: '+DMG', value: 500 } },
-            boots: { name: "Astral Treads", effect: { id: 'dodge', name: 'Dodge', value: 28 } },
-            gloves: { name: "Astral Grips", effect: { id: 'critDamage', name: 'Crit DMG', value: 280 } },
-            shield: { name: "Astral Ward", effect: { id: 'thorns', name: 'Thorns', value: 60 } },
-            belt: { name: "Astral Waistguard", effect: { id: 'lifesteal', name: 'Lifesteal', value: 14 } },
-            amulet: { name: "Astral Core", effect: { id: 'bonusDmg', name: '+DMG', value: 600 } },
+            weapon: { name: "Tyrant Gaze", effect: { id: 'bonusDmg', name: '+DMG', value: 800 } },
+            helmet: { name: "Tyrant Crown", effect: { id: 'critChance', name: 'Crit', value: 35 } },
+            armor: { name: "Tyrant Carapace", effect: { id: 'bonusHp', name: '+HP', value: 4000 } },
+            legs: { name: "Tyrant Legguards", effect: { id: 'bonusDmg', name: '+DMG', value: 500 } },
+            boots: { name: "Tyrant Treads", effect: { id: 'dodge', name: 'Dodge', value: 28 } },
+            gloves: { name: "Tyrant Grips", effect: { id: 'critDamage', name: 'Crit DMG', value: 280 } },
+            shield: { name: "Tyrant Ward", effect: { id: 'thorns', name: 'Thorns', value: 60 } },
+            belt: { name: "Tyrant Girdle", effect: { id: 'lifesteal', name: 'Lifesteal', value: 14 } },
+            amulet: { name: "Tyrant Eye", effect: { id: 'bonusDmg', name: '+DMG', value: 600 } },
         },
         setBonuses: [
             { pieces: 2, desc: '+150% All Stats', effect: { dmgMult: 1.50, hpMult: 1.50, speedMult: 0.50 } },
             { pieces: 4, desc: '+400% DMG, +300% HP', effect: { dmgMult: 4.00, hpMult: 3.00 } },
             { pieces: 6, desc: '+60% Crit, +250% Crit DMG', effect: { critChance: 60, critDamage: 250 } },
-            { pieces: 8, desc: 'Astral Ascension: +600% All Stats', effect: { dmgMult: 6.0, hpMult: 6.0, speedMult: 1.0 } },
+            { pieces: 8, desc: 'Tyrant Dominion: +600% All Stats', effect: { dmgMult: 6.0, hpMult: 6.0, speedMult: 1.0 } },
             { pieces: 9, desc: 'SECRET: +100% Drop Rate', effect: { matMult: 2.0 }, secret: true },
         ]
     },
-    cosmic: {
-        name: "Cosmic", color: '#a78bfa', tier: 6, statBonus: 3.0,
+    inferno: {
+        name: "Inferno Fox", color: '#a78bfa', tier: 6, statBonus: 3.0,
         items: {
-            weapon: { name: "Cosmic Annihilator", effect: { id: 'bonusDmg', name: '+DMG', value: 1500 } },
-            helmet: { name: "Cosmic Diadem", effect: { id: 'critChance', name: 'Crit', value: 40 } },
-            armor: { name: "Cosmic Aegis", effect: { id: 'bonusHp', name: '+HP', value: 8000 } },
-            legs: { name: "Cosmic Leggings", effect: { id: 'critChance', name: 'Crit', value: 30 } },
-            boots: { name: "Cosmic Striders", effect: { id: 'dodge', name: 'Dodge', value: 32 } },
-            gloves: { name: "Cosmic Gauntlets", effect: { id: 'critDamage', name: 'Crit DMG', value: 350 } },
-            shield: { name: "Cosmic Barrier", effect: { id: 'thorns', name: 'Thorns', value: 80 } },
-            belt: { name: "Cosmic Girdle", effect: { id: 'critChance', name: 'Crit', value: 35 } },
-            amulet: { name: "Cosmic Heart", effect: { id: 'lifesteal', name: 'Lifesteal', value: 15 } },
+            weapon: { name: "Inferno Fang", effect: { id: 'bonusDmg', name: '+DMG', value: 1500 } },
+            helmet: { name: "Inferno Crown", effect: { id: 'critChance', name: 'Crit', value: 40 } },
+            armor: { name: "Inferno Pelt", effect: { id: 'bonusHp', name: '+HP', value: 8000 } },
+            legs: { name: "Inferno Legguards", effect: { id: 'critChance', name: 'Crit', value: 30 } },
+            boots: { name: "Inferno Paws", effect: { id: 'dodge', name: 'Dodge', value: 32 } },
+            gloves: { name: "Inferno Claws", effect: { id: 'critDamage', name: 'Crit DMG', value: 350 } },
+            shield: { name: "Inferno Barrier", effect: { id: 'thorns', name: 'Thorns', value: 80 } },
+            belt: { name: "Inferno Sash", effect: { id: 'critChance', name: 'Crit', value: 35 } },
+            amulet: { name: "Inferno Heart", effect: { id: 'lifesteal', name: 'Lifesteal', value: 15 } },
         },
         setBonuses: [
             { pieces: 2, desc: '+250% All Stats', effect: { dmgMult: 2.50, hpMult: 2.50, speedMult: 0.80 } },
             { pieces: 4, desc: '+700% DMG, +500% HP', effect: { dmgMult: 7.00, hpMult: 5.00 } },
             { pieces: 6, desc: '+50% Crit, +300% Crit DMG', effect: { critChance: 50, critDamage: 300 } },
-            { pieces: 8, desc: 'Cosmic Infinity: +1200% All Stats', effect: { dmgMult: 12.0, hpMult: 12.0, speedMult: 1.5 } },
+            { pieces: 8, desc: 'Inferno Blaze: +1200% All Stats', effect: { dmgMult: 12.0, hpMult: 12.0, speedMult: 1.5 } },
             { pieces: 9, desc: 'SECRET: +100% Drop Rate', effect: { matMult: 2.0 }, secret: true },
         ]
     },
-    primordial: {
-        name: "Primordial", color: '#f472b6', tier: 6, statBonus: 4.0,
+    scorpion: {
+        name: "Scorpion King", color: '#f472b6', tier: 6, statBonus: 4.0,
         items: {
-            weapon: { name: "Primordial Worldbreaker", effect: { id: 'bonusDmg', name: '+DMG', value: 3000 } },
-            helmet: { name: "Primordial Crown", effect: { id: 'critChance', name: 'Crit', value: 50 } },
-            armor: { name: "Primordial Mantle", effect: { id: 'bonusHp', name: '+HP', value: 15000 } },
-            legs: { name: "Primordial Greaves", effect: { id: 'bonusHp', name: '+HP', value: 10000 } },
-            boots: { name: "Primordial Steps", effect: { id: 'dodge', name: 'Dodge', value: 35 } },
-            gloves: { name: "Primordial Fists", effect: { id: 'critDamage', name: 'Crit DMG', value: 500 } },
-            shield: { name: "Primordial Bulwark", effect: { id: 'thorns', name: 'Thorns', value: 100 } },
-            belt: { name: "Primordial Girdle", effect: { id: 'lifesteal', name: 'Lifesteal', value: 20 } },
-            amulet: { name: "Primordial Essence", effect: { id: 'bonusDmg', name: '+DMG', value: 2000 } },
+            weapon: { name: "Scorpion Stinger", effect: { id: 'bonusDmg', name: '+DMG', value: 3000 } },
+            helmet: { name: "Scorpion Crown", effect: { id: 'critChance', name: 'Crit', value: 50 } },
+            armor: { name: "Scorpion Carapace", effect: { id: 'bonusHp', name: '+HP', value: 15000 } },
+            legs: { name: "Scorpion Legguards", effect: { id: 'bonusHp', name: '+HP', value: 10000 } },
+            boots: { name: "Scorpion Treads", effect: { id: 'dodge', name: 'Dodge', value: 35 } },
+            gloves: { name: "Scorpion Pincers", effect: { id: 'critDamage', name: 'Crit DMG', value: 500 } },
+            shield: { name: "Scorpion Shell", effect: { id: 'thorns', name: 'Thorns', value: 100 } },
+            belt: { name: "Scorpion Girdle", effect: { id: 'lifesteal', name: 'Lifesteal', value: 20 } },
+            amulet: { name: "Scorpion Heart", effect: { id: 'bonusDmg', name: '+DMG', value: 2000 } },
         },
         setBonuses: [
             { pieces: 2, desc: '+500% All Stats', effect: { dmgMult: 5.00, hpMult: 5.00, speedMult: 1.00 } },
             { pieces: 4, desc: '+1500% DMG, +1000% HP', effect: { dmgMult: 15.00, hpMult: 10.00 } },
             { pieces: 6, desc: '+75% Crit, +500% Crit DMG', effect: { critChance: 75, critDamage: 500 } },
-            { pieces: 8, desc: 'Primordial Power: +3000% All', effect: { dmgMult: 30.0, hpMult: 30.0, speedMult: 2.0 } },
+            { pieces: 8, desc: 'Scorpion Venom: +3000% All', effect: { dmgMult: 30.0, hpMult: 30.0, speedMult: 2.0 } },
             { pieces: 9, desc: 'SECRET: +100% Drop Rate', effect: { matMult: 2.0 }, secret: true },
         ]
     },
