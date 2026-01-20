@@ -239,9 +239,71 @@ export default function InventoryView({ onHover }) {
         );
     };
 
+    // Calculate active set bonuses
+    const getActiveSetBonuses = () => {
+        const setCounts = {};
+        Object.values(state.gear).forEach(item => {
+            if (item?.bossSet) {
+                setCounts[item.bossSet] = (setCounts[item.bossSet] || 0) + 1;
+            }
+        });
+        return setCounts;
+    };
+    const activeSetCounts = getActiveSetBonuses();
+
+    // Mobile Equipment Card component
+    const MobileEquipCard = ({ slot }) => {
+        const item = state.gear[slot];
+        if (!item) {
+            return (
+                <div className="flex items-center gap-2 p-2 bg-slate-800/40 rounded border border-slate-700/40">
+                    <div className="w-8 h-8 bg-slate-700/50 rounded flex items-center justify-center">
+                        <span className="text-[8px] text-slate-500 uppercase">{SLOT_LABELS[slot]}</span>
+                    </div>
+                    <span className="text-xs text-slate-500 italic">Empty</span>
+                </div>
+            );
+        }
+        const tierInfo = TIERS[item.tier];
+        const stats = calculateItemStats(item);
+        const setInfo = item.bossSet ? (BOSS_SETS[item.bossSet] || PRESTIGE_BOSS_SETS[item.bossSet]) : null;
+        const stage = item.plus > 0 ? getEnhanceStage(item.plus) : null;
+        const effects = item.effects || [];
+
+        return (
+            <div
+                className="bg-slate-800/60 rounded border border-slate-700/60 overflow-hidden"
+                style={{ borderColor: tierInfo?.color + '60' }}
+                onClick={() => handleUnequip(item)}
+            >
+                <div className="flex items-center gap-2 p-1.5">
+                    <div className="w-8 h-8 flex-shrink-0">
+                        <ItemIcon item={item} size="sm" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <div className="text-[11px] font-bold truncate" style={{ color: tierInfo?.color }}>
+                            {item.name}
+                            {stage && <span className="ml-1 text-[9px]" style={{ color: stage.color }}>+{item.plus}</span>}
+                        </div>
+                        <div className="flex gap-1 text-[9px]">
+                            {stats.dmg > 0 && <span className="text-red-400">+{stats.dmg} DMG</span>}
+                            {stats.hp > 0 && <span className="text-green-400">+{stats.hp} HP</span>}
+                            {stats.armor > 0 && <span className="text-blue-400">+{stats.armor} ARM</span>}
+                        </div>
+                    </div>
+                    {effects.length > 0 && (
+                        <div className="text-[8px] text-purple-400">
+                            {effects.map(e => e.name).join(', ')}
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className="h-full flex flex-col gap-2">
-            {/* Equipment Paper Doll Layout */}
+            {/* Equipment Section - Different layout for mobile vs desktop */}
             <div className="game-panel" onMouseLeave={() => onHover && onHover(null)}>
                 <div className="game-panel-header flex justify-between items-center">
                     <span className="text-sm">Equipment</span>
@@ -260,32 +322,66 @@ export default function InventoryView({ onHover }) {
                         </button>
                     </div>
                 </div>
-                <div className="p-4">
-                    {/* Paper Doll Grid - compact 3-column layout */}
-                    <div className="flex justify-center">
-                        <div className={`grid grid-cols-3 ${isMobile ? 'gap-1' : 'gap-2'}`}>
-                            {/* Row 1: Amulet - Helmet - (empty) */}
-                            <EquipSlot slot="amulet" />
-                            <EquipSlot slot="helmet" />
-                            <div className={isMobile ? 'w-14 h-14' : 'w-20 h-20'} /> {/* spacer */}
 
-                            {/* Row 2: Weapon - Armor - Shield */}
-                            <EquipSlot slot="weapon" />
-                            <EquipSlot slot="armor" />
-                            <EquipSlot slot="shield" />
+                {isMobile ? (
+                    /* MOBILE: List view with full stats */
+                    <div className="p-2 space-y-1 max-h-48 overflow-y-auto">
+                        {GEAR_SLOTS.map(slot => (
+                            <MobileEquipCard key={slot} slot={slot} />
+                        ))}
 
-                            {/* Row 3: Gloves - Legs - Belt */}
-                            <EquipSlot slot="gloves" />
-                            <EquipSlot slot="legs" />
-                            <EquipSlot slot="belt" />
-
-                            {/* Row 4: (empty) - Boots - (empty) */}
-                            <div className={isMobile ? 'w-14 h-14' : 'w-20 h-20'} /> {/* spacer */}
-                            <EquipSlot slot="boots" />
-                            <div className={isMobile ? 'w-14 h-14' : 'w-20 h-20'} /> {/* spacer */}
+                        {/* Active Set Bonuses */}
+                        {Object.keys(activeSetCounts).length > 0 && (
+                            <div className="mt-2 pt-2 border-t border-slate-700/50">
+                                <div className="text-[10px] text-slate-400 mb-1">ACTIVE SET BONUSES</div>
+                                {Object.entries(activeSetCounts).map(([setId, count]) => {
+                                    const setInfo = BOSS_SETS[setId] || PRESTIGE_BOSS_SETS[setId];
+                                    if (!setInfo) return null;
+                                    return (
+                                        <div key={setId} className="mb-2">
+                                            <div className="text-[10px] font-bold mb-0.5" style={{ color: setInfo.color }}>
+                                                {setInfo.name} ({count}/8)
+                                            </div>
+                                            <div className="space-y-0.5">
+                                                {setInfo.setBonuses?.map((bonus, i) => {
+                                                    const isActive = count >= bonus.pieces;
+                                                    if (bonus.secret && !isActive) return null;
+                                                    return (
+                                                        <div key={i} className={`text-[9px] flex gap-1 ${isActive ? 'text-green-400' : 'text-slate-600'}`}>
+                                                            <span className="font-bold">{bonus.pieces}pc:</span>
+                                                            <span>{bonus.desc}</span>
+                                                            {isActive && <span className="text-green-500">✓</span>}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    /* DESKTOP: Paper Doll Grid */
+                    <div className="p-4">
+                        <div className="flex justify-center">
+                            <div className="grid grid-cols-3 gap-2">
+                                <EquipSlot slot="amulet" />
+                                <EquipSlot slot="helmet" />
+                                <div className="w-20 h-20" />
+                                <EquipSlot slot="weapon" />
+                                <EquipSlot slot="armor" />
+                                <EquipSlot slot="shield" />
+                                <EquipSlot slot="gloves" />
+                                <EquipSlot slot="legs" />
+                                <EquipSlot slot="belt" />
+                                <div className="w-20 h-20" />
+                                <EquipSlot slot="boots" />
+                                <div className="w-20 h-20" />
+                            </div>
                         </div>
                     </div>
-                </div>
+                )}
             </div>
 
             {/* Inventory Grid - Fixed height with internal scroll */}
@@ -338,6 +434,14 @@ export default function InventoryView({ onHover }) {
                                 const stats = calculateItemStats(item);
                                 const effects = item.effects || [];
 
+                                // Compare to equipped item
+                                const equippedItem = state.gear[item.slot];
+                                const equippedStats = equippedItem ? calculateItemStats(equippedItem) : { dmg: 0, hp: 0, armor: 0 };
+                                const itemScore = getItemScore(item);
+                                const equippedScore = equippedItem ? getItemScore(equippedItem) : 0;
+                                const scoreDiff = itemScore - equippedScore;
+                                const isUpgrade = scoreDiff > 0;
+
                                 return (
                                     <div
                                         key={item.id}
@@ -346,6 +450,20 @@ export default function InventoryView({ onHover }) {
                                         }`}
                                         style={!isSelected && tierInfo ? { borderColor: tierInfo.color + '80' } : {}}
                                     >
+                                        {/* Upgrade/Downgrade indicator */}
+                                        {equippedItem && (
+                                            <div className={`absolute top-0 right-0 px-1.5 py-0.5 text-[8px] font-bold ${
+                                                isUpgrade ? 'bg-green-500 text-white' : 'bg-red-500/80 text-white'
+                                            }`}>
+                                                {isUpgrade ? '↑ UPGRADE' : '↓ DOWNGRADE'}
+                                            </div>
+                                        )}
+                                        {!equippedItem && (
+                                            <div className="absolute top-0 right-0 px-1.5 py-0.5 text-[8px] font-bold bg-blue-500 text-white">
+                                                EMPTY SLOT
+                                            </div>
+                                        )}
+
                                         {/* Header: Icon + Name + Tier */}
                                         <div className="flex items-center gap-2 p-2 border-b border-slate-700/50" style={{ background: `linear-gradient(135deg, ${tierInfo?.color || '#666'}15, transparent)` }}>
                                             <div className="w-10 h-10 flex-shrink-0">
@@ -368,28 +486,43 @@ export default function InventoryView({ onHover }) {
                                                 </div>
                                             </div>
                                             <div className="text-right text-[10px] text-slate-500">
-                                                PWR<br/><span className="text-sm font-bold text-slate-300">{getItemScore(item)}</span>
+                                                PWR<br/><span className="text-sm font-bold text-slate-300">{itemScore}</span>
                                             </div>
                                         </div>
 
-                                        {/* Stats Row */}
+                                        {/* Stats Row with comparison */}
                                         <div className="flex gap-1 p-2 text-[10px]">
-                                            {stats.dmg > 0 && (
+                                            {(stats.dmg > 0 || equippedStats.dmg > 0) && (
                                                 <div className="flex-1 bg-red-500/20 rounded px-1.5 py-1 text-center">
                                                     <div className="text-red-400">DMG</div>
                                                     <div className="font-bold text-red-300">+{stats.dmg}</div>
+                                                    {equippedItem && (
+                                                        <div className={`text-[9px] ${stats.dmg - equippedStats.dmg > 0 ? 'text-green-400' : stats.dmg - equippedStats.dmg < 0 ? 'text-red-400' : 'text-slate-500'}`}>
+                                                            {stats.dmg - equippedStats.dmg > 0 ? '+' : ''}{stats.dmg - equippedStats.dmg}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             )}
-                                            {stats.hp > 0 && (
+                                            {(stats.hp > 0 || equippedStats.hp > 0) && (
                                                 <div className="flex-1 bg-green-500/20 rounded px-1.5 py-1 text-center">
                                                     <div className="text-green-400">HP</div>
                                                     <div className="font-bold text-green-300">+{stats.hp}</div>
+                                                    {equippedItem && (
+                                                        <div className={`text-[9px] ${stats.hp - equippedStats.hp > 0 ? 'text-green-400' : stats.hp - equippedStats.hp < 0 ? 'text-red-400' : 'text-slate-500'}`}>
+                                                            {stats.hp - equippedStats.hp > 0 ? '+' : ''}{stats.hp - equippedStats.hp}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             )}
-                                            {stats.armor > 0 && (
+                                            {(stats.armor > 0 || equippedStats.armor > 0) && (
                                                 <div className="flex-1 bg-blue-500/20 rounded px-1.5 py-1 text-center">
                                                     <div className="text-blue-400">ARM</div>
                                                     <div className="font-bold text-blue-300">+{stats.armor}</div>
+                                                    {equippedItem && (
+                                                        <div className={`text-[9px] ${stats.armor - equippedStats.armor > 0 ? 'text-green-400' : stats.armor - equippedStats.armor < 0 ? 'text-red-400' : 'text-slate-500'}`}>
+                                                            {stats.armor - equippedStats.armor > 0 ? '+' : ''}{stats.armor - equippedStats.armor}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             )}
                                         </div>
@@ -405,11 +538,32 @@ export default function InventoryView({ onHover }) {
                                             </div>
                                         )}
 
-                                        {/* Set Bonus Info */}
+                                        {/* Set Bonus Info - Full details */}
                                         {setInfo && (
-                                            <div className="px-2 pb-1">
-                                                <div className="text-[9px] px-1.5 py-0.5 rounded inline-block" style={{ backgroundColor: setInfo.color + '20', color: setInfo.color }}>
-                                                    {setInfo.name} Set
+                                            <div className="px-2 pb-2 border-t border-slate-700/30 mt-1 pt-1">
+                                                <div className="flex items-center gap-1 mb-1">
+                                                    <span className="text-[9px] font-bold" style={{ color: setInfo.color }}>
+                                                        {setInfo.name} Set
+                                                    </span>
+                                                    <span className="text-[8px] text-slate-500">
+                                                        ({activeSetCounts[item.bossSet] || 0}/8 equipped)
+                                                    </span>
+                                                </div>
+                                                <div className="space-y-0.5">
+                                                    {setInfo.setBonuses?.slice(0, 4).map((bonus, i) => {
+                                                        const currentCount = activeSetCounts[item.bossSet] || 0;
+                                                        const wouldBeActive = (currentCount + 1) >= bonus.pieces;
+                                                        const isActive = currentCount >= bonus.pieces;
+                                                        if (bonus.secret && !isActive) return null;
+                                                        return (
+                                                            <div key={i} className={`text-[8px] flex gap-1 ${isActive ? 'text-green-400' : wouldBeActive ? 'text-yellow-400' : 'text-slate-600'}`}>
+                                                                <span className="font-bold w-6">{bonus.pieces}pc:</span>
+                                                                <span className="flex-1">{bonus.desc}</span>
+                                                                {isActive && <span>✓</span>}
+                                                                {!isActive && wouldBeActive && <span>+</span>}
+                                                            </div>
+                                                        );
+                                                    })}
                                                 </div>
                                             </div>
                                         )}
