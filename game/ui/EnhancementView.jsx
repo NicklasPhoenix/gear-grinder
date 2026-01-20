@@ -15,6 +15,10 @@ export default function EnhancementView() {
     const [autoEnhancing, setAutoEnhancing] = useState(false);
     const autoEnhanceRef = useRef(null);
 
+    // Enhancement result display (shows SUCCESS/FAIL on the panel)
+    const [enhanceResult, setEnhanceResult] = useState(null); // { type: 'success'|'fail', text: string }
+    const resultTimeoutRef = useRef(null);
+
     // Refs for always-fresh state access (fixes stale closure in auto-enhance)
     const stateRef = useRef(state);
     const selectedItemRef = useRef(selectedItem);
@@ -175,13 +179,17 @@ export default function EnhancementView() {
 
         gameManager.setState(newState);
 
+        // Show result on enhancement panel (not on character)
+        if (resultTimeoutRef.current) clearTimeout(resultTimeoutRef.current);
         if (success) {
-            gameManager.emit('floatingText', { text: `+${newItem.plus}!`, type: 'heal', target: 'player' });
+            setEnhanceResult({ type: 'success', text: `+${newItem.plus}!` });
             audioManager.playSfxEnhanceSuccess();
         } else {
-            gameManager.emit('floatingText', { text: `FAIL`, type: 'death', target: 'player' });
+            setEnhanceResult({ type: 'fail', text: 'FAIL' });
             audioManager.playSfxEnhanceFail();
         }
+        // Clear result after delay (longer for manual, shorter for auto)
+        resultTimeoutRef.current = setTimeout(() => setEnhanceResult(null), autoEnhancing ? 150 : 800);
 
         if (isInventoryItem) {
             const updatedItem = newState.inventory.find(i =>
@@ -300,7 +308,21 @@ export default function EnhancementView() {
                 <div className="game-panel-header text-sm">Enhance</div>
 
                 {selectedItem ? (
-                    <div className="flex-1 flex flex-col p-3 min-h-0">
+                    <div className="flex-1 flex flex-col p-3 min-h-0 relative">
+                        {/* Enhancement Result Overlay */}
+                        {enhanceResult && (
+                            <div className={`absolute inset-0 flex items-center justify-center z-10 pointer-events-none ${
+                                enhanceResult.type === 'success' ? 'animate-pulse' : ''
+                            }`}>
+                                <div className={`text-4xl font-black tracking-wider ${
+                                    enhanceResult.type === 'success'
+                                        ? 'text-green-400 drop-shadow-[0_0_10px_rgba(74,222,128,0.8)]'
+                                        : 'text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]'
+                                }`}>
+                                    {enhanceResult.text}
+                                </div>
+                            </div>
+                        )}
                         {/* Selected Item Display */}
                         <div className="flex items-center gap-3 mb-2">
                             <div className="w-16 h-16 rounded-lg bg-slate-900/80 border-2 border-slate-600 relative flex-shrink-0">
