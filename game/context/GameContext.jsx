@@ -199,6 +199,7 @@ export function GameProvider({ children }) {
                     newState.prestigeLevel !== lastState?.prestigeLevel ||
                     newState.prestigeStones !== lastState?.prestigeStones ||
                     newState.autoSalvage !== lastState?.autoSalvage ||
+                    newState.combatPaused !== lastState?.combatPaused ||
                     newState.unlockedAchievements !== lastState?.unlockedAchievements ||
                     newState.dailyStreak !== lastState?.dailyStreak ||
                     newState.lastDailyReward !== lastState?.lastDailyReward ||
