@@ -145,17 +145,26 @@ export default function EnhancementView() {
         const newItem = { ...item, plus: newPlus, id: Date.now() };
         delete newItem.count;
 
-        // Check if we just hit an enhancement milestone (awakening)
+        // Handle awakening bonuses based on milestone thresholds
         if (success && isEnhanceMilestone(newPlus)) {
-            // Check if item already has an awakening bonus for this milestone
-            // This prevents exploit where player drops below milestone and regains bonus
+            // Gained a milestone - add awakening bonus if we don't have one for this level
             const alreadyHasMilestoneBonus = (newItem.effects || []).some(e => e.isAwakened && e.milestone === newPlus);
             if (!alreadyHasMilestoneBonus) {
-                // Generate a new awakening substat
                 const newSubstat = generateAwakeningSubstat(newPlus, newItem.effects || []);
                 newItem.effects = [...(newItem.effects || []), newSubstat];
                 gameManager.emit('floatingText', { text: `AWAKENED! +${newSubstat.name}`, type: 'levelup', target: 'player' });
                 audioManager.playSfxAwakening();
+            }
+        } else if (!success) {
+            // Failed enhancement - remove awakening bonuses for milestones we dropped below
+            // e.g., if we were +10 and dropped to +9, remove the +10 awakening bonus
+            const lostMilestones = ENHANCE_MILESTONES.filter(m => m > newPlus && m <= item.plus);
+            if (lostMilestones.length > 0 && newItem.effects) {
+                const removedEffects = newItem.effects.filter(e => e.isAwakened && lostMilestones.includes(e.milestone));
+                if (removedEffects.length > 0) {
+                    newItem.effects = newItem.effects.filter(e => !e.isAwakened || !lostMilestones.includes(e.milestone));
+                    gameManager.emit('floatingText', { text: `LOST AWAKENING!`, type: 'death', target: 'player' });
+                }
             }
         }
 
