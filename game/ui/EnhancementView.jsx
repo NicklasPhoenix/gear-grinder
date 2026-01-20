@@ -145,30 +145,19 @@ export default function EnhancementView() {
             };
         }
 
-        const newPlus = success ? item.plus + 1 : Math.max(0, item.plus - 1);
+        // No downgrade on failure - you keep your level, just don't progress
+        const newPlus = success ? item.plus + 1 : item.plus;
         const newItem = { ...item, plus: newPlus, id: Date.now() };
         delete newItem.count;
 
-        // Handle awakening bonuses based on milestone thresholds
+        // Handle awakening bonuses on milestone success
         if (success && isEnhanceMilestone(newPlus)) {
-            // Gained a milestone - add awakening bonus if we don't have one for this level
             const alreadyHasMilestoneBonus = (newItem.effects || []).some(e => e.isAwakened && e.milestone === newPlus);
             if (!alreadyHasMilestoneBonus) {
                 const newSubstat = generateAwakeningSubstat(newPlus, newItem.effects || []);
                 newItem.effects = [...(newItem.effects || []), newSubstat];
                 gameManager.emit('floatingText', { text: `AWAKENED! +${newSubstat.name}`, type: 'levelup', target: 'player' });
                 audioManager.playSfxAwakening();
-            }
-        } else if (!success) {
-            // Failed enhancement - remove awakening bonuses for milestones we dropped below
-            // e.g., if we were +10 and dropped to +9, remove the +10 awakening bonus
-            const lostMilestones = ENHANCE_MILESTONES.filter(m => m > newPlus && m <= item.plus);
-            if (lostMilestones.length > 0 && newItem.effects) {
-                const removedEffects = newItem.effects.filter(e => e.isAwakened && lostMilestones.includes(e.milestone));
-                if (removedEffects.length > 0) {
-                    newItem.effects = newItem.effects.filter(e => !e.isAwakened || !lostMilestones.includes(e.milestone));
-                    gameManager.emit('floatingText', { text: `LOST AWAKENING!`, type: 'death', target: 'player' });
-                }
             }
         }
 
