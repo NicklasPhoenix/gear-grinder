@@ -2,6 +2,7 @@ export const initialState = {
     gold: 50, enhanceStone: 5, blessedOrb: 0, celestialShard: 0,
     level: 1, xp: 0, currentZone: 0,
     autoSalvage: false, // Auto-salvage dropped items
+    combatPaused: false, // Pause combat to take a breather
     // Boss stones - dropped by bosses, needed to enhance boss gear past +10
     bossStones: {
         guardian: 0, lich: 0, dragon: 0, frost: 0, demon: 0,

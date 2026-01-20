@@ -31,6 +31,21 @@ export class GameManager {
         return () => this.speedListeners.delete(listener);
     }
 
+    // --- Combat Pause Control ---
+    toggleCombat() {
+        this.setState(prev => ({
+            ...prev,
+            combatPaused: !prev.combatPaused
+        }));
+    }
+
+    setCombatPaused(paused) {
+        this.setState(prev => ({
+            ...prev,
+            combatPaused: paused
+        }));
+    }
+
     // --- State Management ---
     getState() {
         return this.state;
@@ -145,7 +160,10 @@ export class GameManager {
         if (this.accumulatedTime > 1000) this.accumulatedTime = 1000;
 
         while (this.accumulatedTime >= tickSpeed) {
-            this.combatSystem.tick(tickSpeed);
+            // Only run combat if not paused
+            if (!this.state.combatPaused) {
+                this.combatSystem.tick(tickSpeed);
+            }
             this.accumulatedTime -= tickSpeed;
         }
 

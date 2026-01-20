@@ -287,6 +287,11 @@ export default function GameLayout() {
                     <GameRenderer />
                 </div>
 
+                {/* Combat Pause Button - bottom left overlay */}
+                <div className="absolute bottom-16 left-4 z-10">
+                    <CombatToggle />
+                </div>
+
                 {/* Bottom XP Bar - full width footer */}
                 <div className="absolute bottom-0 left-0 right-0 z-10">
                     <XPBar level={state.level || 1} xp={state.xp || 0} />
@@ -515,6 +520,45 @@ function ResetButton() {
             }`}
         >
             {confirming ? 'Confirm?' : 'Reset'}
+        </button>
+    );
+}
+
+function CombatToggle() {
+    const { gameManager, state } = useGame();
+    const isPaused = state?.combatPaused || false;
+
+    const handleToggle = () => {
+        if (gameManager) {
+            gameManager.toggleCombat();
+        }
+    };
+
+    return (
+        <button
+            onClick={handleToggle}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm transition-all shadow-lg ${
+                isPaused
+                    ? 'bg-green-600 hover:bg-green-500 text-white'
+                    : 'bg-red-600/80 hover:bg-red-500 text-white'
+            }`}
+            title={isPaused ? 'Resume Combat' : 'Pause Combat'}
+        >
+            {isPaused ? (
+                <>
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z" />
+                    </svg>
+                    Fight
+                </>
+            ) : (
+                <>
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                    </svg>
+                    Rest
+                </>
+            )}
         </button>
     );
 }
