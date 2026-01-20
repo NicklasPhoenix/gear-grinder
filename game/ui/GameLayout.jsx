@@ -17,6 +17,8 @@ import { getZoneById } from '../data/zones';
 import { calculatePlayerStats } from '../systems/PlayerSystem';
 import { formatWithCommas } from '../utils/format';
 import { audioManager } from '../systems/AudioManager';
+import { useIsMobilePortrait } from '../hooks/useIsMobile';
+import MobileGameLayout from './MobileGameLayout';
 
 // Icons for tabs
 const TabIcons = {
@@ -67,6 +69,14 @@ const TabIcons = {
 const TABS = ['inventory', 'stats', 'enhance', 'skills', 'zone', 'prestige', 'achievements', 'settings'];
 
 export default function GameLayout() {
+    const isMobilePortrait = useIsMobilePortrait();
+
+    // Render mobile layout for mobile portrait devices
+    if (isMobilePortrait) {
+        return <MobileGameLayout />;
+    }
+
+    // Desktop layout below
     const { state } = useGame();
     const [activeTab, setActiveTab] = useState('inventory');
     const [tooltipUser, setTooltipUser] = useState(null);

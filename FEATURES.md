@@ -1,176 +1,339 @@
-# Gear Grinder - Improvement Features
+# Mobile Portrait Redesign - Implementation Plan
 
-## Critical (Must Fix)
+## Overview
 
-### Feature #1: Fix Memory Leak in Particle System
-**Status:** ✅ Complete
-**Location:** `game/renderer/GameRenderer.jsx`
-**Issue:** Creates new PIXI.Graphics objects every frame without proper pooling. Will cause performance degradation for players who leave the game running (common for idle games).
-**Solution:** Implemented `GraphicsPool` class for object pooling. Graphics objects are now acquired from and released back to the pool instead of being created/destroyed every frame.
+**Goal:** Transform the game into a fully playable mobile portrait experience while keeping desktop intact.
 
----
-
-### Feature #2: Add Error Boundaries
-**Status:** ✅ Complete
-**Location:** `App.jsx`
-**Issue:** No crash protection means a single JavaScript error loses all progress since last save.
-**Solution:** Added ErrorBoundary class component that catches errors, creates emergency backups to localStorage, and provides Reload/Restore buttons.
-
----
-
-### Feature #3: Fix Auto-Enhance Race Condition
-**Status:** ✅ Complete
-**Location:** `game/ui/EnhancementView.jsx`
-**Issue:** Stale closure issues can cause incorrect resource deduction during rapid auto-enhance.
-**Solution:** Added `stateRef` and `selectedItemRef` to always access fresh values in interval callbacks and `doEnhance` function.
-
----
-
-### Feature #4: Add Keyboard Navigation
-**Status:** ✅ Complete
-**Location:** `game/ui/GameLayout.jsx`
-**Issue:** Game is mouse-only, excluding keyboard-preferring users.
-**Solution:** Added keyboard shortcuts (1-6 for tabs, arrow keys for navigation), proper ARIA attributes, and a ? help modal showing all shortcuts.
-
----
-
-## Performance
-
-### Feature #5: Reduce Excessive Re-renders
-**Status:** ✅ Complete
-**Location:** `game/context/GameContext.jsx`
-**Issue:** Every state change (6x/second for HP bars) triggers full tree re-renders.
-**Solution:** Split high-frequency HP updates into separate context, added smart change detection to only update full state when important values change, memoized context value.
+**Target Layout (Portrait Mobile):**
+```
+┌─────────────────────────┐
+│  Zone: Goblin Stronghold│  ← Zone header (compact)
+├─────────────────────────┤
+│                         │
+│   [HERO]     [ENEMY]    │  ← Combat view (~200px)
+│   ██████     ██████     │     Health bars
+│   HP: 850    HP: 5.5K   │
+│                         │
+│      -150!    -48!      │  ← Damage numbers
+│                         │
+│  [Rest]     Silver: 3K  │  ← Controls + currency
+├─────────────────────────┤
+│ INV│STS│ENH│SKL│MAP│PRE │  ← Tab bar (scrollable)
+├─────────────────────────┤
+│                         │
+│                         │
+│     Tab Content         │  ← Main content (~50%)
+│     (scrollable)        │
+│                         │
+│                         │
+├─────────────────────────┤
+│ Lv.41  ████████░░  XP   │  ← Bottom bar
+│        1.7M / 1.8M      │
+└─────────────────────────┘
+```
 
 ---
 
-### Feature #6: Add Asset Loading Indicator
-**Status:** ✅ Complete
-**Location:** `game/renderer/GameRenderer.jsx`
-**Issue:** Blank screen while loading sprites, then sudden appearance.
-**Solution:** Added loading overlay with animated icon, progress bar, and status text showing current asset being loaded.
+## Phase 1: Setup & Detection
+**Status:** NOT STARTED
+
+### 1.1 Create Mobile Detection Hook
+**File:** `game/hooks/useIsMobile.js`
+
+```javascript
+// Detect mobile viewport and orientation
+// Returns { isMobile, isPortrait, isLandscape }
+// Updates on resize/orientation change
+```
+
+**Acceptance Criteria:**
+- [ ] Hook detects screen width < 768px as mobile
+- [ ] Hook detects portrait vs landscape
+- [ ] Hook updates on window resize
+- [ ] Hook updates on orientation change
+
+### 1.2 Create Mobile Layout Shell
+**File:** `game/ui/MobileGameLayout.jsx`
+
+```javascript
+// New layout component for mobile portrait
+// Will contain: MobileCombatView, MobileTabBar, TabContent, MobileBottomBar
+```
+
+**Acceptance Criteria:**
+- [ ] Shell component renders without errors
+- [ ] Proper flex column layout
+- [ ] Takes full viewport height (100dvh for mobile)
+
+### 1.3 Update App to Route Layouts
+**File:** `game/ui/GameLayout.jsx` or `App.jsx`
+
+**Acceptance Criteria:**
+- [ ] Desktop users see current layout (unchanged)
+- [ ] Mobile portrait users see MobileGameLayout
+- [ ] Smooth transition if orientation changes
 
 ---
 
-## UX Polish
+## Phase 2: Mobile Combat View
+**Status:** NOT STARTED
 
-### Feature #7: Fix Tooltip Overflow
-**Status:** ✅ Complete
-**Location:** `game/ui/GameTooltip.jsx`
-**Issue:** Tooltips can overflow screen bounds.
-**Solution:** Added comprehensive boundary checking for all four screen edges, auto-scroll for tall tooltips, and smart positioning (left/right/above/below cursor).
+### 2.1 Create MobileCombatView Component
+**File:** `game/ui/MobileCombatView.jsx`
 
----
+A compact, horizontal battle scene optimized for mobile.
 
-### Feature #8: Add Damage Breakdown Tooltips
-**Status:** ✅ Complete
-**Location:** `game/ui/StatsView.jsx`
-**Issue:** Players cannot see how stats translate to damage.
-**Solution:** Added expandable "Damage Breakdown" panel showing base hit, crit damage, true DPS, armor reduction, and estimated kill time for current zone.
+**Layout:**
+```
+┌─────────────────────────────────┐
+│ Goblin Stronghold          3.2K│  ← Zone name + silver
+├─────────────────────────────────┤
+│                                 │
+│  [HERO]              [ENEMY]   │  ← Sprites (64x64 or 96x96)
+│  ▓▓▓▓▓▓░░            ▓▓▓▓░░░░  │  ← Health bars below
+│  850/1000            2.8K/5.5K │  ← HP text
+│                                 │
+│     -150              -48      │  ← Floating damage
+│                                 │
+├─────────────────────────────────┤
+│ [II Rest]       [1x] [2x] [5x] │  ← Controls row
+└─────────────────────────────────┘
+```
 
----
+**Acceptance Criteria:**
+- [ ] Shows hero sprite on left side
+- [ ] Shows enemy sprite on right side
+- [ ] Health bars visible below each character
+- [ ] HP numbers shown (formatted)
+- [ ] Damage numbers float up and fade
+- [ ] Zone name displayed
+- [ ] Currency display (silver)
+- [ ] Rest/Fight toggle button
+- [ ] Speed controls (1x, 2x, 5x)
+- [ ] Boss enemies have visual distinction (glow/size)
+- [ ] Smooth animations (breathing, hit flash)
+- [ ] Works without PIXI (pure React/CSS for simplicity) OR uses small PIXI canvas
 
-### Feature #9: Add Sound Effects
-**Status:** Deferred
-**Location:** Entire game
-**Issue:** Game is completely silent - no audio feedback.
-**Solution:** Add sound effects for attacks, kills, level ups, enhancement, etc.
-**Note:** Requires external sound assets - deferred for future implementation.
-
----
-
-### Feature #10: Add Save Validation
-**Status:** ✅ Complete
-**Location:** `game/context/GameContext.jsx`
-**Issue:** Corrupted saves crash the game.
-**Solution:** Added `validateSave()` function with comprehensive field validation, automatic repair of invalid data, save versioning (SAVE_VERSION constant), and graceful error handling.
-
----
-
-### Feature #11: Standardize Number Formatting
-**Status:** ✅ Complete
-**Location:** Multiple files
-**Issue:** Some use toLocaleString(), some custom formatNumber(), some nothing.
-**Solution:** Created centralized `game/utils/format.js` utility with formatNumber(), formatWithCommas(), formatPercent(), formatMultiplier(), formatBonus(), and formatTime() functions. Updated ZoneView, StatsView, GameLayout, EnhancementView, and GameTooltip to use the shared utilities.
-
----
-
-## Code Quality
-
-### Feature #12: Remove Debug Console Logs
-**Status:** ✅ Complete
-**Location:** `GameRenderer.jsx`, `GameContext.jsx`
-**Issue:** Debug console.log statements left in production code.
-**Solution:** Removed all debug console.log statements from production code. Kept console.warn and console.error for actual issues (save validation warnings, load errors).
+### 2.2 Connect Combat View to Game State
+**Acceptance Criteria:**
+- [ ] Real-time HP updates from game state
+- [ ] Damage events trigger floating numbers
+- [ ] Enemy changes when zone changes
+- [ ] Death/spawn animations work
 
 ---
 
-### Feature #13: Extract Magic Numbers to Constants
-**Status:** ✅ Complete
-**Location:** Multiple files
-**Issue:** Magic numbers scattered throughout code (XP scaling, heal percentages, etc.).
-**Solution:** Created `game/data/constants.js` with organized constants for PLAYER_BASE, STAT_SCALING, LEVEL_UP, COMBAT, DEATH_PENALTY, BOSS_DROPS, ENHANCE, SAVE, DEFAULTS, and UI. Updated formulas.js, PlayerSystem.js, CombatSystem.js, StatsView.jsx, and GameContext.jsx to use the centralized constants.
+## Phase 3: Mobile Tab Navigation
+**Status:** NOT STARTED
+
+### 3.1 Create MobileTabBar Component
+**File:** `game/ui/MobileTabBar.jsx`
+
+Horizontal, scrollable tab bar with touch-friendly targets.
+
+**Tabs (6 total, simplified from 8):**
+1. INV - Inventory (bag icon)
+2. STATS - Stats (chart icon)
+3. ENHANCE - Enhancement (lightning icon)
+4. SKILLS - Skills (star icon)
+5. MAP - Zone/Map (map icon)
+6. MORE - Settings/Prestige/Achievements (menu icon → opens submenu)
+
+**Acceptance Criteria:**
+- [ ] Horizontal layout
+- [ ] Each tab minimum 44px touch target
+- [ ] Active tab visually highlighted
+- [ ] Icons + short labels
+- [ ] Scrollable if needed (overflow-x-auto)
+- [ ] "MORE" tab opens modal/dropdown for secondary tabs
+
+### 3.2 Mobile Tab State Management
+**Acceptance Criteria:**
+- [ ] Tab state persists correctly
+- [ ] Switching tabs is instant (no lag)
+- [ ] Swipe gestures between tabs (stretch goal)
 
 ---
 
-### Feature #14: Add JSDoc Comments
-**Status:** ✅ Complete
-**Location:** Core functions
-**Issue:** Lack of documentation on complex functions.
-**Solution:** Added JSDoc comments to calculatePlayerStats (PlayerSystem.js), all enhancement functions (formulas.js), and CombatSystem class methods (tick, handleEnemyDeath, handleBossLoot, handlePlayerDeath).
+## Phase 4: Mobile Tab Content
+**Status:** NOT STARTED
+
+Each existing tab view needs mobile optimization.
+
+### 4.1 Mobile Inventory View
+**File:** Update `game/ui/InventoryView.jsx`
+
+**Changes needed:**
+- [ ] Grid: 5 columns on mobile (from 8-10)
+- [ ] Larger item slots (48px minimum)
+- [ ] Equipment section: 2x4 grid or horizontal scroll
+- [ ] Touch-hold for tooltip (instead of hover)
+- [ ] Tap to select, tap again to equip
+- [ ] Presets button accessible
+
+### 4.2 Mobile Stats View
+**File:** Update `game/ui/StatsView.jsx`
+
+**Changes needed:**
+- [ ] Stack sections vertically
+- [ ] Larger stat buttons (+/- for allocation)
+- [ ] Collapsible sections for detailed stats
+- [ ] Scrollable content
+
+### 4.3 Mobile Enhancement View
+**File:** Update `game/ui/EnhancementView.jsx`
+
+**Changes needed:**
+- [ ] Larger item selection grid
+- [ ] Big "ENHANCE" button (easy to tap)
+- [ ] Clear success/fail feedback
+- [ ] Auto-enhance controls touch-friendly
+
+### 4.4 Mobile Skills View
+**File:** Update `game/ui/SkillsView.jsx`
+
+**Changes needed:**
+- [ ] Vertical skill list (not grid)
+- [ ] Clear unlock requirements
+- [ ] Touch-friendly activation
+
+### 4.5 Mobile Zone/Map View
+**File:** Update `game/ui/ZoneView.jsx`
+
+**Changes needed:**
+- [ ] Vertical zone list
+- [ ] Larger zone cards
+- [ ] Clear "GO" buttons
+- [ ] Progress bars visible
+
+### 4.6 Mobile "More" Menu
+**File:** `game/ui/MobileMoreMenu.jsx` (new)
+
+**Contains:**
+- [ ] Settings button
+- [ ] Prestige button
+- [ ] Achievements button
+- [ ] Daily Rewards button
+- [ ] Maybe: Volume controls
 
 ---
 
-## Strategic Features
+## Phase 5: Mobile Bottom Bar
+**Status:** NOT STARTED
 
-### Feature #15: Achievement System
-**Status:** ✅ Complete
-**Location:** `game/data/achievements.js`, `game/ui/AchievementsView.jsx`, `game/ui/GameLayout.jsx`
-**Issue:** No long-term player goals beyond zone progression.
-**Solution:** Added comprehensive achievement system with 25+ achievements across 6 categories (Combat, Wealth, Progress, Exploration, Crafting, Prestige). Achievements provide rewards (gold, materials, stat points) and are automatically tracked via state changes. Added new Achievements tab to the UI.
+### 5.1 Create MobileBottomBar Component
+**File:** `game/ui/MobileBottomBar.jsx`
 
----
+Persistent footer with XP and level.
 
-### Feature #16: Daily Login Rewards
-**Status:** ✅ Complete
-**Location:** `game/data/dailyRewards.js`, `game/ui/DailyRewardsModal.jsx`, `game/ui/GameLayout.jsx`
-**Issue:** No retention mechanic for returning players.
-**Solution:** Added 7-day reward cycle with escalating bonuses (gold, materials, stat points). Streak tracking with reset on missed days. Week 2+ multipliers increase rewards. Footer button with notification badge when reward is available.
+**Layout:**
+```
+┌─────────────────────────────────┐
+│ Lv.41    ████████████░░░░  XP  │
+│          1,719,808 / 1,805,943 │
+└─────────────────────────────────┘
+```
 
----
-
-### Feature #17: Mobile Responsiveness
-**Status:** ✅ Complete
-**Location:** `game/ui/GameLayout.jsx`
-**Issue:** Layout breaks on smaller screens.
-**Solution:** Added responsive breakpoints using Tailwind classes. Game canvas takes 40vh on mobile with sidebar below. Reduced padding/margins on mobile. Made tabs horizontally scrollable. Hidden less important info on small screens. Added touch-friendly larger tap targets.
-
----
-
-### Feature #18: Build/Equipment Presets
-**Status:** ✅ Complete
-**Location:** `game/ui/PresetsModal.jsx`, `game/ui/InventoryView.jsx`
-**Issue:** No way to quickly swap between equipment setups.
-**Solution:** Added 5 preset slots for saving equipment configurations. PRESETS button in inventory header opens modal. Save current gear to a slot, load to swap with inventory. Mini preview shows equipped items in each preset.
+**Acceptance Criteria:**
+- [ ] Shows current level prominently
+- [ ] XP progress bar
+- [ ] XP numbers (current / needed)
+- [ ] Level up animation/flash
+- [ ] Safe area padding for home indicator
 
 ---
 
-## Completed Features
+## Phase 6: Polish & Platform
+**Status:** NOT STARTED
 
-- **Feature #1:** Fix Memory Leak in Particle System - Implemented GraphicsPool for object reuse
-- **Feature #2:** Add Error Boundaries - Emergency backup and crash recovery UI
-- **Feature #3:** Fix Auto-Enhance Race Condition - Use refs for fresh state in interval callbacks
-- **Feature #4:** Add Keyboard Navigation - Number keys, arrow keys, and help modal
-- **Feature #5:** Reduce Excessive Re-renders - Split contexts, smart change detection
-- **Feature #6:** Add Asset Loading Indicator - Animated progress bar during sprite loading
-- **Feature #7:** Fix Tooltip Overflow - Full boundary checking for all screen edges
-- **Feature #8:** Add Damage Breakdown - Expandable panel showing DPS, armor reduction, kill time
-- **Feature #10:** Add Save Validation - Schema validation, auto-repair, and save versioning
-- **Feature #11:** Standardize Number Formatting - Centralized format.js utility used across all UI components
-- **Feature #12:** Remove Debug Console Logs - Cleaned up console.log from GameRenderer.jsx and GameContext.jsx
-- **Feature #13:** Extract Magic Numbers to Constants - Centralized constants.js for game balance values
-- **Feature #14:** Add JSDoc Comments - Documented core functions in PlayerSystem, formulas, and CombatSystem
-- **Feature #15:** Achievement System - 25+ achievements across 6 categories with rewards and UI tab
-- **Feature #16:** Daily Login Rewards - 7-day reward cycle with streak tracking and escalating bonuses
-- **Feature #17:** Mobile Responsiveness - Vertical layout on mobile, responsive breakpoints, touch-friendly controls
-- **Feature #18:** Build/Equipment Presets - 5 save slots for equipment configurations with quick load
+### 6.1 Safe Area Handling
+**Acceptance Criteria:**
+- [ ] Padding for iPhone notch (env(safe-area-inset-top))
+- [ ] Padding for home indicator (env(safe-area-inset-bottom))
+- [ ] Works on iPhone X+ and Android with notches
+
+### 6.2 Touch Feedback
+**Acceptance Criteria:**
+- [ ] Buttons have active/pressed states
+- [ ] Haptic feedback where appropriate (stretch)
+- [ ] No 300ms tap delay
+
+### 6.3 Performance Optimization
+**Acceptance Criteria:**
+- [ ] 60fps scrolling
+- [ ] No jank on tab switches
+- [ ] Memory usage reasonable
+- [ ] Battery efficient (requestAnimationFrame when visible only)
+
+### 6.4 Cross-Browser Testing
+**Acceptance Criteria:**
+- [ ] Works on iOS Safari
+- [ ] Works on Chrome Android
+- [ ] Works on Samsung Internet
+- [ ] Works on Firefox Mobile
+
+---
+
+## Phase 7: Capacitor Integration (After UI Complete)
+**Status:** NOT STARTED
+
+### 7.1 Add Capacitor
+```bash
+npm install @capacitor/core @capacitor/cli
+npx cap init "Gear Grinder" "com.gearginder.app"
+npx cap add ios
+npx cap add android
+```
+
+### 7.2 Configure App
+- [ ] App icons (all sizes)
+- [ ] Splash screens
+- [ ] Status bar configuration
+- [ ] Orientation lock (portrait)
+
+### 7.3 Build & Test
+- [ ] iOS Simulator testing
+- [ ] Android Emulator testing
+- [ ] Real device testing
+
+---
+
+## File Structure (New Files)
+
+```
+game/
+├── hooks/
+│   └── useIsMobile.js          ← NEW: Mobile detection
+├── ui/
+│   ├── MobileGameLayout.jsx    ← NEW: Mobile layout shell
+│   ├── MobileCombatView.jsx    ← NEW: Compact combat
+│   ├── MobileTabBar.jsx        ← NEW: Tab navigation
+│   ├── MobileBottomBar.jsx     ← NEW: XP bar footer
+│   └── MobileMoreMenu.jsx      ← NEW: Secondary tabs menu
+```
+
+---
+
+## Implementation Order
+
+1. **Phase 1.1** - useIsMobile hook
+2. **Phase 1.2** - MobileGameLayout shell
+3. **Phase 1.3** - Layout routing
+4. **Phase 2.1** - MobileCombatView (core)
+5. **Phase 2.2** - Combat state connection
+6. **Phase 3.1** - MobileTabBar
+7. **Phase 5.1** - MobileBottomBar
+8. **Phase 4.1-4.6** - Mobile tab content (iterate)
+9. **Phase 6** - Polish
+10. **Phase 7** - Capacitor (separate milestone)
+
+---
+
+## Success Metrics
+
+- [ ] Game is fully playable on iPhone SE (smallest common phone)
+- [ ] All features accessible on mobile
+- [ ] No horizontal scrolling required
+- [ ] Touch targets minimum 44x44px
+- [ ] Load time under 3 seconds on 4G
+- [ ] No layout shifts after load
