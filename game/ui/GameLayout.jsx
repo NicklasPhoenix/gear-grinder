@@ -276,7 +276,7 @@ function DesktopGameLayout() {
                         {/* Boss Stones - compact grid */}
                         {state.bossStones && Object.entries(state.bossStones).some(([_, v]) => v > 0) && (
                             <div className="mt-2 pt-2 border-t border-slate-700/50">
-                                <p className="text-[8px] text-slate-500 uppercase mb-1">Boss Stones</p>
+                                <p className="text-[0.5rem] text-slate-500 uppercase mb-1">Boss Stones</p>
                                 <div className="grid grid-cols-5 lg:grid-cols-6 gap-1">
                                     {Object.entries(BOSS_STONES).map(([key, info]) => {
                                         const count = state.bossStones?.[key] || 0;
@@ -468,8 +468,8 @@ function BossStoneDisplay({ bossSet, value, info }) {
             className="flex items-center gap-0.5 px-1 py-0.5 rounded bg-slate-800/60"
             title={info.name}
         >
-            <BossStoneIcon bossSet={bossSet} size={14} />
-            <span className="text-[10px] font-bold tabular-nums min-w-[24px]" style={{ color: info.color }}>
+            <BossStoneIcon bossSet={bossSet} className="w-[0.875rem] h-[0.875rem]" />
+            <span className="text-[0.625rem] font-bold tabular-nums min-w-[1.5rem]" style={{ color: info.color }}>
                 {formatWithCommas(value)}
             </span>
         </div>

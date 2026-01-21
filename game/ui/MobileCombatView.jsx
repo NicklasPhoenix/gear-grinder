@@ -98,11 +98,11 @@ export default function MobileCombatView({ currentZone, state, gameManager }) {
                     {/* Boss Stones - only show if player has any */}
                     {ownedBossStones.length > 0 && (
                         <div className="pt-2 border-t border-slate-800/50">
-                            <div className="text-[10px] text-slate-500 uppercase font-bold mb-1.5">Boss Stones</div>
+                            <div className="text-[0.625rem] text-slate-500 uppercase font-bold mb-1.5">Boss Stones</div>
                             <div className="flex flex-wrap gap-2">
                                 {ownedBossStones.map(([bossKey, count]) => (
                                     <div key={bossKey} className="flex items-center gap-1 bg-slate-800/50 px-2 py-1 rounded">
-                                        <BossStoneIcon bossSet={bossKey} size={14} />
+                                        <BossStoneIcon bossSet={bossKey} className="w-[0.875rem] h-[0.875rem]" />
                                         <span className="text-xs text-slate-300 capitalize">{bossKey}</span>
                                         <span className="text-xs text-slate-400 font-mono">x{count}</span>
                                     </div>

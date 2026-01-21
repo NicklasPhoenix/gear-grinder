@@ -11,13 +11,16 @@ const GEM_ICONS = {
 };
 
 // Generic gem icon component using asset images
+// If className includes width/height (w-*, h-*), those will be used for sizing
+// Otherwise falls back to the size prop
 function GemIcon({ iconNum, size = 16, className = '' }) {
+    const hasClassSize = className.includes('w-') || className.includes('h-');
     return (
         <img
             src={`/assets/gems/Icon${iconNum}.png`}
             alt=""
-            width={size}
-            height={size}
+            width={hasClassSize ? undefined : size}
+            height={hasClassSize ? undefined : size}
             className={className}
             style={{ imageRendering: 'pixelated' }}
         />
