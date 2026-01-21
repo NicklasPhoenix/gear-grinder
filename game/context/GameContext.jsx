@@ -187,6 +187,11 @@ function validateSave(parsed) {
         gear: {},
         skills: [],
         unlockedSkills: [],
+        // Display & loot filter settings (new in this version)
+        uiScale: 1.0,
+        autoSalvageTier: -1,
+        autoSalvageKeepEffects: true,
+        inventorySort: 'none',
     };
 
     // Check save version for migrations
@@ -256,6 +261,20 @@ function validateSave(parsed) {
     // Validate skills arrays
     if (!Array.isArray(parsed.skills)) parsed.skills = [];
     if (!Array.isArray(parsed.unlockedSkills)) parsed.unlockedSkills = [];
+
+    // Add defaults for new display/loot filter settings (for old saves)
+    if (typeof parsed.uiScale !== 'number' || parsed.uiScale < 0.8 || parsed.uiScale > 1.5) {
+        parsed.uiScale = defaults.uiScale;
+    }
+    if (typeof parsed.autoSalvageTier !== 'number' || parsed.autoSalvageTier < -1 || parsed.autoSalvageTier > 8) {
+        parsed.autoSalvageTier = defaults.autoSalvageTier;
+    }
+    if (typeof parsed.autoSalvageKeepEffects !== 'boolean') {
+        parsed.autoSalvageKeepEffects = defaults.autoSalvageKeepEffects;
+    }
+    if (!['none', 'slot', 'tier', 'score'].includes(parsed.inventorySort)) {
+        parsed.inventorySort = defaults.inventorySort;
+    }
 
     // Log validation errors (but don't crash)
     if (errors.length > 0) {
@@ -474,6 +493,13 @@ export function GameProvider({ children }) {
             document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
     }, []);
+
+    // Apply UI scale setting to document
+    useEffect(() => {
+        const scale = gameState?.uiScale ?? 1.0;
+        document.documentElement.style.setProperty('--ui-scale', scale);
+        document.documentElement.style.fontSize = `${scale * 16}px`;
+    }, [gameState?.uiScale]);
 
     // Toast management functions
     const addToast = useCallback((type, data) => {

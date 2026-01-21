@@ -38,12 +38,49 @@ const SLOT_LABELS = {
     amulet: 'Neck',
 };
 
+// Slot order for sorting by slot
+const SLOT_ORDER = ['weapon', 'helmet', 'armor', 'legs', 'boots', 'belt', 'shield', 'gloves', 'amulet'];
+
+// Sort inventory based on sort mode
+function sortInventory(inventory, sortMode, playerStats) {
+    if (!inventory || sortMode === 'none') return inventory;
+
+    const sorted = [...inventory];
+    switch (sortMode) {
+        case 'slot':
+            sorted.sort((a, b) => {
+                const slotDiff = SLOT_ORDER.indexOf(a.slot) - SLOT_ORDER.indexOf(b.slot);
+                if (slotDiff !== 0) return slotDiff;
+                // Within same slot, sort by tier descending
+                return (b.tier || 0) - (a.tier || 0);
+            });
+            break;
+        case 'tier':
+            sorted.sort((a, b) => {
+                const tierDiff = (b.tier || 0) - (a.tier || 0);
+                if (tierDiff !== 0) return tierDiff;
+                // Within same tier, sort by score
+                return getItemScore(b, playerStats) - getItemScore(a, playerStats);
+            });
+            break;
+        case 'score':
+            sorted.sort((a, b) => getItemScore(b, playerStats) - getItemScore(a, playerStats));
+            break;
+        default:
+            break;
+    }
+    return sorted;
+}
+
 export default function InventoryView({ onHover }) {
     const { state, gameManager } = useGame();
     const [selectedForSalvage, setSelectedForSalvage] = useState(new Set());
     const [showPresets, setShowPresets] = useState(false);
     const { isMobile } = useIsMobile();
     const longPressTimerRef = useRef(null);
+
+    // Get sorted inventory based on settings
+    const sortedInventory = sortInventory(state.inventory, state.inventorySort || 'none', state.stats);
 
     // Long press handler for mobile salvage selection
     const handleTouchStart = useCallback((itemId) => {
@@ -428,7 +465,7 @@ export default function InventoryView({ onHover }) {
                     ) : isMobile ? (
                         /* MOBILE: Full item cards with all stats */
                         <div className="space-y-2">
-                            {state.inventory.map(item => {
+                            {sortedInventory.map(item => {
                                 const tierInfo = TIERS[item.tier];
                                 const isSelected = selectedForSalvage.has(item.id);
                                 const setInfo = item.bossSet ? (BOSS_SETS[item.bossSet] || PRESTIGE_BOSS_SETS[item.bossSet]) : null;
@@ -594,7 +631,7 @@ export default function InventoryView({ onHover }) {
                     ) : (
                         /* DESKTOP: Compact grid with tooltips */
                         <div className="grid gap-1.5 grid-cols-7">
-                            {state.inventory.map(item => {
+                            {sortedInventory.map(item => {
                                 const tierInfo = TIERS[item.tier];
                                 const isSelected = selectedForSalvage.has(item.id);
                                 const setInfo = item.bossSet ? BOSS_SETS[item.bossSet] : null;

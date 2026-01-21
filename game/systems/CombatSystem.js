@@ -29,6 +29,31 @@ export class CombatSystem {
     }
 
     /**
+     * Determines if an item should be auto-salvaged based on loot filter settings.
+     * @param {Object} item - The dropped item
+     * @param {Object} state - Current game state
+     * @returns {boolean} - True if item should be auto-salvaged
+     */
+    shouldAutoSalvageItem(item, state) {
+        // Never auto-salvage boss set items
+        if (item.bossSet || item.isBossItem) return false;
+
+        // Check tier threshold (-1 means disabled, otherwise salvage items at or below threshold)
+        const tierThreshold = state.autoSalvageTier ?? -1;
+        if (tierThreshold === -1) return true; // Old behavior: salvage everything
+
+        // Item is above tier threshold - don't salvage
+        if (item.tier > tierThreshold) return false;
+
+        // Check if we should keep items with effects
+        const keepEffects = state.autoSalvageKeepEffects ?? true;
+        if (keepEffects && item.effects && item.effects.length > 0) return false;
+
+        // Item matches criteria for auto-salvage
+        return true;
+    }
+
+    /**
      * Processes one combat tick. Handles player attack, enemy damage, lifesteal, thorns, and death.
      * @param {number} deltaTime - Time since last tick in milliseconds
      * @returns {Object} Combat updates for visual feedback (lastDamage, isPlayerTurn, etc.)
@@ -161,9 +186,12 @@ export class CombatSystem {
         state.zoneKills = { ...state.zoneKills };
         state.zoneKills[state.currentZone] = (state.zoneKills[state.currentZone] || 0) + 1;
 
-        // Handle gear drop
+        // Handle gear drop with loot filter
         if (droppedGear) {
-            if (state.autoSalvage) {
+            // Check if item should be auto-salvaged based on settings
+            const shouldAutoSalvage = state.autoSalvage && this.shouldAutoSalvageItem(droppedGear, state);
+
+            if (shouldAutoSalvage) {
                 const returns = getSalvageReturns(droppedGear, 1);
                 state.gold += returns.gold;
                 state.enhanceStone += returns.enhanceStone;
@@ -183,7 +211,9 @@ export class CombatSystem {
         const lootItems = [];
         lootItems.push({ text: `+${goldEarned}s`, color: '#c0c0c0' });
         lootItems.push({ text: `+${xpEarned}xp`, color: '#a855f7' });
-        if (droppedGear && !state.autoSalvage) {
+        // Only show gear drop visual if it wasn't auto-salvaged
+        const wasAutoSalvaged = droppedGear && state.autoSalvage && this.shouldAutoSalvageItem(droppedGear, state);
+        if (droppedGear && !wasAutoSalvaged) {
             const tierInfo = TIERS[droppedGear.tier] || TIERS[0];
             lootItems.push({ text: `${droppedGear.name}`, color: tierInfo.color });
         }
@@ -258,18 +288,10 @@ export class CombatSystem {
                 name: bossItem.name,
             };
 
-            // Check if auto-salvage is enabled
-            if (state.autoSalvage) {
-                const returns = getSalvageReturns(newBossItem, 1);
-                state.gold += returns.gold;
-                state.enhanceStone += returns.enhanceStone;
-                log.push({ type: 'autoSalvage', msg: `♻️ ${bossItem.name} salvaged! +${returns.gold}s` });
-                this.callbacks.onFloatingText(`+${returns.gold}s`, 'silver', 'player');
-            } else {
-                // Add to inventory with stacking
-                state.inventory = addItemToInventory(state.inventory, newBossItem);
-                log.push({ type: 'bossLoot', msg: `${bossItem.name} obtained!` });
-            }
+            // Boss items are never auto-salvaged (shouldAutoSalvageItem checks for bossSet/isBossItem)
+            // Add to inventory with stacking
+            state.inventory = addItemToInventory(state.inventory, newBossItem);
+            log.push({ type: 'bossLoot', msg: `${bossItem.name} obtained!` });
         }
     }
 

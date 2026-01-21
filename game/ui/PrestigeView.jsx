@@ -9,7 +9,7 @@ export default function PrestigeView() {
     const { isMobile } = useIsMobile();
 
     const handlePrestige = () => {
-        if (confirm("ASCEND NOW?\n\nThis will reset your level, gold, and gear, but you will keep your Prestige Skills and earn 10 Prestige Stones.")) {
+        if (confirm("ASCEND NOW?\n\nThis will reset your level, gold, gear, and zone progress, but you will keep your Prestige Skills and earn 10 Prestige Stones.")) {
             gameManager.performPrestige();
         }
     };
@@ -22,7 +22,7 @@ export default function PrestigeView() {
         }
     };
 
-    const hasBeatenLastBoss = (state.zoneKills?.[20] || 0) >= 1;
+    const hasBeatenLastBoss = (state.zoneKills?.[39] || 0) >= 1;
 
     // Mobile layout
     if (isMobile) {
@@ -50,7 +50,7 @@ export default function PrestigeView() {
                     {/* Prestige Action */}
                     <div className="bg-slate-950 p-3 rounded-lg border border-slate-800">
                         <p className="text-slate-400 text-xs mb-2">
-                            Defeat the Eternal One in Zone 20 to unlock. Rewards <span className="text-pink-400 font-bold">10 Prestige Stones</span>.
+                            Defeat the Dark Wolf King in Zone 39 to unlock. Rewards <span className="text-pink-400 font-bold">10 Prestige Stones</span>.
                         </p>
                         <button
                             onClick={handlePrestige}
@@ -158,7 +158,7 @@ export default function PrestigeView() {
                     <div className="flex-1">
                         <h3 className="text-white font-bold text-lg mb-1">Perform Ascension</h3>
                         <p className="text-slate-500 text-sm max-w-md">
-                            Requirement: Defeat the Eternal One in Zone 20.
+                            Requirement: Defeat the Dark Wolf King in Zone 39.
                             Resets all progress but rewards <span className="text-pink-400 font-bold">10 Prestige Stones</span> and increases Prestige Level.
                         </p>
                     </div>

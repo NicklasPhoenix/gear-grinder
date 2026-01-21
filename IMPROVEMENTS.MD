@@ -953,16 +953,73 @@ export const calculatePlayerStats = (gameState) => {
 ```
 
 **Effort:** Medium Effort
-Reddit Feedback to be addressed:
+---
 
-Just a FYI, when enhancing equipment, if it fails and go below 10/15/20/25/30 it wont lose its bonus, and when reaching that milestone again, it will gain a new bonus - currently checking if I can just go from guardian to last boss by just enhancing that first gear set 😂
+## Reddit Feedback - ADDRESSED
 
+### 1. Font Size / UI Scale - IMPLEMENTED
+> "i want an option for font size. on 1080p i dont see a thing"
 
-Found a bug when enhancing - didnt really pay attention before, but noticed now that you arent required to have any b.orbs - it will just go negative, but on reload it gets set back to 0 so yeah
+**Solution:** Added UI Scale slider in Settings (80% - 150%)
+- Located in Settings > Display Settings > UI Scale
+- Persisted to game save
+- Helpful text: "Increase this if text is too small on 1080p screens"
+- Applied globally via CSS `font-size` on document root
 
-Same with C.shards
+**Files Changed:**
+- `game/ui/SettingsView.jsx` - Added Display Settings section with UI Scale slider
+- `game/data/initialState.js` - Added `uiScale: 1.0` default
+- `game/context/GameContext.jsx` - Added useEffect to apply scale on load, validation for old saves
 
-As a side note, the equip best gear button is horrible. There are a few meaningful gear choices you can make here, but the equip best button ignores them and equips trash - e.g., will equip a sword when you are specced into int, dividing your damage by 10.
+---
+
+### 2. Loot Filter / Auto-Salvage - IMPLEMENTED
+> "loot filter. to autosalvage gear by rarity/ by presence-absense of special effects"
+
+**Solution:** Added Loot Filter section in Settings with:
+- **Auto-Salvage Threshold**: Buttons for OFF, Common, Uncommon, Rare, Epic, Legendary, Mythic, Divine
+  - Items at or below selected rarity are auto-salvaged
+- **Keep Items with Effects**: Toggle (ON by default)
+  - Items with special effects are never auto-salvaged
+- **Boss items are NEVER auto-salvaged** regardless of settings
+
+**Files Changed:**
+- `game/ui/SettingsView.jsx` - Added Loot Filter section
+- `game/data/initialState.js` - Added `autoSalvageTier: -1`, `autoSalvageKeepEffects: true`
+- `game/systems/CombatSystem.js` - Added `shouldAutoSalvageItem()` helper, updated loot handling
+- `game/context/GameContext.jsx` - Added validation for new settings
+
+---
+
+### 3. Inventory Sorting - IMPLEMENTED
+> "sorting by slot/rarity/score"
+
+**Solution:** Added inventory sorting options in Settings:
+- **None**: Original drop order
+- **By Slot**: Grouped by equipment slot (weapon, helmet, armor, etc.)
+- **By Rarity**: Sorted by tier (highest first)
+- **By Power**: Sorted by item score (highest first)
+
+**Files Changed:**
+- `game/ui/SettingsView.jsx` - Added Inventory Sort buttons
+- `game/ui/InventoryView.jsx` - Added `sortInventory()` function, applied to both mobile/desktop views
+- `game/data/initialState.js` - Added `inventorySort: 'none'`
+- `game/context/GameContext.jsx` - Added validation for new setting
+
+---
+
+### 4. Prestige Screen Fixes - IMPLEMENTED
+> "still indicates that you have to 'defeat the Eternal One in zone 20' and it's not there anymore"
+
+**Solution:**
+- Updated prestige requirement from Zone 20 to Zone 39 (Dark Wolf King)
+- Updated all UI text to reference "Dark Wolf King in Zone 39"
+- Fixed both mobile and desktop layouts
+
+**Files Changed:**
+- `game/managers/GameManager.js` - Changed `lastBossZone` from 20 to 39
+- `game/ui/PrestigeView.jsx` - Updated zone check (39 instead of 20), updated all text strings
+
 ---
 
 ## Summary

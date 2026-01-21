@@ -166,7 +166,7 @@ export class GameManager {
     }
 
     performPrestige() {
-        const lastBossZone = 20; // Eternal One
+        const lastBossZone = 39; // Dark Wolf King - final boss before prestige zones
         const hasBeatenLastBoss = (this.state.zoneKills[lastBossZone] || 0) >= 1;
         if (!hasBeatenLastBoss) return;
 

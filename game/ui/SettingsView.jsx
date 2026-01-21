@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { audioManager } from '../systems/AudioManager';
+import { useGame } from '../context/GameContext';
+import { TIERS } from '../data/items';
 
 function VolumeSlider({ label, value, onChange, muted, onToggleMute, icon }) {
     return (
@@ -46,11 +48,42 @@ function VolumeSlider({ label, value, onChange, muted, onToggleMute, icon }) {
 }
 
 export default function SettingsView() {
+    const { state, gameManager } = useGame();
     const [masterVolume, setMasterVolume] = useState(audioManager.masterVolume);
     const [musicVolume, setMusicVolume] = useState(audioManager.musicVolume);
     const [sfxVolume, setSfxVolume] = useState(audioManager.sfxVolume);
     const [musicMuted, setMusicMuted] = useState(audioManager.musicMuted);
     const [sfxMuted, setSfxMuted] = useState(audioManager.sfxMuted);
+
+    // Display settings
+    const uiScale = state?.uiScale ?? 1.0;
+
+    // Loot filter settings
+    const autoSalvageTier = state?.autoSalvageTier ?? -1;
+    const autoSalvageKeepEffects = state?.autoSalvageKeepEffects ?? true;
+    const inventorySort = state?.inventorySort ?? 'none';
+
+    // Apply UI scale to document
+    useEffect(() => {
+        document.documentElement.style.setProperty('--ui-scale', uiScale);
+        document.documentElement.style.fontSize = `${uiScale * 16}px`;
+    }, [uiScale]);
+
+    const handleUiScaleChange = (val) => {
+        gameManager?.setState(prev => ({ ...prev, uiScale: val }));
+    };
+
+    const handleAutoSalvageTierChange = (tier) => {
+        gameManager?.setState(prev => ({ ...prev, autoSalvageTier: tier }));
+    };
+
+    const handleAutoSalvageKeepEffectsToggle = () => {
+        gameManager?.setState(prev => ({ ...prev, autoSalvageKeepEffects: !prev.autoSalvageKeepEffects }));
+    };
+
+    const handleInventorySortChange = (sort) => {
+        gameManager?.setState(prev => ({ ...prev, inventorySort: sort }));
+    };
 
     const handleMasterChange = (val) => {
         setMasterVolume(val);
@@ -164,6 +197,140 @@ export default function SettingsView() {
                             >
                                 Test SFX
                             </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Display Settings */}
+                <div className="game-panel">
+                    <div className="game-panel-header">Display Settings</div>
+                    <div className="p-4 space-y-4">
+                        {/* UI Scale */}
+                        <div className="bg-slate-900/50 rounded-lg p-4 border border-slate-700">
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-xl">Aa</span>
+                                    <span className="font-bold text-white">UI Scale</span>
+                                </div>
+                                <span className="text-sm text-slate-400">For smaller screens</span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <span className="text-xs text-slate-500">80%</span>
+                                <input
+                                    type="range"
+                                    min="80"
+                                    max="150"
+                                    step="5"
+                                    value={Math.round(uiScale * 100)}
+                                    onChange={(e) => handleUiScaleChange(parseInt(e.target.value) / 100)}
+                                    className="flex-1 h-3 rounded-lg appearance-none cursor-pointer"
+                                    style={{
+                                        background: `linear-gradient(to right, #22c55e 0%, #22c55e ${((uiScale - 0.8) / 0.7) * 100}%, #334155 ${((uiScale - 0.8) / 0.7) * 100}%, #334155 100%)`
+                                    }}
+                                />
+                                <span className="text-xs text-slate-500">150%</span>
+                                <span className="w-14 text-right font-mono text-sm text-white font-bold">
+                                    {Math.round(uiScale * 100)}%
+                                </span>
+                            </div>
+                            <p className="text-xs text-slate-500 mt-2">
+                                Increase this if text is too small on 1080p screens
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Loot Filter Settings */}
+                <div className="game-panel">
+                    <div className="game-panel-header">Loot Filter</div>
+                    <div className="p-4 space-y-4">
+                        {/* Auto-Salvage Tier Threshold */}
+                        <div className="bg-slate-900/50 rounded-lg p-4 border border-slate-700">
+                            <div className="flex items-center justify-between mb-3">
+                                <div>
+                                    <span className="font-bold text-white">Auto-Salvage Threshold</span>
+                                    <p className="text-xs text-slate-500">Automatically salvage items up to this rarity</p>
+                                </div>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                <button
+                                    onClick={() => handleAutoSalvageTierChange(-1)}
+                                    className={`px-3 py-1.5 rounded text-sm font-bold transition-all ${
+                                        autoSalvageTier === -1
+                                            ? 'bg-slate-600 text-white'
+                                            : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                                    }`}
+                                >
+                                    OFF
+                                </button>
+                                {TIERS.slice(0, 7).map((tier, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={() => handleAutoSalvageTierChange(idx)}
+                                        className={`px-3 py-1.5 rounded text-sm font-bold transition-all ${
+                                            autoSalvageTier === idx
+                                                ? 'ring-2 ring-white'
+                                                : 'hover:brightness-125'
+                                        }`}
+                                        style={{
+                                            backgroundColor: tier.color + '40',
+                                            color: tier.color,
+                                        }}
+                                    >
+                                        {tier.name}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Keep Items with Effects */}
+                        <div className="bg-slate-900/50 rounded-lg p-4 border border-slate-700">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <span className="font-bold text-white">Keep Items with Effects</span>
+                                    <p className="text-xs text-slate-500">Don't auto-salvage items that have special effects</p>
+                                </div>
+                                <button
+                                    onClick={handleAutoSalvageKeepEffectsToggle}
+                                    className={`px-4 py-2 rounded text-sm font-bold transition-all active:scale-95 ${
+                                        autoSalvageKeepEffects
+                                            ? 'bg-green-500/30 text-green-400 hover:bg-green-500/40'
+                                            : 'bg-red-500/30 text-red-400 hover:bg-red-500/40'
+                                    }`}
+                                >
+                                    {autoSalvageKeepEffects ? 'ON' : 'OFF'}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Inventory Sort */}
+                        <div className="bg-slate-900/50 rounded-lg p-4 border border-slate-700">
+                            <div className="flex items-center justify-between mb-3">
+                                <div>
+                                    <span className="font-bold text-white">Inventory Sort</span>
+                                    <p className="text-xs text-slate-500">How to organize inventory items</p>
+                                </div>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                {[
+                                    { id: 'none', label: 'None' },
+                                    { id: 'slot', label: 'By Slot' },
+                                    { id: 'tier', label: 'By Rarity' },
+                                    { id: 'score', label: 'By Power' },
+                                ].map(opt => (
+                                    <button
+                                        key={opt.id}
+                                        onClick={() => handleInventorySortChange(opt.id)}
+                                        className={`px-3 py-1.5 rounded text-sm font-bold transition-all ${
+                                            inventorySort === opt.id
+                                                ? 'bg-blue-600 text-white'
+                                                : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                                        }`}
+                                    >
+                                        {opt.label}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
