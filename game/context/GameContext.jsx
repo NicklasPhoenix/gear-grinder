@@ -494,11 +494,15 @@ export function GameProvider({ children }) {
         };
     }, []);
 
-    // Apply UI scale setting to document
+    // Apply UI scale setting using CSS zoom (scales everything proportionally)
     useEffect(() => {
         const scale = gameState?.uiScale ?? 1.0;
         document.documentElement.style.setProperty('--ui-scale', scale);
-        document.documentElement.style.fontSize = `${scale * 16}px`;
+        // Use CSS zoom on the game container - scales everything including layouts
+        const gameContainer = document.getElementById('game-root');
+        if (gameContainer) {
+            gameContainer.style.zoom = scale;
+        }
     }, [gameState?.uiScale]);
 
     // Toast management functions

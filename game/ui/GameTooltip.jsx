@@ -225,7 +225,7 @@ export default function GameTooltip({ tooltip }) {
                         className="flex flex-col items-center px-2 py-1 rounded-lg"
                         style={{ backgroundColor: `${rating.color}20`, border: `1px solid ${rating.color}40` }}
                     >
-                        <span className="text-[0.625rem] text-slate-400 uppercase">Rating</span>
+                        <span className="text-[10px] text-slate-400 uppercase">Rating</span>
                         <span className="font-bold text-lg leading-none" style={{ color: rating.color }}>
                             {rating.label}
                         </span>
@@ -235,23 +235,23 @@ export default function GameTooltip({ tooltip }) {
 
             {/* Base Stats Section */}
             <div className="px-4 py-3 border-b border-slate-700/30">
-                <div className="text-[0.625rem] text-slate-500 uppercase tracking-wider mb-2">Base Stats</div>
+                <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">Base Stats</div>
                 <div className="grid grid-cols-3 gap-2 text-sm">
                     {baseDmg > 0 && (
                         <div className="flex flex-col items-center p-1.5 bg-red-500/10 rounded">
-                            <span className="text-[0.625rem] text-red-400">DMG</span>
+                            <span className="text-[10px] text-red-400">DMG</span>
                             <span className="font-bold text-red-300">+{baseDmg}</span>
                         </div>
                     )}
                     {baseHp > 0 && (
                         <div className="flex flex-col items-center p-1.5 bg-green-500/10 rounded">
-                            <span className="text-[0.625rem] text-green-400">HP</span>
+                            <span className="text-[10px] text-green-400">HP</span>
                             <span className="font-bold text-green-300">+{baseHp}</span>
                         </div>
                     )}
                     {baseArmor > 0 && (
                         <div className="flex flex-col items-center p-1.5 bg-blue-500/10 rounded">
-                            <span className="text-[0.625rem] text-blue-400">Armor</span>
+                            <span className="text-[10px] text-blue-400">Armor</span>
                             <span className="font-bold text-blue-300">+{baseArmor}</span>
                         </div>
                     )}
@@ -275,7 +275,7 @@ export default function GameTooltip({ tooltip }) {
             {/* Comparison Section - Only show when hovering inventory items */}
             {isInventoryItem && equippedItem && (
                 <div className="px-4 py-3 border-b border-slate-700/30 bg-gradient-to-r from-blue-500/5 to-purple-500/5">
-                    <div className="text-[0.625rem] text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                    <div className="text-[10px] text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
                         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                         </svg>
@@ -284,28 +284,28 @@ export default function GameTooltip({ tooltip }) {
                     <div className="grid grid-cols-4 gap-2 text-xs">
                         {/* DMG comparison */}
                         <div className={`flex flex-col items-center p-1.5 rounded ${dmgDiff !== null ? (dmgDiff > 0 ? 'bg-green-500/15' : 'bg-red-500/15') : 'bg-slate-700/20'}`}>
-                            <span className="text-[0.5625rem] text-slate-400">DMG</span>
+                            <span className="text-[9px] text-slate-400">DMG</span>
                             <span className={`font-bold ${dmgDiff === null ? 'text-slate-400' : dmgDiff > 0 ? 'text-green-400' : 'text-red-400'}`}>
                                 {dmgDiff === null ? '=' : dmgDiff > 0 ? `+${dmgDiff}` : dmgDiff}
                             </span>
                         </div>
                         {/* HP comparison */}
                         <div className={`flex flex-col items-center p-1.5 rounded ${hpDiff !== null ? (hpDiff > 0 ? 'bg-green-500/15' : 'bg-red-500/15') : 'bg-slate-700/20'}`}>
-                            <span className="text-[0.5625rem] text-slate-400">HP</span>
+                            <span className="text-[9px] text-slate-400">HP</span>
                             <span className={`font-bold ${hpDiff === null ? 'text-slate-400' : hpDiff > 0 ? 'text-green-400' : 'text-red-400'}`}>
                                 {hpDiff === null ? '=' : hpDiff > 0 ? `+${hpDiff}` : hpDiff}
                             </span>
                         </div>
                         {/* Armor comparison */}
                         <div className={`flex flex-col items-center p-1.5 rounded ${armorDiff !== null ? (armorDiff > 0 ? 'bg-green-500/15' : 'bg-red-500/15') : 'bg-slate-700/20'}`}>
-                            <span className="text-[0.5625rem] text-slate-400">ARM</span>
+                            <span className="text-[9px] text-slate-400">ARM</span>
                             <span className={`font-bold ${armorDiff === null ? 'text-slate-400' : armorDiff > 0 ? 'text-green-400' : 'text-red-400'}`}>
                                 {armorDiff === null ? '=' : armorDiff > 0 ? `+${armorDiff}` : armorDiff}
                             </span>
                         </div>
                         {/* Score comparison */}
                         <div className={`flex flex-col items-center p-1.5 rounded ${scoreDiff !== null ? (scoreDiff > 0 ? 'bg-green-500/15' : 'bg-red-500/15') : 'bg-slate-700/20'}`}>
-                            <span className="text-[0.5625rem] text-slate-400">PWR</span>
+                            <span className="text-[9px] text-slate-400">PWR</span>
                             <span className={`font-bold ${scoreDiff === null ? 'text-slate-400' : scoreDiff > 0 ? 'text-green-400' : 'text-red-400'}`}>
                                 {scoreDiff === null ? '=' : scoreDiff > 0 ? `+${scoreDiff}` : scoreDiff}
                             </span>
@@ -313,7 +313,7 @@ export default function GameTooltip({ tooltip }) {
                     </div>
                     {/* Upgrade indicator */}
                     {scoreDiff !== null && (
-                        <div className={`mt-2 text-center text-[0.625rem] font-bold uppercase tracking-wider ${scoreDiff > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        <div className={`mt-2 text-center text-[10px] font-bold uppercase tracking-wider ${scoreDiff > 0 ? 'text-green-400' : 'text-red-400'}`}>
                             {scoreDiff > 0 ? '^ UPGRADE ^' : 'v DOWNGRADE v'}
                         </div>
                     )}
@@ -323,7 +323,7 @@ export default function GameTooltip({ tooltip }) {
             {/* Show "Empty slot" comparison when no item equipped */}
             {isInventoryItem && !equippedItem && (
                 <div className="px-4 py-2 border-b border-slate-700/30 bg-green-500/5">
-                    <div className="text-[0.625rem] text-green-400 uppercase tracking-wider text-center font-bold">
+                    <div className="text-[10px] text-green-400 uppercase tracking-wider text-center font-bold">
                         Slot Empty - Equipping will add stats!
                     </div>
                 </div>
@@ -336,7 +336,7 @@ export default function GameTooltip({ tooltip }) {
 
                 return (
                     <div className="px-4 py-3 border-b border-slate-700/30">
-                        <div className="text-[0.625rem] text-slate-500 uppercase tracking-wider mb-2">Special Effects</div>
+                        <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">Special Effects</div>
 
                         {/* Regular effects - full display with descriptions */}
                         {regularEffects.length > 0 && (
@@ -350,7 +350,7 @@ export default function GameTooltip({ tooltip }) {
                                                 <span className="font-mono font-bold text-sm text-purple-300">+{eff.value}</span>
                                             </div>
                                             {desc && (
-                                                <div className="text-[0.625rem] text-slate-400">{desc(eff.value)}</div>
+                                                <div className="text-[10px] text-slate-400">{desc(eff.value)}</div>
                                             )}
                                         </div>
                                     );
@@ -361,14 +361,14 @@ export default function GameTooltip({ tooltip }) {
                         {/* Awakened effects - compact 2-column grid */}
                         {awakenedEffects.length > 0 && (
                             <div className="p-2 rounded bg-gradient-to-r from-orange-500/10 to-yellow-500/10 border border-orange-500/20">
-                                <div className="text-[0.5625rem] text-orange-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                                <div className="text-[9px] text-orange-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
                                     <span className="text-yellow-400">★</span> Awakening Bonuses
                                 </div>
                                 <div className="grid grid-cols-2 gap-x-3 gap-y-1">
                                     {awakenedEffects.map((eff, i) => (
-                                        <div key={i} className="flex items-center justify-between text-[0.6875rem]">
+                                        <div key={i} className="flex items-center justify-between text-[11px]">
                                             <span className="text-orange-200 flex items-center gap-1">
-                                                <span className="text-[0.5625rem] text-orange-400/70">+{eff.milestone}</span>
+                                                <span className="text-[9px] text-orange-400/70">+{eff.milestone}</span>
                                                 {eff.name}
                                             </span>
                                             <span className="font-mono font-bold text-orange-300">+{eff.value}</span>
@@ -406,7 +406,7 @@ export default function GameTooltip({ tooltip }) {
                                 {displayCount}
                             </span>
                         </div>
-                        <div className="space-y-0.5 text-[0.625rem]">
+                        <div className="space-y-0.5 text-[10px]">
                             {bossSet.setBonuses.map((bonus, i) => {
                                 // Hide secret bonus unless it's active
                                 if (bonus.secret && equippedSetPieces < bonus.pieces) return null;
@@ -442,7 +442,7 @@ export default function GameTooltip({ tooltip }) {
                         </div>
                         {hasSecretBonus && (
                             <div className="mt-2 pt-2 border-t border-yellow-500/30 text-center">
-                                <span className="text-[0.625rem] text-yellow-400 font-bold uppercase tracking-wider">
+                                <span className="text-[10px] text-yellow-400 font-bold uppercase tracking-wider">
                                     Secret Set Bonus Unlocked!
                                 </span>
                             </div>
@@ -462,11 +462,11 @@ export default function GameTooltip({ tooltip }) {
                         {stage.icon && (
                             <span style={{ color: stage.color }} className="text-sm">{stage.icon}</span>
                         )}
-                        <span className="text-[0.625rem] uppercase font-bold" style={{ color: stage.color }}>
+                        <span className="text-[10px] uppercase font-bold" style={{ color: stage.color }}>
                             {stage.name}
                         </span>
                         {item.plus >= 15 && (
-                            <span className="text-[0.625rem] px-1.5 py-0.5 rounded" style={{ color: stage.color, backgroundColor: `${stage.color}20` }}>
+                            <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ color: stage.color, backgroundColor: `${stage.color}20` }}>
                                 {formatBonus((enhanceBonus.dmgMult - 1) * 100)} DMG
                             </span>
                         )}
@@ -476,10 +476,10 @@ export default function GameTooltip({ tooltip }) {
 
             {/* Footer with Score */}
             <div className="px-4 py-2 bg-slate-950/50 flex justify-between items-center">
-                <span className="text-[0.625rem] text-slate-500 uppercase">Item Power</span>
+                <span className="text-[10px] text-slate-500 uppercase">Item Power</span>
                 <div className="flex items-center gap-2">
                     {(item.count || 1) > 1 && (
-                        <span className="text-[0.625rem] text-blue-400 bg-blue-500/20 px-1.5 py-0.5 rounded">x{item.count}</span>
+                        <span className="text-[10px] text-blue-400 bg-blue-500/20 px-1.5 py-0.5 rounded">x{item.count}</span>
                     )}
                     <span className="font-mono font-bold text-slate-300">{score}</span>
                 </div>

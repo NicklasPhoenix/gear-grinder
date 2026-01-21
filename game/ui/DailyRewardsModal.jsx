@@ -120,7 +120,7 @@ export default function DailyRewardsModal({ onClose }) {
                                             : 'bg-slate-700/50 border border-slate-600/50'
                                 } ${isWeekly ? 'ring-2 ring-purple-500/50' : ''}`}
                             >
-                                <div className="text-[0.625rem] text-slate-400 mb-1">Day {dayNum}</div>
+                                <div className="text-[10px] text-slate-400 mb-1">Day {dayNum}</div>
                                 <div className="text-lg">
                                     {isPast ? (
                                         <span className="text-green-400">✓</span>

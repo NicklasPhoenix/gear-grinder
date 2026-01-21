@@ -504,7 +504,7 @@ export default function EnhancementView() {
                             </div>
                             {/* Pity streak info */}
                             {failStreak > 0 && (
-                                <div className="text-[0.625rem] text-cyan-400 mt-1 text-center">
+                                <div className="text-[10px] text-cyan-400 mt-1 text-center">
                                     Pity: {failStreak} fails (+{pityBonus}% bonus)
                                 </div>
                             )}
@@ -513,12 +513,12 @@ export default function EnhancementView() {
                         {/* Stats Preview */}
                         <div className="grid grid-cols-2 gap-2 mb-2">
                             <div className="bg-slate-800/50 rounded p-2">
-                                <div className="text-slate-500 text-[0.625rem] uppercase mb-1 font-semibold">Current</div>
+                                <div className="text-slate-500 text-[10px] uppercase mb-1 font-semibold">Current</div>
                                 <div className="text-red-300 text-sm font-semibold">DMG +{currentStats.dmgBonus}</div>
                                 <div className="text-green-300 text-sm font-semibold">HP +{currentStats.hpBonus}</div>
                             </div>
                             <div className="bg-blue-900/30 rounded p-2 border border-blue-500/30">
-                                <div className="text-blue-400 text-[0.625rem] uppercase mb-1 font-semibold">Next</div>
+                                <div className="text-blue-400 text-[10px] uppercase mb-1 font-semibold">Next</div>
                                 <div className="text-red-300 text-sm font-semibold">DMG +{nextStats.dmgBonus}</div>
                                 <div className="text-green-300 text-sm font-semibold">HP +{nextStats.hpBonus}</div>
                             </div>
@@ -533,7 +533,7 @@ export default function EnhancementView() {
                                 <div className="mb-2 p-2 bg-gradient-to-r from-orange-900/20 to-yellow-900/20 rounded border border-orange-500/30">
                                     <div className="flex items-center gap-1.5 mb-1.5">
                                         <span className="text-yellow-400 text-sm">★</span>
-                                        <span className="text-[0.625rem] uppercase font-bold text-orange-300">Awakening Progress</span>
+                                        <span className="text-[10px] uppercase font-bold text-orange-300">Awakening Progress</span>
                                     </div>
                                     {/* Milestone dots */}
                                     <div className="flex items-center justify-between mb-1">
@@ -543,7 +543,7 @@ export default function EnhancementView() {
                                             return (
                                                 <div key={m} className="flex flex-col items-center">
                                                     <div
-                                                        className={`w-5 h-5 rounded-full flex items-center justify-center text-[0.625rem] font-bold ${
+                                                        className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
                                                             achieved
                                                                 ? 'bg-orange-500 text-white'
                                                                 : isNext
@@ -553,7 +553,7 @@ export default function EnhancementView() {
                                                     >
                                                         {achieved ? '★' : m}
                                                     </div>
-                                                    <span className={`text-[0.5rem] ${achieved ? 'text-orange-300' : 'text-slate-500'}`}>
+                                                    <span className={`text-[8px] ${achieved ? 'text-orange-300' : 'text-slate-500'}`}>
                                                         +{m}
                                                     </span>
                                                 </div>
@@ -564,7 +564,7 @@ export default function EnhancementView() {
                                     {awakenedEffects.length > 0 && (
                                         <div className="pt-1.5 border-t border-orange-500/20 space-y-0.5">
                                             {awakenedEffects.map((eff, i) => (
-                                                <div key={i} className="flex justify-between text-[0.625rem]">
+                                                <div key={i} className="flex justify-between text-[10px]">
                                                     <span className="text-orange-200">★ {eff.name}</span>
                                                     <span className="text-orange-300 font-mono">+{eff.value}</span>
                                                 </div>
@@ -573,7 +573,7 @@ export default function EnhancementView() {
                                     )}
                                     {/* Next milestone preview */}
                                     {nextMilestone && (
-                                        <div className="mt-1 text-center text-[0.5625rem] text-yellow-400/80">
+                                        <div className="mt-1 text-center text-[9px] text-yellow-400/80">
                                             Next awakening at +{nextMilestone} ({nextMilestone - selectedItem.plus} to go)
                                         </div>
                                     )}

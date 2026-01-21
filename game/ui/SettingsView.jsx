@@ -63,10 +63,13 @@ export default function SettingsView() {
     const autoSalvageKeepEffects = state?.autoSalvageKeepEffects ?? true;
     const inventorySort = state?.inventorySort ?? 'none';
 
-    // Apply UI scale to document
+    // Apply UI scale using CSS zoom (handled by GameContext, but also here for immediate feedback)
     useEffect(() => {
         document.documentElement.style.setProperty('--ui-scale', uiScale);
-        document.documentElement.style.fontSize = `${uiScale * 16}px`;
+        const gameContainer = document.getElementById('game-root');
+        if (gameContainer) {
+            gameContainer.style.zoom = uiScale;
+        }
     }, [uiScale]);
 
     const handleUiScaleChange = (val) => {

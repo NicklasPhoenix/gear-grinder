@@ -329,7 +329,7 @@ export default function StatsView() {
                                     </div>
                                 </div>
                                 {/* Bottom row: Description */}
-                                <div className="text-[0.625rem] text-slate-500 mt-1 leading-tight">
+                                <div className="text-[10px] text-slate-500 mt-1 leading-tight">
                                     {STATS[key].desc}
                                 </div>
                             </div>
@@ -372,7 +372,7 @@ export default function StatsView() {
                             <div className="mt-2 p-3 bg-slate-900/70 rounded border border-slate-700/50 text-xs space-y-3">
                                 {/* Damage Calculation */}
                                 <div>
-                                    <div className="text-slate-500 uppercase text-[0.625rem] mb-1.5">Damage Output</div>
+                                    <div className="text-slate-500 uppercase text-[10px] mb-1.5">Damage Output</div>
                                     <div className="space-y-1">
                                         <div className="flex justify-between">
                                             <span className="text-slate-400">Base Hit</span>
@@ -395,7 +395,7 @@ export default function StatsView() {
 
                                 {/* Defense Calculation */}
                                 <div>
-                                    <div className="text-slate-500 uppercase text-[0.625rem] mb-1.5">vs {currentZone.name}</div>
+                                    <div className="text-slate-500 uppercase text-[10px] mb-1.5">vs {currentZone.name}</div>
                                     <div className="space-y-1">
                                         <div className="flex justify-between">
                                             <span className="text-slate-400">Enemy Base Dmg</span>

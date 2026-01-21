@@ -67,7 +67,7 @@ export default function AchievementsView() {
                                 style={{ color: ACHIEVEMENT_CATEGORIES[category]?.color || '#94a3b8' }}
                             >
                                 <span
-                                    className="w-5 h-5 rounded flex items-center justify-center text-[0.625rem] font-bold"
+                                    className="w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold"
                                     style={{ backgroundColor: `${ACHIEVEMENT_CATEGORIES[category]?.color || '#94a3b8'}30` }}
                                 >
                                     {ACHIEVEMENT_CATEGORIES[category]?.icon || '?'}
@@ -118,7 +118,7 @@ export default function AchievementsView() {
                                 style={{ color: ACHIEVEMENT_CATEGORIES[category]?.color || '#94a3b8' }}
                             >
                                 <span
-                                    className="w-5 h-5 rounded flex items-center justify-center text-[0.625rem] font-bold"
+                                    className="w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold"
                                     style={{ backgroundColor: `${ACHIEVEMENT_CATEGORIES[category]?.color || '#94a3b8'}30` }}
                                 >
                                     {ACHIEVEMENT_CATEGORIES[category]?.icon || '?'}
@@ -192,7 +192,7 @@ function AchievementCard({ achievement, isUnlocked, state, isMobile }) {
                             {achievement.name}
                         </span>
                         {isUnlocked && (
-                            <span className="text-[0.625rem] text-green-400 font-bold">DONE</span>
+                            <span className="text-[10px] text-green-400 font-bold">DONE</span>
                         )}
                     </div>
                     <p className={`${isMobile ? 'text-xs' : 'text-xs'} text-slate-400 mt-0.5`}>{achievement.description}</p>
@@ -200,7 +200,7 @@ function AchievementCard({ achievement, isUnlocked, state, isMobile }) {
                     {/* Progress bar - only show if not unlocked */}
                     {!isUnlocked && (
                         <div className="mt-2">
-                            <div className="flex justify-between text-[0.625rem] text-slate-500 mb-1">
+                            <div className="flex justify-between text-[10px] text-slate-500 mb-1">
                                 <span>Progress</span>
                                 <span>{formatWithCommas(Math.min(progress, achievement.target))} / {formatWithCommas(achievement.target)}</span>
                             </div>
@@ -246,7 +246,7 @@ function AchievementCard({ achievement, isUnlocked, state, isMobile }) {
 function RewardBadge({ label, color }) {
     return (
         <span
-            className="text-[0.625rem] px-1.5 py-0.5 rounded font-semibold"
+            className="text-[10px] px-1.5 py-0.5 rounded font-semibold"
             style={{ backgroundColor: `${color}20`, color }}
         >
             {label}

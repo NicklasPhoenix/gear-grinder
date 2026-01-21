@@ -119,7 +119,9 @@ export default function App() {
     return (
         <ErrorBoundary>
             <GameProvider>
-                <GameLayout />
+                <div id="game-root" className="min-h-screen">
+                    <GameLayout />
+                </div>
             </GameProvider>
         </ErrorBoundary>
     );

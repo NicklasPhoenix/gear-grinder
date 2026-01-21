@@ -240,14 +240,14 @@ function DesktopGameLayout() {
                                     )}
                                 </div>
                                 <div>
-                                    <p className="text-[0.625rem] lg:text-xs text-slate-400 uppercase tracking-wider hidden sm:block">Current Zone</p>
+                                    <p className="text-[10px] lg:text-xs text-slate-400 uppercase tracking-wider hidden sm:block">Current Zone</p>
                                     <h2 className={`font-bold text-sm lg:text-lg ${currentZone.isBoss ? 'text-red-400' : 'text-white'}`}>
                                         {currentZone.name}
                                     </h2>
                                 </div>
                             </div>
                             {currentZone.isBoss && (
-                                <div className="mt-1 lg:mt-2 px-2 py-0.5 lg:py-1 bg-red-500/20 rounded text-[0.625rem] lg:text-xs text-red-400 font-bold uppercase tracking-wider text-center">
+                                <div className="mt-1 lg:mt-2 px-2 py-0.5 lg:py-1 bg-red-500/20 rounded text-[10px] lg:text-xs text-red-400 font-bold uppercase tracking-wider text-center">
                                     Boss
                                 </div>
                             )}
@@ -276,7 +276,7 @@ function DesktopGameLayout() {
                         {/* Boss Stones - compact grid */}
                         {state.bossStones && Object.entries(state.bossStones).some(([_, v]) => v > 0) && (
                             <div className="mt-2 pt-2 border-t border-slate-700/50">
-                                <p className="text-[0.5rem] text-slate-500 uppercase mb-1">Boss Stones</p>
+                                <p className="text-[8px] text-slate-500 uppercase mb-1">Boss Stones</p>
                                 <div className="grid grid-cols-5 lg:grid-cols-6 gap-1">
                                     {Object.entries(BOSS_STONES).map(([key, info]) => {
                                         const count = state.bossStones?.[key] || 0;
@@ -370,7 +370,7 @@ function DesktopGameLayout() {
                                 className="text-slate-600 hover:text-slate-400 transition-colors"
                                 aria-label="Keyboard shortcuts"
                             >
-                                <kbd className="px-1.5 py-0.5 bg-slate-800 rounded text-[0.625rem] font-mono">?</kbd>
+                                <kbd className="px-1.5 py-0.5 bg-slate-800 rounded text-[10px] font-mono">?</kbd>
                             </button>
                             <span className="flex items-center gap-1">
                                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
@@ -418,9 +418,9 @@ function TabButton({ children, active, onClick, icon, shortcut }) {
             <span className={`transition-transform duration-200 ${active ? 'scale-110' : 'group-hover:scale-105'}`}>
                 {icon}
             </span>
-            <span className="text-[0.625rem] font-semibold uppercase tracking-wider">{children}</span>
+            <span className="text-[10px] font-semibold uppercase tracking-wider">{children}</span>
             {shortcut && (
-                <span className="absolute top-1 right-1 text-[0.5rem] text-slate-600 font-mono">{shortcut}</span>
+                <span className="absolute top-1 right-1 text-[8px] text-slate-600 font-mono">{shortcut}</span>
             )}
             {active && (
                 <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-blue-500 rounded-full" />
@@ -432,7 +432,7 @@ function TabButton({ children, active, onClick, icon, shortcut }) {
 function StatMini({ label, value, color }) {
     return (
         <div className="text-center">
-            <p className="text-[0.625rem] text-slate-400 uppercase tracking-wider">{label}</p>
+            <p className="text-[10px] text-slate-400 uppercase tracking-wider">{label}</p>
             <p className={`text-lg font-bold ${color}`}>{typeof value === 'number' ? formatWithCommas(value) : value}</p>
         </div>
     );
@@ -453,7 +453,7 @@ function MaterialDisplay({ type, value, color, className = '' }) {
                 <MaterialIcon type={type} size={20} />
             </div>
             <div className="min-w-[70px] lg:min-w-[90px]">
-                <p className="text-[0.5rem] text-slate-500 uppercase">{MATERIAL_NAMES[type]}</p>
+                <p className="text-[8px] text-slate-500 uppercase">{MATERIAL_NAMES[type]}</p>
                 <p className={`text-sm lg:text-base font-bold ${color} leading-none tabular-nums`}>
                     {typeof value === 'number' ? formatWithCommas(value) : value}
                 </p>
@@ -468,8 +468,8 @@ function BossStoneDisplay({ bossSet, value, info }) {
             className="flex items-center gap-0.5 px-1 py-0.5 rounded bg-slate-800/60"
             title={info.name}
         >
-            <BossStoneIcon bossSet={bossSet} className="w-[0.875rem] h-[0.875rem]" />
-            <span className="text-[0.625rem] font-bold tabular-nums min-w-[1.5rem]" style={{ color: info.color }}>
+            <BossStoneIcon bossSet={bossSet} size={14} />
+            <span className="text-[10px] font-bold tabular-nums min-w-[1.5rem]" style={{ color: info.color }}>
                 {formatWithCommas(value)}
             </span>
         </div>
@@ -500,7 +500,7 @@ function SpeedControl() {
                 <button
                     key={s}
                     onClick={() => handleSpeedChange(s)}
-                    className={`px-2 py-0.5 rounded text-[0.625rem] font-bold transition-all ${
+                    className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all ${
                         speed === s
                             ? 'bg-blue-600 text-white'
                             : 'bg-slate-700 text-slate-400 hover:bg-slate-600'
@@ -532,7 +532,7 @@ function ResetButton() {
     return (
         <button
             onClick={handleReset}
-            className={`px-2 py-0.5 rounded text-[0.625rem] font-bold transition-all ${
+            className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all ${
                 confirming
                     ? 'bg-red-600 text-white'
                     : 'bg-slate-700 text-slate-400 hover:bg-red-600/50 hover:text-red-300'
@@ -823,7 +823,7 @@ function KeyboardHelpModal({ onClose }) {
 
                 <div className="mt-6 pt-4 border-t border-slate-700 text-center">
                     <p className="text-slate-500 text-xs">
-                        Press <kbd className="px-1.5 py-0.5 bg-slate-900 rounded text-[0.625rem] font-mono">?</kbd> or <kbd className="px-1.5 py-0.5 bg-slate-900 rounded text-[0.625rem] font-mono">Esc</kbd> to close
+                        Press <kbd className="px-1.5 py-0.5 bg-slate-900 rounded text-[10px] font-mono">?</kbd> or <kbd className="px-1.5 py-0.5 bg-slate-900 rounded text-[10px] font-mono">Esc</kbd> to close
                     </p>
                 </div>
             </div>

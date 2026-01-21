@@ -237,7 +237,7 @@ export default function PresetsModal({ onClose }) {
                                                     return (
                                                         <div
                                                             key={slot}
-                                                            className={`w-6 h-6 rounded flex items-center justify-center text-[0.5rem] ${
+                                                            className={`w-6 h-6 rounded flex items-center justify-center text-[8px] ${
                                                                 item ? 'bg-slate-600' : 'bg-slate-800'
                                                             }`}
                                                             style={{
