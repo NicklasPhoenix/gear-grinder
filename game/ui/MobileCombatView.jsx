@@ -50,7 +50,7 @@ export default function MobileCombatView({ currentZone, state, gameManager }) {
                         {currentZone?.name || 'Unknown'}
                     </span>
                     {currentZone?.isBoss && (
-                        <span className="text-[10px] bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded font-bold">
+                        <span className="text-[0.625rem] bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded font-bold">
                             BOSS
                         </span>
                     )}

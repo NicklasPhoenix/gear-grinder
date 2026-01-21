@@ -37,11 +37,11 @@ export default function PrestigeView() {
                         </div>
                         <div className="flex gap-2">
                             <div className="bg-slate-900 px-3 py-2 rounded-lg border border-pink-500/30 text-center">
-                                <div className="text-[10px] uppercase text-pink-400 font-bold">Level</div>
+                                <div className="text-[0.625rem] uppercase text-pink-400 font-bold">Level</div>
                                 <div className="text-xl font-mono text-pink-500 font-bold">{state.prestigeLevel || 0}</div>
                             </div>
                             <div className="bg-slate-900 px-3 py-2 rounded-lg border border-blue-500/30 text-center">
-                                <div className="text-[10px] uppercase text-blue-400 font-bold">Stones</div>
+                                <div className="text-[0.625rem] uppercase text-blue-400 font-bold">Stones</div>
                                 <div className="text-xl font-mono text-blue-500 font-bold">{state.prestigeStones || 0}</div>
                             </div>
                         </div>
@@ -114,15 +114,15 @@ export default function PrestigeView() {
                     <h4 className="text-xs text-slate-500 uppercase mb-2 font-bold">System Unlocks</h4>
                     <div className="grid grid-cols-3 gap-2 text-center">
                         <div>
-                            <div className="text-[10px] text-slate-500">P1</div>
+                            <div className="text-[0.625rem] text-slate-500">P1</div>
                             <div className="text-xs text-blue-400 font-bold">Astral</div>
                         </div>
                         <div>
-                            <div className="text-[10px] text-slate-500">P2</div>
+                            <div className="text-[0.625rem] text-slate-500">P2</div>
                             <div className="text-xs text-blue-400 font-bold">Cosmic</div>
                         </div>
                         <div>
-                            <div className="text-[10px] text-slate-500">P3</div>
+                            <div className="text-[0.625rem] text-slate-500">P3</div>
                             <div className="text-xs text-blue-400 font-bold">Primordial</div>
                         </div>
                     </div>

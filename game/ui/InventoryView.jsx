@@ -260,7 +260,7 @@ export default function InventoryView({ onHover }) {
                                     textShadow: '0 1px 2px rgba(0,0,0,0.8)'
                                 }}
                             >
-                                {stage.icon && <span className="text-[10px] mr-0.5">{stage.icon}</span>}
+                                {stage.icon && <span className="text-[0.625rem] mr-0.5">{stage.icon}</span>}
                                 +{item.plus}
                             </div>
                         )}
@@ -271,7 +271,7 @@ export default function InventoryView({ onHover }) {
                     </>
                 ) : (
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className="text-[10px] text-slate-600 font-medium uppercase">{SLOT_LABELS[slot]}</span>
+                        <span className="text-[0.625rem] text-slate-600 font-medium uppercase">{SLOT_LABELS[slot]}</span>
                     </div>
                 )}
             </div>
@@ -297,7 +297,7 @@ export default function InventoryView({ onHover }) {
             return (
                 <div className="flex items-center gap-2 p-2 bg-slate-800/40 rounded border border-slate-700/40">
                     <div className="w-8 h-8 bg-slate-700/50 rounded flex items-center justify-center">
-                        <span className="text-[8px] text-slate-500 uppercase">{SLOT_LABELS[slot]}</span>
+                        <span className="text-[0.5rem] text-slate-500 uppercase">{SLOT_LABELS[slot]}</span>
                     </div>
                     <span className="text-xs text-slate-500 italic">Empty</span>
                 </div>
@@ -320,18 +320,18 @@ export default function InventoryView({ onHover }) {
                         <ItemIcon item={item} size="sm" />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <div className="text-[11px] font-bold truncate" style={{ color: tierInfo?.color }}>
+                        <div className="text-[0.6875rem] font-bold truncate" style={{ color: tierInfo?.color }}>
                             {item.name}
-                            {stage && <span className="ml-1 text-[9px]" style={{ color: stage.color }}>+{item.plus}</span>}
+                            {stage && <span className="ml-1 text-[0.5625rem]" style={{ color: stage.color }}>+{item.plus}</span>}
                         </div>
-                        <div className="flex gap-1 text-[9px]">
+                        <div className="flex gap-1 text-[0.5625rem]">
                             {stats.dmg > 0 && <span className="text-red-400">+{stats.dmg} DMG</span>}
                             {stats.hp > 0 && <span className="text-green-400">+{stats.hp} HP</span>}
                             {stats.armor > 0 && <span className="text-blue-400">+{stats.armor} ARM</span>}
                         </div>
                     </div>
                     {effects.length > 0 && (
-                        <div className="text-[8px] text-purple-400">
+                        <div className="text-[0.5rem] text-purple-400">
                             {effects.map(e => e.name).join(', ')}
                         </div>
                     )}
@@ -372,13 +372,13 @@ export default function InventoryView({ onHover }) {
                         {/* Active Set Bonuses */}
                         {Object.keys(activeSetCounts).length > 0 && (
                             <div className="mt-2 pt-2 border-t border-slate-700/50">
-                                <div className="text-[10px] text-slate-400 mb-1">ACTIVE SET BONUSES</div>
+                                <div className="text-[0.625rem] text-slate-400 mb-1">ACTIVE SET BONUSES</div>
                                 {Object.entries(activeSetCounts).map(([setId, count]) => {
                                     const setInfo = BOSS_SETS[setId] || PRESTIGE_BOSS_SETS[setId];
                                     if (!setInfo) return null;
                                     return (
                                         <div key={setId} className="mb-2">
-                                            <div className="text-[10px] font-bold mb-0.5" style={{ color: setInfo.color }}>
+                                            <div className="text-[0.625rem] font-bold mb-0.5" style={{ color: setInfo.color }}>
                                                 {setInfo.name} ({count}/8)
                                             </div>
                                             <div className="space-y-0.5">
@@ -386,7 +386,7 @@ export default function InventoryView({ onHover }) {
                                                     const isActive = count >= bonus.pieces;
                                                     if (bonus.secret && !isActive) return null;
                                                     return (
-                                                        <div key={i} className={`text-[9px] flex gap-1 ${isActive ? 'text-green-400' : 'text-slate-600'}`}>
+                                                        <div key={i} className={`text-[0.5625rem] flex gap-1 ${isActive ? 'text-green-400' : 'text-slate-600'}`}>
                                                             <span className="font-bold">{bonus.pieces}pc:</span>
                                                             <span>{bonus.desc}</span>
                                                             {isActive && <span className="text-green-500">✓</span>}
@@ -491,14 +491,14 @@ export default function InventoryView({ onHover }) {
                                     >
                                         {/* Upgrade/Downgrade indicator */}
                                         {equippedItem && (
-                                            <div className={`absolute top-0 right-0 px-1.5 py-0.5 text-[8px] font-bold ${
+                                            <div className={`absolute top-0 right-0 px-1.5 py-0.5 text-[0.5rem] font-bold ${
                                                 isUpgrade ? 'bg-green-500 text-white' : 'bg-red-500/80 text-white'
                                             }`}>
                                                 {isUpgrade ? '↑ UPGRADE' : '↓ DOWNGRADE'}
                                             </div>
                                         )}
                                         {!equippedItem && (
-                                            <div className="absolute top-0 right-0 px-1.5 py-0.5 text-[8px] font-bold bg-blue-500 text-white">
+                                            <div className="absolute top-0 right-0 px-1.5 py-0.5 text-[0.5rem] font-bold bg-blue-500 text-white">
                                                 EMPTY SLOT
                                             </div>
                                         )}
@@ -517,26 +517,26 @@ export default function InventoryView({ onHover }) {
                                                         </span>
                                                     )}
                                                 </div>
-                                                <div className="text-[10px] text-slate-400 flex items-center gap-1">
+                                                <div className="text-[0.625rem] text-slate-400 flex items-center gap-1">
                                                     <span style={{ color: tierInfo?.color }}>{tierInfo?.name}</span>
                                                     <span>·</span>
                                                     <span className="capitalize">{item.slot}</span>
                                                     {item.weaponType && <><span>·</span><span className="capitalize">{item.weaponType}</span></>}
                                                 </div>
                                             </div>
-                                            <div className="text-right text-[10px] text-slate-500">
+                                            <div className="text-right text-[0.625rem] text-slate-500">
                                                 PWR<br/><span className="text-sm font-bold text-slate-300">{itemScore}</span>
                                             </div>
                                         </div>
 
                                         {/* Stats Row with comparison */}
-                                        <div className="flex gap-1 p-2 text-[10px]">
+                                        <div className="flex gap-1 p-2 text-[0.625rem]">
                                             {(stats.dmg > 0 || equippedStats.dmg > 0) && (
                                                 <div className="flex-1 bg-red-500/20 rounded px-1.5 py-1 text-center">
                                                     <div className="text-red-400">DMG</div>
                                                     <div className="font-bold text-red-300">+{stats.dmg}</div>
                                                     {equippedItem && (
-                                                        <div className={`text-[9px] ${stats.dmg - equippedStats.dmg > 0 ? 'text-green-400' : stats.dmg - equippedStats.dmg < 0 ? 'text-red-400' : 'text-slate-500'}`}>
+                                                        <div className={`text-[0.5625rem] ${stats.dmg - equippedStats.dmg > 0 ? 'text-green-400' : stats.dmg - equippedStats.dmg < 0 ? 'text-red-400' : 'text-slate-500'}`}>
                                                             {stats.dmg - equippedStats.dmg > 0 ? '+' : ''}{stats.dmg - equippedStats.dmg}
                                                         </div>
                                                     )}
@@ -547,7 +547,7 @@ export default function InventoryView({ onHover }) {
                                                     <div className="text-green-400">HP</div>
                                                     <div className="font-bold text-green-300">+{stats.hp}</div>
                                                     {equippedItem && (
-                                                        <div className={`text-[9px] ${stats.hp - equippedStats.hp > 0 ? 'text-green-400' : stats.hp - equippedStats.hp < 0 ? 'text-red-400' : 'text-slate-500'}`}>
+                                                        <div className={`text-[0.5625rem] ${stats.hp - equippedStats.hp > 0 ? 'text-green-400' : stats.hp - equippedStats.hp < 0 ? 'text-red-400' : 'text-slate-500'}`}>
                                                             {stats.hp - equippedStats.hp > 0 ? '+' : ''}{stats.hp - equippedStats.hp}
                                                         </div>
                                                     )}
@@ -558,7 +558,7 @@ export default function InventoryView({ onHover }) {
                                                     <div className="text-blue-400">ARM</div>
                                                     <div className="font-bold text-blue-300">+{stats.armor}</div>
                                                     {equippedItem && (
-                                                        <div className={`text-[9px] ${stats.armor - equippedStats.armor > 0 ? 'text-green-400' : stats.armor - equippedStats.armor < 0 ? 'text-red-400' : 'text-slate-500'}`}>
+                                                        <div className={`text-[0.5625rem] ${stats.armor - equippedStats.armor > 0 ? 'text-green-400' : stats.armor - equippedStats.armor < 0 ? 'text-red-400' : 'text-slate-500'}`}>
                                                             {stats.armor - equippedStats.armor > 0 ? '+' : ''}{stats.armor - equippedStats.armor}
                                                         </div>
                                                     )}
@@ -570,7 +570,7 @@ export default function InventoryView({ onHover }) {
                                         {effects.length > 0 && (
                                             <div className="px-2 pb-1 flex flex-wrap gap-1">
                                                 {effects.map((eff, i) => (
-                                                    <span key={i} className="text-[9px] px-1.5 py-0.5 bg-purple-500/20 text-purple-300 rounded">
+                                                    <span key={i} className="text-[0.5625rem] px-1.5 py-0.5 bg-purple-500/20 text-purple-300 rounded">
                                                         {eff.name} +{eff.value}
                                                     </span>
                                                 ))}
@@ -581,10 +581,10 @@ export default function InventoryView({ onHover }) {
                                         {setInfo && (
                                             <div className="px-2 pb-2 border-t border-slate-700/30 mt-1 pt-1">
                                                 <div className="flex items-center gap-1 mb-1">
-                                                    <span className="text-[9px] font-bold" style={{ color: setInfo.color }}>
+                                                    <span className="text-[0.5625rem] font-bold" style={{ color: setInfo.color }}>
                                                         {setInfo.name} Set
                                                     </span>
-                                                    <span className="text-[8px] text-slate-500">
+                                                    <span className="text-[0.5rem] text-slate-500">
                                                         ({activeSetCounts[item.bossSet] || 0}/8 equipped)
                                                     </span>
                                                 </div>
@@ -595,7 +595,7 @@ export default function InventoryView({ onHover }) {
                                                         const isActive = currentCount >= bonus.pieces;
                                                         if (bonus.secret && !isActive) return null;
                                                         return (
-                                                            <div key={i} className={`text-[8px] flex gap-1 ${isActive ? 'text-green-400' : wouldBeActive ? 'text-yellow-400' : 'text-slate-600'}`}>
+                                                            <div key={i} className={`text-[0.5rem] flex gap-1 ${isActive ? 'text-green-400' : wouldBeActive ? 'text-yellow-400' : 'text-slate-600'}`}>
                                                                 <span className="font-bold w-6">{bonus.pieces}pc:</span>
                                                                 <span className="flex-1">{bonus.desc}</span>
                                                                 {isActive && <span>✓</span>}
@@ -661,13 +661,13 @@ export default function InventoryView({ onHover }) {
                                         </div>
                                         <div className="absolute top-1 left-1 w-2 h-2 rounded-full" style={{ backgroundColor: tierInfo?.color || '#666' }} />
                                         {item.plus > 0 && stage && (
-                                            <div className="absolute -top-1.5 -right-1.5 px-1 py-0.5 text-[11px] font-bold rounded flex items-center border border-black/60"
+                                            <div className="absolute -top-1.5 -right-1.5 px-1 py-0.5 text-[0.6875rem] font-bold rounded flex items-center border border-black/60"
                                                 style={{ backgroundColor: stage.bgColor, color: stage.color, boxShadow: `${stage.glow}, 0 1px 3px rgba(0,0,0,0.5)` }}>
-                                                {stage.icon && <span className="text-[9px] mr-0.5">{stage.icon}</span>}+{item.plus}
+                                                {stage.icon && <span className="text-[0.5625rem] mr-0.5">{stage.icon}</span>}+{item.plus}
                                             </div>
                                         )}
                                         {(item.count || 1) > 1 && (
-                                            <div className="absolute bottom-0 left-0 text-[10px] font-bold text-white bg-blue-600/90 px-1 rounded-tr">x{item.count}</div>
+                                            <div className="absolute bottom-0 left-0 text-[0.625rem] font-bold text-white bg-blue-600/90 px-1 rounded-tr">x{item.count}</div>
                                         )}
                                         {isSelected && (
                                             <div className="absolute inset-0 flex items-center justify-center bg-red-500/30">

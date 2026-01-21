@@ -98,7 +98,7 @@ export default function MobileTabBar({ tabs, activeTab, onTabChange, moreSubTab,
                             <div className={`transition-transform ${isActive ? 'scale-110' : ''}`}>
                                 {config.icon}
                             </div>
-                            <span className={`text-[10px] mt-1 font-medium ${isActive ? 'text-blue-400' : 'text-slate-500'}`}>
+                            <span className={`text-[0.625rem] mt-1 font-medium ${isActive ? 'text-blue-400' : 'text-slate-500'}`}>
                                 {config.label}
                             </span>
                             {isActive && (

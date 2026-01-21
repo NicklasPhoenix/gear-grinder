@@ -26,7 +26,7 @@ export default function MobileBottomBar({ level, xp }) {
 
                 {/* XP Bar */}
                 <div className="flex-1">
-                    <div className="flex justify-between text-[10px] text-slate-500 mb-1">
+                    <div className="flex justify-between text-[0.625rem] text-slate-500 mb-1">
                         <span>XP</span>
                         <span>{formatWithCommas(xp)} / {formatWithCommas(xpNeeded)}</span>
                     </div>
