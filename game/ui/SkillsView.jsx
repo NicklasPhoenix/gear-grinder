@@ -93,9 +93,9 @@ export default function SkillsView() {
 
     // Desktop layout
     return (
-        <div className="h-full flex flex-col gap-4">
-            <h3 className="font-bold text-yellow-500 uppercase border-b border-slate-700 pb-2">Combat Skills</h3>
-            <div className="grid grid-cols-1 gap-2">
+        <div className="h-full flex flex-col gap-4 min-h-0">
+            <h3 className="font-bold text-yellow-500 uppercase border-b border-slate-700 pb-2 flex-shrink-0">Combat Skills</h3>
+            <div className="grid grid-cols-1 gap-2 overflow-y-auto custom-scrollbar flex-1 min-h-0">
                 {SKILLS.map(skill => {
                     const isUnlocked = state.unlockedSkills.includes(skill.id);
                     const canUnlock = state.level >= skill.unlockLevel;
