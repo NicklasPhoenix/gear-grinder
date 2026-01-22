@@ -63,12 +63,15 @@ export default function SettingsView() {
     const autoSalvageKeepEffects = state?.autoSalvageKeepEffects ?? true;
     const inventorySort = state?.inventorySort ?? 'none';
 
-    // Apply UI scale using CSS zoom (handled by GameContext, but also here for immediate feedback)
+    // Apply UI scale using transform (handled by GameContext, but also here for immediate feedback)
     useEffect(() => {
-        document.documentElement.style.setProperty('--ui-scale', uiScale);
         const gameContainer = document.getElementById('game-root');
         if (gameContainer) {
-            gameContainer.style.zoom = uiScale;
+            gameContainer.style.zoom = '';
+            gameContainer.style.transformOrigin = 'top left';
+            gameContainer.style.transform = `scale(${uiScale})`;
+            gameContainer.style.width = `${100 / uiScale}%`;
+            gameContainer.style.height = `${100 / uiScale}vh`;
         }
     }, [uiScale]);
 

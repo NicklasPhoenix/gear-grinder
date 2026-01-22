@@ -494,14 +494,19 @@ export function GameProvider({ children }) {
         };
     }, []);
 
-    // Apply UI scale setting using CSS zoom (scales everything proportionally)
+    // Apply UI scale using transform scale with proper container sizing
     useEffect(() => {
         const scale = gameState?.uiScale ?? 1.0;
-        document.documentElement.style.setProperty('--ui-scale', scale);
-        // Use CSS zoom on the game container - scales everything including layouts
         const gameContainer = document.getElementById('game-root');
         if (gameContainer) {
-            gameContainer.style.zoom = scale;
+            // Reset zoom in case it was set before
+            gameContainer.style.zoom = '';
+            // Use transform scale from top-left origin
+            gameContainer.style.transformOrigin = 'top left';
+            gameContainer.style.transform = `scale(${scale})`;
+            // Adjust container size to compensate for scaling
+            gameContainer.style.width = `${100 / scale}%`;
+            gameContainer.style.height = `${100 / scale}vh`;
         }
     }, [gameState?.uiScale]);
 
