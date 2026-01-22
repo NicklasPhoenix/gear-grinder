@@ -56,7 +56,13 @@ function getBossItemName(bossSetKey, slot) {
 }
 
 // Migrate legacy boss set names to new names (and update item names)
+// Only runs once - migration is skipped if bossSetMigrationVersion is set
 function migrateBossSets(parsed) {
+    // Skip migration if already done (prevents re-migrating on every load)
+    if (parsed.bossSetMigrationVersion >= 1) {
+        return parsed;
+    }
+
     let migrated = false;
 
     // Migrate bossStones object keys
@@ -159,6 +165,9 @@ function migrateBossSets(parsed) {
     if (migrated) {
         console.log('Boss set migration completed');
     }
+
+    // Mark migration as done so it doesn't run again
+    parsed.bossSetMigrationVersion = 1;
 
     return parsed;
 }
