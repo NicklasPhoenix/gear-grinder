@@ -309,10 +309,18 @@ export class CombatSystem {
                 name: bossItem.name,
             };
 
-            // Boss items are never auto-salvaged (shouldAutoSalvageItem checks for bossSet/isBossItem)
-            // Add to inventory with stacking
-            state.inventory = addItemToInventory(state.inventory, newBossItem);
-            log.push({ type: 'bossLoot', msg: `${bossItem.name} obtained!` });
+            // Check if boss item should be auto-salvaged based on filter settings
+            const shouldAutoSalvage = state.autoSalvage && this.shouldAutoSalvageItem(newBossItem, state);
+
+            if (shouldAutoSalvage) {
+                const returns = getSalvageReturns(newBossItem, 1);
+                state.gold += returns.gold;
+                state.enhanceStone += returns.enhanceStone;
+                log.push({ type: 'autoSalvage', msg: `${bossItem.name} salvaged!` });
+            } else {
+                state.inventory = addItemToInventory(state.inventory, newBossItem);
+                log.push({ type: 'bossLoot', msg: `${bossItem.name} obtained!` });
+            }
         }
     }
 
