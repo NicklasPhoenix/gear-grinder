@@ -314,38 +314,56 @@ export function GameProvider({ children }) {
         // Load saved game (if any)
         const loadGame = async () => {
             try {
+                // Try main save first
                 const saved = await window.storage.get('gear-grinder-save');
+                let parsed = null;
+
                 if (saved && saved.value) {
-                    let parsed;
                     try {
                         parsed = JSON.parse(saved.value);
                     } catch (parseError) {
-                        console.error('Save file corrupted, starting fresh:', parseError);
-                        parsed = null;
+                        console.error('Main save corrupted:', parseError);
                     }
+                }
 
-                    if (parsed) {
-                        // Migrate legacy boss set names before validation
-                        parsed = migrateBossSets(parsed);
-
-                        // Validate and sanitize the loaded save
-                        const { validated, errors } = validateSave(parsed);
-
-                        if (errors.length > 0) {
-                            console.warn(`Save loaded with ${errors.length} corrections applied`);
+                // Check backup save (from beforeunload)
+                try {
+                    const backup = localStorage.getItem('gear-grinder-save-backup');
+                    if (backup) {
+                        const backupParsed = JSON.parse(backup);
+                        // Use backup if it's newer than main save
+                        if (!parsed || (backupParsed.lastSaveTime && (!parsed.lastSaveTime || backupParsed.lastSaveTime > parsed.lastSaveTime))) {
+                            console.log('Using backup save (newer)');
+                            parsed = backupParsed;
                         }
-
-                        console.log('Loading save:', {
-                            zone: validated.currentZone,
-                            level: validated.level,
-                            gold: validated.gold,
-                            kills: validated.kills,
-                            lastSaveTime: validated.lastSaveTime ? new Date(validated.lastSaveTime).toISOString() : 'never'
-                        });
-
-                        // Merge with default state
-                        gm.state = { ...gm.state, ...validated, combatLog: [], saveVersion: SAVE.SAVE_VERSION };
+                        // Clear backup after checking
+                        localStorage.removeItem('gear-grinder-save-backup');
                     }
+                } catch (e) {
+                    console.error('Backup save check failed:', e);
+                }
+
+                if (parsed) {
+                    // Migrate legacy boss set names before validation
+                    parsed = migrateBossSets(parsed);
+
+                    // Validate and sanitize the loaded save
+                    const { validated, errors } = validateSave(parsed);
+
+                    if (errors.length > 0) {
+                        console.warn(`Save loaded with ${errors.length} corrections applied`);
+                    }
+
+                    console.log('Loading save:', {
+                        zone: validated.currentZone,
+                        level: validated.level,
+                        gold: validated.gold,
+                        kills: validated.kills,
+                        lastSaveTime: validated.lastSaveTime ? new Date(validated.lastSaveTime).toISOString() : 'never'
+                    });
+
+                    // Merge with default state
+                    gm.state = { ...gm.state, ...validated, combatLog: [], saveVersion: SAVE.SAVE_VERSION };
                 }
             } catch (e) {
                 console.error("Save load error, starting fresh:", e);
@@ -445,7 +463,22 @@ export function GameProvider({ children }) {
         // Auto Save Interval (30s)
         const saveInterval = setInterval(saveGame, SAVE.AUTO_SAVE_INTERVAL);
 
+        // Save on page close/refresh
+        const handleBeforeUnload = () => {
+            if (gameManagerRef.current) {
+                const data = JSON.stringify(gameManagerRef.current.state);
+                // Use synchronous localStorage as fallback for page close
+                try {
+                    localStorage.setItem('gear-grinder-save-backup', data);
+                } catch (e) {
+                    console.error('Backup save failed:', e);
+                }
+            }
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
         return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
             clearInterval(saveInterval);
             saveGame(); // Save on unmount
             gm.stop();
@@ -456,8 +489,18 @@ export function GameProvider({ children }) {
     useEffect(() => {
         const handleVisibilityChange = () => {
             if (document.hidden) {
-                // Tab is now hidden - record the time
+                // Tab is now hidden - record the time and save immediately
                 hiddenTimeRef.current = Date.now();
+                // Save to backup when tab hidden (mobile doesn't always fire beforeunload)
+                if (gameManagerRef.current) {
+                    try {
+                        gameManagerRef.current.state.lastSaveTime = Date.now();
+                        const data = JSON.stringify(gameManagerRef.current.state);
+                        localStorage.setItem('gear-grinder-save-backup', data);
+                    } catch (e) {
+                        console.error('Tab hidden save failed:', e);
+                    }
+                }
             } else {
                 // Tab is now visible - check if we should process offline progress
                 if (hiddenTimeRef.current && gameManagerRef.current) {
