@@ -79,6 +79,21 @@ export class CombatSystem {
             newState.enemyHp = zone.enemyHp;
         }
 
+        // HP Regeneration (% of max HP per second, applied per tick)
+        // Tick rate is ATTACKS_PER_SECOND times per second, so divide regen accordingly
+        if (stats.hpRegen > 0 && newState.playerHp < safeMaxHp) {
+            const regenPerTick = (stats.hpRegen / 100) * safeMaxHp / COMBAT.ATTACKS_PER_SECOND;
+            const regenAmount = Math.floor(regenPerTick);
+            if (regenAmount > 0) {
+                newState.playerHp = Math.min(newState.playerHp + regenAmount, safeMaxHp);
+                // Only show regen text occasionally to avoid spam (every 6 ticks = 1 second)
+                if (Math.random() < 0.17) {
+                    this.callbacks.onFloatingText(`+${regenAmount}`, 'regen', 'player');
+                }
+                combatUpdates.lastRegen = regenAmount;
+            }
+        }
+
         // Player Turn
         let playerDmg = stats.damage || PLAYER_BASE.DEFAULT_DAMAGE;
         let isCrit = Math.random() * 100 < (stats.critChance || PLAYER_BASE.DEFAULT_CRIT_CHANCE);
@@ -95,7 +110,7 @@ export class CombatSystem {
         combatUpdates.lastDamage = playerDmg;
         combatUpdates.isPlayerTurn = true;
 
-        // Lifesteal (no cap - scales with endgame damage)
+        // Lifesteal (soft cap with diminishing returns applied in PlayerSystem)
         if (stats.lifesteal > 0) {
             const healed = Math.floor(playerDmg * stats.lifesteal / 100);
             newState.playerHp = Math.min(newState.playerHp + healed, safeMaxHp);
@@ -117,8 +132,17 @@ export class CombatSystem {
                 this.callbacks.onFloatingText('DODGE!', 'dodge', 'player');
                 combatUpdates.lastDamage = 0; // Dodged
             } else {
-                const damageReduction = stats.armor / (stats.armor + COMBAT.ARMOR_CONSTANT);
-                const reducedDmg = Math.max(1, Math.floor(zone.enemyDmg * (1 - damageReduction)));
+                // Armor reduction (logarithmic diminishing returns)
+                const armorReduction = stats.armor / (stats.armor + COMBAT.ARMOR_CONSTANT);
+                let reducedDmg = Math.floor(zone.enemyDmg * (1 - armorReduction));
+
+                // Flat damage reduction (applied after armor, enables tank builds)
+                if (stats.damageReduction > 0) {
+                    reducedDmg = Math.floor(reducedDmg * (1 - stats.damageReduction / 100));
+                }
+
+                // Minimum 1 damage to prevent immortality
+                reducedDmg = Math.max(1, reducedDmg);
 
                 newState.playerHp -= reducedDmg;
                 this.callbacks.onFloatingText(`-${reducedDmg}`, 'enemyDmg', 'player');

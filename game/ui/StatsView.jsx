@@ -23,10 +23,13 @@ export default function StatsView() {
     const attacksPerSecond = calculated.speedMult * COMBAT.ATTACKS_PER_SECOND;
     const trueDPS = Math.floor(effectiveDPS * attacksPerSecond);
 
-    // Enemy damage reduction from armor
-    const damageReduction = calculated.armor / (calculated.armor + COMBAT.ARMOR_CONSTANT);
-    const reducedEnemyDmg = Math.max(1, Math.floor(currentZone.enemyDmg * (1 - damageReduction)));
-    const effectiveHP = Math.floor(calculated.maxHp / (1 - damageReduction));
+    // Enemy damage reduction from armor + flat damage reduction
+    const armorReduction = calculated.armor / (calculated.armor + COMBAT.ARMOR_CONSTANT);
+    const flatDR = (calculated.damageReduction || 0) / 100;
+    const afterArmor = Math.floor(currentZone.enemyDmg * (1 - armorReduction));
+    const reducedEnemyDmg = Math.max(1, Math.floor(afterArmor * (1 - flatDR)));
+    const totalReduction = 1 - (1 - armorReduction) * (1 - flatDR);
+    const effectiveHP = Math.floor(calculated.maxHp / (1 - totalReduction));
 
     const handleStatUp = (key, amount = 1) => {
         const toAdd = Math.min(amount, state.statPoints);
@@ -173,6 +176,8 @@ export default function StatsView() {
                             <MobileStatRow label="Dodge" value={formatPercent(calculated.dodge)} color="text-green-300" />
                             <MobileStatRow label="Lifesteal" value={formatPercent(calculated.lifesteal)} color="text-pink-300" />
                             <MobileStatRow label="Thorns" value={calculated.thorns || 0} color="text-purple-300" />
+                            <MobileStatRow label="HP Regen" value={`${(calculated.hpRegen || 0).toFixed(1)}%/s`} color="text-emerald-300" />
+                            <MobileStatRow label="Dmg Red." value={formatPercent(calculated.damageReduction || 0)} color="text-sky-300" />
                         </div>
                         <div className="border-t border-slate-700/50 mt-2 pt-2 grid grid-cols-2 gap-x-4 gap-y-1">
                             <MobileStatRow label="Silver %" value={formatBonus((calculated.goldMult - 1) * 100)} color="text-slate-300" />
@@ -350,6 +355,8 @@ export default function StatsView() {
                             <StatRow label="Dodge" value={formatPercent(calculated.dodge)} color="text-green-300" />
                             <StatRow label="Lifesteal" value={formatPercent(calculated.lifesteal)} color="text-pink-300" />
                             <StatRow label="Thorns" value={calculated.thorns || 0} color="text-purple-300" />
+                            <StatRow label="HP Regen" value={`${(calculated.hpRegen || 0).toFixed(1)}%/s`} color="text-emerald-300" />
+                            <StatRow label="Dmg Reduction" value={formatPercent(calculated.damageReduction || 0)} color="text-sky-300" />
                             <div className="border-t border-slate-700/50 my-2 pt-2">
                                 <StatRow label="Silver %" value={formatBonus((calculated.goldMult - 1) * 100)} color="text-slate-300" />
                                 <StatRow label="XP %" value={formatBonus(calculated.xpBonus || 0)} color="text-purple-400" />

@@ -269,6 +269,9 @@ export const SPECIAL_EFFECTS = [
     { id: 'goldFind', name: 'Gold%', minVal: 2, maxVal: 10, color: '#fbbf24' },
     { id: 'xpBonus', name: 'XP%', minVal: 3, maxVal: 15, color: '#8b5cf6' },
     { id: 'dodge', name: 'Dodge', minVal: 1, maxVal: 8, color: '#06b6d4' },
+    // New defensive effects for tank/regen builds
+    { id: 'hpRegen', name: 'HP Regen', minVal: 0.5, maxVal: 3, color: '#34d399' },          // % max HP per second
+    { id: 'damageReduction', name: 'DR%', minVal: 2, maxVal: 10, color: '#60a5fa' },        // Flat damage reduction %
 ];
 
 // Enhancement milestones that grant bonus substats

@@ -31,11 +31,19 @@ export const calculatePlayerStats = (gameState) => {
     let critDamage = PLAYER_BASE.CRIT_DAMAGE + s.lck * STAT_SCALING.LCK_CRIT_DAMAGE;
     let dodge = s.agi * STAT_SCALING.AGI_DODGE;
     let xpBonus = s.int * STAT_SCALING.INT_XP_BONUS;
-    let magicDmgMult = 1 + s.int * STAT_SCALING.INT_MAGIC_DAMAGE;
+
+    // Weapon-specific damage multipliers (all weapon types now have scaling)
+    let magicDmgMult = 1 + s.int * STAT_SCALING.INT_MAGIC_DAMAGE;      // INT weapons (staff)
+    let meleeDmgMult = 1 + s.str * STAT_SCALING.STR_MELEE_DAMAGE;      // STR weapons (sword, axe, mace)
+    let precisionDmgMult = 1 + s.agi * STAT_SCALING.AGI_PRECISION_DAMAGE; // AGI weapons (dagger, katana)
+
+    // NEW: Defensive stats for tank/regen builds
+    let hpRegen = COMBAT.BASE_HP_REGEN + s.vit * STAT_SCALING.VIT_HP_REGEN;  // % max HP per second
+    let damageReduction = s.vit * STAT_SCALING.VIT_DAMAGE_REDUCTION;          // Flat % damage reduction
 
     // Gear contributions
     let enhanceDmgMult = 1; // Cumulative enhancement damage multiplier
-    let hasIntWeapon = false; // Track if using INT-scaling weapon
+    let weaponScaling = null; // Track weapon scaling stat (int, str, agi, vit)
 
     Object.entries(gameState.gear).forEach(([slot, gear]) => {
         if (gear) {
@@ -51,8 +59,8 @@ export const calculatePlayerStats = (gameState) => {
                     // Apply weapon type bonuses
                     speedMult += weaponDef.speedBonus;
                     critChance += weaponDef.critBonus;
-                    // Track INT weapons for magic damage multiplier
-                    if (weaponDef.scaling === 'int') hasIntWeapon = true;
+                    // Track weapon scaling stat for damage multiplier
+                    weaponScaling = weaponDef.scaling;
                 }
             }
 
@@ -87,6 +95,8 @@ export const calculatePlayerStats = (gameState) => {
                         case 'goldFind': goldMult += effectValue / 100; break;
                         case 'xpBonus': xpBonus += effectValue; break;
                         case 'dodge': dodge += effectValue; break;
+                        case 'hpRegen': hpRegen += effectValue; break;
+                        case 'damageReduction': damageReduction += effectValue; break;
                     }
                 });
             }
@@ -108,6 +118,8 @@ export const calculatePlayerStats = (gameState) => {
         if (skill.effect.lifesteal) lifesteal += skill.effect.lifesteal;
         if (skill.effect.critChance) critChance += skill.effect.critChance;
         if (skill.effect.thorns) thorns += skill.effect.thorns;
+        if (skill.effect.hpRegen) hpRegen += skill.effect.hpRegen;
+        if (skill.effect.damageReduction) damageReduction += skill.effect.damageReduction;
     });
 
     // Calculate set bonuses
@@ -134,6 +146,8 @@ export const calculatePlayerStats = (gameState) => {
                     if (bonus.effect.thorns) thorns += bonus.effect.thorns;
                     if (bonus.effect.dodge) dodge += bonus.effect.dodge;
                     if (bonus.effect.xpBonus) xpBonus += bonus.effect.xpBonus;
+                    if (bonus.effect.hpRegen) hpRegen += bonus.effect.hpRegen;
+                    if (bonus.effect.damageReduction) damageReduction += bonus.effect.damageReduction;
                 }
             });
         }
@@ -153,12 +167,28 @@ export const calculatePlayerStats = (gameState) => {
                 if (skill.effect.armor) armor += skill.effect.armor * level;
                 if (skill.effect.lifesteal) lifesteal += skill.effect.lifesteal * level;
                 if (skill.effect.xpBonus) xpBonus += skill.effect.xpBonus * level;
+                if (skill.effect.hpRegen) hpRegen += skill.effect.hpRegen * level;
+                if (skill.effect.damageReduction) damageReduction += skill.effect.damageReduction * level;
             }
         }
     });
 
-    // Apply magic damage multiplier for INT weapons (staffs)
-    const finalDmgMult = hasIntWeapon ? dmgMult * magicDmgMult : dmgMult;
+    // Apply weapon-specific damage multiplier based on scaling stat
+    let weaponDmgMult = 1;
+    switch (weaponScaling) {
+        case 'int': weaponDmgMult = magicDmgMult; break;      // Staff: INT scaling
+        case 'str': weaponDmgMult = meleeDmgMult; break;      // Sword, Axe, Mace, Greataxe, Scythe: STR scaling
+        case 'agi': weaponDmgMult = precisionDmgMult; break;  // Dagger, Katana: AGI scaling
+        case 'vit': weaponDmgMult = meleeDmgMult * 0.8; break; // Mace with VIT: slightly lower multiplier for tank trade-off
+    }
+    const finalDmgMult = dmgMult * weaponDmgMult;
+
+    // Apply lifesteal soft cap with diminishing returns
+    let effectiveLifesteal = lifesteal;
+    if (lifesteal > COMBAT.LIFESTEAL_SOFT_CAP) {
+        const overCap = lifesteal - COMBAT.LIFESTEAL_SOFT_CAP;
+        effectiveLifesteal = COMBAT.LIFESTEAL_SOFT_CAP + (overCap * COMBAT.LIFESTEAL_FALLOFF);
+    }
 
     return {
         damage: Math.floor(baseDmg * finalDmgMult * enhanceDmgMult),
@@ -169,9 +199,12 @@ export const calculatePlayerStats = (gameState) => {
         speedMult,
         critChance,
         critDamage,
-        lifesteal,
+        lifesteal: effectiveLifesteal,
+        lifestealRaw: lifesteal, // For display purposes (show actual vs effective)
         thorns,
         dodge: Math.min(COMBAT.DODGE_CAP, dodge),
         xpBonus,
+        hpRegen: Math.min(COMBAT.HP_REGEN_CAP, hpRegen),
+        damageReduction: Math.min(COMBAT.DAMAGE_REDUCTION_CAP, damageReduction),
     };
 };

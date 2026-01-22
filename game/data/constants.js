@@ -14,17 +14,21 @@ export const PLAYER_BASE = {
 
 // === STAT SCALING (per point) ===
 export const STAT_SCALING = {
-    // STR
+    // STR - Melee damage scaling (now mirrors INT for balance)
     STR_DAMAGE: 2,
+    STR_MELEE_DAMAGE: 0.02,  // +2% damage per STR for melee weapons
 
-    // VIT
+    // VIT - Tank/regen build enabler
     VIT_HP: 8,
     VIT_ARMOR: 1,
+    VIT_HP_REGEN: 0.15,      // +0.15% max HP regen per second per VIT point
+    VIT_DAMAGE_REDUCTION: 0.3, // +0.3% damage reduction per VIT point
 
-    // AGI
+    // AGI - Evasion and speed (now with damage scaling for daggers)
     AGI_CRIT_CHANCE: 0.5,
     AGI_SPEED: 0.01,
     AGI_DODGE: 0.3,
+    AGI_PRECISION_DAMAGE: 0.02, // +2% damage per AGI for agility weapons
 
     // LCK
     LCK_GOLD: 0.005,
@@ -55,6 +59,17 @@ export const COMBAT = {
     ATTACKS_PER_SECOND: 6,    // Base attack speed
     HEAL_ON_KILL: 0.03,       // 3% max HP healed on enemy kill
     DODGE_CAP: 80,            // Maximum dodge chance
+
+    // HP Regeneration (alternative to lifesteal for VIT builds)
+    BASE_HP_REGEN: 0.5,       // Base 0.5% max HP regen per second
+    HP_REGEN_CAP: 15,         // Cap at 15% max HP per second
+
+    // Damage Reduction (flat % reduction after armor, enables tank builds)
+    DAMAGE_REDUCTION_CAP: 75, // Cap at 75% damage reduction
+
+    // Lifesteal soft cap (diminishing returns above threshold)
+    LIFESTEAL_SOFT_CAP: 10,   // First 10% is 100% effective
+    LIFESTEAL_FALLOFF: 0.5,   // Above soft cap, only 50% as effective
 };
 
 // === DEATH PENALTIES ===

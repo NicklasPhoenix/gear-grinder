@@ -6,11 +6,13 @@ export const SKILLS = [
     { id: 4, name: 'Berserker', desc: '+30% damage', unlockLevel: 22, effect: { dmgMult: 0.3 } },
     { id: 5, name: 'Fortitude', desc: '+35% HP', unlockLevel: 30, effect: { hpMult: 0.35 } },
     { id: 6, name: 'Lucky Find', desc: '+10% material drop', unlockLevel: 38, effect: { matMult: 0.1 } },
-    { id: 7, name: 'Mastery', desc: '+50% all stats', unlockLevel: 50, effect: { dmgMult: 0.5, hpMult: 0.5 } },
-    { id: 8, name: 'Vampiric', desc: '+3% base lifesteal', unlockLevel: 65, effect: { lifesteal: 3 } },
-    { id: 9, name: 'Critical Eye', desc: '+10% crit chance', unlockLevel: 80, effect: { critChance: 10 } },
-    { id: 10, name: 'Thorny Skin', desc: '10% thorns damage', unlockLevel: 95, effect: { thorns: 10 } },
-    { id: 11, name: 'Transcendence', desc: '+100% all stats', unlockLevel: 120, effect: { dmgMult: 1.0, hpMult: 1.0 } },
+    { id: 7, name: 'Regeneration', desc: '+1.5% HP regen/sec', unlockLevel: 45, effect: { hpRegen: 1.5 } },
+    { id: 8, name: 'Mastery', desc: '+50% all stats', unlockLevel: 50, effect: { dmgMult: 0.5, hpMult: 0.5 } },
+    { id: 9, name: 'Vampiric', desc: '+3% base lifesteal', unlockLevel: 65, effect: { lifesteal: 3 } },
+    { id: 10, name: 'Iron Skin', desc: '+10% damage reduction', unlockLevel: 75, effect: { damageReduction: 10 } },
+    { id: 11, name: 'Critical Eye', desc: '+10% crit chance', unlockLevel: 85, effect: { critChance: 10 } },
+    { id: 12, name: 'Thorny Skin', desc: '10% thorns damage', unlockLevel: 100, effect: { thorns: 10 } },
+    { id: 13, name: 'Transcendence', desc: '+100% all stats', unlockLevel: 120, effect: { dmgMult: 1.0, hpMult: 1.0 } },
 ];
 
 export const PRESTIGE_SKILLS = [
@@ -24,4 +26,6 @@ export const PRESTIGE_SKILLS = [
     { id: 7, name: 'Eternal Leech', desc: '+1% lifesteal per level', maxLevel: 10, cost: (lvl) => Math.floor(8 * Math.pow(1.8, lvl)), effect: { lifesteal: 1 } },
     { id: 8, name: 'Starting Bonus', desc: '+50 gold, +10 ore/leather on prestige per level', maxLevel: 10, cost: (lvl) => Math.floor(5 * Math.pow(1.5, lvl)), effect: { startGold: 50, startOre: 10, startLeather: 10 } },
     { id: 9, name: 'XP Mastery', desc: '+10% XP gain per level', maxLevel: 15, cost: (lvl) => Math.floor(4 * Math.pow(1.5, lvl)), effect: { xpBonus: 10 } },
+    { id: 10, name: 'Eternal Regen', desc: '+0.5% HP regen/sec per level', maxLevel: 15, cost: (lvl) => Math.floor(4 * Math.pow(1.5, lvl)), effect: { hpRegen: 0.5 } },
+    { id: 11, name: 'Eternal Bulwark', desc: '+3% damage reduction per level', maxLevel: 15, cost: (lvl) => Math.floor(5 * Math.pow(1.6, lvl)), effect: { damageReduction: 3 } },
 ];
