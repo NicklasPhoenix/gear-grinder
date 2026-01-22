@@ -35,9 +35,6 @@ export class CombatSystem {
      * @returns {boolean} - True if item should be auto-salvaged
      */
     shouldAutoSalvageItem(item, state) {
-        // Never auto-salvage boss set items
-        if (item.bossSet || item.isBossItem) return false;
-
         // Check tier threshold (-1 means disabled, otherwise salvage items at or below threshold)
         const tierThreshold = state.autoSalvageTier ?? -1;
         if (tierThreshold === -1) return true; // Old behavior: salvage everything
@@ -193,7 +190,7 @@ export class CombatSystem {
         // Roll Gear Drop (non-boss zones only)
         let droppedGear = null;
         if (!zone.isBoss && zone.gearChance && Math.random() < zone.gearChance * stats.matMult) {
-            droppedGear = generateGearDrop(zone.gearTier || 0, zone.id);
+            droppedGear = generateGearDrop(zone.gearTier || 0, zone.id, zone.prestigeReq || 0);
         }
 
         // Update State

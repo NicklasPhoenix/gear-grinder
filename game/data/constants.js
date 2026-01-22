@@ -14,9 +14,9 @@ export const PLAYER_BASE = {
 
 // === STAT SCALING (per point) ===
 export const STAT_SCALING = {
-    // STR - Melee damage scaling (now mirrors INT for balance)
+    // STR - Melee damage scaling (matches INT for balance)
     STR_DAMAGE: 2,
-    STR_MELEE_DAMAGE: 0.02,  // +2% damage per STR for melee weapons
+    STR_MELEE_DAMAGE: 0.03,  // +3% damage per STR for melee weapons
 
     // VIT - Tank/regen build enabler
     VIT_HP: 8,
@@ -63,14 +63,14 @@ export const COMBAT = {
 
     // HP Regeneration (alternative to lifesteal for VIT builds)
     BASE_HP_REGEN: 0.5,       // Base 0.5% max HP regen per second
-    HP_REGEN_CAP: 15,         // Cap at 15% max HP per second
+    HP_REGEN_CAP: 25,         // Cap at 25% max HP per second
 
     // Damage Reduction (flat % reduction after armor, enables tank builds)
     DAMAGE_REDUCTION_CAP: 75, // Cap at 75% damage reduction
 
     // Lifesteal soft cap (diminishing returns above threshold)
-    LIFESTEAL_SOFT_CAP: 10,   // First 10% is 100% effective
-    LIFESTEAL_FALLOFF: 0.5,   // Above soft cap, only 50% as effective
+    LIFESTEAL_SOFT_CAP: 15,   // First 15% is 100% effective
+    LIFESTEAL_FALLOFF: 0.7,   // Above soft cap, 70% as effective
 };
 
 // === DEATH PENALTIES ===

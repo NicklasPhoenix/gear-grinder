@@ -243,7 +243,7 @@ export const BOSS_SETS = {
 export const WEAPON_TYPES = [
     { id: 'sword', name: 'Sword', baseDmg: 8, baseHp: 0, scaling: 'str', speedBonus: 0, critBonus: 5, desc: 'Balanced, +5% crit' },
     { id: 'staff', name: 'Staff', baseDmg: 7, baseHp: 15, scaling: 'int', speedBonus: 0, critBonus: 0, desc: 'Magic, +15 HP' },
-    { id: 'dagger', name: 'Dagger', baseDmg: 5, baseHp: 0, scaling: 'agi', speedBonus: 0.4, critBonus: 10, desc: '+40% speed, +10% crit' },
+    { id: 'dagger', name: 'Dagger', baseDmg: 5, baseHp: 0, scaling: 'agi', speedBonus: 0.25, critBonus: 10, desc: '+25% speed, +10% crit' },
     { id: 'mace', name: 'Mace', baseDmg: 6, baseHp: 30, scaling: 'vit', speedBonus: -0.1, critBonus: 0, desc: 'Slow but tanky, +30 HP' },
 ];
 
@@ -384,8 +384,8 @@ export const PRESTIGE_BOSS_SETS = {
 
 export const PRESTIGE_WEAPONS = [
     { id: 'scythe', name: 'Scythe', baseDmg: 12, baseHp: 0, scaling: 'str', speedBonus: -0.1, critBonus: 15, desc: 'Slow but deadly, +15% crit', prestigeReq: 1 },
-    { id: 'katana', name: 'Katana', baseDmg: 7, baseHp: 0, scaling: 'agi', speedBonus: 0.3, critBonus: 20, desc: 'Lightning fast, +20% crit', prestigeReq: 2 },
-    { id: 'greataxe', name: 'Greataxe', baseDmg: 15, baseHp: 50, scaling: 'str', speedBonus: -0.2, critBonus: 8, desc: 'Massive damage, +50 HP', prestigeReq: 3 },
+    { id: 'katana', name: 'Katana', baseDmg: 9, baseHp: 0, scaling: 'agi', speedBonus: 0.3, critBonus: 20, desc: 'Lightning fast, +20% crit', prestigeReq: 2 },
+    { id: 'greataxe', name: 'Greataxe', baseDmg: 18, baseHp: 50, scaling: 'str', speedBonus: -0.2, critBonus: 8, desc: 'Massive damage, +50 HP', prestigeReq: 3 },
 ];
 
 // Calculate item score for comparison (higher is better)
@@ -545,7 +545,7 @@ export function removeOneFromStack(inventory, itemId) {
 }
 
 // Generate a random gear drop for a given zone tier
-export function generateGearDrop(zoneTier, zoneId) {
+export function generateGearDrop(zoneTier, zoneId, prestigeLevel = 0) {
     // Random slot
     const slot = GEAR_SLOTS[Math.floor(Math.random() * GEAR_SLOTS.length)];
 
@@ -561,11 +561,18 @@ export function generateGearDrop(zoneTier, zoneId) {
     let name;
     let weaponType = null;
     if (slot === 'weapon') {
-        // Pick a random weapon type
-        const weaponTypes = WEAPON_TYPES;
-        const weaponTypeInfo = weaponTypes[Math.floor(Math.random() * weaponTypes.length)];
+        // Pick a random weapon type - include prestige weapons if in prestige zones
+        const availableWeapons = [...WEAPON_TYPES];
+
+        // Add prestige weapons based on prestige level
+        if (prestigeLevel >= 1) {
+            const eligiblePrestigeWeapons = PRESTIGE_WEAPONS.filter(w => w.prestigeReq <= prestigeLevel);
+            availableWeapons.push(...eligiblePrestigeWeapons);
+        }
+
+        const weaponTypeInfo = availableWeapons[Math.floor(Math.random() * availableWeapons.length)];
         weaponType = weaponTypeInfo.id;
-        name = GEAR_NAMES[weaponType]?.[tier] || GEAR_NAMES.sword[tier] || 'Weapon';
+        name = GEAR_NAMES[weaponType]?.[tier] || GEAR_NAMES.sword[tier] || weaponTypeInfo.name;
     } else {
         name = GEAR_NAMES[slot]?.[tier] || tierInfo.name + ' ' + slot;
     }
