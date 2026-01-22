@@ -15,22 +15,51 @@ class AudioManager {
         this.currentMusicTrack = null;
         this.audioContext = null;
 
-        // Music tracks configuration
+        // Music tracks configuration - organized by game progression
         this.musicTracks = {
-            // Normal zone music (rotates)
-            zone: [
+            // Zone music by progression tier
+            zoneEarly: [  // Zones 0-9: Upbeat adventure
                 '/assets/audio/quest_begins.mp3',
                 '/assets/audio/hero_journey.mp3',
+                '/assets/audio/secret_level.mp3',
+            ],
+            zoneMid: [  // Zones 10-19: Exploration
+                '/assets/audio/dungeon_crawl.mp3',
+                '/assets/audio/hidden_treasure.mp3',
+                '/assets/audio/secret_level.mp3',
+            ],
+            zoneLate: [  // Zones 20-29: Building tension
+                '/assets/audio/dark_descent.mp3',
+                '/assets/audio/hidden_treasure.mp3',
                 '/assets/audio/dungeon_crawl.mp3',
             ],
-            // Boss music
+            zoneEnd: [  // Zones 30-39: Epic/dramatic
+                '/assets/audio/dark_descent.mp3',
+                '/assets/audio/ultimate_showdown.mp3',
+            ],
+            zonePrestige: [  // Zones 40+: Horror/prestige themes
+                '/assets/audio/horror_watches.mp3',
+                '/assets/audio/thing_below.mp3',
+                '/assets/audio/eyes_dark.mp3',
+                '/assets/audio/neon_nightmare.mp3',
+                '/assets/audio/creeping_dread.mp3',
+                '/assets/audio/blood_moon.mp3',
+            ],
+            // Boss music - escalating intensity
             boss: [
                 '/assets/audio/boss_first.mp3',
+                '/assets/audio/first_encounter.mp3',
                 '/assets/audio/boss_incoming.mp3',
+                '/assets/audio/phase_two.mp3',
+                '/assets/audio/final_form.mp3',
+                '/assets/audio/true_power.mp3',
+                '/assets/audio/climax_battle.mp3',
             ],
-            // Horror/prestige boss music
-            horror: [
-                '/assets/audio/horror_watches.mp3',
+            // Prestige boss music - horror themed
+            prestigeBoss: [
+                '/assets/audio/blood_moon.mp3',
+                '/assets/audio/neon_nightmare.mp3',
+                '/assets/audio/eyes_dark.mp3',
             ],
             // Victory jingle
             victory: '/assets/audio/victory.mp3',
@@ -160,12 +189,37 @@ class AudioManager {
     }
 
     /**
+     * Get the appropriate music category for a zone
+     * @param {number} zoneId - Zone ID
+     * @param {boolean} isBoss - Whether this is a boss zone
+     * @returns {string} Music category key
+     */
+    getMusicCategory(zoneId, isBoss = false) {
+        if (isBoss) {
+            return zoneId >= 40 ? 'prestigeBoss' : 'boss';
+        }
+        if (zoneId >= 40) return 'zonePrestige';
+        if (zoneId >= 30) return 'zoneEnd';
+        if (zoneId >= 20) return 'zoneLate';
+        if (zoneId >= 10) return 'zoneMid';
+        return 'zoneEarly';
+    }
+
+    /**
      * Play background music for a zone
-     * @param {string} type - 'zone', 'boss', or 'horror'
+     * @param {string} type - 'zone', 'boss', 'prestigeBoss', or specific category
      * @param {number} zoneId - Zone ID to vary the track
      */
     playMusic(type = 'zone', zoneId = 0) {
-        const tracks = this.musicTracks[type];
+        // Auto-select category based on zone if type is 'zone'
+        let category = type;
+        if (type === 'zone') {
+            category = this.getMusicCategory(zoneId, false);
+        } else if (type === 'boss') {
+            category = this.getMusicCategory(zoneId, true);
+        }
+
+        const tracks = this.musicTracks[category];
         if (!tracks) return;
 
         const trackList = Array.isArray(tracks) ? tracks : [tracks];

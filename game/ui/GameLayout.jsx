@@ -155,14 +155,9 @@ function DesktopGameLayout() {
             audioManager.init();
             audioManager.resume();
 
-            // Determine music type based on zone
+            // Play music - AudioManager auto-selects category based on zone
             if (zone.isBoss) {
-                // Prestige bosses get horror music
-                if (state.currentZone >= 40) {
-                    audioManager.playMusic('horror', state.currentZone);
-                } else {
-                    audioManager.playMusic('boss', state.currentZone);
-                }
+                audioManager.playMusic('boss', state.currentZone);
             } else {
                 audioManager.playMusic('zone', state.currentZone);
             }
@@ -177,11 +172,7 @@ function DesktopGameLayout() {
         // If audio already initialized, play music immediately
         if (audioManager.audioContext?.state === 'running') {
             if (zone.isBoss) {
-                if (state.currentZone >= 40) {
-                    audioManager.playMusic('horror', state.currentZone);
-                } else {
-                    audioManager.playMusic('boss', state.currentZone);
-                }
+                audioManager.playMusic('boss', state.currentZone);
             } else {
                 audioManager.playMusic('zone', state.currentZone);
             }
