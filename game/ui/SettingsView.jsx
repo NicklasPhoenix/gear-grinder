@@ -58,9 +58,7 @@ export default function SettingsView() {
     // Display settings
     const textSize = state?.textSize ?? 'normal';
 
-    // Loot filter settings
-    const autoSalvageTier = state?.autoSalvageTier ?? -1;
-    const autoSalvageKeepEffects = state?.autoSalvageKeepEffects ?? true;
+    // Inventory settings
     const inventorySort = state?.inventorySort ?? 'none';
 
     // Apply text size to body element
@@ -74,14 +72,6 @@ export default function SettingsView() {
 
     const handleTextSizeChange = (size) => {
         gameManager?.setState(prev => ({ ...prev, textSize: size }));
-    };
-
-    const handleAutoSalvageTierChange = (tier) => {
-        gameManager?.setState(prev => ({ ...prev, autoSalvageTier: tier }));
-    };
-
-    const handleAutoSalvageKeepEffectsToggle = () => {
-        gameManager?.setState(prev => ({ ...prev, autoSalvageKeepEffects: !prev.autoSalvageKeepEffects }));
     };
 
     const handleInventorySortChange = (sort) => {
@@ -239,69 +229,10 @@ export default function SettingsView() {
                     </div>
                 </div>
 
-                {/* Loot Filter Settings */}
+                {/* Inventory Settings */}
                 <div className="game-panel">
-                    <div className="game-panel-header">Loot Filter</div>
+                    <div className="game-panel-header">Inventory</div>
                     <div className="p-4 space-y-4">
-                        {/* Auto-Salvage Tier Threshold */}
-                        <div className="bg-slate-900/50 rounded-lg p-4 border border-slate-700">
-                            <div className="flex items-center justify-between mb-3">
-                                <div>
-                                    <span className="font-bold text-white">Auto-Salvage Threshold</span>
-                                    <p className="text-xs text-slate-500">Automatically salvage items up to this rarity</p>
-                                </div>
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                                <button
-                                    onClick={() => handleAutoSalvageTierChange(-1)}
-                                    className={`px-3 py-1.5 rounded text-sm font-bold transition-all ${
-                                        autoSalvageTier === -1
-                                            ? 'bg-slate-600 text-white'
-                                            : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
-                                    }`}
-                                >
-                                    OFF
-                                </button>
-                                {TIERS.slice(0, 7).map((tier, idx) => (
-                                    <button
-                                        key={idx}
-                                        onClick={() => handleAutoSalvageTierChange(idx)}
-                                        className={`px-3 py-1.5 rounded text-sm font-bold transition-all ${
-                                            autoSalvageTier === idx
-                                                ? 'ring-2 ring-white'
-                                                : 'hover:brightness-125'
-                                        }`}
-                                        style={{
-                                            backgroundColor: tier.color + '40',
-                                            color: tier.color,
-                                        }}
-                                    >
-                                        {tier.name}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Keep Items with Effects */}
-                        <div className="bg-slate-900/50 rounded-lg p-4 border border-slate-700">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <span className="font-bold text-white">Keep Items with Effects</span>
-                                    <p className="text-xs text-slate-500">Don't auto-salvage items that have special effects</p>
-                                </div>
-                                <button
-                                    onClick={handleAutoSalvageKeepEffectsToggle}
-                                    className={`px-4 py-2 rounded text-sm font-bold transition-all active:scale-95 ${
-                                        autoSalvageKeepEffects
-                                            ? 'bg-green-500/30 text-green-400 hover:bg-green-500/40'
-                                            : 'bg-red-500/30 text-red-400 hover:bg-red-500/40'
-                                    }`}
-                                >
-                                    {autoSalvageKeepEffects ? 'ON' : 'OFF'}
-                                </button>
-                            </div>
-                        </div>
-
                         {/* Inventory Sort */}
                         <div className="bg-slate-900/50 rounded-lg p-4 border border-slate-700">
                             <div className="flex items-center justify-between mb-3">

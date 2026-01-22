@@ -209,6 +209,18 @@ export default function InventoryView({ onHover }) {
         gameManager.setState(prev => ({ ...prev, autoSalvage: !prev.autoSalvage }));
     };
 
+    const setAutoSalvageTier = (tier) => {
+        gameManager.setState(prev => ({ ...prev, autoSalvageTier: tier }));
+    };
+
+    const toggleKeepEffects = () => {
+        gameManager.setState(prev => ({ ...prev, autoSalvageKeepEffects: !prev.autoSalvageKeepEffects }));
+    };
+
+    // Loot filter state
+    const autoSalvageTier = state.autoSalvageTier ?? -1;
+    const autoSalvageKeepEffects = state.autoSalvageKeepEffects ?? true;
+
     // Equipment slot component for the paper doll
     const EquipSlot = ({ slot, className = '' }) => {
         const item = state.gear[slot];
@@ -456,6 +468,56 @@ export default function InventoryView({ onHover }) {
                         )}
                     </div>
                 </div>
+
+                {/* Loot Filter - shows when auto-salvage is enabled */}
+                {state.autoSalvage && (
+                    <div className="px-2 py-1.5 bg-slate-800/50 border-b border-slate-700 space-y-1.5">
+                        <div className="flex flex-wrap items-center gap-1">
+                            <span className="text-xs text-slate-400 mr-1">Filter:</span>
+                            <button
+                                onClick={() => setAutoSalvageTier(-1)}
+                                className={`px-1.5 py-0.5 text-xs rounded transition-all ${
+                                    autoSalvageTier === -1
+                                        ? 'bg-slate-600 text-white'
+                                        : 'bg-slate-700/50 text-slate-400 hover:bg-slate-600/50'
+                                }`}
+                            >
+                                ALL
+                            </button>
+                            {TIERS.slice(0, 7).map((tier, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => setAutoSalvageTier(idx)}
+                                    className={`px-1.5 py-0.5 text-xs rounded transition-all ${
+                                        autoSalvageTier === idx
+                                            ? 'ring-1 ring-white'
+                                            : 'hover:brightness-125'
+                                    }`}
+                                    style={{
+                                        backgroundColor: tier.color + '30',
+                                        color: tier.color,
+                                    }}
+                                    title={tier.name}
+                                >
+                                    {tier.name.slice(0, 3)}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs text-slate-400">Keep effects:</span>
+                            <button
+                                onClick={toggleKeepEffects}
+                                className={`px-1.5 py-0.5 text-xs rounded transition-all ${
+                                    autoSalvageKeepEffects
+                                        ? 'bg-green-600/40 text-green-300'
+                                        : 'bg-red-600/40 text-red-300'
+                                }`}
+                            >
+                                {autoSalvageKeepEffects ? 'ON' : 'OFF'}
+                            </button>
+                        </div>
+                    </div>
+                )}
 
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-2 min-h-0">
                     {state.inventory.length === 0 ? (
