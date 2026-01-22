@@ -250,6 +250,8 @@ export function GameProvider({ children }) {
                     newState.autoSalvage !== lastState?.autoSalvage ||
                     newState.autoSalvageTier !== lastState?.autoSalvageTier ||
                     newState.autoSalvageKeepEffects !== lastState?.autoSalvageKeepEffects ||
+                    newState.textSize !== lastState?.textSize ||
+                    newState.inventorySort !== lastState?.inventorySort ||
                     newState.combatPaused !== lastState?.combatPaused ||
                     newState.unlockedAchievements !== lastState?.unlockedAchievements ||
                     newState.dailyStreak !== lastState?.dailyStreak ||
