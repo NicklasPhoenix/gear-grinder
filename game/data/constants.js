@@ -23,6 +23,7 @@ export const STAT_SCALING = {
     VIT_ARMOR: 1,
     VIT_HP_REGEN: 0.15,      // +0.15% max HP regen per second per VIT point
     VIT_DAMAGE_REDUCTION: 0.3, // +0.3% damage reduction per VIT point
+    VIT_TANK_DAMAGE: 0.02,   // +2% damage per VIT for maces
 
     // AGI - Evasion and speed (now with damage scaling for daggers)
     AGI_CRIT_CHANCE: 0.5,

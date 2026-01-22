@@ -34,8 +34,9 @@ export const calculatePlayerStats = (gameState) => {
 
     // Weapon-specific damage multipliers (all weapon types now have scaling)
     let magicDmgMult = 1 + s.int * STAT_SCALING.INT_MAGIC_DAMAGE;      // INT weapons (staff)
-    let meleeDmgMult = 1 + s.str * STAT_SCALING.STR_MELEE_DAMAGE;      // STR weapons (sword, axe, mace)
+    let meleeDmgMult = 1 + s.str * STAT_SCALING.STR_MELEE_DAMAGE;      // STR weapons (sword, scythe, greataxe)
     let precisionDmgMult = 1 + s.agi * STAT_SCALING.AGI_PRECISION_DAMAGE; // AGI weapons (dagger, katana)
+    let tankDmgMult = 1 + s.vit * STAT_SCALING.VIT_TANK_DAMAGE;        // VIT weapons (mace)
 
     // NEW: Defensive stats for tank/regen builds
     let hpRegen = COMBAT.BASE_HP_REGEN + s.vit * STAT_SCALING.VIT_HP_REGEN;  // % max HP per second
@@ -177,9 +178,9 @@ export const calculatePlayerStats = (gameState) => {
     let weaponDmgMult = 1;
     switch (weaponScaling) {
         case 'int': weaponDmgMult = magicDmgMult; break;      // Staff: INT scaling
-        case 'str': weaponDmgMult = meleeDmgMult; break;      // Sword, Axe, Mace, Greataxe, Scythe: STR scaling
+        case 'str': weaponDmgMult = meleeDmgMult; break;      // Sword, Scythe, Greataxe: STR scaling
         case 'agi': weaponDmgMult = precisionDmgMult; break;  // Dagger, Katana: AGI scaling
-        case 'vit': weaponDmgMult = meleeDmgMult * 0.8; break; // Mace with VIT: slightly lower multiplier for tank trade-off
+        case 'vit': weaponDmgMult = tankDmgMult; break;       // Mace: VIT scaling
     }
     const finalDmgMult = dmgMult * weaponDmgMult;
 
