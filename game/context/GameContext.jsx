@@ -188,7 +188,7 @@ function validateSave(parsed) {
         skills: [],
         unlockedSkills: [],
         // Display & loot filter settings (new in this version)
-        uiScale: 1.0,
+        textSize: 'normal',
         autoSalvageTier: -1,
         autoSalvageKeepEffects: true,
         inventorySort: 'none',
@@ -263,8 +263,8 @@ function validateSave(parsed) {
     if (!Array.isArray(parsed.unlockedSkills)) parsed.unlockedSkills = [];
 
     // Add defaults for new display/loot filter settings (for old saves)
-    if (typeof parsed.uiScale !== 'number' || parsed.uiScale < 0.8 || parsed.uiScale > 1.5) {
-        parsed.uiScale = defaults.uiScale;
+    if (!['normal', 'large', 'xlarge'].includes(parsed.textSize)) {
+        parsed.textSize = defaults.textSize;
     }
     if (typeof parsed.autoSalvageTier !== 'number' || parsed.autoSalvageTier < -1 || parsed.autoSalvageTier > 8) {
         parsed.autoSalvageTier = defaults.autoSalvageTier;
@@ -494,6 +494,15 @@ export function GameProvider({ children }) {
         };
     }, []);
 
+    // Apply text size setting to body element for CSS scaling
+    useEffect(() => {
+        const textSize = gameState?.textSize ?? 'normal';
+        if (textSize === 'normal') {
+            document.body.removeAttribute('data-text-size');
+        } else {
+            document.body.setAttribute('data-text-size', textSize);
+        }
+    }, [gameState?.textSize]);
 
     // Toast management functions
     const addToast = useCallback((type, data) => {

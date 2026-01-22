@@ -2,7 +2,7 @@ export const initialState = {
     gold: 50, enhanceStone: 5, blessedOrb: 0, celestialShard: 0,
     level: 1, xp: 0, currentZone: 0,
     // Display settings
-    uiScale: 1.0, // UI scale multiplier for font size (0.8 to 1.5)
+    textSize: 'normal', // Text size: 'normal', 'large', 'xlarge'
     // Loot filter settings
     autoSalvage: false, // Auto-salvage dropped items
     autoSalvageTier: -1, // Max tier to auto-salvage (-1 = disabled, 0-8 = tier threshold)

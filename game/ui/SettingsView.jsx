@@ -56,16 +56,24 @@ export default function SettingsView() {
     const [sfxMuted, setSfxMuted] = useState(audioManager.sfxMuted);
 
     // Display settings
-    const uiScale = state?.uiScale ?? 1.0;
+    const textSize = state?.textSize ?? 'normal';
 
     // Loot filter settings
     const autoSalvageTier = state?.autoSalvageTier ?? -1;
     const autoSalvageKeepEffects = state?.autoSalvageKeepEffects ?? true;
     const inventorySort = state?.inventorySort ?? 'none';
 
+    // Apply text size to body element
+    useEffect(() => {
+        if (textSize === 'normal') {
+            document.body.removeAttribute('data-text-size');
+        } else {
+            document.body.setAttribute('data-text-size', textSize);
+        }
+    }, [textSize]);
 
-    const handleUiScaleChange = (val) => {
-        gameManager?.setState(prev => ({ ...prev, uiScale: val }));
+    const handleTextSizeChange = (size) => {
+        gameManager?.setState(prev => ({ ...prev, textSize: size }));
     };
 
     const handleAutoSalvageTierChange = (tier) => {
@@ -192,6 +200,41 @@ export default function SettingsView() {
                             >
                                 Test SFX
                             </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Display Settings */}
+                <div className="game-panel">
+                    <div className="game-panel-header">Display Settings</div>
+                    <div className="p-4 space-y-4">
+                        {/* Text Size */}
+                        <div className="bg-slate-900/50 rounded-lg p-4 border border-slate-700">
+                            <div className="flex items-center justify-between mb-3">
+                                <div>
+                                    <span className="font-bold text-white">Text Size</span>
+                                    <p className="text-xs text-slate-500">Increase text size for better readability</p>
+                                </div>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                {[
+                                    { id: 'normal', label: 'Normal' },
+                                    { id: 'large', label: 'Large' },
+                                    { id: 'xlarge', label: 'X-Large' },
+                                ].map(opt => (
+                                    <button
+                                        key={opt.id}
+                                        onClick={() => handleTextSizeChange(opt.id)}
+                                        className={`px-4 py-2 rounded text-sm font-bold transition-all ${
+                                            textSize === opt.id
+                                                ? 'bg-blue-600 text-white'
+                                                : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                                        }`}
+                                    >
+                                        {opt.label}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>

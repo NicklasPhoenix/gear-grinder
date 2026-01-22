@@ -807,3 +807,39 @@ body, .game-panel, .game-panel-header, button, input, select {
   outline: 2px solid #3b82f6;
   outline-offset: 2px;
 }
+
+/* ===========================================
+   TEXT SIZE SCALING
+   Add data-text-size="large" or "xlarge" to body
+   Only scales text, not layouts
+   =========================================== */
+
+body[data-text-size="large"] {
+  font-size: 18px;
+}
+
+body[data-text-size="large"] .text-xs { font-size: 0.8125rem; }
+body[data-text-size="large"] .text-sm { font-size: 0.9375rem; }
+body[data-text-size="large"] .text-base { font-size: 1.125rem; }
+body[data-text-size="large"] .text-lg { font-size: 1.25rem; }
+body[data-text-size="large"] .text-xl { font-size: 1.375rem; }
+body[data-text-size="large"] .text-2xl { font-size: 1.625rem; }
+body[data-text-size="large"] .text-\[8px\] { font-size: 10px; }
+body[data-text-size="large"] .text-\[9px\] { font-size: 11px; }
+body[data-text-size="large"] .text-\[10px\] { font-size: 12px; }
+body[data-text-size="large"] .text-\[11px\] { font-size: 13px; }
+
+body[data-text-size="xlarge"] {
+  font-size: 20px;
+}
+
+body[data-text-size="xlarge"] .text-xs { font-size: 0.875rem; }
+body[data-text-size="xlarge"] .text-sm { font-size: 1rem; }
+body[data-text-size="xlarge"] .text-base { font-size: 1.25rem; }
+body[data-text-size="xlarge"] .text-lg { font-size: 1.375rem; }
+body[data-text-size="xlarge"] .text-xl { font-size: 1.5rem; }
+body[data-text-size="xlarge"] .text-2xl { font-size: 1.75rem; }
+body[data-text-size="xlarge"] .text-\[8px\] { font-size: 12px; }
+body[data-text-size="xlarge"] .text-\[9px\] { font-size: 13px; }
+body[data-text-size="xlarge"] .text-\[10px\] { font-size: 14px; }
+body[data-text-size="xlarge"] .text-\[11px\] { font-size: 15px; }
