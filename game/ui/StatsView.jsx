@@ -232,8 +232,14 @@ export default function StatsView() {
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-slate-400">Armor Reduction</span>
-                                        <span className="text-blue-300 font-mono font-bold">-{formatPercent(damageReduction, 1, false)}</span>
+                                        <span className="text-blue-300 font-mono font-bold">-{formatPercent(armorReduction * 100, 1, false)}</span>
                                     </div>
+                                    {flatDR > 0 && (
+                                        <div className="flex justify-between">
+                                            <span className="text-slate-400">Dmg Reduction</span>
+                                            <span className="text-sky-300 font-mono font-bold">-{formatPercent(flatDR * 100, 1, false)}</span>
+                                        </div>
+                                    )}
                                     <div className="flex justify-between border-t border-slate-700/50 pt-2 mt-2">
                                         <span className="text-slate-200 font-semibold">You Take</span>
                                         <span className="text-cyan-400 font-mono font-bold text-base">{reducedEnemyDmg}/hit</span>
@@ -410,8 +416,14 @@ export default function StatsView() {
                                         </div>
                                         <div className="flex justify-between">
                                             <span className="text-slate-400">Armor Reduction</span>
-                                            <span className="text-blue-300 font-mono">-{formatPercent(damageReduction, 1, false)}</span>
+                                            <span className="text-blue-300 font-mono">-{formatPercent(armorReduction * 100, 1, false)}</span>
                                         </div>
+                                        {flatDR > 0 && (
+                                            <div className="flex justify-between">
+                                                <span className="text-slate-400">Dmg Reduction</span>
+                                                <span className="text-sky-300 font-mono">-{formatPercent(flatDR * 100, 1, false)}</span>
+                                            </div>
+                                        )}
                                         <div className="flex justify-between border-t border-slate-700/50 pt-1 mt-1">
                                             <span className="text-slate-300 font-semibold">You Take</span>
                                             <span className="text-cyan-400 font-mono font-bold">{reducedEnemyDmg}/hit</span>

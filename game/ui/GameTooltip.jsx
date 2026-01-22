@@ -14,6 +14,8 @@ const EFFECT_DESCRIPTIONS = {
     goldFind: (val) => `+${val}% gold from enemies`,
     xpBonus: (val) => `+${val}% experience gained`,
     dodge: (val) => `${val}% chance to avoid attacks`,
+    hpRegen: (val) => `Restore ${val}% max HP per second`,
+    damageReduction: (val) => `Reduce damage taken by ${val}%`,
 };
 
 // Helper to calculate item stats for comparison
@@ -259,14 +261,30 @@ export default function GameTooltip({ tooltip }) {
 
                 {/* Weapon bonuses */}
                 {item.slot === 'weapon' && weaponBase.speedBonus !== undefined && (
-                    <div className="mt-2 flex gap-3 text-xs">
-                        {weaponBase.speedBonus !== 0 && (
-                            <span className={weaponBase.speedBonus > 0 ? 'text-cyan-400' : 'text-orange-400'}>
-                                {formatBonus(weaponBase.speedBonus * 100)} Speed
-                            </span>
-                        )}
-                        {weaponBase.critBonus > 0 && (
-                            <span className="text-yellow-400">+{weaponBase.critBonus}% Crit</span>
+                    <div className="mt-2 space-y-1">
+                        <div className="flex gap-3 text-xs">
+                            {weaponBase.speedBonus !== 0 && (
+                                <span className={weaponBase.speedBonus > 0 ? 'text-cyan-400' : 'text-orange-400'}>
+                                    {formatBonus(weaponBase.speedBonus * 100)} Speed
+                                </span>
+                            )}
+                            {weaponBase.critBonus > 0 && (
+                                <span className="text-yellow-400">+{weaponBase.critBonus}% Crit</span>
+                            )}
+                        </div>
+                        {/* Weapon scaling info */}
+                        {weaponBase.scaling && (
+                            <div className="text-[10px] text-slate-400">
+                                Scales with <span className={{
+                                    str: 'text-red-400',
+                                    int: 'text-purple-400',
+                                    agi: 'text-amber-400',
+                                    vit: 'text-green-400',
+                                }[weaponBase.scaling] || 'text-slate-300'}>
+                                    {weaponBase.scaling.toUpperCase()}
+                                </span>
+                                <span className="text-slate-500"> (+{weaponBase.scaling === 'int' ? '3' : '2'}% DMG per point)</span>
+                            </div>
                         )}
                     </div>
                 )}
