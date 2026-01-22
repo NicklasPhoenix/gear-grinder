@@ -1,176 +1,11 @@
 import React, { createContext, useContext, useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { GameManager } from '../managers/GameManager';
 import { SAVE, DEFAULTS } from '../data/constants';
-import { BOSS_SETS, PRESTIGE_BOSS_SETS } from '../data/items';
-
 const GameContext = createContext(null);
 
 // Separate context for high-frequency updates (HP bars) to prevent full tree re-renders
 const HighFrequencyContext = createContext(null);
 
-// Migration map: old boss set names -> new boss set names
-// Includes variations (capitalized, suffixed) to catch all legacy items
-const BOSS_SET_MIGRATION = {
-    // Base names
-    guardian: 'crow',
-    lich: 'cerberus',
-    dragon: 'demon',
-    frost: 'spider',
-    demon: 'shadow',      // old "demon" becomes "shadow" (new "demon" is different boss)
-    seraph: 'abyss',
-    void: 'behemoth',
-    chaos: 'darkwolf',
-    eternal: null,        // removed - no equivalent
-    astral: 'tyrant',
-    cosmic: 'inferno',
-    primordial: 'scorpion',
-    // Capitalized variations
-    Guardian: 'crow',
-    Lich: 'cerberus',
-    Dragon: 'demon',
-    Frost: 'spider',
-    Demon: 'shadow',
-    Seraph: 'abyss',
-    Void: 'behemoth',
-    Chaos: 'darkwolf',
-    Eternal: null,
-    Astral: 'tyrant',
-    Cosmic: 'inferno',
-    Primordial: 'scorpion',
-    // Suffixed variations (e.g., "frostborn", "lichborn")
-    frostborn: 'spider',
-    lichborn: 'cerberus',
-    dragonborn: 'demon',
-    Frostborn: 'spider',
-    Lichborn: 'cerberus',
-    Dragonborn: 'demon',
-};
-
-// Helper to get the correct item name from boss set definitions
-function getBossItemName(bossSetKey, slot) {
-    const bossSet = BOSS_SETS[bossSetKey] || PRESTIGE_BOSS_SETS[bossSetKey];
-    if (bossSet && bossSet.items && bossSet.items[slot]) {
-        return bossSet.items[slot].name;
-    }
-    return null;
-}
-
-// Migrate legacy boss set names to new names (and update item names)
-// Only runs once - migration is skipped if bossSetMigrationVersion is set
-function migrateBossSets(parsed) {
-    // Skip migration if already done (prevents re-migrating on every load)
-    if (parsed.bossSetMigrationVersion >= 1) {
-        return parsed;
-    }
-
-    let migrated = false;
-
-    // Migrate bossStones object keys
-    if (parsed.bossStones) {
-        const newBossStones = {};
-        for (const [oldKey, value] of Object.entries(parsed.bossStones)) {
-            if (BOSS_SET_MIGRATION.hasOwnProperty(oldKey)) {
-                const newKey = BOSS_SET_MIGRATION[oldKey];
-                if (newKey) {
-                    newBossStones[newKey] = (newBossStones[newKey] || 0) + value;
-                    migrated = true;
-                    console.log(`Migrated bossStone: ${oldKey} -> ${newKey} (${value})`);
-                }
-            } else {
-                // Keep keys that don't need migration (already new names)
-                newBossStones[oldKey] = value;
-            }
-        }
-        parsed.bossStones = newBossStones;
-    }
-
-    // Migrate gear bossSet values and names
-    if (parsed.gear) {
-        for (const [slot, item] of Object.entries(parsed.gear)) {
-            if (item && item.bossSet) {
-                console.log(`[Migration] Found gear with bossSet: "${item.bossSet}" (${item.name})`);
-                if (BOSS_SET_MIGRATION.hasOwnProperty(item.bossSet)) {
-                    const newSet = BOSS_SET_MIGRATION[item.bossSet];
-                    if (newSet) {
-                        const oldName = item.name;
-                        item.bossSet = newSet;
-                        // Update item name from the new boss set definition
-                        const newName = getBossItemName(newSet, slot);
-                        if (newName) {
-                            item.name = newName;
-                            console.log(`Migrated gear: ${oldName} -> ${newName} (bossSet: ${newSet})`);
-                        }
-                        migrated = true;
-                    }
-                } else {
-                    console.log(`[Migration] No mapping for bossSet: "${item.bossSet}"`);
-                }
-            }
-        }
-    }
-
-    // Migrate inventory item bossSet values and names
-    if (Array.isArray(parsed.inventory)) {
-        for (const item of parsed.inventory) {
-            if (item && item.bossSet) {
-                console.log(`[Migration] Found inventory item with bossSet: "${item.bossSet}" (${item.name})`);
-                if (BOSS_SET_MIGRATION.hasOwnProperty(item.bossSet)) {
-                    const newSet = BOSS_SET_MIGRATION[item.bossSet];
-                    if (newSet) {
-                        const oldName = item.name;
-                        item.bossSet = newSet;
-                        // Update item name from the new boss set definition
-                        const newName = getBossItemName(newSet, item.slot);
-                        if (newName) {
-                            item.name = newName;
-                            console.log(`Migrated inventory: ${oldName} -> ${newName} (bossSet: ${newSet})`);
-                        }
-                        migrated = true;
-                    }
-                } else {
-                    console.log(`[Migration] No mapping for bossSet: "${item.bossSet}"`);
-                }
-            }
-        }
-    }
-
-    // Second pass: Fix items that have new bossSet but old names
-    // (This handles saves where bossSet was migrated but name wasn't)
-    if (parsed.gear) {
-        for (const [slot, item] of Object.entries(parsed.gear)) {
-            if (item && item.bossSet && item.isBossItem) {
-                const expectedName = getBossItemName(item.bossSet, slot);
-                if (expectedName && item.name !== expectedName) {
-                    console.log(`[Migration] Fixing gear name: ${item.name} -> ${expectedName}`);
-                    item.name = expectedName;
-                    migrated = true;
-                }
-            }
-        }
-    }
-
-    if (Array.isArray(parsed.inventory)) {
-        for (const item of parsed.inventory) {
-            if (item && item.bossSet && item.isBossItem) {
-                const expectedName = getBossItemName(item.bossSet, item.slot);
-                if (expectedName && item.name !== expectedName) {
-                    console.log(`[Migration] Fixing inventory name: ${item.name} -> ${expectedName}`);
-                    item.name = expectedName;
-                    migrated = true;
-                }
-            }
-        }
-    }
-
-    if (migrated) {
-        console.log('Boss set migration completed');
-    }
-
-    // Mark migration as done so it doesn't run again
-    parsed.bossSetMigrationVersion = 1;
-
-    return parsed;
-}
 
 // Validate and sanitize a loaded save to prevent crashes
 function validateSave(parsed) {
@@ -353,9 +188,6 @@ export function GameProvider({ children }) {
                 }
 
                 if (parsed) {
-                    // Migrate legacy boss set names before validation
-                    parsed = migrateBossSets(parsed);
-
                     // Validate and sanitize the loaded save
                     const { validated, errors } = validateSave(parsed);
 
