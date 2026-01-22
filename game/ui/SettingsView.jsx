@@ -63,17 +63,6 @@ export default function SettingsView() {
     const autoSalvageKeepEffects = state?.autoSalvageKeepEffects ?? true;
     const inventorySort = state?.inventorySort ?? 'none';
 
-    // Apply UI scale using transform (handled by GameContext, but also here for immediate feedback)
-    useEffect(() => {
-        const gameContainer = document.getElementById('game-root');
-        if (gameContainer) {
-            gameContainer.style.zoom = '';
-            gameContainer.style.transformOrigin = 'top left';
-            gameContainer.style.transform = `scale(${uiScale})`;
-            gameContainer.style.width = `${100 / uiScale}%`;
-            gameContainer.style.height = `${100 / uiScale}vh`;
-        }
-    }, [uiScale]);
 
     const handleUiScaleChange = (val) => {
         gameManager?.setState(prev => ({ ...prev, uiScale: val }));
@@ -203,45 +192,6 @@ export default function SettingsView() {
                             >
                                 Test SFX
                             </button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Display Settings */}
-                <div className="game-panel">
-                    <div className="game-panel-header">Display Settings</div>
-                    <div className="p-4 space-y-4">
-                        {/* UI Scale */}
-                        <div className="bg-slate-900/50 rounded-lg p-4 border border-slate-700">
-                            <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-xl">Aa</span>
-                                    <span className="font-bold text-white">UI Scale</span>
-                                </div>
-                                <span className="text-sm text-slate-400">For smaller screens</span>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <span className="text-xs text-slate-500">80%</span>
-                                <input
-                                    type="range"
-                                    min="80"
-                                    max="150"
-                                    step="5"
-                                    value={Math.round(uiScale * 100)}
-                                    onChange={(e) => handleUiScaleChange(parseInt(e.target.value) / 100)}
-                                    className="flex-1 h-3 rounded-lg appearance-none cursor-pointer"
-                                    style={{
-                                        background: `linear-gradient(to right, #22c55e 0%, #22c55e ${((uiScale - 0.8) / 0.7) * 100}%, #334155 ${((uiScale - 0.8) / 0.7) * 100}%, #334155 100%)`
-                                    }}
-                                />
-                                <span className="text-xs text-slate-500">150%</span>
-                                <span className="w-14 text-right font-mono text-sm text-white font-bold">
-                                    {Math.round(uiScale * 100)}%
-                                </span>
-                            </div>
-                            <p className="text-xs text-slate-500 mt-2">
-                                Increase this if text is too small on 1080p screens
-                            </p>
                         </div>
                     </div>
                 </div>

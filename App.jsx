@@ -119,9 +119,7 @@ export default function App() {
     return (
         <ErrorBoundary>
             <GameProvider>
-                <div id="game-root" className="min-h-screen overflow-hidden">
-                    <GameLayout />
-                </div>
+                <GameLayout />
             </GameProvider>
         </ErrorBoundary>
     );
