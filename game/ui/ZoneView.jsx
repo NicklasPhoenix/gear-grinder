@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useGame } from '../context/GameContext';
 import { ZONES, PRESTIGE_ZONES, getZoneById } from '../data/zones';
 import { BOSS_SETS, PRESTIGE_BOSS_SETS, WEAPON_TYPES } from '../data/items';
@@ -7,6 +7,14 @@ import { formatNumber } from '../utils/format';
 
 export default function ZoneView() {
     const { state, gameManager } = useGame();
+    const currentZoneRef = useRef(null);
+
+    // Scroll to current zone on mount
+    useEffect(() => {
+        if (currentZoneRef.current) {
+            currentZoneRef.current.scrollIntoView({ block: 'center', behavior: 'instant' });
+        }
+    }, []);
 
     const handleTravel = (zoneId) => {
         const zone = getZoneById(zoneId);
@@ -44,6 +52,7 @@ export default function ZoneView() {
                         return (
                             <div
                                 key={zone.id}
+                                ref={isCurrent ? currentZoneRef : null}
                                 onClick={() => isUnlocked && !isCurrent && handleTravel(zone.id)}
                                 className={`
                                     relative rounded-lg p-3 transition-all border-2
