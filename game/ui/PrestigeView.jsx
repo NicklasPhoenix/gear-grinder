@@ -8,8 +8,11 @@ export default function PrestigeView() {
     const { state, gameManager } = useGame();
     const { isMobile } = useIsMobile();
 
+    // Calculate prestige stone reward: 10 base + level/2
+    const stoneReward = 10 + Math.floor((state.level || 1) / 2);
+
     const handlePrestige = () => {
-        if (confirm("ASCEND NOW?\n\nThis will reset your level, gold, gear, and zone progress, but you will keep your Prestige Skills and earn 10 Prestige Stones.")) {
+        if (confirm(`ASCEND NOW?\n\nThis will reset your level, gold, gear, and zone progress, but you will keep your Prestige Skills and earn ${stoneReward} Prestige Stones.`)) {
             gameManager.performPrestige();
         }
     };
@@ -50,10 +53,10 @@ export default function PrestigeView() {
                     {/* Prestige Action */}
                     <div className="bg-slate-950 p-3 rounded-lg border border-slate-800">
                         <p className="text-slate-400 text-xs mb-2">
-                            Defeat the Dark Wolf King in Zone 39 to unlock. Rewards <span className="text-pink-400 font-bold">+10 Prestige Stones</span> per ascension.
+                            Defeat the Dark Wolf King in Zone 39 to unlock. Current reward: <span className="text-pink-400 font-bold">+{stoneReward} Prestige Stones</span>
                         </p>
                         <p className="text-slate-500 text-[10px] mb-2">
-                            Extra stones drop from Prestige zones (40+) and achievements.
+                            Formula: 10 + Level/2. Extra stones drop from Prestige zones (40+).
                         </p>
                         <button
                             onClick={handlePrestige}
@@ -162,10 +165,10 @@ export default function PrestigeView() {
                         <h3 className="text-white font-bold text-lg mb-1">Perform Ascension</h3>
                         <p className="text-slate-500 text-sm max-w-md">
                             Requirement: Defeat the Dark Wolf King in Zone 39.
-                            Resets all progress but rewards <span className="text-pink-400 font-bold">+10 Prestige Stones</span> and increases Prestige Level.
+                            Resets all progress but rewards <span className="text-pink-400 font-bold">+{stoneReward} Prestige Stones</span> and increases Prestige Level.
                         </p>
                         <p className="text-slate-600 text-xs mt-1">
-                            Extra stones drop from Prestige zones (40+) and achievements.
+                            Formula: 10 + Level/2. Extra stones drop from Prestige zones (40+).
                         </p>
                     </div>
                     <button

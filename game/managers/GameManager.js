@@ -176,6 +176,9 @@ export class GameManager {
         const startOre = 5 + startingBonusLevel * 10;
         const startLeather = 5 + startingBonusLevel * 10;
 
+        // Calculate prestige stone reward based on level: 10 base + level/2
+        const stoneReward = 10 + Math.floor(this.state.level / 2);
+
         this.setState(prev => ({
             ...prev,
             gold: startGold,
@@ -199,7 +202,7 @@ export class GameManager {
             kills: 0,
             zoneKills: {},
             prestigeLevel: (prev.prestigeLevel || 0) + 1,
-            prestigeStones: (prev.prestigeStones || 0) + 10,
+            prestigeStones: (prev.prestigeStones || 0) + stoneReward,
             prestigeSkills: prev.prestigeSkills || {},
             totalPrestiges: (prev.totalPrestiges || 0) + 1,
         }));
