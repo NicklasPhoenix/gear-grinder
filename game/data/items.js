@@ -261,18 +261,39 @@ export const GEAR_BASES = {
 
 export const SPECIAL_EFFECTS = [
     { id: 'thorns', name: 'Thorns', minVal: 5, maxVal: 25, color: '#f97316' },
-    { id: 'lifesteal', name: 'Lifesteal', minVal: 1, maxVal: 8, color: '#22c55e' },
-    { id: 'critChance', name: 'Crit', minVal: 3, maxVal: 15, color: '#ef4444' },
-    { id: 'critDamage', name: 'Crit DMG', minVal: 15, maxVal: 60, color: '#dc2626' },
+    { id: 'lifesteal', name: 'Lifesteal', minVal: 0.5, maxVal: 4, color: '#22c55e' },       // Reduced from 8% max
+    { id: 'critChance', name: 'Crit', minVal: 1, maxVal: 8, color: '#ef4444' },             // Reduced from 15% max
+    { id: 'critDamage', name: 'Crit DMG', minVal: 10, maxVal: 60, color: '#dc2626' },
     { id: 'bonusDmg', name: '+DMG', minVal: 2, maxVal: 50, color: '#f59e0b' },
     { id: 'bonusHp', name: '+HP', minVal: 10, maxVal: 200, color: '#10b981' },
-    { id: 'goldFind', name: 'Gold%', minVal: 2, maxVal: 10, color: '#fbbf24' },
+    { id: 'silverFind', name: 'Silver%', minVal: 2, maxVal: 10, color: '#fbbf24' },         // Renamed from goldFind
     { id: 'xpBonus', name: 'XP%', minVal: 3, maxVal: 15, color: '#8b5cf6' },
     { id: 'dodge', name: 'Dodge', minVal: 1, maxVal: 8, color: '#06b6d4' },
-    // New defensive effects for tank/regen builds
+    // Defensive effects for tank/regen builds
     { id: 'hpRegen', name: 'HP Regen', minVal: 0.5, maxVal: 3, color: '#34d399' },          // % max HP per second
     { id: 'damageReduction', name: 'DR%', minVal: 2, maxVal: 10, color: '#60a5fa' },        // Flat damage reduction %
 ];
+
+// Tier-based cap multipliers for effect max values
+// Lower tier items can't roll as high as prestige gear
+export const EFFECT_TIER_CAPS = {
+    0: 0.30,  // Common
+    1: 0.30,  // Uncommon
+    2: 0.40,  // Rare
+    3: 0.50,  // Epic
+    4: 0.65,  // Legendary
+    5: 0.80,  // Mythic
+    6: 0.90,  // Divine
+    7: 1.00,  // Astral (prestige)
+    8: 1.00,  // Cosmic (prestige)
+    9: 1.00,  // Primordial (prestige)
+};
+
+// Get the capped max value for an effect at a given tier
+export function getEffectMaxForTier(effect, tier) {
+    const capMultiplier = EFFECT_TIER_CAPS[tier] ?? 1.0;
+    return effect.minVal + (effect.maxVal - effect.minVal) * capMultiplier;
+}
 
 // Enhancement milestones that grant bonus substats
 export const ENHANCE_MILESTONES = [10, 15, 20, 25, 30];
@@ -578,19 +599,42 @@ export function generateGearDrop(zoneTier, zoneId, prestigeLevel = 0) {
     }
 
     // Generate random effects based on tier
+    // Divine+ (tier 6+) can roll up to 3 effects, lower tiers cap at 2
     const effects = [];
-    const numEffects = Math.random() < (0.1 + tier * 0.08) ? (Math.random() < 0.3 ? 2 : 1) : 0;
+    const maxEffects = tier >= 6 ? 3 : 2;
+    const effectChance = 0.1 + tier * 0.08;
+
+    let numEffects = 0;
+    if (Math.random() < effectChance) {
+        // Roll for number of effects
+        const roll = Math.random();
+        if (tier >= 6 && roll < 0.10) {
+            numEffects = 3; // 10% chance for 3 effects on Divine+
+        } else if (roll < 0.30) {
+            numEffects = 2; // 30% chance for 2 effects
+        } else {
+            numEffects = 1; // 60% chance for 1 effect
+        }
+        numEffects = Math.min(numEffects, maxEffects);
+    }
 
     if (numEffects > 0) {
         const availableEffects = [...SPECIAL_EFFECTS];
+        const tierCapMultiplier = EFFECT_TIER_CAPS[tier] ?? 1.0;
+
         for (let i = 0; i < numEffects; i++) {
             if (availableEffects.length === 0) break;
             const effectIndex = Math.floor(Math.random() * availableEffects.length);
             const effect = availableEffects.splice(effectIndex, 1)[0];
-            // Scale effect value with tier
-            const tierScale = 1 + tier * 0.3;
-            const value = Math.floor(effect.minVal + Math.random() * (effect.maxVal - effect.minVal) * tierScale);
-            effects.push({ id: effect.id, name: effect.name, value: Math.min(value, effect.maxVal * 2) });
+
+            // Calculate tier-capped max value
+            const cappedMax = getEffectMaxForTier(effect, tier);
+            // Roll value between min and capped max
+            const value = effect.minVal + Math.random() * (cappedMax - effect.minVal);
+            // Round appropriately (1 decimal for small values like lifesteal/regen)
+            const finalValue = effect.maxVal <= 10 ? Math.round(value * 10) / 10 : Math.floor(value);
+
+            effects.push({ id: effect.id, name: effect.name, value: finalValue });
         }
     }
 

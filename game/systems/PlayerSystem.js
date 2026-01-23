@@ -93,7 +93,7 @@ export const calculatePlayerStats = (gameState) => {
                         case 'critDamage': critDamage += effectValue; break;
                         case 'bonusDmg': baseDmg += effectValue; break;
                         case 'bonusHp': baseHp += effectValue; break;
-                        case 'goldFind': goldMult += effectValue / 100; break;
+                        case 'silverFind': goldMult += effectValue / 100; break;
                         case 'xpBonus': xpBonus += effectValue; break;
                         case 'dodge': dodge += effectValue; break;
                         case 'hpRegen': hpRegen += effectValue; break;
