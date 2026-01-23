@@ -14,6 +14,7 @@ import EnhancementView from './EnhancementView';
 import PrestigeView from './PrestigeView';
 import AchievementsView from './AchievementsView';
 import SettingsView from './SettingsView';
+import ShopView from './ShopView';
 import DailyRewardsModal from './DailyRewardsModal';
 import GameTooltip from './GameTooltip';
 
@@ -31,7 +32,7 @@ export default function MobileGameLayout() {
     const [tooltipData, setTooltipData] = useState(null);
     const [showDailyRewards, setShowDailyRewards] = useState(false);
     const [showMoreMenu, setShowMoreMenu] = useState(false);
-    const [moreSubTab, setMoreSubTab] = useState(null); // 'prestige' | 'achievements' | 'settings'
+    const [moreSubTab, setMoreSubTab] = useState(null); // 'shop' | 'prestige' | 'achievements' | 'settings'
 
     const handleHover = (item, position, isInventoryItem = false) => {
         if (!item) {
@@ -71,6 +72,8 @@ export default function MobileGameLayout() {
         // If a "more" sub-tab is active, show that
         if (moreSubTab) {
             switch (moreSubTab) {
+                case 'shop':
+                    return <ShopView />;
                 case 'prestige':
                     return <PrestigeView />;
                 case 'achievements':
@@ -163,6 +166,7 @@ export default function MobileGameLayout() {
  */
 function MoreMenuContent({ onSelect, onDailyRewards }) {
     const menuItems = [
+        { id: 'shop', label: 'Shop', icon: <svg className="w-8 h-8 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>, description: 'Exchange resources' },
         { id: 'prestige', label: 'Prestige', icon: <img src="/assets/ui-icons/star-prestige.png" alt="" className="w-8 h-8" />, description: 'Reset for permanent bonuses' },
         { id: 'achievements', label: 'Achievements', icon: <img src="/assets/ui-icons/crown-achievements.png" alt="" className="w-8 h-8" />, description: 'Track your progress' },
         { id: 'settings', label: 'Settings', icon: <img src="/assets/ui-icons/compass-settings.png" alt="" className="w-8 h-8" />, description: 'Game options' },

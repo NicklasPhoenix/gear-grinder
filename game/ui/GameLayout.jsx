@@ -9,6 +9,7 @@ import EnhancementView from './EnhancementView';
 import PrestigeView from './PrestigeView';
 import AchievementsView from './AchievementsView';
 import SettingsView from './SettingsView';
+import ShopView from './ShopView';
 import DailyRewardsModal, { useDailyRewardAvailable } from './DailyRewardsModal';
 import OfflineRewardsModal from './OfflineRewardsModal';
 import { ToastContainer } from './ToastNotification';
@@ -49,6 +50,11 @@ const TabIcons = {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
         </svg>
     ),
+    shop: (
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+    ),
     prestige: (
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
@@ -68,7 +74,7 @@ const TabIcons = {
 };
 
 // Tab order for keyboard navigation
-const TABS = ['inventory', 'stats', 'enhance', 'skills', 'zone', 'prestige', 'achievements', 'settings'];
+const TABS = ['inventory', 'stats', 'enhance', 'skills', 'zone', 'shop', 'prestige', 'achievements', 'settings'];
 
 // Router component - decides which layout to show
 export default function GameLayout() {
@@ -99,8 +105,8 @@ function DesktopGameLayout() {
             // Don't intercept if user is typing in an input
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
-            // Number keys 1-8 for tab switching
-            if (e.key >= '1' && e.key <= '8') {
+            // Number keys 1-9 for tab switching
+            if (e.key >= '1' && e.key <= '9') {
                 const tabIndex = parseInt(e.key) - 1;
                 if (tabIndex < TABS.length) {
                     setActiveTab(TABS[tabIndex]);
@@ -328,6 +334,7 @@ function DesktopGameLayout() {
                         {activeTab === 'enhance' && <EnhancementView />}
                         {activeTab === 'skills' && <SkillsView />}
                         {activeTab === 'zone' && <ZoneView />}
+                        {activeTab === 'shop' && <ShopView />}
                         {activeTab === 'prestige' && <PrestigeView />}
                         {activeTab === 'achievements' && <AchievementsView />}
                         {activeTab === 'settings' && <SettingsView />}
@@ -761,7 +768,7 @@ function KeyboardHelpModal({ onClose }) {
     }, [onClose]);
 
     const shortcuts = [
-        { keys: ['1', '2', '3', '4', '5', '6', '7', '8'], action: 'Switch tabs (Inventory, Stats, Enhance, Skills, Map, Prestige, Achievements, Settings)' },
+        { keys: ['1', '2', '3', '4', '5', '6', '7', '8', '9'], action: 'Switch tabs (Inventory, Stats, Enhance, Skills, Map, Shop, Prestige, Achievements, Settings)' },
         { keys: ['\u2190', '\u2192'], action: 'Navigate between tabs' },
         { keys: ['?'], action: 'Toggle this help menu' },
         { keys: ['Esc'], action: 'Close this menu' },
