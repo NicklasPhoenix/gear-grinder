@@ -735,7 +735,7 @@ export default function InventoryView({ onHover }) {
                                 return (
                                     <div
                                         key={item.id}
-                                        className={`relative aspect-square bg-slate-900/60 border-2 rounded-lg cursor-pointer transition-all active:scale-95 ${
+                                        className={`group relative aspect-square bg-slate-900/60 border-2 rounded-lg cursor-pointer transition-all active:scale-95 ${
                                             item.locked ? 'border-yellow-500/60 bg-yellow-500/10' :
                                             isSelected ? 'border-red-500 bg-red-500/20' : 'border-slate-700/40 hover:border-blue-500/50'
                                         }`}
@@ -759,9 +759,18 @@ export default function InventoryView({ onHover }) {
                                         {(item.count || 1) > 1 && (
                                             <div className="absolute bottom-0 left-0 text-[10px] font-bold text-white bg-blue-600/90 px-1 rounded-tr">x{item.count}</div>
                                         )}
-                                        {item.locked && (
-                                            <div className="absolute bottom-0 right-0 text-[10px] bg-yellow-600/90 px-1 rounded-tl">🔒</div>
-                                        )}
+                                        {/* Lock button - always visible on hover, highlighted when locked */}
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); toggleItemLock(item.id); }}
+                                            className={`absolute bottom-0 right-0 text-[10px] px-1 rounded-tl transition-all ${
+                                                item.locked
+                                                    ? 'bg-yellow-600/90 opacity-100'
+                                                    : 'bg-slate-700/80 opacity-0 group-hover:opacity-100 hover:bg-yellow-600/70'
+                                            }`}
+                                            title={item.locked ? 'Unlock item' : 'Lock item (protected from salvage)'}
+                                        >
+                                            {item.locked ? '🔒' : '🔓'}
+                                        </button>
                                         {isSelected && !item.locked && (
                                             <div className="absolute inset-0 flex items-center justify-center bg-red-500/30">
                                                 <span className="text-red-400 text-xl font-bold">×</span>
@@ -776,7 +785,7 @@ export default function InventoryView({ onHover }) {
 
                 {/* Footer hint */}
                 <div className="px-3 py-1.5 border-t border-slate-700/30 text-xs text-slate-500 text-center">
-                    {isMobile ? 'Tap to equip · Long-press to salvage · Use lock button to protect' : 'Click to equip · Right-click to salvage · Middle-click to lock'}
+                    {isMobile ? 'Tap to equip · Long-press to salvage · Use lock button to protect' : 'Click to equip · Right-click to salvage · Hover for lock button'}
                 </div>
             </div>
 
