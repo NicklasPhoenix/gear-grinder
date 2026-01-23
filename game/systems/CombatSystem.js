@@ -1,5 +1,5 @@
 import { getZoneById } from '../data/zones';
-import { BOSS_SETS, PRESTIGE_BOSS_SETS, BOSS_STONES, MATERIALS, getSalvageReturns, addItemToInventory, generateGearDrop, TIERS } from '../data/items';
+import { BOSS_SETS, PRESTIGE_BOSS_SETS, BOSS_STONES, MATERIALS, getSalvageReturns, addItemToInventory, generateGearDrop, TIERS, SPECIAL_EFFECTS, getEffectMaxForTier } from '../data/items';
 import { SKILLS } from '../data/skills';
 import { calculatePlayerStats } from './PlayerSystem';
 import { PLAYER_BASE, COMBAT, DEATH_PENALTY, BOSS_DROPS, LEVEL_UP, UI } from '../data/constants';
@@ -310,13 +310,27 @@ export class CombatSystem {
             const droppedSlot = availableSlots[Math.floor(Math.random() * availableSlots.length)];
             const bossItem = bossSet.items[droppedSlot];
 
+            // Boss items get their fixed effect + one random effect
+            const fixedEffect = bossItem.effect;
+            const effects = [fixedEffect];
+
+            // Add a random second effect (excluding the fixed effect's type)
+            const availableEffects = SPECIAL_EFFECTS.filter(e => e.id !== fixedEffect.id);
+            if (availableEffects.length > 0) {
+                const randomEffect = availableEffects[Math.floor(Math.random() * availableEffects.length)];
+                const cappedMax = getEffectMaxForTier(randomEffect, bossSet.tier);
+                const value = randomEffect.minVal + Math.random() * (cappedMax - randomEffect.minVal);
+                const finalValue = randomEffect.maxVal <= 10 ? Math.round(value * 10) / 10 : Math.floor(value);
+                effects.push({ id: randomEffect.id, name: randomEffect.name, value: finalValue });
+            }
+
             const newBossItem = {
                 slot: droppedSlot,
                 tier: bossSet.tier,
                 statBonus: bossSet.statBonus,
                 id: Date.now(),
                 plus: 0,
-                effects: [bossItem.effect],
+                effects: effects,
                 bossSet: zone.bossSet,
                 isBossItem: true,
                 weaponType: droppedSlot === 'weapon' ? (bossSet.weaponType || 'sword') : null,
