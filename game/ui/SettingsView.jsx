@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { audioManager } from '../systems/AudioManager';
 import { useGame } from '../context/GameContext';
-import { TIERS } from '../data/items';
+import { TIERS, MATERIALS } from '../data/items';
+import { MaterialIcon } from './MaterialIcons';
+
+// Exchange rates - intentionally inefficient to preserve farming incentives
+const EXCHANGE_RATES = [
+    { from: 'gold', to: 'enhanceStone', fromAmount: 1000, toAmount: 10, fromName: 'Silver', toName: 'Enhance Stones' },
+    { from: 'enhanceStone', to: 'blessedOrb', fromAmount: 100, toAmount: 5, fromName: 'Enhance Stones', toName: 'Blessed Orbs' },
+    { from: 'blessedOrb', to: 'celestialShard', fromAmount: 50, toAmount: 3, fromName: 'Blessed Orbs', toName: 'Celestial Shards' },
+];
 
 function VolumeSlider({ label, value, onChange, muted, onToggleMute, icon }) {
     return (
@@ -76,6 +84,24 @@ export default function SettingsView() {
 
     const handleInventorySortChange = (sort) => {
         gameManager?.setState(prev => ({ ...prev, inventorySort: sort }));
+    };
+
+    const handleExchange = (exchange) => {
+        const currentFrom = state?.[exchange.from] ?? 0;
+        if (currentFrom < exchange.fromAmount) return;
+
+        gameManager?.setState(prev => ({
+            ...prev,
+            [exchange.from]: (prev[exchange.from] || 0) - exchange.fromAmount,
+            [exchange.to]: (prev[exchange.to] || 0) + exchange.toAmount,
+        }));
+
+        // Visual feedback
+        gameManager?.emit('floatingText', {
+            text: `+${exchange.toAmount} ${exchange.toName}!`,
+            type: 'heal',
+            target: 'player'
+        });
     };
 
     const handleMasterChange = (val) => {
@@ -262,6 +288,72 @@ export default function SettingsView() {
                                 ))}
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                {/* Resource Exchange */}
+                <div className="game-panel">
+                    <div className="game-panel-header">Resource Exchange</div>
+                    <div className="p-4 space-y-3">
+                        <p className="text-xs text-slate-500 mb-3">
+                            Convert surplus resources. Rates are inefficient - farming is more efficient!
+                        </p>
+                        {EXCHANGE_RATES.map((exchange, idx) => {
+                            const currentAmount = state?.[exchange.from] ?? 0;
+                            const canAfford = currentAmount >= exchange.fromAmount;
+                            const maxExchanges = Math.floor(currentAmount / exchange.fromAmount);
+
+                            return (
+                                <div
+                                    key={idx}
+                                    className="bg-slate-900/50 rounded-lg p-3 border border-slate-700"
+                                >
+                                    <div className="flex items-center justify-between gap-3">
+                                        {/* From side */}
+                                        <div className="flex items-center gap-2 min-w-0">
+                                            <MaterialIcon type={exchange.from === 'gold' ? 'gold' : exchange.from} size={20} />
+                                            <div className="min-w-0">
+                                                <div className="text-sm font-bold text-slate-200">
+                                                    {exchange.fromAmount.toLocaleString()} {exchange.fromName}
+                                                </div>
+                                                <div className="text-xs text-slate-500">
+                                                    Have: {currentAmount.toLocaleString()}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Arrow */}
+                                        <div className="text-slate-600 text-lg">→</div>
+
+                                        {/* To side */}
+                                        <div className="flex items-center gap-2">
+                                            <MaterialIcon type={exchange.to} size={20} />
+                                            <span className="text-sm font-bold text-slate-200">
+                                                {exchange.toAmount} {exchange.toName}
+                                            </span>
+                                        </div>
+
+                                        {/* Exchange button */}
+                                        <button
+                                            onClick={() => handleExchange(exchange)}
+                                            disabled={!canAfford}
+                                            className={`px-3 py-1.5 rounded text-sm font-bold transition-all ${
+                                                canAfford
+                                                    ? 'bg-green-600/40 text-green-300 hover:bg-green-600/60 active:scale-95'
+                                                    : 'bg-slate-800 text-slate-600 cursor-not-allowed'
+                                            }`}
+                                        >
+                                            Exchange
+                                        </button>
+                                    </div>
+                                    {maxExchanges > 1 && (
+                                        <div className="text-xs text-slate-500 mt-1">
+                                            Can exchange {maxExchanges}x
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
 
