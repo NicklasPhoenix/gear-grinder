@@ -27,6 +27,7 @@ function validateSave(parsed) {
         celestialShard: 0,
         prestigeLevel: 0,
         prestigeStones: 0,
+        achievementStatPoints: 0,
         inventory: [],
         gear: {},
         skills: [],
@@ -60,7 +61,8 @@ function validateSave(parsed) {
     const numericFields = [
         'playerHp', 'playerMaxHp', 'enemyHp', 'enemyMaxHp',
         'gold', 'xp', 'level', 'kills', 'currentZone', 'statPoints',
-        'enhanceStone', 'blessedOrb', 'celestialShard', 'prestigeLevel', 'prestigeStones'
+        'enhanceStone', 'blessedOrb', 'celestialShard', 'prestigeLevel', 'prestigeStones',
+        'achievementStatPoints'
     ];
 
     for (const field of numericFields) {

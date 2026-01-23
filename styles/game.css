@@ -843,3 +843,32 @@ body[data-text-size="xlarge"] .text-\[8px\] { font-size: 12px; }
 body[data-text-size="xlarge"] .text-\[9px\] { font-size: 13px; }
 body[data-text-size="xlarge"] .text-\[10px\] { font-size: 14px; }
 body[data-text-size="xlarge"] .text-\[11px\] { font-size: 15px; }
+
+/* Overflow handling for xlarge text - prevent layout overflow */
+body[data-text-size="xlarge"] .game-panel {
+  overflow: hidden;
+}
+
+body[data-text-size="xlarge"] .glass-card {
+  overflow: hidden;
+}
+
+/* Ensure text truncation in currency/stats areas */
+body[data-text-size="large"] .min-w-\[280px\],
+body[data-text-size="xlarge"] .min-w-\[280px\] {
+  min-width: auto;
+  max-width: 100%;
+}
+
+body[data-text-size="large"] .min-w-\[320px\],
+body[data-text-size="xlarge"] .min-w-\[320px\] {
+  min-width: auto;
+  max-width: 100%;
+}
+
+/* Reduce right panel width slightly at xlarge to prevent overflow */
+@media (min-width: 1024px) {
+  body[data-text-size="xlarge"] .lg\:w-\[550px\] {
+    width: 580px;
+  }
+}

@@ -35,18 +35,32 @@ export class CombatSystem {
      * @returns {boolean} - True if item should be auto-salvaged
      */
     shouldAutoSalvageItem(item, state) {
+        // Never auto-salvage locked items
+        if (item.locked) return false;
+
+        // Never auto-salvage boss items - they're special
+        if (item.isBossItem) return false;
+
         // Check tier threshold (-1 means disabled, otherwise salvage items at or below threshold)
         const tierThreshold = state.autoSalvageTier ?? -1;
         if (tierThreshold === -1) return true; // Old behavior: salvage everything
 
-        // Item is above tier threshold - don't salvage
-        if (item.tier > tierThreshold) return false;
-
         // Check if we should keep items with effects
         const keepEffects = state.autoSalvageKeepEffects ?? true;
-        if (keepEffects && item.effects && item.effects.length > 0) return false;
+        const hasEffects = item.effects && item.effects.length > 0;
 
-        // Item matches criteria for auto-salvage
+        // When keepEffects is ON, effects filter applies to ALL tiers consistently
+        // Items WITH effects are always kept, items WITHOUT effects are salvaged
+        // up to the tier threshold
+        if (keepEffects) {
+            if (hasEffects) return false; // Keep - has effects (any tier)
+            // Salvage items without effects that are at or below threshold
+            if (item.tier <= tierThreshold) return true;
+            return false; // Keep higher tier items without effects (safety net)
+        }
+
+        // When keepEffects is OFF, just use tier threshold
+        if (item.tier > tierThreshold) return false;
         return true;
     }
 

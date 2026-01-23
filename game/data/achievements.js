@@ -339,5 +339,9 @@ export function applyAchievementReward(state, reward) {
     if (reward.blessedOrb) state.blessedOrb += reward.blessedOrb;
     if (reward.celestialShard) state.celestialShard += reward.celestialShard;
     if (reward.prestigeStones) state.prestigeStones = (state.prestigeStones || 0) + reward.prestigeStones;
-    if (reward.statPoints) state.statPoints = (state.statPoints || 0) + reward.statPoints;
+    if (reward.statPoints) {
+        state.statPoints = (state.statPoints || 0) + reward.statPoints;
+        // Also track achievement stat points separately - these persist through prestige
+        state.achievementStatPoints = (state.achievementStatPoints || 0) + reward.statPoints;
+    }
 }

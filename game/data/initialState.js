@@ -39,4 +39,6 @@ export const initialState = {
     prestigeStones: 0,
     prestigeSkills: {}, // { skillId: level }
     totalPrestiges: 0,
+    // Achievement stat points - persists through prestige
+    achievementStatPoints: 0, // Total stat points earned from achievements (never reset)
 };

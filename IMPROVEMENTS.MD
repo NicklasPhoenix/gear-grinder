@@ -955,6 +955,151 @@ export const calculatePlayerStats = (gameState) => {
 **Effort:** Medium Effort
 ---
 
+## Reddit Community Feedback - January 2026 (Second Wave)
+
+### User Stories & Fixes Implemented
+
+#### US-1: Achievement Stat Points Persist Through Prestige
+**User Story:** As a player, I want my achievement-granted stat points to persist through prestige, so that I don't feel significantly weaker after prestiging despite having earned permanent rewards.
+
+**Problem:** Prestige reset `stats` to base values and `statPoints` to 0, causing players to lose ~125+ stat points accumulated from achievements.
+
+**Solution:**
+- Added `achievementStatPoints` field to track permanent stat points from achievements
+- Modified `applyAchievementReward()` to also track in `achievementStatPoints`
+- Modified `performPrestige()` to preserve `achievementStatPoints` and re-apply them to `statPoints`
+
+**Files Changed:**
+- `game/data/initialState.js` - Added `achievementStatPoints: 0`
+- `game/data/achievements.js` - Track achievement stat points separately
+- `game/managers/GameManager.js` - Preserve and re-apply on prestige
+- `game/context/GameContext.jsx` - Added validation for new field
+
+---
+
+#### US-2: Tier Filter Includes Prestige Tiers
+**User Story:** As a player who has prestiged, I want to filter my inventory by Astral/Cosmic/Primordial tiers, so that I can manage my prestige-tier gear with the same filtering tools.
+
+**Problem:** Filter only showed Common→Divine (tiers 0-6), excluding prestige tiers (7-9).
+
+**Solution:** Changed `TIERS.slice(0, 7)` to `TIERS` to show all tiers.
+
+**Files Changed:**
+- `game/ui/InventoryView.jsx` - Show all tiers in filter
+
+---
+
+#### US-3: Item Locking Feature
+**User Story:** As a player, I want to lock specific items in my inventory, so that they are protected from "Salvage All" and I don't accidentally destroy valuable gear.
+
+**Solution:**
+- Added `locked` property to items
+- Added lock/unlock toggle button in mobile and desktop views
+- Locked items excluded from "Salvage All" and auto-salvage
+- Middle-click to toggle lock on desktop
+- Visual indicator (🔒) on locked items
+
+**Files Changed:**
+- `game/ui/InventoryView.jsx` - Lock toggle UI, exclude from salvage
+- `game/systems/CombatSystem.js` - Exclude locked items from auto-salvage
+
+---
+
+#### US-4: Luck Stat Description Clarity
+**User Story:** As a player, I want clear stat descriptions, so that I understand exactly what each stat does.
+
+**Problem:** Luck said "+0.5% gold" which was ambiguous.
+
+**Solution:** Changed to "+0.5% silver find" to be specific (gold doesn't exist, it's called silver).
+
+**Files Changed:**
+- `game/data/stats.js` - Updated luck description
+
+---
+
+#### US-5: Remove Vestigial Ore/Leather References
+**User Story:** As a player, I want game descriptions to match actual mechanics, so that I'm not confused by references to non-existent features.
+
+**Problem:** Prestige skill "Starting Bonus" mentioned "+10 ore/leather" but no zones drop these resources.
+
+**Solution:** Removed ore/leather references from skill description and prestige logic.
+
+**Files Changed:**
+- `game/data/skills.js` - Updated skill description
+- `game/managers/GameManager.js` - Removed ore/leather from prestige reset
+
+---
+
+#### US-6: Large Font Overflow Fix
+**User Story:** As a player using large font settings, I want the UI to remain fully visible, so that I can see all game content.
+
+**Problem:** Extra large font caused right side content to go offscreen.
+
+**Solution:** Added CSS overflow handling for xlarge text mode, removed min-width constraints that caused overflow.
+
+**Files Changed:**
+- `styles/game.css` - Added overflow handling rules for xlarge text
+
+---
+
+#### US-7: Effects Filter Consistency
+**User Story:** As a player, I want the effects filter to work consistently across all tiers, so that I can reliably filter for items with effects.
+
+**Problem:** Filtering Divine + effects ON worked for Divine tier, but Astral items showed both with and without effects.
+
+**Solution:**
+- Extended tier filter to include all prestige tiers (US-2 above)
+- Improved auto-salvage logic to handle effects filter consistently
+- Added boss item protection in auto-salvage
+
+**Files Changed:**
+- `game/systems/CombatSystem.js` - Improved shouldAutoSalvageItem logic
+
+---
+
+### Balance Feedback Documented (Future Consideration)
+
+#### AGI Meta
+> "logically you always go max agi. since it determines how fast you farm blue stones"
+
+**Analysis:** AGI provides +1% speed per point, making it optimal for farming rate. This is intentional design - different stats favor different playstyles (AGI for farming, STR for damage, VIT for survival).
+
+**Recommendation:** Consider adding alternative farming bonuses to other stats, or adding diminishing returns on speed.
+
+---
+
+#### Boss Items vs Random Items
+> "boss items always look subpar to any items with decent effects. since random items can have 2 effects"
+
+**Analysis:** Boss items have 1 fixed effect + stat bonus multiplier (1.2-4.0x) + set bonuses. Random items can have 0-2 random effects but no stat bonus or set bonuses.
+
+**Recommendation:** Consider adding a second effect slot to boss items, or increase stat bonus multiplier to make set bonuses more competitive.
+
+---
+
+#### Enhancement Stone (Blue Stone) Bottleneck
+> "im mostly short of blue stones. i have to farm em on 1-hit areas"
+
+**Analysis:** Enhancement stones are intentionally the limiting resource for progression. This creates meaningful choices about what to enhance.
+
+**Current Sources:**
+- Zone drops (2-50% depending on zone)
+- Salvaging items (1 + plus*0.5 + tier*0.3 per item)
+- Achievement rewards
+
+**Recommendation:** Consider adding enhancement stone exchange or alternative farming methods.
+
+---
+
+#### Currency Exchange Suggestion
+> "maybe some kind of exchange between all the currencies ie silver to blue/purple/gold stones"
+
+**Analysis:** No currency conversion currently exists. This could help players who have surplus of one resource.
+
+**Recommendation:** Consider adding a merchant or exchange system with conversion ratios (e.g., 1000 silver = 10 enhancement stones).
+
+---
+
 ## Reddit Feedback - ADDRESSED
 
 ### 1. Font Size / UI Scale - IMPLEMENTED

@@ -1,3 +1,69 @@
+# Gear Grinder - Development Progress Log
+
+---
+
+## Reddit Community Feedback Fixes - January 2026
+
+### Status: COMPLETE
+
+### Fixes Implemented
+
+- [x] **US-1: Achievement stat points persist through prestige**
+  - Added `achievementStatPoints` tracking
+  - Prestige now re-grants achievement stat points
+  - Players no longer lose ~125+ stat points on prestige
+
+- [x] **US-2: Tier filter includes prestige tiers (Astral, Cosmic, Primordial)**
+  - Changed `TIERS.slice(0, 7)` to `TIERS`
+  - All 10 tiers now visible in filter dropdown
+
+- [x] **US-3: Item locking feature**
+  - Added `locked` property to items
+  - Lock/unlock toggle in UI (🔒/🔓)
+  - Locked items protected from Salvage All
+  - Locked items protected from auto-salvage
+  - Desktop: Middle-click to toggle lock
+  - Mobile: Dedicated lock button
+
+- [x] **US-4: Luck stat description clarity**
+  - Changed "+0.5% gold" to "+0.5% silver find"
+  - Currency is silver, not gold
+
+- [x] **US-5: Remove ore/leather references**
+  - Updated "Starting Bonus" skill description
+  - Removed unused resources from prestige logic
+
+- [x] **US-6: Large font overflow fix**
+  - Added CSS overflow handling for xlarge text
+  - Removed min-width constraints causing overflow
+
+- [x] **US-7: Effects filter consistency**
+  - Extended tier filter to all tiers
+  - Improved auto-salvage logic
+  - Boss items now protected from auto-salvage
+
+### Balance Feedback Documented
+
+- AGI meta (speed farming optimization)
+- Boss items vs random items (effects comparison)
+- Enhancement stone bottleneck
+- Currency exchange suggestion
+
+### Files Modified
+
+- `game/data/initialState.js`
+- `game/data/achievements.js`
+- `game/data/stats.js`
+- `game/data/skills.js`
+- `game/managers/GameManager.js`
+- `game/context/GameContext.jsx`
+- `game/ui/InventoryView.jsx`
+- `game/systems/CombatSystem.js`
+- `styles/game.css`
+- `improvements.md`
+
+---
+
 # Mobile Portrait Redesign - Progress Log
 
 Started: 2026-01-20

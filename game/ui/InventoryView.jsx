@@ -139,6 +139,9 @@ export default function InventoryView({ onHover }) {
     };
 
     const toggleSalvageSelection = (itemId) => {
+        // Don't allow selecting locked items for salvage
+        const item = state.inventory.find(i => i.id === itemId);
+        if (item?.locked) return;
         setSelectedForSalvage(prev => {
             const newSet = new Set(prev);
             if (newSet.has(itemId)) newSet.delete(itemId);
@@ -169,18 +172,30 @@ export default function InventoryView({ onHover }) {
     const handleSalvageAll = () => {
         if (state.inventory.length === 0) return;
         let totalGold = 0, totalStones = 0;
-        for (const item of state.inventory) {
+        const itemsToSalvage = state.inventory.filter(item => !item.locked);
+        const lockedItems = state.inventory.filter(item => item.locked);
+        if (itemsToSalvage.length === 0) return; // Nothing to salvage (all locked)
+        for (const item of itemsToSalvage) {
             const returns = getSalvageReturns(item);
             totalGold += returns.gold;
             totalStones += returns.enhanceStone;
         }
         gameManager.setState(prev => ({
-            ...prev, inventory: [],
+            ...prev, inventory: lockedItems, // Keep only locked items
             gold: (prev.gold || 0) + totalGold,
             enhanceStone: (prev.enhanceStone || 0) + totalStones,
         }));
         setSelectedForSalvage(new Set());
         gameManager.emit('floatingText', { text: `+${totalGold}g`, type: 'heal', target: 'player' });
+    };
+
+    const toggleItemLock = (itemId) => {
+        gameManager.setState(prev => ({
+            ...prev,
+            inventory: prev.inventory.map(item =>
+                item.id === itemId ? { ...item, locked: !item.locked } : item
+            )
+        }));
     };
 
     const handleEquip = (item) => {
@@ -484,7 +499,7 @@ export default function InventoryView({ onHover }) {
                             >
                                 ALL
                             </button>
-                            {TIERS.slice(0, 7).map((tier, idx) => (
+                            {TIERS.map((tier, idx) => (
                                 <button
                                     key={idx}
                                     onClick={() => setAutoSalvageTier(idx)}
@@ -672,6 +687,15 @@ export default function InventoryView({ onHover }) {
                                         {/* Action Buttons */}
                                         <div className="flex border-t border-slate-700/50">
                                             <button
+                                                onClick={() => toggleItemLock(item.id)}
+                                                className={`px-3 py-2 text-xs font-bold border-r border-slate-700/50 ${
+                                                    item.locked ? 'text-yellow-400 bg-yellow-500/20' : 'text-slate-400 bg-slate-500/10 active:bg-slate-500/30'
+                                                }`}
+                                                title={item.locked ? 'Unlock item' : 'Lock item (protected from salvage)'}
+                                            >
+                                                {item.locked ? '🔒' : '🔓'}
+                                            </button>
+                                            <button
                                                 onClick={() => handleEquip(item)}
                                                 className="flex-1 py-2 text-xs font-bold text-green-400 bg-green-500/10 active:bg-green-500/30"
                                             >
@@ -679,11 +703,13 @@ export default function InventoryView({ onHover }) {
                                             </button>
                                             <button
                                                 onClick={() => toggleSalvageSelection(item.id)}
+                                                disabled={item.locked}
                                                 className={`flex-1 py-2 text-xs font-bold border-l border-slate-700/50 ${
+                                                    item.locked ? 'text-slate-600 bg-slate-800 cursor-not-allowed' :
                                                     isSelected ? 'text-white bg-red-500' : 'text-red-400 bg-red-500/10 active:bg-red-500/30'
                                                 }`}
                                             >
-                                                {isSelected ? 'SELECTED' : 'SALVAGE'}
+                                                {item.locked ? 'LOCKED' : isSelected ? 'SELECTED' : 'SALVAGE'}
                                             </button>
                                         </div>
                                     </div>
@@ -710,11 +736,13 @@ export default function InventoryView({ onHover }) {
                                     <div
                                         key={item.id}
                                         className={`relative aspect-square bg-slate-900/60 border-2 rounded-lg cursor-pointer transition-all active:scale-95 ${
+                                            item.locked ? 'border-yellow-500/60 bg-yellow-500/10' :
                                             isSelected ? 'border-red-500 bg-red-500/20' : 'border-slate-700/40 hover:border-blue-500/50'
                                         }`}
-                                        style={getItemBorderStyle()}
+                                        style={!item.locked && !isSelected ? getItemBorderStyle() : {}}
                                         onClick={() => handleEquip(item)}
                                         onContextMenu={(e) => { e.preventDefault(); toggleSalvageSelection(item.id); }}
+                                        onAuxClick={(e) => { if (e.button === 1) { e.preventDefault(); toggleItemLock(item.id); } }}
                                         onMouseEnter={(e) => onHover && onHover(item, { x: e.clientX, y: e.clientY }, true)}
                                         onMouseLeave={() => onHover && onHover(null)}
                                     >
@@ -731,7 +759,10 @@ export default function InventoryView({ onHover }) {
                                         {(item.count || 1) > 1 && (
                                             <div className="absolute bottom-0 left-0 text-[10px] font-bold text-white bg-blue-600/90 px-1 rounded-tr">x{item.count}</div>
                                         )}
-                                        {isSelected && (
+                                        {item.locked && (
+                                            <div className="absolute bottom-0 right-0 text-[10px] bg-yellow-600/90 px-1 rounded-tl">🔒</div>
+                                        )}
+                                        {isSelected && !item.locked && (
                                             <div className="absolute inset-0 flex items-center justify-center bg-red-500/30">
                                                 <span className="text-red-400 text-xl font-bold">×</span>
                                             </div>
@@ -745,7 +776,7 @@ export default function InventoryView({ onHover }) {
 
                 {/* Footer hint */}
                 <div className="px-3 py-1.5 border-t border-slate-700/30 text-xs text-slate-500 text-center">
-                    {isMobile ? 'Tap to equip · Long-press to salvage' : 'Click to equip · Right-click to salvage'}
+                    {isMobile ? 'Tap to equip · Long-press to salvage · Use lock button to protect' : 'Click to equip · Right-click to salvage · Middle-click to lock'}
                 </div>
             </div>
 

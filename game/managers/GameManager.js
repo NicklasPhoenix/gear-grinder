@@ -173,17 +173,16 @@ export class GameManager {
         // Calculate starting bonus from prestige skills
         const startingBonusLevel = this.state.prestigeSkills?.[8] || 0;
         const startGold = 50 + startingBonusLevel * 50;
-        const startOre = 5 + startingBonusLevel * 10;
-        const startLeather = 5 + startingBonusLevel * 10;
 
         // Calculate prestige stone reward based on level: 10 base + level/2
         const stoneReward = 10 + Math.floor(this.state.level / 2);
 
+        // Preserve achievement stat points - these are permanent rewards
+        const achievementStatPoints = this.state.achievementStatPoints || 0;
+
         this.setState(prev => ({
             ...prev,
             gold: startGold,
-            ore: startOre,
-            leather: startLeather,
             enhanceStone: 3,
             blessedOrb: 0,
             celestialShard: 0,
@@ -191,7 +190,8 @@ export class GameManager {
             xp: 0,
             currentZone: 0,
             stats: { str: 5, int: 5, vit: 5, agi: 5, lck: 5 },
-            statPoints: 0,
+            statPoints: achievementStatPoints, // Re-grant achievement stat points
+            achievementStatPoints: achievementStatPoints, // Preserve the tracking value
             gear: { weapon: null, helmet: null, armor: null, boots: null, belt: null, shield: null, gloves: null, amulet: null },
             inventory: [],
             unlockedSkills: [],
