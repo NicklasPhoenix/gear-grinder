@@ -161,15 +161,11 @@ export class CombatSystem {
             if (regenAmount > 0) {
                 regenThisTick = Math.min(regenAmount, safeMaxHp - newState.playerHp);
                 newState.playerHp = Math.min(newState.playerHp + regenAmount, safeMaxHp);
-                // Only show regen text occasionally to avoid spam (every 6 ticks = 1 second)
-                if (Math.random() < 0.17) {
-                    this.callbacks.onFloatingText(`+${regenAmount}`, 'regen', 'player');
-                }
+                // Always show regen so player understands total healing
+                this.callbacks.onFloatingText(`+${regenAmount}`, 'regen', 'player');
                 combatUpdates.lastRegen = regenAmount;
             }
         }
-        // Track HP at start of combat (after regen)
-        const hpAfterRegen = newState.playerHp;
 
         // ========== PLAYER TURN ==========
         let playerDmg = stats.damage || PLAYER_BASE.DEFAULT_DAMAGE;
@@ -496,15 +492,6 @@ export class CombatSystem {
         // Sync endless enemy HP for UI display
         if (newState.endlessActive) {
             newState.endlessEnemyHp = newState.enemyHp;
-        }
-
-        // DEBUG: Full HP breakdown (log every ~1 second)
-        if (Math.random() < 0.17) {
-            const startHp = state.playerHp;
-            const endHp = newState.playerHp;
-            const totalHeal = (combatUpdates.lastHeal || 0) + regenThisTick;
-            const totalDmg = combatUpdates.actualDamageTaken || 0;
-            console.log(`[HP DEBUG] Start: ${startHp}, Regen: +${regenThisTick}, Lifesteal: +${combatUpdates.lastHeal || 0}, Dmg: -${totalDmg}, End: ${endHp}, Net: ${endHp - startHp}`);
         }
 
         this.stateManager.setState(newState);
