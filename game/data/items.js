@@ -599,43 +599,37 @@ export function generateGearDrop(zoneTier, zoneId, prestigeLevel = 0) {
     }
 
     // Generate random effects based on tier
+    // Each effect slot rolls independently for more natural variation
     // Divine+ (tier 6+) can roll up to 3 effects, lower tiers cap at 2
     const effects = [];
     const maxEffects = tier >= 6 ? 3 : 2;
-    const effectChance = 0.1 + tier * 0.08;
 
-    let numEffects = 0;
-    if (Math.random() < effectChance) {
-        // Roll for number of effects
-        const roll = Math.random();
-        if (tier >= 6 && roll < 0.10) {
-            numEffects = 3; // 10% chance for 3 effects on Divine+
-        } else if (roll < 0.30) {
-            numEffects = 2; // 30% chance for 2 effects
-        } else {
-            numEffects = 1; // 60% chance for 1 effect
-        }
-        numEffects = Math.min(numEffects, maxEffects);
-    }
+    // Base chance for each effect slot, increases with tier
+    // Tier 0: 15%, 5%, 0%  |  Tier 3: 30%, 15%, 0%  |  Tier 6+: 50%, 25%, 10%
+    const effectSlotChances = [
+        0.15 + tier * 0.05,  // 1st effect: 15-60% based on tier
+        0.05 + tier * 0.03,  // 2nd effect: 5-32% based on tier
+        tier >= 6 ? 0.05 + (tier - 6) * 0.03 : 0,  // 3rd effect: Divine+ only, 5-14%
+    ];
 
-    if (numEffects > 0) {
-        const availableEffects = [...SPECIAL_EFFECTS];
-        const tierCapMultiplier = EFFECT_TIER_CAPS[tier] ?? 1.0;
+    const availableEffects = [...SPECIAL_EFFECTS];
 
-        for (let i = 0; i < numEffects; i++) {
-            if (availableEffects.length === 0) break;
-            const effectIndex = Math.floor(Math.random() * availableEffects.length);
-            const effect = availableEffects.splice(effectIndex, 1)[0];
+    for (let i = 0; i < maxEffects; i++) {
+        // Roll for this effect slot
+        if (Math.random() >= effectSlotChances[i]) continue;
+        if (availableEffects.length === 0) break;
 
-            // Calculate tier-capped max value
-            const cappedMax = getEffectMaxForTier(effect, tier);
-            // Roll value between min and capped max
-            const value = effect.minVal + Math.random() * (cappedMax - effect.minVal);
-            // Round appropriately (1 decimal for small values like lifesteal/regen)
-            const finalValue = effect.maxVal <= 10 ? Math.round(value * 10) / 10 : Math.floor(value);
+        const effectIndex = Math.floor(Math.random() * availableEffects.length);
+        const effect = availableEffects.splice(effectIndex, 1)[0];
 
-            effects.push({ id: effect.id, name: effect.name, value: finalValue });
-        }
+        // Calculate tier-capped max value
+        const cappedMax = getEffectMaxForTier(effect, tier);
+        // Roll value between min and capped max
+        const value = effect.minVal + Math.random() * (cappedMax - effect.minVal);
+        // Round appropriately (1 decimal for small values like lifesteal/regen)
+        const finalValue = effect.maxVal <= 10 ? Math.round(value * 10) / 10 : Math.floor(value);
+
+        effects.push({ id: effect.id, name: effect.name, value: finalValue });
     }
 
     return {
