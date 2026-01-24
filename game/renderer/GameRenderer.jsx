@@ -525,24 +525,24 @@ export default function GameRenderer() {
                 uiContainer.addChild(zoneText);
                 uiContainer.zoneText = zoneText;
 
-                // Endless Mode Wave Counter - fixed at top right of screen
+                // Endless Mode Wave Counter - center top, below zone name
                 const waveStyle = new PIXI.TextStyle({
                     fontFamily: 'Press Start 2P',
-                    fontSize: Math.round(32 * scaleFactor),
+                    fontSize: Math.round(40 * scaleFactor),
                     fontWeight: 'bold',
-                    fill: '#22c55e',
-                    stroke: { color: '#000000', width: Math.max(3, 8 * scaleFactor) },
+                    fill: '#4ade80',
+                    stroke: { color: '#000000', width: Math.max(4, 10 * scaleFactor) },
                     dropShadow: {
                         color: '#000000',
-                        distance: Math.max(2, 4 * scaleFactor),
-                        blur: Math.max(2, 4 * scaleFactor),
-                        alpha: 0.9,
+                        distance: Math.max(3, 5 * scaleFactor),
+                        blur: Math.max(3, 6 * scaleFactor),
+                        alpha: 1,
                     },
                 });
                 const waveText = new PIXI.Text({ text: '', style: waveStyle });
-                waveText.anchor.set(1, 0); // Anchor top-right
-                waveText.x = canvasWidth - 20;
-                waveText.y = 60; // Below the top UI overlay
+                waveText.anchor.set(0.5, 0); // Anchor center-top
+                waveText.x = centerX;
+                waveText.y = 150 * scaleFactor; // Well below the HTML overlay
                 waveText.visible = false;
                 uiContainer.addChild(waveText);
                 uiContainer.waveText = waveText;
@@ -1077,10 +1077,10 @@ export default function GameRenderer() {
                     enemyHpBarRef.current.position.set(enemyX, hpBarY);
                 }
 
-                // Update wave text position (endless mode) - top right corner
+                // Update wave text position (endless mode) - center top
                 if (uiContainerRef.current?.waveText) {
-                    uiContainerRef.current.waveText.x = containerWidth - 20;
-                    uiContainerRef.current.waveText.y = 60;
+                    uiContainerRef.current.waveText.x = centerX;
+                    uiContainerRef.current.waveText.y = 150 * scaleFactor;
                 }
 
                 // Update background
