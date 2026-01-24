@@ -653,8 +653,6 @@ export default function GameRenderer() {
                     const playerMaxHp = typeof gmState.playerMaxHp === 'number' && !isNaN(gmState.playerMaxHp)
                         ? gmState.playerMaxHp
                         : 100;
-                    // DEBUG: Log what renderer sees (throttled to 1% of frames)
-                    if (Math.random() < 0.01) console.log(`Renderer sees HP: ${playerHp}`);
                     updateHpBar(playerHpBarRef.current, playerHp, playerMaxHp, true);
                 }
                 if (gmState && enemyHpBarRef.current) {

@@ -316,9 +316,10 @@ function DesktopGameLayout() {
                     <GameRenderer />
                 </div>
 
-                {/* Combat Pause Button - bottom left overlay */}
-                <div className="absolute bottom-16 left-4 z-10">
+                {/* Game Controls - bottom left overlay */}
+                <div className="absolute bottom-16 left-4 z-10 flex items-center gap-3">
                     <CombatToggle />
+                    <GameSpeedControl />
                 </div>
 
                 {/* Bottom XP Bar - full width footer */}
@@ -621,6 +622,41 @@ function CombatToggle() {
                 </>
             )}
         </button>
+    );
+}
+
+function GameSpeedControl() {
+    const { gameManager } = useGame();
+    const [speed, setSpeed] = useState(1);
+
+    useEffect(() => {
+        if (!gameManager) return;
+        return gameManager.subscribeSpeed(setSpeed);
+    }, [gameManager]);
+
+    const handleSpeedChange = (newSpeed) => {
+        if (gameManager) {
+            gameManager.setSpeed(newSpeed);
+        }
+    };
+
+    return (
+        <div className="flex items-center gap-1 px-3 py-2 rounded-lg bg-slate-800/90 shadow-lg">
+            <span className="text-slate-300 text-sm font-semibold mr-1">Speed</span>
+            {SPEED_OPTIONS.map(s => (
+                <button
+                    key={s}
+                    onClick={() => handleSpeedChange(s)}
+                    className={`px-3 py-1 rounded text-sm font-bold transition-all ${
+                        speed === s
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-slate-700 text-slate-400 hover:bg-slate-600'
+                    }`}
+                >
+                    {s}x
+                </button>
+            ))}
+        </div>
     );
 }
 

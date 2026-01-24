@@ -1,38 +1,15 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useGame } from '../context/GameContext';
 import { useIsMobile } from '../hooks/useIsMobile';
-import { ACHIEVEMENTS, ACHIEVEMENT_CATEGORIES, checkAchievements, applyAchievementReward } from '../data/achievements';
+import { ACHIEVEMENTS, ACHIEVEMENT_CATEGORIES } from '../data/achievements';
 import { formatWithCommas } from '../utils/format';
 
 export default function AchievementsView() {
-    const { state, gameManager, addToast } = useGame();
+    const { state } = useGame();
     const { isMobile } = useIsMobile();
     const unlockedAchievements = state.unlockedAchievements || [];
 
-    // Check for new achievements
-    useEffect(() => {
-        const newlyUnlocked = checkAchievements(state, unlockedAchievements);
-
-        if (newlyUnlocked.length > 0) {
-            gameManager.setState(prev => {
-                const newState = { ...prev };
-                const newUnlocked = [...(prev.unlockedAchievements || [])];
-
-                for (const achievement of newlyUnlocked) {
-                    if (!newUnlocked.includes(achievement.id)) {
-                        newUnlocked.push(achievement.id);
-                        applyAchievementReward(newState, achievement.reward);
-
-                        // Show toast notification for achievement
-                        addToast('achievement', achievement);
-                    }
-                }
-
-                newState.unlockedAchievements = newUnlocked;
-                return newState;
-            });
-        }
-    }, [state.kills, state.totalGold, state.level, state.prestigeLevel, state.inventory, state.gear, state.zoneKills, addToast]);
+    // Achievement checking is now done in GameContext so toasts work even when not viewing this tab
 
     const unlockedCount = unlockedAchievements.length;
     const totalCount = ACHIEVEMENTS.length;

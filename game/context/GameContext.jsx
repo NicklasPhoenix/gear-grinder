@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { GameManager } from '../managers/GameManager';
 import { SAVE, DEFAULTS } from '../data/constants';
+import { checkAchievements, applyAchievementReward } from '../data/achievements';
 const GameContext = createContext(null);
 
 // Separate context for high-frequency updates (HP bars) to prevent full tree re-renders
@@ -460,6 +461,38 @@ export function GameProvider({ children }) {
             document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
     }, []);
+
+    // Check for achievements continuously (not just when viewing achievements tab)
+    useEffect(() => {
+        if (!gameState || !gameManagerRef.current) return;
+
+        const unlockedAchievements = gameState.unlockedAchievements || [];
+        const newlyUnlocked = checkAchievements(gameState, unlockedAchievements);
+
+        if (newlyUnlocked.length > 0) {
+            gameManagerRef.current.setState(prev => {
+                const newState = { ...prev };
+                const newUnlocked = [...(prev.unlockedAchievements || [])];
+
+                for (const achievement of newlyUnlocked) {
+                    if (!newUnlocked.includes(achievement.id)) {
+                        newUnlocked.push(achievement.id);
+                        applyAchievementReward(newState, achievement.reward);
+
+                        // Show toast notification for achievement
+                        setToasts(prevToasts => [
+                            ...prevToasts,
+                            { id: Date.now() + Math.random(), type: 'achievement', data: achievement }
+                        ]);
+                    }
+                }
+
+                newState.unlockedAchievements = newUnlocked;
+                return newState;
+            });
+        }
+    }, [gameState?.kills, gameState?.totalGold, gameState?.level, gameState?.prestigeLevel,
+        gameState?.inventory?.length, gameState?.zoneKills, gameState?.gear]);
 
     // Apply text size setting to body element for CSS scaling
     useEffect(() => {
