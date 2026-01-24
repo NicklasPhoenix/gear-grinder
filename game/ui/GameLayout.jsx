@@ -327,23 +327,24 @@ function DesktopGameLayout() {
                 </div>
             </div>
 
-            {/* Menu Collapse Toggle Button */}
-            <button
-                onClick={() => setMenuCollapsed(prev => !prev)}
-                className={`hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 z-30 items-center justify-center w-6 h-16 bg-slate-800/90 hover:bg-slate-700 border border-slate-700 rounded-l-lg transition-all ${
-                    menuCollapsed ? 'right-0' : 'right-[550px]'
-                }`}
-                title={menuCollapsed ? 'Expand Menu (M)' : 'Collapse Menu (M)'}
-            >
-                <svg className={`w-4 h-4 text-slate-400 transition-transform ${menuCollapsed ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-            </button>
-
             {/* Right Panel: UI Sidebar */}
-            <div className={`w-full h-[60vh] lg:h-full flex flex-col border-t lg:border-t-0 lg:border-l border-slate-800/50 bg-slate-900/80 backdrop-blur-sm shadow-2xl z-20 transition-all duration-300 ${
-                menuCollapsed ? 'lg:w-0 lg:overflow-hidden lg:border-l-0' : 'lg:w-[550px]'
-            }`}>
+            <div
+                className="w-full h-[60vh] lg:h-full lg:w-[550px] flex-shrink-0 flex flex-col border-t lg:border-t-0 lg:border-l border-slate-800/50 bg-slate-900/80 backdrop-blur-sm shadow-2xl z-20 transition-transform duration-300 relative"
+                style={{
+                    transform: menuCollapsed ? 'translateX(100%)' : 'translateX(0)',
+                    marginRight: menuCollapsed ? '-550px' : '0'
+                }}
+            >
+                {/* Menu Collapse Toggle Button - inside the panel */}
+                <button
+                    onClick={() => setMenuCollapsed(prev => !prev)}
+                    className="hidden lg:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full z-30 items-center justify-center w-6 h-16 bg-slate-800/90 hover:bg-slate-700 border border-slate-700 rounded-l-lg"
+                    title={menuCollapsed ? 'Expand Menu (M)' : 'Collapse Menu (M)'}
+                >
+                    <svg className={`w-4 h-4 text-slate-400 transition-transform ${menuCollapsed ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
                 {/* Tab Navigation */}
                 <div className="flex overflow-x-auto custom-scrollbar bg-slate-950/80 border-b border-slate-800/50" role="tablist" aria-label="Game sections">
                     {TABS.map((tab, index) => (
