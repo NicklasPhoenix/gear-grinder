@@ -328,7 +328,9 @@ export class CombatSystem {
 
         if (totalHealed > 0) {
             const actualHeal = Math.min(totalHealed, safeMaxHp - newState.playerHp);
+            console.log(`Lifesteal: healing ${totalHealed}, HP before: ${newState.playerHp}`);
             newState.playerHp = Math.min(newState.playerHp + totalHealed, safeMaxHp);
+            console.log(`HP after heal: ${newState.playerHp}`);
 
             // Overheal: excess healing becomes shield
             if (stats.overheal > 0 && totalHealed > actualHeal) {
@@ -372,6 +374,7 @@ export class CombatSystem {
             }
         } else {
             // ========== ENEMY TURN ==========
+            console.log(`Enemy turn: enemyDmg=${enemyDmg}, dodge=${stats.dodge}%`);
             const dodged = Math.random() * 100 < stats.dodge;
             if (dodged) {
                 this.callbacks.onFloatingText('DODGE!', 'dodge', 'player');
@@ -438,7 +441,9 @@ export class CombatSystem {
                     }
 
                     if (reducedDmg > 0) {
+                        console.log(`Applying ${reducedDmg} damage to player. HP before: ${newState.playerHp}`);
                         newState.playerHp -= reducedDmg;
+                        console.log(`HP after: ${newState.playerHp}`);
                         this.callbacks.onFloatingText(`-${reducedDmg}`, 'enemyDmg', 'player');
                     }
                     combatUpdates.lastDamage = reducedDmg;
