@@ -368,7 +368,7 @@ export class CombatSystem {
             const actualHeal = Math.min(totalHealed, safeMaxHp - newState.playerHp);
             newState.playerHp = Math.min(newState.playerHp + totalHealed, safeMaxHp);
 
-            // Overheal: excess healing becomes shield
+            // Overheal: excess healing becomes shield (show immediately as special effect)
             if (stats.overheal > 0 && totalHealed > actualHeal) {
                 const excessHeal = totalHealed - actualHeal;
                 const shieldGain = Math.floor(excessHeal * stats.overheal / 100);
@@ -380,7 +380,8 @@ export class CombatSystem {
                 }
             }
 
-            this.callbacks.onFloatingText(`+${actualHeal}`, 'heal', 'player');
+            // Accumulate healing for batched display
+            this.accumulatedHealToPlayer += actualHeal;
             combatUpdates.lastHeal = totalHealed;
         }
 
@@ -477,31 +478,34 @@ export class CombatSystem {
 
                     if (reducedDmg > 0) {
                         newState.playerHp -= reducedDmg;
-                        this.callbacks.onFloatingText(`-${reducedDmg}`, 'enemyDmg', 'player');
+                        // Accumulate damage to player for batched display
+                        this.accumulatedDamageToPlayer += reducedDmg;
                     }
                     combatUpdates.lastDamage = reducedDmg;
                     combatUpdates.actualDamageTaken = reducedDmg;
                     combatUpdates.isPlayerTurn = false;
 
-                    // Vengeance: overflow thorns becomes full damage counter
+                    // Vengeance: overflow thorns becomes full damage counter (show immediately)
                     if (stats.vengeance > 0 && reducedDmg > 0 && Math.random() * 100 < stats.vengeance) {
                         const vengDmg = playerDmg; // Full player damage
                         newState.enemyHp -= vengDmg;
-                        this.callbacks.onFloatingText(`VENGEANCE ${vengDmg}!`, 'vengeance', 'enemy');
+                        this.accumulatedDamageToEnemy += vengDmg;
+                        this.callbacks.onFloatingText('VENGEANCE!', 'vengeance', 'enemy');
                     }
 
-                    // Thorns (only if not vengeance)
+                    // Thorns (only if not vengeance) - accumulate with regular damage
                     else if (stats.thorns > 0 && reducedDmg > 0) {
                         const thornsDmg = Math.floor(reducedDmg * stats.thorns / 100);
                         newState.enemyHp -= thornsDmg;
-                        if (thornsDmg > 0) this.callbacks.onFloatingText(`-${thornsDmg}`, 'thorns', 'enemy');
+                        this.accumulatedDamageToEnemy += thornsDmg;
                     }
 
-                    // Retaliate: chance to counter-attack when hit
+                    // Retaliate: chance to counter-attack when hit (show immediately)
                     if (stats.retaliate > 0 && reducedDmg > 0 && Math.random() * 100 < stats.retaliate) {
                         const retaliateDmg = Math.floor(playerDmg * 0.5);
                         newState.enemyHp -= retaliateDmg;
-                        this.callbacks.onFloatingText(`⚔️${retaliateDmg}`, 'retaliate', 'enemy');
+                        this.accumulatedDamageToEnemy += retaliateDmg;
+                        this.callbacks.onFloatingText('COUNTER!', 'retaliate', 'enemy');
                     }
                 }
             }
@@ -530,6 +534,12 @@ export class CombatSystem {
         // Sync endless enemy HP for UI display
         if (newState.endlessActive) {
             newState.endlessEnemyHp = newState.enemyHp;
+        }
+
+        // Periodically flush accumulated damage/heal numbers (reduces floating text clutter)
+        this.ticksSinceLastDisplay++;
+        if (this.ticksSinceLastDisplay >= this.displayInterval) {
+            this.flushAccumulatedText();
         }
 
         this.stateManager.setState(newState);

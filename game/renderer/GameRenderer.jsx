@@ -1783,26 +1783,27 @@ function spawnFloatingText(app, container, { text, type, target }, positions = {
         case 'heal':
         case 'killHeal':
             fillColor = '#4ade80';
-            fontSize = 22;
-            offsetX = -60;
-            offsetY = 20;
+            fontSize = 24;
+            offsetX = -100; // Far left of player for clear separation
+            offsetY = -20;
             break;
         case 'dodge':
             fillColor = '#67e8f9';
-            fontSize = 20;
-            offsetX = 50;
-            offsetY = -20;
+            fontSize = 22;
+            offsetX = 0;
+            offsetY = -40;
             break;
         case 'playerDmg':
-            fillColor = '#f87171';
-            fontSize = 24;
-            offsetY = 0;
+            fillColor = '#fbbf24'; // Golden/yellow for damage dealt
+            fontSize = 26;
+            offsetX = 0;
+            offsetY = -30;
             break;
         case 'enemyDmg':
             fillColor = '#f87171';
-            fontSize = 22;
-            offsetX = 40;
-            offsetY = 10;
+            fontSize = 24;
+            offsetX = 100; // Far right of player for clear separation
+            offsetY = -20;
             break;
         case 'thorns':
             fillColor = '#c084fc';
