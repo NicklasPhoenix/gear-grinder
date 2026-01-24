@@ -378,8 +378,10 @@ export default function GameTooltip({ tooltip }) {
                     const minVal = effectDef.minVal;
                     const range = maxForTier - minVal;
                     if (range <= 0) return { percent: 100, max: maxForTier };
-                    const percent = Math.round(((value - minVal) / range) * 100);
-                    return { percent, max: maxForTier, min: minVal };
+                    const percent = Math.min(100, Math.round(((value - minVal) / range) * 100));
+                    // If value exceeds max (boss fixed effects), show as perfect roll
+                    const isOverMax = value > maxForTier;
+                    return { percent: isOverMax ? 100 : percent, max: maxForTier, min: minVal, isOverMax };
                 };
 
                 // Get color based on roll quality
@@ -414,11 +416,11 @@ export default function GameTooltip({ tooltip }) {
                                                             <span
                                                                 className="text-[10px] font-bold px-1.5 py-0.5 rounded"
                                                                 style={{
-                                                                    color: getQualityColor(quality.percent),
-                                                                    backgroundColor: `${getQualityColor(quality.percent)}20`
+                                                                    color: quality.isOverMax ? '#fbbf24' : getQualityColor(quality.percent),
+                                                                    backgroundColor: quality.isOverMax ? '#fbbf2430' : `${getQualityColor(quality.percent)}20`
                                                                 }}
                                                             >
-                                                                {quality.percent}%
+                                                                {quality.isOverMax ? 'MAX+' : `${quality.percent}%`}
                                                             </span>
                                                             <span className="text-[10px] text-slate-500">
                                                                 max: {quality.max}
