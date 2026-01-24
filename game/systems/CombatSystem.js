@@ -20,6 +20,14 @@ export class CombatSystem {
             onLootDrop: () => { },
             onEnemyDeath: () => { },
         };
+
+        // Accumulator for batching floating text (reduces visual clutter)
+        this.accumulatedDamageToEnemy = 0;
+        this.accumulatedHealToPlayer = 0;
+        this.accumulatedDamageToPlayer = 0;
+        this.ticksSinceLastDisplay = 0;
+        this.displayInterval = 3; // Show accumulated numbers every N ticks
+        this.lastCritType = null; // Track if we had a crit for display
     }
 
     /**
@@ -28,6 +36,35 @@ export class CombatSystem {
      */
     setCallbacks(callbacks) {
         this.callbacks = { ...this.callbacks, ...callbacks };
+    }
+
+    /**
+     * Display accumulated damage/healing numbers and reset accumulators.
+     * Called periodically to batch floating text and reduce visual clutter.
+     */
+    flushAccumulatedText() {
+        // Show accumulated damage dealt to enemy (left side of enemy)
+        if (this.accumulatedDamageToEnemy > 0) {
+            const type = this.lastCritType || 'playerDmg';
+            const text = this.lastCritType ? `${this.accumulatedDamageToEnemy}!` : `-${this.accumulatedDamageToEnemy}`;
+            this.callbacks.onFloatingText(text, type, 'enemy');
+            this.accumulatedDamageToEnemy = 0;
+            this.lastCritType = null;
+        }
+
+        // Show accumulated healing to player (right side of player)
+        if (this.accumulatedHealToPlayer > 0) {
+            this.callbacks.onFloatingText(`+${this.accumulatedHealToPlayer}`, 'heal', 'player');
+            this.accumulatedHealToPlayer = 0;
+        }
+
+        // Show accumulated damage to player (left side of player)
+        if (this.accumulatedDamageToPlayer > 0) {
+            this.callbacks.onFloatingText(`-${this.accumulatedDamageToPlayer}`, 'enemyDmg', 'player');
+            this.accumulatedDamageToPlayer = 0;
+        }
+
+        this.ticksSinceLastDisplay = 0;
     }
 
     /**
@@ -154,15 +191,14 @@ export class CombatSystem {
 
         // HP Regeneration (% of max HP per second, applied per tick)
         // Tick rate is ATTACKS_PER_SECOND times per second, so divide regen accordingly
-        let regenThisTick = 0;
         if (stats.hpRegen > 0 && newState.playerHp < safeMaxHp) {
             const regenPerTick = (stats.hpRegen / 100) * safeMaxHp / COMBAT.ATTACKS_PER_SECOND;
             const regenAmount = Math.floor(regenPerTick);
             if (regenAmount > 0) {
-                regenThisTick = Math.min(regenAmount, safeMaxHp - newState.playerHp);
+                const actualRegen = Math.min(regenAmount, safeMaxHp - newState.playerHp);
                 newState.playerHp = Math.min(newState.playerHp + regenAmount, safeMaxHp);
-                // Always show regen so player understands total healing
-                this.callbacks.onFloatingText(`+${regenAmount}`, 'regen', 'player');
+                // Accumulate regen with other healing
+                this.accumulatedHealToPlayer += actualRegen;
                 combatUpdates.lastRegen = regenAmount;
             }
         }
@@ -221,28 +257,32 @@ export class CombatSystem {
             const frenzyDmg = Math.floor(playerDmg * 0.6);
             newState.enemyHp -= frenzyDmg * 2;
             totalDamageDealt += frenzyDmg * 2;
-            this.callbacks.onFloatingText(`FRENZY x3!`, 'frenzy', 'enemy');
+            this.accumulatedDamageToEnemy += frenzyDmg * 2;
+            this.callbacks.onFloatingText('FRENZY!', 'frenzy', 'enemy');
         }
         // Multi-Strike: chance to hit again (not on ascended crit or frenzy)
         else if (!isAscendedCrit && stats.multiStrike > 0 && Math.random() * 100 < stats.multiStrike) {
             const multiDmg = Math.floor(playerDmg * 0.75);
             newState.enemyHp -= multiDmg;
             totalDamageDealt += multiDmg;
-            this.callbacks.onFloatingText(`x2 ${multiDmg}!`, 'multiStrike', 'enemy');
+            this.accumulatedDamageToEnemy += multiDmg;
+            this.callbacks.onFloatingText('x2!', 'multiStrike', 'enemy');
         }
 
-        // Visuals: Damage Text
+        // Accumulate damage to enemy (shown in batches to reduce clutter)
+        this.accumulatedDamageToEnemy += playerDmg;
+
+        // Track crit type for display (special crits show label immediately)
         if (isAscendedCrit) {
-            this.callbacks.onFloatingText(`ASCENDED ${playerDmg}!`, 'ascendedCrit', 'enemy');
+            this.lastCritType = 'ascendedCrit';
+            this.callbacks.onFloatingText('ASCENDED!', 'ascendedCrit', 'enemy');
         } else if (isAnnihilate) {
-            this.callbacks.onFloatingText(`ANNIHILATE ${playerDmg}!`, 'annihilate', 'enemy');
-        } else {
-            this.callbacks.onFloatingText(
-                isCrit ? `CRIT ${playerDmg}!` : `-${playerDmg}`,
-                isCrit ? 'crit' : 'playerDmg',
-                'enemy'
-            );
+            this.lastCritType = 'annihilate';
+            this.callbacks.onFloatingText('ANNIHILATE!', 'annihilate', 'enemy');
+        } else if (isCrit) {
+            this.lastCritType = 'crit';
         }
+
         combatUpdates.lastDamage = playerDmg;
         combatUpdates.isPlayerTurn = true;
 
@@ -279,25 +319,23 @@ export class CombatSystem {
             newState.combatState.poisonTimer = poisonTicks;
         }
 
-        // Process DOT ticks (damage applied each tick)
+        // Process DOT ticks (damage applied each tick) - accumulated with regular damage
         let dotDamage = 0;
         if (newState.combatState.bleedTimer > 0) {
             dotDamage += newState.combatState.bleedDamage;
             newState.combatState.bleedTimer--;
-            if (Math.random() < 0.2) this.callbacks.onFloatingText(`🩸${newState.combatState.bleedDamage}`, 'bleed', 'enemy');
         }
         if (newState.combatState.burnTimer > 0) {
             dotDamage += newState.combatState.burnDamage;
             newState.combatState.burnTimer--;
-            if (Math.random() < 0.2) this.callbacks.onFloatingText(`🔥${newState.combatState.burnDamage}`, 'burn', 'enemy');
         }
         if (newState.combatState.poisonTimer > 0) {
             dotDamage += newState.combatState.poisonDamage;
             newState.combatState.poisonTimer--;
-            if (Math.random() < 0.2) this.callbacks.onFloatingText(`☠️${newState.combatState.poisonDamage}`, 'poison', 'enemy');
         }
         newState.enemyHp -= dotDamage;
         totalDamageDealt += dotDamage;
+        this.accumulatedDamageToEnemy += dotDamage;
 
         // Execute: instant kill enemies below 15% HP
         if (stats.executeChance > 0 && newState.enemyHp > 0 && newState.enemyHp < enemyMaxHp * 0.15) {

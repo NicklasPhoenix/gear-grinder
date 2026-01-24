@@ -525,13 +525,13 @@ export default function GameRenderer() {
                 uiContainer.addChild(zoneText);
                 uiContainer.zoneText = zoneText;
 
-                // Endless Mode Wave Counter - big number above enemy
+                // Endless Mode Wave Counter - fixed at top right of screen
                 const waveStyle = new PIXI.TextStyle({
                     fontFamily: 'Press Start 2P',
-                    fontSize: Math.round(48 * scaleFactor),
+                    fontSize: Math.round(32 * scaleFactor),
                     fontWeight: 'bold',
                     fill: '#22c55e',
-                    stroke: { color: '#000000', width: Math.max(2, 6 * scaleFactor) },
+                    stroke: { color: '#000000', width: Math.max(3, 8 * scaleFactor) },
                     dropShadow: {
                         color: '#000000',
                         distance: Math.max(2, 4 * scaleFactor),
@@ -540,9 +540,9 @@ export default function GameRenderer() {
                     },
                 });
                 const waveText = new PIXI.Text({ text: '', style: waveStyle });
-                waveText.anchor.set(0.5);
-                waveText.x = enemyX;
-                waveText.y = characterY - 120 * scaleFactor;
+                waveText.anchor.set(1, 0); // Anchor top-right
+                waveText.x = canvasWidth - 20;
+                waveText.y = 60; // Below the top UI overlay
                 waveText.visible = false;
                 uiContainer.addChild(waveText);
                 uiContainer.waveText = waveText;
@@ -1077,10 +1077,10 @@ export default function GameRenderer() {
                     enemyHpBarRef.current.position.set(enemyX, hpBarY);
                 }
 
-                // Update wave text position (endless mode)
+                // Update wave text position (endless mode) - top right corner
                 if (uiContainerRef.current?.waveText) {
-                    uiContainerRef.current.waveText.x = enemyX;
-                    uiContainerRef.current.waveText.y = characterY - 120 * scaleFactor;
+                    uiContainerRef.current.waveText.x = containerWidth - 20;
+                    uiContainerRef.current.waveText.y = 60;
                 }
 
                 // Update background
