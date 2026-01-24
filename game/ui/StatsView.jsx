@@ -689,72 +689,41 @@ function MobileStatRow({ label, value, color = "text-slate-200" }) {
     );
 }
 
-// SVG icons for overflow abilities
-function OverflowIcon({ name, className }) {
-    const iconClass = `w-4 h-4 ${className}`;
-    switch (name) {
-        case 'Ascended':
-            return (
-                <svg className={iconClass} viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-                </svg>
-            );
-        case 'Annihilate':
-            return (
-                <svg className={iconClass} viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C6.47 2 2 6.47 2 12C2 17.53 6.47 22 12 22C17.53 22 22 17.53 22 12C22 6.47 17.53 2 12 2M12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20M15 12L13 10V7H11V10L9 12L11 14V17H13V14L15 12Z" />
-                </svg>
-            );
-        case 'Frenzy':
-            return (
-                <svg className={iconClass} viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M11 15H6L13 1V9H18L11 23V15Z" />
-                </svg>
-            );
-        case 'Phantom':
-            return (
-                <svg className={iconClass} viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2A9 9 0 0 0 3 11C3 14.03 4.53 16.82 7 18.47V22H9V19H11V22H13V19H15V22H17V18.46C19.47 16.81 21 14 21 11A9 9 0 0 0 12 2M8 11A2 2 0 1 1 10 13A2 2 0 0 1 8 11M16 11A2 2 0 1 1 14 13A2 2 0 0 1 16 11Z" />
-                </svg>
-            );
-        case 'Overheal':
-            return (
-                <svg className={iconClass} viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 1L3 5V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V5L12 1M12 5A3 3 0 1 1 9 8A3 3 0 0 1 12 5M17.13 17C15.92 18.85 14.11 20.24 12 20.92C9.89 20.24 8.08 18.85 6.87 17C6.53 16.5 6.24 16 6 15.47C6 13.82 8.71 12.47 12 12.47S18 13.79 18 15.47C17.76 16 17.47 16.5 17.13 17Z" />
-                </svg>
-            );
-        case 'Vengeance':
-            return (
-                <svg className={iconClass} viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M6.92 5H5L14 14L15 13.06L6.92 5M19.71 7.04C19.94 7.27 19.94 7.64 19.71 7.88L17.34 10.25L18.04 10.95C18.27 11.18 18.27 11.55 18.04 11.78L17.34 12.5L14.56 9.72L15.26 9L15.96 9.72C16.19 9.5 16.56 9.5 16.79 9.72L19.16 7.04C19.39 6.81 19.76 6.81 19.99 7.04H19.71M12.32 13.18L5.44 20.05C5.21 20.28 4.84 20.28 4.62 20.05L3.91 19.35C3.68 19.12 3.68 18.75 3.91 18.53L10.79 11.65L12.32 13.18Z" />
-                </svg>
-            );
-        case 'Second Wind':
-            return (
-                <svg className={iconClass} viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M4 10A1 1 0 0 1 5 9A5 5 0 0 1 10 14A1 1 0 0 1 9 15A5 5 0 0 1 4 10M15 12A3 3 0 1 0 12 15A3 3 0 0 0 15 12M19 10A1 1 0 0 0 20 9A5 5 0 0 0 15 14A1 1 0 0 0 16 15A5 5 0 0 0 19 10Z" />
-                </svg>
-            );
-        case 'Immunity':
-            return (
-                <svg className={iconClass} viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M21 11C21 16.5 17.2 21.7 12 23C6.8 21.7 3 16.5 3 11V5L12 1L21 5V11M12 21C15.8 20 19 15.5 19 11.2V6.3L12 3.2L5 6.3V11.2C5 15.5 8.2 20 12 21Z" />
-                </svg>
-            );
-        default:
-            return null;
-    }
+// Icon mappings for overflow abilities using game assets
+const OVERFLOW_ICONS = {
+    'Ascended': { type: 'ui', src: '/assets/ui-icons/star-ascend.png' },
+    'Annihilate': { type: 'ui', src: '/assets/ui-icons/skull.png' },
+    'Frenzy': { type: 'gem', num: 38 },      // Yellow lightning gem
+    'Phantom': { type: 'gem', num: 13 },     // Purple gem
+    'Overheal': { type: 'ui', src: '/assets/ui-icons/fire-shield-boss.png' },
+    'Vengeance': { type: 'ui', src: '/assets/ui-icons/sword-loading.png' },
+    'Second Wind': { type: 'gem', num: 21 }, // Green gem
+    'Immunity': { type: 'gem', num: 37 },    // Gold gem
+};
+
+// Game asset icon for overflow abilities
+function OverflowIcon({ name, size = 16, className = '' }) {
+    const iconInfo = OVERFLOW_ICONS[name];
+    if (!iconInfo) return null;
+
+    const src = iconInfo.type === 'ui' ? iconInfo.src : `/assets/gems/Icon${iconInfo.num}.png`;
+
+    return (
+        <img
+            src={src}
+            alt=""
+            width={size}
+            height={size}
+            className={className}
+            style={{ imageRendering: 'pixelated' }}
+        />
+    );
 }
 
 // Overflow effect stat row - distinct styling to show it's a special ability
 function OverflowStatRow({ name, value, color, source, description, maxValue = 100 }) {
     const isActive = value > 0;
     const isMaxed = value >= maxValue;
-
-    // Get the color class for the icon
-    const iconColorClass = isActive
-        ? isMaxed ? 'text-amber-400' : color.replace('text-', 'text-')
-        : 'text-slate-600';
 
     return (
         <div className={`relative my-1 py-2 px-3 rounded-lg border transition-all ${
@@ -766,8 +735,8 @@ function OverflowStatRow({ name, value, color, source, description, maxValue = 1
         }`}>
             <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
-                    <div className={`${isActive ? '' : 'opacity-40'} ${iconColorClass}`}>
-                        <OverflowIcon name={name} className={iconColorClass} />
+                    <div className={`${isActive ? '' : 'opacity-30 grayscale'}`}>
+                        <OverflowIcon name={name} size={18} />
                     </div>
                     <div>
                         <span className={`text-sm font-bold ${isActive ? color : 'text-slate-600'}`}>
@@ -803,9 +772,6 @@ function OverflowStatRow({ name, value, color, source, description, maxValue = 1
 function MobileOverflowStatRow({ name, value, color, source, maxValue = 100 }) {
     const isActive = value > 0;
     const isMaxed = value >= maxValue;
-    const iconColorClass = isActive
-        ? isMaxed ? 'text-amber-400' : color
-        : 'text-slate-600';
 
     return (
         <div className={`col-span-2 my-0.5 py-1.5 px-2 rounded border transition-all ${
@@ -817,8 +783,8 @@ function MobileOverflowStatRow({ name, value, color, source, maxValue = 100 }) {
         }`}>
             <div className="flex justify-between items-center">
                 <div className="flex items-center gap-1.5">
-                    <div className={`${isActive ? '' : 'opacity-40'} ${iconColorClass}`}>
-                        <OverflowIcon name={name} className={`w-3 h-3 ${iconColorClass}`} />
+                    <div className={`${isActive ? '' : 'opacity-30 grayscale'}`}>
+                        <OverflowIcon name={name} size={14} />
                     </div>
                     <span className={`text-xs font-bold ${isActive ? color : 'text-slate-600'}`}>
                         {name}
