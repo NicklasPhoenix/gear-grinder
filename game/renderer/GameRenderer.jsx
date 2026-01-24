@@ -1678,10 +1678,11 @@ function spawnFloatingText(app, container, { text, type, target }, positions = {
 
     container.addChild(pixiText);
 
-    let velocityY = (isCrit ? -2.5 : -1.5) * scaleFactor;
+    const isBigHit = type === 'crit' || type === 'execute' || type === 'multiStrike';
+    let velocityY = (isBigHit ? -2.5 : -1.5) * scaleFactor;
     let velocityX = (Math.random() - 0.5) * 0.6 * scaleFactor;
     let tick = 0;
-    const scale = isCrit ? 1.5 : 1.2;
+    const scale = isBigHit ? 1.5 : 1.2;
 
     pixiText.scale.set(0.5);
 
