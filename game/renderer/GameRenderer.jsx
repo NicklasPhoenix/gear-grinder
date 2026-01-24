@@ -110,6 +110,8 @@ export default function GameRenderer() {
     const mainContainerRef = useRef(null);
     const groundRef = useRef(null);
     const gridLinesRef = useRef(null);
+    const overlayRef = useRef(null);
+    const vignetteRef = useRef(null);
 
     // Entities refs for updating
     const playerRef = useRef(null);
@@ -212,6 +214,7 @@ export default function GameRenderer() {
             bgContainerRef.current = bgContainer;
             particleContainerRef.current = particleContainer;
             gameContainerRef.current = gameContainer;
+            uiContainerRef.current = uiContainer;
 
             // Calculate positions based on canvas size (scale for mobile)
             // Use 25% from center for characters, with minimum spacing
@@ -324,6 +327,7 @@ export default function GameRenderer() {
             ground.rect(0, groundY - 2, canvasWidth, 4);
             ground.fill({ color: 0x2a2a4e });
             bgContainer.addChild(ground);
+            groundRef.current = ground;
 
             // Grid lines on ground for depth
             const gridLines = new PIXI.Graphics();
@@ -335,6 +339,7 @@ export default function GameRenderer() {
                 gridLines.stroke();
             }
             bgContainer.addChild(gridLines);
+            gridLinesRef.current = gridLines;
 
             // --- Create Player (Hero) using real sprite ---
             // DawnLike sprites face LEFT by default, so flip player to face RIGHT (toward enemy)
@@ -949,9 +954,20 @@ export default function GameRenderer() {
     useEffect(() => {
         if (!isInitialized || !containerRef.current || !appRef.current) return;
 
+        let resizeTimeout = null;
+
         const handleResize = () => {
             if (!appRef.current || !containerRef.current) return;
 
+            // Debounce resize to handle CSS transitions (300ms menu collapse)
+            if (resizeTimeout) clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                if (!appRef.current || !containerRef.current) return;
+                doResize();
+            }, 50);
+        };
+
+        const doResize = () => {
             // Use requestAnimationFrame to ensure DOM has updated
             requestAnimationFrame(() => {
                 const containerWidth = containerRef.current?.clientWidth || 800;
@@ -1044,6 +1060,11 @@ export default function GameRenderer() {
                     enemyHpBarRef.current.position.set(enemyX, hpBarY);
                 }
 
+                // Update zone text position
+                if (uiContainerRef.current && uiContainerRef.current.zoneText) {
+                    uiContainerRef.current.zoneText.x = centerX;
+                }
+
                 // Update background
                 if (bgSpriteRef.current && bgSpriteRef.current.texture) {
                     const texture = bgSpriteRef.current.texture;
@@ -1053,6 +1074,62 @@ export default function GameRenderer() {
                     bgSpriteRef.current.scale.set(coverScale, coverScale);
                     bgSpriteRef.current.x = (containerWidth - texture.width * coverScale) / 2;
                     bgSpriteRef.current.y = (containerHeight - texture.height * coverScale) / 2;
+                }
+
+                // Update ground
+                if (groundRef.current) {
+                    groundRef.current.clear();
+                    groundRef.current.rect(0, groundY, containerWidth, 70);
+                    groundRef.current.fill({ color: 0x1a1a2e });
+                    groundRef.current.rect(0, groundY - 2, containerWidth, 4);
+                    groundRef.current.fill({ color: 0x2a2a4e });
+                }
+
+                // Update grid lines
+                if (gridLinesRef.current) {
+                    gridLinesRef.current.clear();
+                    gridLinesRef.current.setStrokeStyle({ width: 1, color: 0x2a2a4e, alpha: 0.3 });
+                    for (let i = 0; i < Math.ceil(containerWidth / 50) + 5; i++) {
+                        const x = i * 50 - 100;
+                        gridLinesRef.current.moveTo(x, groundY);
+                        gridLinesRef.current.lineTo(x + 200, containerHeight);
+                        gridLinesRef.current.stroke();
+                    }
+                }
+
+                // Update overlay
+                if (overlayRef.current) {
+                    overlayRef.current.clear();
+                    overlayRef.current.rect(0, 0, containerWidth, containerHeight);
+                    overlayRef.current.fill({ color: 0x000000, alpha: 0.25 });
+                }
+
+                // Update vignette
+                if (vignetteRef.current) {
+                    vignetteRef.current.clear();
+                    // Top gradient
+                    for (let i = 0; i < 100; i++) {
+                        vignetteRef.current.rect(0, i, containerWidth, 1);
+                        vignetteRef.current.fill({ color: 0x000000, alpha: (1 - i / 100) * 0.6 });
+                    }
+                    // Bottom gradient
+                    const bottomStart = containerHeight - 60;
+                    for (let i = 0; i < 60; i++) {
+                        vignetteRef.current.rect(0, bottomStart + i, containerWidth, 1);
+                        vignetteRef.current.fill({ color: 0x000000, alpha: (i / 60) * 0.4 });
+                    }
+                    // Side vignettes
+                    for (let i = 0; i < 50; i++) {
+                        vignetteRef.current.rect(i, 0, 1, containerHeight);
+                        vignetteRef.current.fill({ color: 0x000000, alpha: (1 - i / 50) * 0.3 });
+                        vignetteRef.current.rect(containerWidth - i, 0, 1, containerHeight);
+                        vignetteRef.current.fill({ color: 0x000000, alpha: (1 - i / 50) * 0.3 });
+                    }
+                }
+
+                // Force PIXI to resize the renderer
+                if (appRef.current && appRef.current.renderer) {
+                    appRef.current.renderer.resize(containerWidth, containerHeight);
                 }
             });
         };
@@ -1068,9 +1145,10 @@ export default function GameRenderer() {
         window.addEventListener('resize', handleResize);
 
         // Initial call to ensure positions are correct
-        handleResize();
+        doResize();
 
         return () => {
+            if (resizeTimeout) clearTimeout(resizeTimeout);
             observer.disconnect();
             window.removeEventListener('resize', handleResize);
         };
@@ -1137,6 +1215,7 @@ export default function GameRenderer() {
         overlay.rect(0, 0, width, height);
         overlay.fill({ color: 0x000000, alpha: 0.25 });
         container.addChild(overlay);
+        overlayRef.current = overlay;
 
         // Vignette effect
         const vignette = new PIXI.Graphics();
@@ -1159,6 +1238,7 @@ export default function GameRenderer() {
             vignette.fill({ color: 0x000000, alpha: (1 - i / 50) * 0.3 });
         }
         container.addChild(vignette);
+        vignetteRef.current = vignette;
     }
 
     // Update background texture when zone changes
