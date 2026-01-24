@@ -38,8 +38,8 @@ export class CombatSystem {
         // Never auto-salvage locked items
         if (item.locked) return false;
 
-        // Never auto-salvage boss items - they're special
-        if (item.isBossItem) return false;
+        // Only auto-salvage boss items if explicitly enabled (dangerous!)
+        if (item.isBossItem && !state.autoSalvageBossItems) return false;
 
         // Check tier threshold (-1 means disabled, otherwise salvage items at or below threshold)
         const tierThreshold = state.autoSalvageTier ?? -1;

@@ -112,11 +112,14 @@ function validateSave(parsed) {
     if (!['normal', 'large', 'xlarge'].includes(parsed.textSize)) {
         parsed.textSize = defaults.textSize;
     }
-    if (typeof parsed.autoSalvageTier !== 'number' || parsed.autoSalvageTier < -1 || parsed.autoSalvageTier > 8) {
+    if (typeof parsed.autoSalvageTier !== 'number' || parsed.autoSalvageTier < -1 || parsed.autoSalvageTier > 9) {
         parsed.autoSalvageTier = defaults.autoSalvageTier;
     }
     if (typeof parsed.autoSalvageKeepEffects !== 'boolean') {
         parsed.autoSalvageKeepEffects = defaults.autoSalvageKeepEffects;
+    }
+    if (typeof parsed.autoSalvageBossItems !== 'boolean') {
+        parsed.autoSalvageBossItems = false; // Default OFF for safety
     }
     if (!['none', 'slot', 'tier', 'score'].includes(parsed.inventorySort)) {
         parsed.inventorySort = defaults.inventorySort;

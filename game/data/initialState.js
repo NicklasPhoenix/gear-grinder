@@ -5,8 +5,9 @@ export const initialState = {
     textSize: 'normal', // Text size: 'normal', 'large', 'xlarge'
     // Loot filter settings
     autoSalvage: false, // Auto-salvage dropped items
-    autoSalvageTier: -1, // Max tier to auto-salvage (-1 = disabled, 0-8 = tier threshold)
+    autoSalvageTier: -1, // Max tier to auto-salvage (-1 = disabled, 0-9 = tier threshold)
     autoSalvageKeepEffects: true, // Keep items with special effects from auto-salvage
+    autoSalvageBossItems: false, // Include boss set items in auto-salvage (dangerous!)
     inventorySort: 'none', // Inventory sort: 'none', 'slot', 'tier', 'score'
     combatPaused: false, // Pause combat to take a breather
     // Boss stones - dropped by bosses, needed to enhance boss gear past +10

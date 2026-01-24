@@ -518,7 +518,7 @@ export default function InventoryView({ onHover }) {
                                 </button>
                             ))}
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                             <span className="text-xs text-slate-400">Keep effects:</span>
                             <button
                                 onClick={toggleKeepEffects}
@@ -529,6 +529,18 @@ export default function InventoryView({ onHover }) {
                                 }`}
                             >
                                 {autoSalvageKeepEffects ? 'ON' : 'OFF'}
+                            </button>
+                            <span className="text-xs text-slate-400 ml-2">Salvage boss items:</span>
+                            <button
+                                onClick={() => gameManager.setState(prev => ({ ...prev, autoSalvageBossItems: !prev.autoSalvageBossItems }))}
+                                className={`px-1.5 py-0.5 text-xs rounded transition-all ${
+                                    state.autoSalvageBossItems
+                                        ? 'bg-orange-600/40 text-orange-300'
+                                        : 'bg-slate-600/40 text-slate-300'
+                                }`}
+                                title="Warning: Enabling this will auto-salvage boss set items!"
+                            >
+                                {state.autoSalvageBossItems ? 'ON' : 'OFF'}
                             </button>
                         </div>
                     </div>
