@@ -7,6 +7,7 @@ export const initialState = {
     autoSalvage: false, // Auto-salvage dropped items
     autoSalvageTier: -1, // Max tier to auto-salvage (-1 = disabled, 0-9 = tier threshold)
     autoSalvageKeepEffects: true, // Keep items with special effects from auto-salvage
+    autoSalvageMaxEffectsOnly: false, // Only keep items with at least one max-rolled effect
     autoSalvageBossItems: false, // Include boss set items in auto-salvage (dangerous!)
     inventorySort: 'none', // Inventory sort: 'none', 'slot', 'tier', 'score'
     combatPaused: false, // Pause combat to take a breather

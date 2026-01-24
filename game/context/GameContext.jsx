@@ -118,6 +118,9 @@ function validateSave(parsed) {
     if (typeof parsed.autoSalvageKeepEffects !== 'boolean') {
         parsed.autoSalvageKeepEffects = defaults.autoSalvageKeepEffects;
     }
+    if (typeof parsed.autoSalvageMaxEffectsOnly !== 'boolean') {
+        parsed.autoSalvageMaxEffectsOnly = false; // Default OFF
+    }
     if (typeof parsed.autoSalvageBossItems !== 'boolean') {
         parsed.autoSalvageBossItems = false; // Default OFF for safety
     }
@@ -255,6 +258,7 @@ export function GameProvider({ children }) {
                     newState.autoSalvage !== lastState?.autoSalvage ||
                     newState.autoSalvageTier !== lastState?.autoSalvageTier ||
                     newState.autoSalvageKeepEffects !== lastState?.autoSalvageKeepEffects ||
+                    newState.autoSalvageMaxEffectsOnly !== lastState?.autoSalvageMaxEffectsOnly ||
                     newState.autoSalvageBossItems !== lastState?.autoSalvageBossItems ||
                     newState.textSize !== lastState?.textSize ||
                     newState.inventorySort !== lastState?.inventorySort ||

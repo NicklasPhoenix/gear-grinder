@@ -34,6 +34,35 @@ export class CombatSystem {
      * @param {Object} state - Current game state
      * @returns {boolean} - True if item should be auto-salvaged
      */
+    /**
+     * Checks if an item has at least one effect rolled at or near max value for its tier.
+     * @param {Object} item - The item to check
+     * @returns {boolean} - True if item has at least one max-rolled effect
+     */
+    hasMaxEffect(item) {
+        if (!item.effects || item.effects.length === 0) return false;
+
+        for (const effect of item.effects) {
+            // Skip awakening bonus effects - they use different scaling
+            if (effect.isAwakened) continue;
+
+            const effectDef = SPECIAL_EFFECTS.find(e => e.id === effect.id);
+            if (!effectDef) continue;
+
+            // Get the max value for this effect at the item's tier
+            const maxForTier = getEffectMaxForTier(effectDef, item.tier);
+
+            // Consider it "max" if within 95% of the tier's max value
+            // This accounts for rounding and gives a bit of tolerance
+            const threshold = effectDef.minVal + (maxForTier - effectDef.minVal) * 0.95;
+
+            if (effect.value >= threshold) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     shouldAutoSalvageItem(item, state) {
         // Never auto-salvage locked items
         if (item.locked) return false;
@@ -47,13 +76,19 @@ export class CombatSystem {
 
         // Check if we should keep items with effects
         const keepEffects = state.autoSalvageKeepEffects ?? true;
+        const maxEffectsOnly = state.autoSalvageMaxEffectsOnly ?? false;
         const hasEffects = item.effects && item.effects.length > 0;
 
         // When keepEffects is ON, effects filter applies to ALL tiers consistently
-        // Items WITH effects are always kept, items WITHOUT effects are salvaged
-        // up to the tier threshold
         if (keepEffects) {
-            if (hasEffects) return false; // Keep - has effects (any tier)
+            if (hasEffects) {
+                // If maxEffectsOnly is ON, only keep items with at least one max-rolled effect
+                if (maxEffectsOnly) {
+                    if (this.hasMaxEffect(item)) return false; // Keep - has max effect
+                    return true; // Salvage - has effects but none are max
+                }
+                return false; // Keep - has effects (any tier)
+            }
             // Salvage items without effects that are at or below threshold
             if (item.tier <= tierThreshold) return true;
             return false; // Keep higher tier items without effects (safety net)

@@ -232,6 +232,10 @@ export default function InventoryView({ onHover }) {
         gameManager.setState(prev => ({ ...prev, autoSalvageKeepEffects: !prev.autoSalvageKeepEffects }));
     };
 
+    const toggleMaxEffectsOnly = () => {
+        gameManager.setState(prev => ({ ...prev, autoSalvageMaxEffectsOnly: !prev.autoSalvageMaxEffectsOnly }));
+    };
+
     const toggleSalvageBossItems = () => {
         gameManager.setState(prev => ({ ...prev, autoSalvageBossItems: !prev.autoSalvageBossItems }));
     };
@@ -239,6 +243,7 @@ export default function InventoryView({ onHover }) {
     // Loot filter state
     const autoSalvageTier = state.autoSalvageTier ?? -1;
     const autoSalvageKeepEffects = state.autoSalvageKeepEffects ?? true;
+    const autoSalvageMaxEffectsOnly = state.autoSalvageMaxEffectsOnly ?? false;
     const autoSalvageBossItems = state.autoSalvageBossItems ?? false;
 
     // Equipment slot component for the paper doll
@@ -535,6 +540,22 @@ export default function InventoryView({ onHover }) {
                             >
                                 {autoSalvageKeepEffects ? 'ON' : 'OFF'}
                             </button>
+                            {autoSalvageKeepEffects && (
+                                <>
+                                    <span className="text-xs text-slate-400 ml-2">Max only:</span>
+                                    <button
+                                        onClick={toggleMaxEffectsOnly}
+                                        className={`px-1.5 py-0.5 text-xs rounded transition-all ${
+                                            autoSalvageMaxEffectsOnly
+                                                ? 'bg-purple-600/40 text-purple-300'
+                                                : 'bg-slate-600/40 text-slate-300'
+                                        }`}
+                                        title="Only keep items with at least one max-rolled effect (95%+ of tier max)"
+                                    >
+                                        {autoSalvageMaxEffectsOnly ? 'ON' : 'OFF'}
+                                    </button>
+                                </>
+                            )}
                             <span className="text-xs text-slate-400 ml-2">Salvage boss items:</span>
                             <button
                                 onClick={toggleSalvageBossItems}
