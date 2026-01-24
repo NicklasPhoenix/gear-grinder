@@ -118,7 +118,7 @@ export class CombatSystem {
         const isEndless = state.endlessActive;
         let newState = { ...state };
         let log = [...state.combatLog].slice(-UI.COMBAT_LOG_MAX_ENTRIES);
-        let combatUpdates = {}; // Track what happened for visuals
+        let combatUpdates = { actualDamageTaken: 0, lastHeal: 0 }; // Track what happened for visuals
 
         // Get enemy stats based on mode (endless vs regular)
         const enemyMaxHp = isEndless ? state.endlessEnemyMaxHp : zone.enemyHp;
@@ -154,10 +154,12 @@ export class CombatSystem {
 
         // HP Regeneration (% of max HP per second, applied per tick)
         // Tick rate is ATTACKS_PER_SECOND times per second, so divide regen accordingly
+        let regenThisTick = 0;
         if (stats.hpRegen > 0 && newState.playerHp < safeMaxHp) {
             const regenPerTick = (stats.hpRegen / 100) * safeMaxHp / COMBAT.ATTACKS_PER_SECOND;
             const regenAmount = Math.floor(regenPerTick);
             if (regenAmount > 0) {
+                regenThisTick = Math.min(regenAmount, safeMaxHp - newState.playerHp);
                 newState.playerHp = Math.min(newState.playerHp + regenAmount, safeMaxHp);
                 // Only show regen text occasionally to avoid spam (every 6 ticks = 1 second)
                 if (Math.random() < 0.17) {
@@ -166,6 +168,8 @@ export class CombatSystem {
                 combatUpdates.lastRegen = regenAmount;
             }
         }
+        // Track HP at start of combat (after regen)
+        const hpAfterRegen = newState.playerHp;
 
         // ========== PLAYER TURN ==========
         let playerDmg = stats.damage || PLAYER_BASE.DEFAULT_DAMAGE;
@@ -442,6 +446,7 @@ export class CombatSystem {
                         this.callbacks.onFloatingText(`-${reducedDmg}`, 'enemyDmg', 'player');
                     }
                     combatUpdates.lastDamage = reducedDmg;
+                    combatUpdates.actualDamageTaken = reducedDmg;
                     combatUpdates.isPlayerTurn = false;
 
                     // Vengeance: overflow thorns becomes full damage counter
@@ -491,6 +496,15 @@ export class CombatSystem {
         // Sync endless enemy HP for UI display
         if (newState.endlessActive) {
             newState.endlessEnemyHp = newState.enemyHp;
+        }
+
+        // DEBUG: Full HP breakdown (log every ~1 second)
+        if (Math.random() < 0.17) {
+            const startHp = state.playerHp;
+            const endHp = newState.playerHp;
+            const totalHeal = (combatUpdates.lastHeal || 0) + regenThisTick;
+            const totalDmg = combatUpdates.actualDamageTaken || 0;
+            console.log(`[HP DEBUG] Start: ${startHp}, Regen: +${regenThisTick}, Lifesteal: +${combatUpdates.lastHeal || 0}, Dmg: -${totalDmg}, End: ${endHp}, Net: ${endHp - startHp}`);
         }
 
         this.stateManager.setState(newState);

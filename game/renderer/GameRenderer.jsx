@@ -523,6 +523,28 @@ export default function GameRenderer() {
                 zoneText.y = 15;
                 uiContainer.addChild(zoneText);
                 uiContainer.zoneText = zoneText;
+
+                // Endless Mode Wave Counter - big number above enemy
+                const waveStyle = new PIXI.TextStyle({
+                    fontFamily: 'Press Start 2P',
+                    fontSize: Math.round(48 * scaleFactor),
+                    fontWeight: 'bold',
+                    fill: '#22c55e',
+                    stroke: { color: '#000000', width: Math.max(2, 6 * scaleFactor) },
+                    dropShadow: {
+                        color: '#000000',
+                        distance: Math.max(2, 4 * scaleFactor),
+                        blur: Math.max(2, 4 * scaleFactor),
+                        alpha: 0.9,
+                    },
+                });
+                const waveText = new PIXI.Text({ text: '', style: waveStyle });
+                waveText.anchor.set(0.5);
+                waveText.x = enemyX;
+                waveText.y = characterY - 120 * scaleFactor;
+                waveText.visible = false;
+                uiContainer.addChild(waveText);
+                uiContainer.waveText = waveText;
             }
 
             // --- Animation Loop ---
@@ -1904,8 +1926,18 @@ function spawnFloatingText(app, container, { text, type, target }, positions = {
     const baseY = characterY - 50 * scaleFactor;
 
     // Apply type-specific offset + small random spread (scaled)
-    pixiText.x = baseX + offsetX + (Math.random() - 0.5) * 30 * scaleFactor;
-    pixiText.y = baseY + offsetY + (Math.random() - 0.5) * 15 * scaleFactor;
+    let finalX = baseX + offsetX + (Math.random() - 0.5) * 30 * scaleFactor;
+    let finalY = baseY + offsetY + (Math.random() - 0.5) * 15 * scaleFactor;
+
+    // Clamp to canvas bounds with padding to prevent text going off screen
+    const canvasWidth = positions.canvasWidth || 800;
+    const canvasHeight = positions.canvasHeight || 600;
+    const padding = fontSize + 20;
+    finalX = Math.max(padding, Math.min(canvasWidth - padding, finalX));
+    finalY = Math.max(padding, Math.min(canvasHeight - padding, finalY));
+
+    pixiText.x = finalX;
+    pixiText.y = finalY;
 
     container.addChild(pixiText);
 
