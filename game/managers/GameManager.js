@@ -163,13 +163,11 @@ export class GameManager {
 
         const stats = calculatePlayerStats(this.state);
         const baseTickSpeed = Math.max(200, 1000 - (stats.speedMult - 1) * 500);
-        const tickSpeed = Math.max(40, Math.floor(baseTickSpeed / this.gameSpeed));
+        const tickSpeed = Math.max(40, baseTickSpeed / this.gameSpeed);
 
         this.accumulatedTime += deltaTime;
 
-        // Cap accumulated time to prevent spiral of death, but ensure at least one tick can happen
-        const maxAccumulated = Math.max(1000, tickSpeed * 2);
-        if (this.accumulatedTime > maxAccumulated) this.accumulatedTime = maxAccumulated;
+        if (this.accumulatedTime > 1000) this.accumulatedTime = 1000;
 
         while (this.accumulatedTime >= tickSpeed) {
             // Only run combat if not paused
