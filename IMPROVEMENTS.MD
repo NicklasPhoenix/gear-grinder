@@ -1167,6 +1167,202 @@ export const calculatePlayerStats = (gameState) => {
 
 ---
 
+## Endgame & Progression - Community Feedback (January 2026)
+
+### Player Feedback
+> "I quickly managed to get 25 on tyrant set and thus started one-shotting tyrant. That led me to quickly max out every prestige upgrade available and not sure what to do further in the game and why. Are there more unlocks on higher prestiges apart from higher zones?"
+
+**Problem:** Players who optimize well can reach "max" state quickly, leaving them without clear goals or motivation to continue.
+
+---
+
+### Proposed Endgame Systems
+
+#### 1. Endless/Infinite Mode
+**Concept:** After completing all zones, unlock an endless dungeon with scaling difficulty.
+- Enemy HP/damage scales infinitely (+10% per floor)
+- Special rewards every 10 floors (cosmetics, titles, unique effects)
+- Leaderboard for highest floor reached
+- Death resets to floor 1 but rewards are kept
+- Unique endless-only drops (e.g., "Abyssal" tier gear)
+
+**Implementation Effort:** Medium
+
+---
+
+#### 2. Challenge Modes / Modifiers
+**Concept:** Replayable challenges with special rules and unique rewards.
+
+**Examples:**
+- **Glass Cannon:** 1 HP, massive damage boost - survive X kills
+- **Pacifist:** Only thorns/reflect damage works
+- **Speedrun:** Clear zones 1-39 as fast as possible (timed)
+- **Hardcore:** Permadeath - how far can you get on one life?
+- **No Gear:** Stats only - clear zones with no equipment
+- **Boss Rush:** Fight all bosses back-to-back
+
+**Rewards:** Unique cosmetics, titles, achievement points
+
+**Implementation Effort:** Medium-High
+
+---
+
+#### 3. Ascension System (Prestige 2.0)
+**Concept:** After maxing prestige, unlock "Ascension" - a deeper reset with bigger bonuses.
+
+- Reset prestige level, prestige skills, and zones
+- Gain permanent "Ascension Points" based on progress
+- Ascension Points unlock:
+  - Passive bonuses (starting gold, XP mult, drop rates)
+  - New skill trees
+  - Cosmetic effects
+  - Quality of life (auto-loot, faster combat)
+- Each Ascension gets harder but more rewarding
+
+**Implementation Effort:** High
+
+---
+
+#### 4. Leaderboards & Competition
+**Concept:** Give players something to compete for.
+
+**Leaderboard Categories:**
+- Highest prestige level
+- Total kills
+- Fastest zone clear times
+- Highest endless floor
+- Most gold earned (lifetime)
+- Highest single hit damage
+- Collection completion %
+
+**Features:**
+- Daily/Weekly/All-time boards
+- Seasonal resets with rewards
+- Friend comparisons
+- Achievement badges
+
+**Implementation Effort:** Medium (requires backend)
+
+---
+
+#### 5. Collection & Completion Goals
+**Concept:** Give collectors something to chase.
+
+**Trackable Collections:**
+- All boss set pieces (each set at +15, +20, +25)
+- All weapon types at max tier
+- All effects discovered
+- All zones 100% cleared (X kills each)
+- All achievements unlocked
+
+**Rewards for Completion:**
+- Unique titles ("Collector", "Completionist", "Set Master")
+- Cosmetic borders/effects
+- Stat bonuses
+- Unlock hidden content
+
+**Implementation Effort:** Low-Medium
+
+---
+
+#### 6. Crafting / Item Synthesis
+**Concept:** Give excess items and materials a purpose.
+
+**Features:**
+- Combine 3 items of same tier → 1 item of next tier
+- Extract effects from items (destroy item, get "effect essence")
+- Apply effect essences to other items
+- Craft specific boss set pieces using boss stones + materials
+- Reroll effect values using materials
+
+**Implementation Effort:** Medium-High
+
+---
+
+#### 7. Daily/Weekly Objectives
+**Concept:** Give players reasons to log in regularly.
+
+**Daily Objectives (pick 3 random):**
+- Kill 100 enemies in Zone X
+- Enhance an item to +5
+- Salvage 20 items
+- Earn 10,000 gold
+- Kill a specific boss
+- Equip a full set
+
+**Weekly Objectives:**
+- Prestige once
+- Complete a challenge mode
+- Reach floor 50 in endless
+- Enhance to +15
+
+**Rewards:** Special currency → unique shop items
+
+**Implementation Effort:** Medium
+
+---
+
+#### 8. Mastery System
+**Concept:** Long-term progression tied to specific activities.
+
+**Mastery Tracks:**
+- **Weapon Mastery:** Use each weapon type → permanent bonuses with that weapon
+- **Zone Mastery:** Kill X enemies in each zone → zone-specific bonuses
+- **Set Mastery:** Equip each boss set → permanent set bonus improvements
+- **Effect Mastery:** Find X items with each effect → effect values improved globally
+
+**Implementation Effort:** Medium
+
+---
+
+#### 9. Seasonal Content
+**Concept:** Time-limited events to drive engagement.
+
+**Examples:**
+- **Seasonal Boss:** Limited-time boss with unique drops
+- **Holiday Events:** Themed zones, cosmetics, achievements
+- **Battle Pass:** Tiered rewards for playing during season
+- **Seasonal Leaderboards:** Compete fresh each season
+
+**Implementation Effort:** High (ongoing content creation)
+
+---
+
+#### 10. Cosmetic Progression
+**Concept:** Non-power rewards for long-term players.
+
+**Cosmetics:**
+- Character skins/sprites
+- Weapon visual effects (fire, ice, lightning trails)
+- Damage number styles
+- UI themes (dark, light, retro, neon)
+- Idle animation variations
+- Title/badge displays
+- Profile borders
+
+**Sources:** Achievements, collections, challenges, seasonal rewards
+
+**Implementation Effort:** Medium
+
+---
+
+### Implementation Priority Recommendation
+
+| Priority | System | Effort | Impact |
+|----------|--------|--------|--------|
+| 1 | Collection/Completion Goals | Low | High - easy to add, gives immediate goals |
+| 2 | Daily/Weekly Objectives | Medium | High - drives daily engagement |
+| 3 | Endless Mode | Medium | High - infinite replayability |
+| 4 | Challenge Modes | Medium | Medium - variety for experienced players |
+| 5 | Mastery System | Medium | Medium - long-term progression |
+| 6 | Leaderboards | Medium | Medium - competitive motivation |
+| 7 | Crafting/Synthesis | Medium-High | Medium - item sink, agency |
+| 8 | Cosmetics | Medium | Low-Medium - no power, but desirable |
+| 9 | Ascension System | High | High - but complex |
+| 10 | Seasonal Content | High | High - but requires ongoing work |
+
+---
+
 ## Summary
 
 | Priority | Category | Count |
