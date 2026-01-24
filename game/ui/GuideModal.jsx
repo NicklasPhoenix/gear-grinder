@@ -56,11 +56,10 @@ export default function GuideModal({ onClose }) {
                             <button
                                 key={section.id}
                                 onClick={() => setActiveSection(section.id)}
-                                className={`px-3 py-2 rounded text-left text-sm font-semibold transition-all ${
-                                    activeSection === section.id
-                                        ? 'bg-blue-600 text-white'
-                                        : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-                                }`}
+                                className={`px-3 py-2 rounded text-left text-sm font-semibold transition-all ${activeSection === section.id
+                                    ? 'bg-blue-600 text-white'
+                                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                                    }`}
                             >
                                 {section.label}
                             </button>
@@ -148,22 +147,44 @@ function GearSection() {
                 </div>
             </SubSection>
 
+            <SubSection title="Weapon Types">
+                <div className="space-y-1 mb-3">
+                    <div className="flex justify-between p-2 bg-slate-800/30 rounded text-xs">
+                        <span className="text-red-400">Sword</span>
+                        <span className="text-slate-400">STR scaling, +5% crit</span>
+                    </div>
+                    <div className="flex justify-between p-2 bg-slate-800/30 rounded text-xs">
+                        <span className="text-purple-400">Staff</span>
+                        <span className="text-slate-400">INT scaling, +15 HP</span>
+                    </div>
+                    <div className="flex justify-between p-2 bg-slate-800/30 rounded text-xs">
+                        <span className="text-blue-400">Dagger</span>
+                        <span className="text-slate-400">AGI scaling, +25% speed, +10% crit</span>
+                    </div>
+                    <div className="flex justify-between p-2 bg-slate-800/30 rounded text-xs">
+                        <span className="text-green-400">Mace</span>
+                        <span className="text-slate-400">VIT scaling, -10% speed, +30 HP</span>
+                    </div>
+                </div>
+                <p className="text-xs text-slate-500">Prestige weapons: Scythe (STR), Katana (AGI), Greataxe (STR)</p>
+            </SubSection>
+
             <SubSection title="Special Effects">
-                <p className="mb-2">Gear can roll special effects. Each effect slot rolls independently:</p>
+                <p className="mb-2">Gear can roll special effects. Chance increases with tier:</p>
                 <div className="bg-slate-800/50 rounded p-3 mb-3">
                     <div className="grid grid-cols-3 gap-2 text-xs">
                         <div><span className="text-slate-400">1st Effect:</span> 15-60%</div>
                         <div><span className="text-slate-400">2nd Effect:</span> 5-32%</div>
                         <div><span className="text-slate-400">3rd Effect:</span> 5-14%*</div>
                     </div>
-                    <p className="text-xs text-slate-500 mt-2">*Divine tier and above only. Chances increase with tier.</p>
+                    <p className="text-xs text-slate-500 mt-2">*Divine+ tier only (3 effects max)</p>
                 </div>
                 <div className="space-y-1">
                     {SPECIAL_EFFECTS.map((effect) => (
                         <div key={effect.id} className="flex justify-between p-2 bg-slate-800/30 rounded text-xs">
-                            <span className="text-yellow-400">{effect.name}</span>
+                            <span style={{ color: effect.color }}>{effect.name}</span>
                             <span className="text-slate-400">
-                                {effect.isPercent ? `${effect.minVal}% - ${effect.maxVal}%` : `${effect.minVal} - ${effect.maxVal}`}
+                                {effect.minVal} - {effect.maxVal}{effect.maxVal <= 10 ? '%' : ''}
                             </span>
                         </div>
                     ))}
@@ -183,8 +204,18 @@ function GearSection() {
             </SubSection>
 
             <SubSection title="Gear Slots">
-                <p>Weapon, Helmet, Chest, Gloves, Boots, Accessory</p>
-                <p className="text-slate-400">Each slot can be equipped with one piece of gear.</p>
+                <div className="grid grid-cols-3 gap-1 text-xs mb-2">
+                    <div className="p-1.5 bg-slate-800/30 rounded"><span className="text-red-400">Weapon</span> <span className="text-slate-500">(STR)</span></div>
+                    <div className="p-1.5 bg-slate-800/30 rounded"><span className="text-slate-300">Helmet</span> <span className="text-slate-500">(VIT)</span></div>
+                    <div className="p-1.5 bg-slate-800/30 rounded"><span className="text-slate-300">Armor</span> <span className="text-slate-500">(VIT)</span></div>
+                    <div className="p-1.5 bg-slate-800/30 rounded"><span className="text-slate-300">Legs</span> <span className="text-slate-500">(VIT)</span></div>
+                    <div className="p-1.5 bg-slate-800/30 rounded"><span className="text-slate-300">Boots</span> <span className="text-slate-500">(AGI)</span></div>
+                    <div className="p-1.5 bg-slate-800/30 rounded"><span className="text-slate-300">Belt</span> <span className="text-slate-500">(INT)</span></div>
+                    <div className="p-1.5 bg-slate-800/30 rounded"><span className="text-slate-300">Shield</span> <span className="text-slate-500">(VIT)</span></div>
+                    <div className="p-1.5 bg-slate-800/30 rounded"><span className="text-slate-300">Gloves</span> <span className="text-slate-500">(STR)</span></div>
+                    <div className="p-1.5 bg-slate-800/30 rounded"><span className="text-slate-300">Amulet</span> <span className="text-slate-500">(INT)</span></div>
+                </div>
+                <p className="text-slate-400 text-xs">Gear scales with matching stat (shown in parentheses). +2% bonus per stat point.</p>
             </SubSection>
         </div>
     );
@@ -196,8 +227,8 @@ function EnhancementSection() {
             <SectionTitle>Enhancement</SectionTitle>
 
             <SubSection title="How Enhancement Works">
-                <p>Enhance gear to increase its stats. Each <span className="text-blue-400">+1</span> level adds bonus stats to the item.</p>
-                <p>Higher enhancement levels have lower success rates and may require better materials.</p>
+                <p>Enhance gear to increase its stats. Each <span className="text-blue-400">+1</span> level adds bonus damage, HP, and armor.</p>
+                <p>Higher levels = lower success rate but bigger bonuses. At +15/+20 you get damage multipliers!</p>
             </SubSection>
 
             <SubSection title="Enhancement Materials">
@@ -220,14 +251,20 @@ function EnhancementSection() {
                 </div>
             </SubSection>
 
-            <SubSection title="Success Rates">
-                <p>Success rate decreases as enhancement level increases.</p>
-                <p>Failed enhancements may decrease the item's level (protection items coming soon).</p>
+            <SubSection title="Boss Gear Enhancement">
+                <p>Boss set items require <span className="text-orange-400">Boss Stones</span> in addition to regular materials past +10.</p>
+                <p className="text-xs text-slate-400 mt-1">Each boss drops their own stone type (e.g., Crow Stone for Crow Demon set)</p>
+            </SubSection>
+
+            <SubSection title="Success & Pity">
+                <p>Success rate: ~90% at +1, decreasing to ~30% at +20</p>
+                <p>Each failure increases <span className="text-green-400">pity bonus</span> (+5% per fail)</p>
+                <p className="text-xs text-slate-400 mt-1">Pity resets on success. Keep trying - you'll get it!</p>
             </SubSection>
 
             <SubSection title="Salvaging">
-                <p>Salvage unwanted gear to get Enhancement Stones back.</p>
-                <p>Higher tier gear returns more materials. Enhanced gear returns bonus materials.</p>
+                <p>Salvage unwanted gear for Enhancement Stones + Silver.</p>
+                <p className="text-xs text-slate-400">Higher tier & enhanced gear = more returns</p>
             </SubSection>
         </div>
     );
@@ -289,35 +326,40 @@ function PrestigeSection() {
             <SectionTitle>Prestige</SectionTitle>
 
             <SubSection title="What is Prestige?">
-                <p>Prestige resets your progress but grants <span className="text-pink-400 font-bold">permanent multipliers</span> that make future runs faster.</p>
-                <p>Each prestige level increases your damage, XP gain, and drop rates.</p>
+                <p>Prestige resets most progress but grants <span className="text-pink-400 font-bold">Prestige Stones</span> to buy permanent upgrades.</p>
+                <p>Requires defeating the <span className="text-yellow-400">Dark Wolf King</span> in Zone 39.</p>
             </SubSection>
 
-            <SubSection title="Prestige Requirements">
-                <p>Reach higher zones to unlock prestige. The further you progress, the more prestige points you'll earn.</p>
+            <SubSection title="Prestige Stones">
+                <p>Earned on prestige: <span className="text-pink-400">10 + (Level ÷ 2)</span> stones</p>
+                <p>Spend on Prestige Skills for permanent bonuses like:</p>
+                <p className="text-xs text-slate-400 mt-1">• +Damage%, +HP%, +Speed%, +Crit, +XP, +Gold</p>
+                <p className="text-xs text-slate-400">• Starting gold bonus for faster restarts</p>
             </SubSection>
 
             <SubSection title="What Resets">
-                <p className="text-red-400">• Level, XP, and stat points allocation</p>
+                <p className="text-red-400">• Level, XP, and stat point allocation</p>
                 <p className="text-red-400">• All gear and inventory</p>
-                <p className="text-red-400">• Silver and enhancement materials</p>
-                <p className="text-red-400">• Zone progress</p>
+                <p className="text-red-400">• Silver, Enhancement Stones, Orbs, Shards</p>
+                <p className="text-red-400">• Zone progress (back to Zone 0)</p>
+                <p className="text-red-400">• Unlocked skills (must re-buy)</p>
             </SubSection>
 
             <SubSection title="What's Kept">
-                <p className="text-green-400">• Prestige level and bonuses</p>
+                <p className="text-green-400">• Prestige level (unlocks new zones/tiers)</p>
                 <p className="text-green-400">• Prestige Stones (currency)</p>
-                <p className="text-green-400">• Achievement progress and rewards</p>
-                <p className="text-green-400">• Unlocked skills</p>
+                <p className="text-green-400">• Prestige Skills (permanent bonuses)</p>
+                <p className="text-green-400">• Achievement stat points (permanent)</p>
+                <p className="text-green-400">• Boss Stones (for boss gear enhancement)</p>
             </SubSection>
 
-            <SubSection title="Prestige Tiers">
-                <p>After prestiging, you can find gear from prestige tiers:</p>
-                <div className="mt-2 space-y-1">
+            <SubSection title="Prestige Tiers & Zones">
+                <p className="mb-2">Higher prestige unlocks new gear tiers and zones:</p>
+                <div className="space-y-1">
                     {TIERS.slice(7).map((tier, idx) => (
-                        <div key={tier.id} className="flex items-center gap-2 p-2 bg-slate-800/50 rounded">
+                        <div key={tier.id} className="flex items-center justify-between p-2 bg-slate-800/50 rounded text-xs">
                             <span className="font-bold" style={{ color: tier.color }}>{tier.name}</span>
-                            <span className="text-slate-500 text-xs">Prestige tier {idx + 1}</span>
+                            <span className="text-slate-400">Prestige {idx + 1}+ required</span>
                         </div>
                     ))}
                 </div>
@@ -345,7 +387,7 @@ function BossesSection() {
 
             <SubSection title="Boss Stones">
                 <p>Defeating bosses also drops <span className="text-orange-400 font-bold">Boss Stones</span> specific to that boss.</p>
-                <p>Boss Stones are used for special crafting and upgrades (coming soon).</p>
+                <p>Boss Stones are used for enhancing Boss Equipment past +10.</p>
             </SubSection>
 
             <SubSection title="Boss Strategy">
@@ -367,34 +409,45 @@ function StatsSection() {
                     <div className="p-2 bg-slate-800/50 rounded">
                         <span className="text-red-400 font-bold">STR (Strength)</span>
                         <p className="text-xs text-slate-400">+2 base damage per point</p>
+                        <p className="text-xs text-slate-500">+3% damage with STR weapons (Sword, Scythe, Greataxe)</p>
+                    </div>
+                    <div className="p-2 bg-slate-800/50 rounded">
+                        <span className="text-purple-400 font-bold">INT (Intelligence)</span>
+                        <p className="text-xs text-slate-400">+1% XP bonus per point</p>
+                        <p className="text-xs text-slate-500">+3% damage with INT weapons (Staff)</p>
                     </div>
                     <div className="p-2 bg-slate-800/50 rounded">
                         <span className="text-green-400 font-bold">VIT (Vitality)</span>
-                        <p className="text-xs text-slate-400">+5 max HP per point</p>
+                        <p className="text-xs text-slate-400">+8 max HP, +1 armor per point</p>
+                        <p className="text-xs text-slate-500">+0.15% HP regen/sec, +0.3% damage reduction, +2% damage with Mace</p>
                     </div>
                     <div className="p-2 bg-slate-800/50 rounded">
                         <span className="text-blue-400 font-bold">AGI (Agility)</span>
-                        <p className="text-xs text-slate-400">+0.5% crit chance, +1% crit damage per point</p>
+                        <p className="text-xs text-slate-400">+0.5% crit chance, +1% attack speed, +0.3% dodge per point</p>
+                        <p className="text-xs text-slate-500">+2% damage with AGI weapons (Dagger, Katana)</p>
                     </div>
                     <div className="p-2 bg-slate-800/50 rounded">
-                        <span className="text-yellow-400 font-bold">LUK (Luck)</span>
-                        <p className="text-xs text-slate-400">+0.5% silver find, +0.3% item drop rate per point</p>
+                        <span className="text-yellow-400 font-bold">LCK (Luck)</span>
+                        <p className="text-xs text-slate-400">+0.5% silver find, +0.5% material drop rate per point</p>
+                        <p className="text-xs text-slate-500">+2% crit damage per point</p>
                     </div>
                 </div>
             </SubSection>
 
             <SubSection title="Combat Stats">
-                <p><span className="text-white font-bold">Damage:</span> Base weapon damage + STR bonus + gear bonuses</p>
-                <p><span className="text-white font-bold">Armor:</span> Reduces incoming damage from enemies</p>
-                <p><span className="text-white font-bold">HP:</span> Your health pool. Regenerates over time.</p>
-                <p><span className="text-white font-bold">Crit Rate:</span> Chance to deal critical damage (capped at 100%)</p>
-                <p><span className="text-white font-bold">Crit Damage:</span> Multiplier for critical hits (default 150%)</p>
+                <p><span className="text-white font-bold">Damage:</span> Base + STR bonus + gear + weapon scaling</p>
+                <p><span className="text-white font-bold">Armor:</span> Reduces damage (Armor / (Armor + 250))</p>
+                <p><span className="text-white font-bold">HP:</span> Your health pool. Regenerates based on VIT.</p>
+                <p><span className="text-white font-bold">Crit Rate:</span> Chance to crit (base 3%, capped at 100%)</p>
+                <p><span className="text-white font-bold">Crit Damage:</span> Crit multiplier (base 150%)</p>
+                <p><span className="text-white font-bold">Dodge:</span> Chance to avoid damage (capped at 80%)</p>
+                <p><span className="text-white font-bold">Damage Reduction:</span> Flat % reduction (capped)</p>
             </SubSection>
 
             <SubSection title="Stat Point Sources">
                 <p>• <span className="text-purple-400">+3 per level up</span></p>
                 <p>• <span className="text-yellow-400">Achievement rewards</span> (permanent, kept through prestige)</p>
-                <p>• <span className="text-pink-400">Prestige bonuses</span></p>
+                <p>• <span className="text-pink-400">Prestige skill bonuses</span></p>
             </SubSection>
         </div>
     );
