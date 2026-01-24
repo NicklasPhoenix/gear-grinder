@@ -232,6 +232,10 @@ export default function InventoryView({ onHover }) {
         gameManager.setState(prev => ({ ...prev, autoSalvageKeepEffects: !prev.autoSalvageKeepEffects }));
     };
 
+    const toggleSalvageBossItems = () => {
+        gameManager.setState(prev => ({ ...prev, autoSalvageBossItems: !prev.autoSalvageBossItems }));
+    };
+
     // Loot filter state
     const autoSalvageTier = state.autoSalvageTier ?? -1;
     const autoSalvageKeepEffects = state.autoSalvageKeepEffects ?? true;
@@ -532,7 +536,7 @@ export default function InventoryView({ onHover }) {
                             </button>
                             <span className="text-xs text-slate-400 ml-2">Salvage boss items:</span>
                             <button
-                                onClick={() => gameManager.setState(prev => ({ ...prev, autoSalvageBossItems: !prev.autoSalvageBossItems }))}
+                                onClick={toggleSalvageBossItems}
                                 className={`px-1.5 py-0.5 text-xs rounded transition-all ${
                                     state.autoSalvageBossItems
                                         ? 'bg-orange-600/40 text-orange-300'
