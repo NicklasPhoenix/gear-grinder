@@ -313,6 +313,7 @@ export function GameProvider({ children }) {
                     newState.textSize !== lastState?.textSize ||
                     newState.inventorySort !== lastState?.inventorySort ||
                     newState.combatPaused !== lastState?.combatPaused ||
+                    newState.autoProgress !== lastState?.autoProgress ||
                     newState.unlockedAchievements !== lastState?.unlockedAchievements ||
                     newState.dailyStreak !== lastState?.dailyStreak ||
                     newState.lastDailyReward !== lastState?.lastDailyReward ||

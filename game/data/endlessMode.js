@@ -210,6 +210,10 @@ export function startEndlessRun(state) {
     state.endlessEnemyMaxHp = enemy.maxHp;
     state.endlessEnemyDmg = enemy.damage;
     state.endlessEnemyName = enemy.name;
+
+    // Also set the regular enemy HP used by combat system
+    state.enemyHp = enemy.hp;
+    state.enemyMaxHp = enemy.maxHp;
 }
 
 /**
@@ -245,6 +249,10 @@ export function endEndlessRun(state) {
     state.endlessEnemyMaxHp = 0;
     state.endlessEnemyDmg = 0;
     state.endlessEnemyName = '';
+
+    // Reset regular enemy HP so combat system re-initializes it for the zone
+    state.enemyHp = NaN; // Forces re-initialization in tick()
+    state.enemyMaxHp = NaN;
 }
 
 /**
@@ -290,6 +298,10 @@ export function processEndlessKill(state) {
     state.endlessEnemyMaxHp = nextEnemy.maxHp;
     state.endlessEnemyDmg = nextEnemy.damage;
     state.endlessEnemyName = nextEnemy.name;
+
+    // Also update the regular enemy HP used by combat system
+    state.enemyHp = nextEnemy.hp;
+    state.enemyMaxHp = nextEnemy.maxHp;
 
     return {
         gold: enemy.goldReward,

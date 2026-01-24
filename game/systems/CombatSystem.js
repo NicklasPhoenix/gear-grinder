@@ -484,6 +484,11 @@ export class CombatSystem {
         newState.combatLog = log;
         newState.playerMaxHp = stats.maxHp; // Sync max HP
 
+        // Sync endless enemy HP for UI display
+        if (newState.endlessActive) {
+            newState.endlessEnemyHp = newState.enemyHp;
+        }
+
         this.stateManager.setState(newState);
         return combatUpdates;
     }
