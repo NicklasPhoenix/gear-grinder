@@ -253,6 +253,7 @@ export default function StatsView() {
                         <div className="bg-slate-900/50 rounded-lg border border-slate-800/50 p-3">
                             <div className="grid grid-cols-2 gap-x-4 gap-y-1">
                                 <MobileStatRow label="Damage" value={calculated.damage} color="text-red-300" />
+                                <MobileStatRow label="Max HP" value={calculated.maxHp} color="text-green-300" />
                                 <MobileStatRow label="Armor" value={calculated.armor} color="text-blue-300" />
                                 <MobileStatRow label="Crit %" value={formatPercent(calculated.critChance)} color="text-yellow-300" />
                                 {calculated.ascendedCrit > 0 && (
@@ -290,6 +291,7 @@ export default function StatsView() {
                             <div className="border-t border-slate-700/50 mt-2 pt-2 grid grid-cols-2 gap-x-4 gap-y-1">
                                 <MobileStatRow label="Silver %" value={formatBonus((calculated.goldMult - 1) * 100)} color="text-slate-300" />
                                 <MobileStatRow label="XP %" value={formatBonus(calculated.xpBonus || 0)} color="text-purple-400" />
+                                <MobileStatRow label="Drop Rate" value={formatBonus((calculated.matMult - 1) * 100)} color="text-teal-300" />
                             </div>
                         </div>
 
@@ -451,6 +453,7 @@ export default function StatsView() {
                     <div className="flex-1 overflow-y-auto custom-scrollbar p-3 min-h-0">
                         <div className="space-y-1">
                             <StatRow label="Damage" value={calculated.damage} color="text-red-300" />
+                            <StatRow label="Max HP" value={calculated.maxHp} color="text-green-300" />
                             <StatRow label="Armor" value={calculated.armor} color="text-blue-300" />
                             <StatRow label="Crit %" value={formatPercent(calculated.critChance)} color="text-yellow-300" />
                             {calculated.ascendedCrit > 0 && (
@@ -487,6 +490,7 @@ export default function StatsView() {
                             <div className="border-t border-slate-700/50 my-2 pt-2">
                                 <StatRow label="Silver %" value={formatBonus((calculated.goldMult - 1) * 100)} color="text-slate-300" />
                                 <StatRow label="XP %" value={formatBonus(calculated.xpBonus || 0)} color="text-purple-400" />
+                                <StatRow label="Drop Rate" value={formatBonus((calculated.matMult - 1) * 100)} color="text-teal-300" />
                             </div>
                         </div>
 
