@@ -3,6 +3,8 @@ import { BOSS_SETS, PRESTIGE_BOSS_SETS, BOSS_STONES, MATERIALS, getSalvageReturn
 import { SKILLS } from '../data/skills';
 import { calculatePlayerStats } from './PlayerSystem';
 import { PLAYER_BASE, COMBAT, DEATH_PENALTY, BOSS_DROPS, LEVEL_UP, UI } from '../data/constants';
+import { updateCollectionProgress } from '../data/collections';
+import { getEndlessEnemyStats, processEndlessKill, endEndlessRun, startEndlessRun } from '../data/endlessMode';
 
 /**
  * Handles all combat logic including damage calculation, enemy death, loot drops, and player death.
@@ -113,9 +115,14 @@ export class CombatSystem {
             ? stats.maxHp : PLAYER_BASE.DEFAULT_MAX_HP;
 
         const zone = getZoneById(state.currentZone);
+        const isEndless = state.endlessActive;
         let newState = { ...state };
         let log = [...state.combatLog].slice(-UI.COMBAT_LOG_MAX_ENTRIES);
         let combatUpdates = {}; // Track what happened for visuals
+
+        // Get enemy stats based on mode (endless vs regular)
+        const enemyMaxHp = isEndless ? state.endlessEnemyMaxHp : zone.enemyHp;
+        const enemyDmg = isEndless ? state.endlessEnemyDmg : zone.enemyDmg;
 
         // Initialize combat state tracking for unique effects
         if (!newState.combatState) {
@@ -136,7 +143,7 @@ export class CombatSystem {
             newState.playerHp = safeMaxHp;
         }
         if (typeof newState.enemyHp !== 'number' || isNaN(newState.enemyHp)) {
-            newState.enemyHp = zone.enemyHp;
+            newState.enemyHp = enemyMaxHp;
         }
 
         // HP Regeneration (% of max HP per second, applied per tick)
@@ -158,6 +165,12 @@ export class CombatSystem {
         let playerDmg = stats.damage || PLAYER_BASE.DEFAULT_DAMAGE;
         let isCrit = Math.random() * 100 < (stats.critChance || PLAYER_BASE.DEFAULT_CRIT_CHANCE);
 
+        // Ascended Crit: overflow crit becomes instant kill chance
+        let isAscendedCrit = false;
+        if (isCrit && stats.ascendedCrit > 0) {
+            isAscendedCrit = Math.random() * 100 < stats.ascendedCrit;
+        }
+
         // Last Stand: bonus damage when below 30% HP
         if (stats.lastStand > 0 && newState.playerHp < safeMaxHp * 0.3) {
             playerDmg = Math.floor(playerDmg * (1 + stats.lastStand / 100));
@@ -176,23 +189,31 @@ export class CombatSystem {
             playerDmg = Math.floor(playerDmg * (1 + stats.armorPen / 200)); // 50% armorPen = +25% damage
         }
 
-        newState.enemyHp -= playerDmg;
-        let totalDamageDealt = playerDmg;
+        // Ascended Crit is an instant kill!
+        if (isAscendedCrit) {
+            newState.enemyHp = 0;
+            this.callbacks.onFloatingText('ASCENDED!', 'ascendedCrit', 'enemy');
+        } else {
+            newState.enemyHp -= playerDmg;
+        }
+        let totalDamageDealt = isAscendedCrit ? zone.enemyHp : playerDmg;
 
-        // Multi-Strike: chance to hit again
-        if (stats.multiStrike > 0 && Math.random() * 100 < stats.multiStrike) {
+        // Multi-Strike: chance to hit again (not on ascended crit - enemy already dead)
+        if (!isAscendedCrit && stats.multiStrike > 0 && Math.random() * 100 < stats.multiStrike) {
             const multiDmg = Math.floor(playerDmg * 0.75); // Second hit does 75% damage
             newState.enemyHp -= multiDmg;
             totalDamageDealt += multiDmg;
             this.callbacks.onFloatingText(`x2 ${multiDmg}!`, 'multiStrike', 'enemy');
         }
 
-        // Visuals: Damage Text
-        this.callbacks.onFloatingText(
-            isCrit ? `CRIT ${playerDmg}!` : `-${playerDmg}`,
-            isCrit ? 'crit' : 'playerDmg',
-            'enemy'
-        );
+        // Visuals: Damage Text (skip if ascended crit - already showed ASCENDED!)
+        if (!isAscendedCrit) {
+            this.callbacks.onFloatingText(
+                isCrit ? `CRIT ${playerDmg}!` : `-${playerDmg}`,
+                isCrit ? 'crit' : 'playerDmg',
+                'enemy'
+            );
+        }
         combatUpdates.lastDamage = playerDmg;
         combatUpdates.isPlayerTurn = true;
 
@@ -250,7 +271,7 @@ export class CombatSystem {
         totalDamageDealt += dotDamage;
 
         // Execute: instant kill enemies below 15% HP
-        if (stats.executeChance > 0 && newState.enemyHp > 0 && newState.enemyHp < zone.enemyHp * 0.15) {
+        if (stats.executeChance > 0 && newState.enemyHp > 0 && newState.enemyHp < enemyMaxHp * 0.15) {
             if (Math.random() * 100 < stats.executeChance) {
                 newState.enemyHp = 0;
                 this.callbacks.onFloatingText('EXECUTE!', 'execute', 'enemy');
@@ -291,7 +312,11 @@ export class CombatSystem {
 
         // Check Enemy Death
         if (newState.enemyHp <= 0) {
-            this.handleEnemyDeath(newState, stats, zone, log, safeMaxHp);
+            if (isEndless) {
+                this.handleEndlessEnemyDeath(newState, stats, log, safeMaxHp);
+            } else {
+                this.handleEnemyDeath(newState, stats, zone, log, safeMaxHp);
+            }
             // Reset combat state on enemy death
             newState.combatState.rageStacks = 0;
             newState.combatState.bleedTimer = 0;
@@ -308,17 +333,17 @@ export class CombatSystem {
                 this.callbacks.onFloatingText('DODGE!', 'dodge', 'player');
                 combatUpdates.lastDamage = 0;
             } else {
-                // Calculate enemy damage
-                let enemyDmg = zone.enemyDmg;
+                // Calculate enemy damage (use mode-specific damage)
+                let incomingDmg = enemyDmg;
 
                 // Frostbite: slow enemy attacks (reduce damage as a simplification)
                 if (stats.frostbite > 0) {
-                    enemyDmg = Math.floor(enemyDmg * (1 - stats.frostbite / 100));
+                    incomingDmg = Math.floor(incomingDmg * (1 - stats.frostbite / 100));
                 }
 
                 // Armor reduction (logarithmic diminishing returns)
                 const armorReduction = stats.armor / (stats.armor + COMBAT.ARMOR_CONSTANT);
-                let reducedDmg = Math.floor(enemyDmg * (1 - armorReduction));
+                let reducedDmg = Math.floor(incomingDmg * (1 - armorReduction));
 
                 // Flat damage reduction (applied after armor, enables tank builds)
                 if (stats.damageReduction > 0) {
@@ -365,7 +390,11 @@ export class CombatSystem {
 
             // Check Player Death
             if (newState.playerHp <= 0) {
-                this.handlePlayerDeath(newState, stats, zone, safeMaxHp);
+                if (isEndless) {
+                    this.handleEndlessPlayerDeath(newState, safeMaxHp, log);
+                } else {
+                    this.handlePlayerDeath(newState, stats, zone, safeMaxHp);
+                }
             }
         }
 
@@ -440,6 +469,8 @@ export class CombatSystem {
                 state.inventory = addItemToInventory(state.inventory, droppedGear);
                 log.push({ type: 'gearDrop', msg: `${droppedGear.name} dropped!` });
             }
+            // Track for collection progress regardless of salvage
+            updateCollectionProgress(state, droppedGear);
         }
 
         // Boss Loot
@@ -554,6 +585,8 @@ export class CombatSystem {
                 state.inventory = addItemToInventory(state.inventory, newBossItem);
                 log.push({ type: 'bossLoot', msg: `${bossItem.name} obtained!` });
             }
+            // Track for collection progress regardless of salvage
+            updateCollectionProgress(state, newBossItem);
         }
     }
 
@@ -586,5 +619,95 @@ export class CombatSystem {
         state.playerHp = safeMaxHp;
         state.enemyHp = zone.enemyHp;
         state.enemyMaxHp = zone.enemyHp;
+    }
+
+    /**
+     * Handles enemy death in Endless Mode - processes wave rewards and advances to next wave.
+     * @param {Object} state - Current game state (modified in place)
+     * @param {Object} stats - Calculated player stats
+     * @param {Array} log - Combat log array
+     * @param {number} safeMaxHp - Validated max HP value
+     */
+    handleEndlessEnemyDeath(state, stats, log, safeMaxHp) {
+        // Process the kill and get rewards
+        const result = processEndlessKill(state);
+
+        // Show loot visuals
+        const lootItems = [];
+        lootItems.push({ text: `+${result.gold}s`, color: '#c0c0c0' });
+        lootItems.push({ text: `+${result.xp}xp`, color: '#a855f7' });
+        lootItems.push({ text: `Wave ${state.endlessWave}`, color: '#22c55e' });
+
+        if (result.drops.enhanceStone > 0) {
+            lootItems.push({ text: `+${result.drops.enhanceStone} E.Stone`, color: '#3b82f6' });
+        }
+        if (result.drops.blessedOrb > 0) {
+            lootItems.push({ text: `+${result.drops.blessedOrb} B.Orb`, color: '#a855f7' });
+        }
+        if (result.drops.celestialShard > 0) {
+            lootItems.push({ text: `+${result.drops.celestialShard} C.Shard`, color: '#fbbf24' });
+        }
+
+        this.callbacks.onLootDrop(lootItems);
+
+        // Handle milestone
+        if (result.milestone) {
+            log.push({ type: 'milestone', msg: `Milestone reached: ${result.milestone.title}!` });
+            this.callbacks.onFloatingText(`${result.milestone.title}!`, 'milestone', 'player');
+        }
+
+        // Kill Heal in endless mode
+        if (stats.killHeal > 0) {
+            const killHealAmount = Math.floor(safeMaxHp * stats.killHeal / 100);
+            state.playerHp = Math.min(state.playerHp + killHealAmount, safeMaxHp);
+            this.callbacks.onFloatingText(`+${killHealAmount}`, 'killHeal', 'player');
+        }
+
+        // Heal player on kill
+        state.playerHp = Math.min(state.playerHp + Math.floor(safeMaxHp * COMBAT.HEAL_ON_KILL), safeMaxHp);
+
+        // Enemy HP is already set by processEndlessKill via state mutation
+        this.callbacks.onEnemyDeath(state.endlessWave % 10 === 0); // Boss every 10 waves
+    }
+
+    /**
+     * Handles player death in Endless Mode - ends the run and returns to normal zone.
+     * @param {Object} state - Current game state (modified in place)
+     * @param {number} safeMaxHp - Validated max HP value
+     * @param {Array} log - Combat log array
+     */
+    handleEndlessPlayerDeath(state, safeMaxHp, log) {
+        this.callbacks.onFloatingText('RUN ENDED!', 'death', 'player');
+
+        const finalWave = state.endlessWave;
+        const wasNewBest = finalWave > (state.endlessBestWave || 0);
+
+        log.push({
+            type: 'endlessEnd',
+            msg: `Endless run ended at Wave ${finalWave}${wasNewBest ? ' (NEW BEST!)' : ''}`
+        });
+
+        if (wasNewBest) {
+            this.callbacks.onFloatingText('NEW BEST!', 'milestone', 'player');
+        }
+
+        // End the run (this updates best wave, stores history, returns to zone)
+        endEndlessRun(state);
+
+        // Restore player HP
+        state.playerHp = safeMaxHp;
+
+        // Reset enemy to current zone's enemy
+        const zone = getZoneById(state.currentZone);
+        state.enemyHp = zone.enemyHp;
+        state.enemyMaxHp = zone.enemyHp;
+    }
+
+    /**
+     * Starts an endless mode run.
+     * @param {Object} state - Current game state (modified in place)
+     */
+    startEndless(state) {
+        startEndlessRun(state);
     }
 }

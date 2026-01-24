@@ -43,4 +43,41 @@ export const initialState = {
     totalPrestiges: 0,
     // Achievement stat points - persists through prestige
     achievementStatPoints: 0, // Total stat points earned from achievements (never reset)
+
+    // Collection tracking - what items/content has been discovered
+    collectedBossSetPieces: {}, // { setId: { slot: true, ... } }
+    collectedWeaponTypes: {},   // { weaponTypeId: true }
+    collectedEffects: {},       // { effectId: true }
+    collectedTiers: {},         // { tierIndex: true }
+    collectedEnhanceLevels: {}, // { level: true } - for 5, 10, 15, 20, 25
+
+    // Daily/Weekly objectives
+    dailyObjective: null,
+    dailyObjectiveDay: 0,
+    dailyObjectiveStartState: null,
+    dailyObjectiveClaimed: false,
+    weeklyObjective: null,
+    weeklyObjectiveWeek: 0,
+    weeklyObjectiveStartState: null,
+    weeklyObjectiveClaimed: false,
+    // Objective progress trackers (reset on claim/new objective)
+    dailySalvaged: 0,
+    dailyEnhanceSuccess: 0,
+    dailyEquipped: 0,
+    weeklyEnhanceSuccess: 0,
+
+    // Endless mode
+    endlessActive: false,
+    endlessWave: 0,
+    endlessBestWave: 0,
+    endlessKillsThisRun: 0,
+    endlessGoldThisRun: 0,
+    endlessXpThisRun: 0,
+    endlessMilestonesClaimedThisRun: [],
+    endlessReturnZone: 0,
+    endlessEnemyHp: 0,
+    endlessEnemyMaxHp: 0,
+    endlessEnemyDmg: 0,
+    endlessEnemyName: '',
+    endlessRunHistory: [], // Last 10 runs
 };

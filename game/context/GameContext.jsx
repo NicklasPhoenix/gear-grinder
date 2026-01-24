@@ -128,6 +128,39 @@ function validateSave(parsed) {
         parsed.inventorySort = defaults.inventorySort;
     }
 
+    // Validate endless mode state (reset if corrupted to prevent stuck state)
+    if (typeof parsed.endlessActive !== 'boolean') {
+        parsed.endlessActive = false;
+    }
+    if (typeof parsed.endlessWave !== 'number' || parsed.endlessWave < 0) {
+        parsed.endlessWave = 0;
+    }
+    if (typeof parsed.endlessBestWave !== 'number' || parsed.endlessBestWave < 0) {
+        parsed.endlessBestWave = 0;
+    }
+    // If endless is active but has invalid state, reset it
+    if (parsed.endlessActive && (!parsed.endlessEnemyMaxHp || parsed.endlessEnemyMaxHp <= 0)) {
+        parsed.endlessActive = false;
+        parsed.endlessWave = 0;
+    }
+
+    // Initialize collection tracking objects if missing
+    if (!parsed.collectedBossSetPieces || typeof parsed.collectedBossSetPieces !== 'object') {
+        parsed.collectedBossSetPieces = {};
+    }
+    if (!parsed.collectedWeaponTypes || typeof parsed.collectedWeaponTypes !== 'object') {
+        parsed.collectedWeaponTypes = {};
+    }
+    if (!parsed.collectedEffects || typeof parsed.collectedEffects !== 'object') {
+        parsed.collectedEffects = {};
+    }
+    if (!parsed.collectedTiers || typeof parsed.collectedTiers !== 'object') {
+        parsed.collectedTiers = {};
+    }
+    if (!parsed.collectedEnhanceLevels || typeof parsed.collectedEnhanceLevels !== 'object') {
+        parsed.collectedEnhanceLevels = {};
+    }
+
     // Log validation errors (but don't crash)
     if (errors.length > 0) {
         console.warn('Save validation found issues:', errors);
@@ -266,7 +299,25 @@ export function GameProvider({ children }) {
                     newState.unlockedAchievements !== lastState?.unlockedAchievements ||
                     newState.dailyStreak !== lastState?.dailyStreak ||
                     newState.lastDailyReward !== lastState?.lastDailyReward ||
-                    newState.equipmentPresets !== lastState?.equipmentPresets;
+                    newState.equipmentPresets !== lastState?.equipmentPresets ||
+                    // Endless mode state
+                    newState.endlessActive !== lastState?.endlessActive ||
+                    newState.endlessWave !== lastState?.endlessWave ||
+                    newState.endlessBestWave !== lastState?.endlessBestWave ||
+                    newState.endlessEnemyHp !== lastState?.endlessEnemyHp ||
+                    newState.endlessEnemyMaxHp !== lastState?.endlessEnemyMaxHp ||
+                    newState.endlessKillsThisRun !== lastState?.endlessKillsThisRun ||
+                    newState.endlessGoldThisRun !== lastState?.endlessGoldThisRun ||
+                    // Daily/Weekly objectives
+                    newState.dailyObjective !== lastState?.dailyObjective ||
+                    newState.dailyObjectiveClaimed !== lastState?.dailyObjectiveClaimed ||
+                    newState.weeklyObjective !== lastState?.weeklyObjective ||
+                    newState.weeklyObjectiveClaimed !== lastState?.weeklyObjectiveClaimed ||
+                    // Collection progress
+                    newState.collectedBossSetPieces !== lastState?.collectedBossSetPieces ||
+                    newState.collectedWeaponTypes !== lastState?.collectedWeaponTypes ||
+                    newState.collectedEffects !== lastState?.collectedEffects ||
+                    newState.collectedTiers !== lastState?.collectedTiers;
 
                 // Only update HP state for high-frequency changes (doesn't trigger full re-render)
                 if (hpChanged) {

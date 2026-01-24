@@ -229,6 +229,30 @@ export class GameManager {
         this.emit('floatingText', { text: "GAME RESET", type: "death", target: "player" });
     }
 
+    // --- Endless Mode ---
+    startEndlessMode() {
+        this.setState(prev => {
+            const newState = { ...prev };
+            this.combatSystem.startEndless(newState);
+            return newState;
+        });
+        this.emit('floatingText', { text: "ENDLESS MODE!", type: "milestone", target: "player" });
+    }
+
+    endEndlessMode() {
+        // This is called from CombatSystem on player death, but can also be called manually
+        if (!this.state.endlessActive) return;
+
+        this.setState(prev => {
+            const newState = { ...prev };
+            // Import and call endEndlessRun
+            const { endEndlessRun } = require('../data/endlessMode');
+            endEndlessRun(newState);
+            return newState;
+        });
+        this.emit('floatingText', { text: "RUN ENDED", type: "death", target: "player" });
+    }
+
     // Admin cheat for testing - gives tons of resources
     cheat() {
         this.setState(prev => {

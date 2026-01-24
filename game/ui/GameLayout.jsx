@@ -10,6 +10,7 @@ import PrestigeView from './PrestigeView';
 import AchievementsView from './AchievementsView';
 import SettingsView from './SettingsView';
 import ShopView from './ShopView';
+import ProgressView from './ProgressView';
 import DailyRewardsModal, { useDailyRewardAvailable } from './DailyRewardsModal';
 import GuideModal from './GuideModal';
 import OfflineRewardsModal from './OfflineRewardsModal';
@@ -72,10 +73,15 @@ const TabIcons = {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
     ),
+    progress: (
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+        </svg>
+    ),
 };
 
 // Tab order for keyboard navigation
-const TABS = ['inventory', 'stats', 'enhance', 'skills', 'zone', 'shop', 'prestige', 'achievements', 'settings'];
+const TABS = ['inventory', 'stats', 'enhance', 'skills', 'zone', 'shop', 'prestige', 'achievements', 'progress', 'settings'];
 
 // Router component - decides which layout to show
 export default function GameLayout() {
@@ -339,6 +345,7 @@ function DesktopGameLayout() {
                         {activeTab === 'shop' && <ShopView />}
                         {activeTab === 'prestige' && <PrestigeView />}
                         {activeTab === 'achievements' && <AchievementsView />}
+                        {activeTab === 'progress' && <ProgressView />}
                         {activeTab === 'settings' && <SettingsView />}
                     </div>
                 </div>
