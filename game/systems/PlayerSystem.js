@@ -233,21 +233,91 @@ export const calculatePlayerStats = (gameState) => {
     }
     const finalDmgMult = dmgMult * weaponDmgMult;
 
-    // Apply lifesteal soft cap with diminishing returns
+    // ========== OVERFLOW / ASCENDED STAT SYSTEMS ==========
+    // When stats exceed their caps, overflow converts to powerful special effects
+
+    // ASCENDED CRIT: Overflow crit becomes instant kill chance
+    // Every 9% over 100% = 1% Ascended (1000% crit = 100% Ascended)
+    let ascendedCrit = 0;
+    let effectiveCritChance = critChance;
+    if (critChance > 100) {
+        const overflow = critChance - 100;
+        ascendedCrit = Math.min(100, overflow / 9);
+        effectiveCritChance = 100;
+    }
+
+    // PHANTOM: Overflow dodge becomes counter-attack on dodge
+    // Every 4% over 80% = 1% Phantom (160% dodge = 100% Phantom)
+    let phantom = 0;
+    let effectiveDodge = dodge;
+    if (dodge > COMBAT.DODGE_CAP) {
+        const overflow = dodge - COMBAT.DODGE_CAP;
+        phantom = Math.min(100, overflow / 0.8); // 80% overflow = 100% phantom
+        effectiveDodge = COMBAT.DODGE_CAP;
+    }
+
+    // OVERHEAL: Overflow lifesteal becomes shield generation
+    // Every 5% over 100% = 1% of damage dealt becomes shield
+    let overheal = 0;
     let effectiveLifesteal = lifesteal;
-    if (lifesteal > COMBAT.LIFESTEAL_SOFT_CAP) {
+    if (lifesteal > 100) {
+        const overflow = lifesteal - 100;
+        overheal = Math.min(50, overflow / 5); // Cap at 50% shield gen
+        effectiveLifesteal = 100;
+    } else if (lifesteal > COMBAT.LIFESTEAL_SOFT_CAP) {
+        // Apply soft cap only if under 100%
         const overCap = lifesteal - COMBAT.LIFESTEAL_SOFT_CAP;
         effectiveLifesteal = COMBAT.LIFESTEAL_SOFT_CAP + (overCap * COMBAT.LIFESTEAL_FALLOFF);
     }
 
-    // Ascended Crit: overflow crit above 100% becomes execute chance
-    // Every 9% crit over 100% = 1% Ascended Crit (so 1000% crit = 100% Ascended)
-    let ascendedCrit = 0;
-    let effectiveCritChance = critChance;
-    if (critChance > 100) {
-        const overflowCrit = critChance - 100;
-        ascendedCrit = Math.min(100, overflowCrit / 9); // Cap at 100%
-        effectiveCritChance = 100; // Cap normal crit at 100%
+    // FRENZY: Overflow speed becomes triple-attack chance
+    // Every 10% over 200% = 1% Frenzy (300% speed = 100% Frenzy)
+    let frenzy = 0;
+    let effectiveSpeed = speedMult;
+    if (speedMult > 2.0) {
+        const overflow = (speedMult - 2.0) * 100; // Convert to percentage
+        frenzy = Math.min(100, overflow / 1); // 100% overflow = 100% frenzy
+        effectiveSpeed = 2.0;
+    }
+
+    // IMMUNITY: Overflow damage reduction becomes full damage negation
+    // Every 5% over 75% = 1% Immunity (125% DR = 100% Immunity)
+    let immunity = 0;
+    let effectiveDR = damageReduction;
+    if (damageReduction > COMBAT.DAMAGE_REDUCTION_CAP) {
+        const overflow = damageReduction - COMBAT.DAMAGE_REDUCTION_CAP;
+        immunity = Math.min(100, overflow / 0.5); // 50% overflow = 100% immunity
+        effectiveDR = COMBAT.DAMAGE_REDUCTION_CAP;
+    }
+
+    // ANNIHILATE: Overflow crit damage becomes 5x damage crit chance
+    // Every 20% over 300% = 1% Annihilate (500% crit dmg = 100% Annihilate)
+    let annihilate = 0;
+    let effectiveCritDamage = critDamage;
+    if (critDamage > 300) {
+        const overflow = critDamage - 300;
+        annihilate = Math.min(100, overflow / 2); // 200% overflow = 100% annihilate
+        effectiveCritDamage = 300;
+    }
+
+    // VENGEANCE: Overflow thorns becomes full damage counter-attack
+    // Every 10% over 100% = 1% Vengeance (200% thorns = 100% Vengeance)
+    let vengeance = 0;
+    let effectiveThorns = thorns;
+    if (thorns > 100) {
+        const overflow = thorns - 100;
+        vengeance = Math.min(100, overflow / 1); // 100% overflow = 100% vengeance
+        effectiveThorns = 100;
+    }
+
+    // SECOND WIND: Overflow HP regen becomes emergency heal
+    // Every 1% over 5%/sec = 5% Second Wind heal (10%/sec = 25% heal when low)
+    let secondWind = 0;
+    let effectiveRegen = hpRegen;
+    if (hpRegen > COMBAT.HP_REGEN_CAP) {
+        const overflow = hpRegen - COMBAT.HP_REGEN_CAP;
+        secondWind = Math.min(50, overflow * 5); // Cap at 50% heal
+        effectiveRegen = COMBAT.HP_REGEN_CAP;
     }
 
     return {
@@ -256,33 +326,48 @@ export const calculatePlayerStats = (gameState) => {
         armor,
         goldMult,
         matMult,
-        speedMult,
+        speedMult: effectiveSpeed,
+        speedMultRaw: speedMult,
         critChance: effectiveCritChance,
-        critChanceRaw: critChance, // For display (show total before cap)
-        critDamage,
-        ascendedCrit, // Execute chance from overflow crit
+        critChanceRaw: critChance,
+        critDamage: effectiveCritDamage,
+        critDamageRaw: critDamage,
+        // Overflow effects
+        ascendedCrit,    // Instant kill on crit
+        phantom,         // Counter-attack on dodge
+        overheal,        // Shield from excess healing
+        frenzy,          // Triple attack chance
+        immunity,        // Full damage negation
+        annihilate,      // 5x damage crits
+        vengeance,       // Full damage counter
+        secondWind,      // Emergency heal when low HP
+        // Standard stats
         lifesteal: effectiveLifesteal,
-        lifestealRaw: lifesteal, // For display purposes (show actual vs effective)
-        thorns,
-        dodge: Math.min(COMBAT.DODGE_CAP, dodge),
+        lifestealRaw: lifesteal,
+        thorns: effectiveThorns,
+        thornsRaw: thorns,
+        dodge: effectiveDodge,
+        dodgeRaw: dodge,
         xpBonus,
-        hpRegen: Math.min(COMBAT.HP_REGEN_CAP, hpRegen),
-        damageReduction: Math.min(COMBAT.DAMAGE_REDUCTION_CAP, damageReduction),
+        hpRegen: effectiveRegen,
+        hpRegenRaw: hpRegen,
+        damageReduction: effectiveDR,
+        damageReductionRaw: damageReduction,
         // Unique boss set effects
         bleed,
         burn,
         poison,
-        multiStrike: Math.min(50, multiStrike),  // Cap at 50%
-        executeChance: Math.min(25, executeChance), // Cap at 25%
-        armorPen: Math.min(75, armorPen),  // Cap at 75%
+        multiStrike: Math.min(50, multiStrike),
+        executeChance: Math.min(25, executeChance),
+        armorPen: Math.min(75, armorPen),
         damageShield,
-        retaliate: Math.min(50, retaliate), // Cap at 50%
+        retaliate: Math.min(50, retaliate),
         lastStand,
         silverOnHit,
         itemFind,
-        rage: Math.min(5, rage),  // Cap at 5% per stack (50% max with 10 stacks)
+        rage: Math.min(5, rage),
         vampiric,
-        frostbite: Math.min(50, frostbite),  // Cap at 50% slow
+        frostbite: Math.min(50, frostbite),
         killHeal,
     };
 };

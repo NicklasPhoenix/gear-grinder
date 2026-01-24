@@ -694,7 +694,16 @@ export default function GameRenderer() {
                 case 'execute':
                 case 'retaliate':
                 case 'ascendedCrit':
+                case 'annihilate':
+                case 'frenzy':
+                case 'phantom':
+                case 'vengeance':
                     audioManager.playSfxCrit();
+                    break;
+                case 'secondWind':
+                case 'immunity':
+                case 'overheal':
+                    audioManager.playSfxHeal();
                     break;
             }
 
@@ -723,6 +732,38 @@ export default function GameRenderer() {
                 animStateRef.current.enemyHitFlash = 20;
                 animStateRef.current.screenShake.intensity = 18;
                 spawnHitParticles(pos.enemyX, pos.characterY - 55, 0x67e8f9, 35);
+            }
+            if (data.type === 'annihilate') {
+                // Annihilate - massive orange explosion
+                animStateRef.current.enemyHitFlash = 25;
+                animStateRef.current.screenShake.intensity = 20;
+                spawnHitParticles(pos.enemyX, pos.characterY - 55, 0xfb923c, 40);
+            }
+            if (data.type === 'frenzy') {
+                // Frenzy - purple rapid strikes
+                animStateRef.current.enemyHitFlash = 12;
+                animStateRef.current.screenShake.intensity = 10;
+                spawnHitParticles(pos.enemyX, pos.characterY - 55, 0xc084fc, 25);
+            }
+            if (data.type === 'phantom') {
+                // Phantom counter - purple ghost strike
+                animStateRef.current.enemyHitFlash = 10;
+                animStateRef.current.screenShake.intensity = 8;
+                spawnHitParticles(pos.enemyX, pos.characterY - 55, 0xa78bfa, 20);
+            }
+            if (data.type === 'vengeance') {
+                // Vengeance - red counter
+                animStateRef.current.enemyHitFlash = 15;
+                animStateRef.current.screenShake.intensity = 12;
+                spawnHitParticles(pos.enemyX, pos.characterY - 55, 0xf43f5e, 30);
+            }
+            if (data.type === 'secondWind') {
+                // Second Wind - healing burst on player
+                spawnHitParticles(pos.playerX, pos.characterY - 55, 0x34d399, 25);
+            }
+            if (data.type === 'immunity') {
+                // Immunity - golden shield effect
+                spawnHitParticles(pos.playerX, pos.characterY - 55, 0xfcd34d, 15);
             }
             if (data.type === 'retaliate') {
                 animStateRef.current.enemyHitFlash = 6;
@@ -1656,6 +1697,43 @@ function spawnFloatingText(app, container, { text, type, target }, positions = {
             fontSize = 32;
             offsetY = -15;
             break;
+        // New overflow effects
+        case 'phantom':
+            fillColor = '#a78bfa'; // Purple
+            fontSize = 24;
+            offsetY = -10;
+            break;
+        case 'immunity':
+            fillColor = '#fcd34d'; // Gold
+            fontSize = 26;
+            offsetY = -15;
+            break;
+        case 'vengeance':
+            fillColor = '#f43f5e'; // Rose/Red
+            fontSize = 26;
+            offsetY = 30;
+            break;
+        case 'secondWind':
+            fillColor = '#34d399'; // Emerald
+            fontSize = 28;
+            offsetY = -20;
+            break;
+        case 'overheal':
+            fillColor = '#22d3ee'; // Cyan
+            fontSize = 20;
+            offsetX = -40;
+            offsetY = 15;
+            break;
+        case 'annihilate':
+            fillColor = '#fb923c'; // Orange
+            fontSize = 30;
+            offsetY = -15;
+            break;
+        case 'frenzy':
+            fillColor = '#c084fc'; // Purple/Pink
+            fontSize = 28;
+            offsetY = -20;
+            break;
     }
 
     // Scale font size and offsets for mobile
@@ -1690,7 +1768,8 @@ function spawnFloatingText(app, container, { text, type, target }, positions = {
 
     container.addChild(pixiText);
 
-    const isBigHit = type === 'crit' || type === 'execute' || type === 'multiStrike' || type === 'ascendedCrit';
+    const isBigHit = type === 'crit' || type === 'execute' || type === 'multiStrike' || type === 'ascendedCrit' ||
+                     type === 'annihilate' || type === 'frenzy' || type === 'vengeance' || type === 'phantom' || type === 'secondWind';
     let velocityY = (isBigHit ? -2.5 : -1.5) * scaleFactor;
     let velocityX = (Math.random() - 0.5) * 0.6 * scaleFactor;
     let tick = 0;

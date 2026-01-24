@@ -129,12 +129,14 @@ export class CombatSystem {
             newState.combatState = {
                 rageStacks: 0,        // Rage stacks (0-10)
                 damageShield: 0,      // Current damage shield amount
+                overhealShield: 0,    // Shield from overheal effect
                 bleedTimer: 0,        // DOT timers (in ticks)
                 burnTimer: 0,
                 poisonTimer: 0,
                 bleedDamage: 0,       // DOT damage per tick
                 burnDamage: 0,
                 poisonDamage: 0,
+                secondWindUsed: false, // Second Wind triggers once per fight
             };
         }
 
@@ -165,10 +167,16 @@ export class CombatSystem {
         let playerDmg = stats.damage || PLAYER_BASE.DEFAULT_DAMAGE;
         let isCrit = Math.random() * 100 < (stats.critChance || PLAYER_BASE.DEFAULT_CRIT_CHANCE);
 
-        // Ascended Crit: overflow crit becomes instant kill chance
+        // Ascended Crit: overflow crit becomes double crit damage chance
         let isAscendedCrit = false;
         if (isCrit && stats.ascendedCrit > 0) {
             isAscendedCrit = Math.random() * 100 < stats.ascendedCrit;
+        }
+
+        // Annihilate: overflow crit damage becomes 5x damage crit chance
+        let isAnnihilate = false;
+        if (isCrit && !isAscendedCrit && stats.annihilate > 0) {
+            isAnnihilate = Math.random() * 100 < stats.annihilate;
         }
 
         // Last Stand: bonus damage when below 30% HP
@@ -181,33 +189,50 @@ export class CombatSystem {
             playerDmg = Math.floor(playerDmg * (1 + (stats.rage * newState.combatState.rageStacks) / 100));
         }
 
-        if (isCrit) playerDmg = Math.floor(playerDmg * (stats.critDamage || PLAYER_BASE.CRIT_DAMAGE) / 100);
+        // Apply crit damage multiplier
+        if (isCrit) {
+            const baseCritMult = (stats.critDamage || PLAYER_BASE.CRIT_DAMAGE) / 100;
+            if (isAscendedCrit) {
+                // Ascended Crit: double the crit damage multiplier
+                playerDmg = Math.floor(playerDmg * baseCritMult * 2);
+            } else if (isAnnihilate) {
+                // Annihilate: 5x damage instead of normal crit
+                playerDmg = Math.floor(playerDmg * 5);
+            } else {
+                playerDmg = Math.floor(playerDmg * baseCritMult);
+            }
+        }
 
-        // Apply armor penetration (enemies have effective armor based on zone level)
-        // For simplicity, armorPen increases effective damage
+        // Apply armor penetration
         if (stats.armorPen > 0) {
-            playerDmg = Math.floor(playerDmg * (1 + stats.armorPen / 200)); // 50% armorPen = +25% damage
+            playerDmg = Math.floor(playerDmg * (1 + stats.armorPen / 200));
         }
 
-        // Ascended Crit is an instant kill!
-        if (isAscendedCrit) {
-            newState.enemyHp = 0;
-            this.callbacks.onFloatingText('ASCENDED!', 'ascendedCrit', 'enemy');
-        } else {
-            newState.enemyHp -= playerDmg;
-        }
-        let totalDamageDealt = isAscendedCrit ? zone.enemyHp : playerDmg;
+        newState.enemyHp -= playerDmg;
+        let totalDamageDealt = playerDmg;
 
-        // Multi-Strike: chance to hit again (not on ascended crit - enemy already dead)
-        if (!isAscendedCrit && stats.multiStrike > 0 && Math.random() * 100 < stats.multiStrike) {
-            const multiDmg = Math.floor(playerDmg * 0.75); // Second hit does 75% damage
+        // Frenzy: overflow speed becomes triple attack chance
+        if (!isAscendedCrit && stats.frenzy > 0 && Math.random() * 100 < stats.frenzy) {
+            // Triple attack - two extra hits at 60% damage each
+            const frenzyDmg = Math.floor(playerDmg * 0.6);
+            newState.enemyHp -= frenzyDmg * 2;
+            totalDamageDealt += frenzyDmg * 2;
+            this.callbacks.onFloatingText(`FRENZY x3!`, 'frenzy', 'enemy');
+        }
+        // Multi-Strike: chance to hit again (not on ascended crit or frenzy)
+        else if (!isAscendedCrit && stats.multiStrike > 0 && Math.random() * 100 < stats.multiStrike) {
+            const multiDmg = Math.floor(playerDmg * 0.75);
             newState.enemyHp -= multiDmg;
             totalDamageDealt += multiDmg;
             this.callbacks.onFloatingText(`x2 ${multiDmg}!`, 'multiStrike', 'enemy');
         }
 
-        // Visuals: Damage Text (skip if ascended crit - already showed ASCENDED!)
-        if (!isAscendedCrit) {
+        // Visuals: Damage Text
+        if (isAscendedCrit) {
+            this.callbacks.onFloatingText(`ASCENDED ${playerDmg}!`, 'ascendedCrit', 'enemy');
+        } else if (isAnnihilate) {
+            this.callbacks.onFloatingText(`ANNIHILATE ${playerDmg}!`, 'annihilate', 'enemy');
+        } else {
             this.callbacks.onFloatingText(
                 isCrit ? `CRIT ${playerDmg}!` : `-${playerDmg}`,
                 isCrit ? 'crit' : 'playerDmg',
@@ -298,8 +323,22 @@ export class CombatSystem {
         }
 
         if (totalHealed > 0) {
+            const actualHeal = Math.min(totalHealed, safeMaxHp - newState.playerHp);
             newState.playerHp = Math.min(newState.playerHp + totalHealed, safeMaxHp);
-            this.callbacks.onFloatingText(`+${totalHealed}`, 'heal', 'player');
+
+            // Overheal: excess healing becomes shield
+            if (stats.overheal > 0 && totalHealed > actualHeal) {
+                const excessHeal = totalHealed - actualHeal;
+                const shieldGain = Math.floor(excessHeal * stats.overheal / 100);
+                if (shieldGain > 0) {
+                    newState.combatState.overhealShield = (newState.combatState.overhealShield || 0) + shieldGain;
+                    // Cap overheal shield at 50% max HP
+                    newState.combatState.overhealShield = Math.min(newState.combatState.overhealShield, Math.floor(safeMaxHp * 0.5));
+                    this.callbacks.onFloatingText(`+${shieldGain}🛡️`, 'overheal', 'player');
+                }
+            }
+
+            this.callbacks.onFloatingText(`+${actualHeal}`, 'heal', 'player');
             combatUpdates.lastHeal = totalHealed;
         }
 
@@ -322,6 +361,7 @@ export class CombatSystem {
             newState.combatState.bleedTimer = 0;
             newState.combatState.burnTimer = 0;
             newState.combatState.poisonTimer = 0;
+            newState.combatState.secondWindUsed = false; // Reset Second Wind for next fight
             // Refresh damage shield on kill
             if (stats.damageShield > 0) {
                 newState.combatState.damageShield = stats.damageShield;
@@ -332,60 +372,103 @@ export class CombatSystem {
             if (dodged) {
                 this.callbacks.onFloatingText('DODGE!', 'dodge', 'player');
                 combatUpdates.lastDamage = 0;
+
+                // Phantom: counter-attack when dodging
+                if (stats.phantom > 0 && Math.random() * 100 < stats.phantom) {
+                    const phantomDmg = Math.floor(playerDmg * 0.5);
+                    newState.enemyHp -= phantomDmg;
+                    this.callbacks.onFloatingText(`PHANTOM ${phantomDmg}!`, 'phantom', 'enemy');
+                }
             } else {
-                // Calculate enemy damage (use mode-specific damage)
-                let incomingDmg = enemyDmg;
+                // Immunity: chance to completely negate damage
+                const isImmune = stats.immunity > 0 && Math.random() * 100 < stats.immunity;
+                if (isImmune) {
+                    this.callbacks.onFloatingText('IMMUNE!', 'immunity', 'player');
+                    combatUpdates.lastDamage = 0;
+                    combatUpdates.isPlayerTurn = false;
+                } else {
+                    // Calculate enemy damage (use mode-specific damage)
+                    let incomingDmg = enemyDmg;
 
-                // Frostbite: slow enemy attacks (reduce damage as a simplification)
-                if (stats.frostbite > 0) {
-                    incomingDmg = Math.floor(incomingDmg * (1 - stats.frostbite / 100));
-                }
+                    // Frostbite: slow enemy attacks (reduce damage as a simplification)
+                    if (stats.frostbite > 0) {
+                        incomingDmg = Math.floor(incomingDmg * (1 - stats.frostbite / 100));
+                    }
 
-                // Armor reduction (logarithmic diminishing returns)
-                const armorReduction = stats.armor / (stats.armor + COMBAT.ARMOR_CONSTANT);
-                let reducedDmg = Math.floor(incomingDmg * (1 - armorReduction));
+                    // Armor reduction (logarithmic diminishing returns)
+                    const armorReduction = stats.armor / (stats.armor + COMBAT.ARMOR_CONSTANT);
+                    let reducedDmg = Math.floor(incomingDmg * (1 - armorReduction));
 
-                // Flat damage reduction (applied after armor, enables tank builds)
-                if (stats.damageReduction > 0) {
-                    reducedDmg = Math.floor(reducedDmg * (1 - stats.damageReduction / 100));
-                }
+                    // Flat damage reduction (applied after armor, enables tank builds)
+                    if (stats.damageReduction > 0) {
+                        reducedDmg = Math.floor(reducedDmg * (1 - stats.damageReduction / 100));
+                    }
 
-                // Minimum 1 damage to prevent immortality
-                reducedDmg = Math.max(1, reducedDmg);
+                    // Minimum 1 damage to prevent immortality
+                    reducedDmg = Math.max(1, reducedDmg);
 
-                // Damage Shield: absorbs damage before HP
-                if (newState.combatState.damageShield > 0) {
-                    if (newState.combatState.damageShield >= reducedDmg) {
-                        newState.combatState.damageShield -= reducedDmg;
-                        this.callbacks.onFloatingText(`🛡️${reducedDmg}`, 'shield', 'player');
-                        reducedDmg = 0;
-                    } else {
-                        reducedDmg -= newState.combatState.damageShield;
-                        this.callbacks.onFloatingText(`🛡️${newState.combatState.damageShield}`, 'shield', 'player');
-                        newState.combatState.damageShield = 0;
+                    // Overheal Shield: absorbs damage first
+                    if (newState.combatState.overhealShield > 0) {
+                        if (newState.combatState.overhealShield >= reducedDmg) {
+                            newState.combatState.overhealShield -= reducedDmg;
+                            this.callbacks.onFloatingText(`🛡️${reducedDmg}`, 'overheal', 'player');
+                            reducedDmg = 0;
+                        } else {
+                            reducedDmg -= newState.combatState.overhealShield;
+                            this.callbacks.onFloatingText(`🛡️${newState.combatState.overhealShield}`, 'overheal', 'player');
+                            newState.combatState.overhealShield = 0;
+                        }
+                    }
+
+                    // Damage Shield: absorbs damage before HP
+                    if (reducedDmg > 0 && newState.combatState.damageShield > 0) {
+                        if (newState.combatState.damageShield >= reducedDmg) {
+                            newState.combatState.damageShield -= reducedDmg;
+                            this.callbacks.onFloatingText(`🛡️${reducedDmg}`, 'shield', 'player');
+                            reducedDmg = 0;
+                        } else {
+                            reducedDmg -= newState.combatState.damageShield;
+                            this.callbacks.onFloatingText(`🛡️${newState.combatState.damageShield}`, 'shield', 'player');
+                            newState.combatState.damageShield = 0;
+                        }
+                    }
+
+                    if (reducedDmg > 0) {
+                        newState.playerHp -= reducedDmg;
+                        this.callbacks.onFloatingText(`-${reducedDmg}`, 'enemyDmg', 'player');
+                    }
+                    combatUpdates.lastDamage = reducedDmg;
+                    combatUpdates.isPlayerTurn = false;
+
+                    // Vengeance: overflow thorns becomes full damage counter
+                    if (stats.vengeance > 0 && reducedDmg > 0 && Math.random() * 100 < stats.vengeance) {
+                        const vengDmg = playerDmg; // Full player damage
+                        newState.enemyHp -= vengDmg;
+                        this.callbacks.onFloatingText(`VENGEANCE ${vengDmg}!`, 'vengeance', 'enemy');
+                    }
+
+                    // Thorns (only if not vengeance)
+                    else if (stats.thorns > 0 && reducedDmg > 0) {
+                        const thornsDmg = Math.floor(reducedDmg * stats.thorns / 100);
+                        newState.enemyHp -= thornsDmg;
+                        if (thornsDmg > 0) this.callbacks.onFloatingText(`-${thornsDmg}`, 'thorns', 'enemy');
+                    }
+
+                    // Retaliate: chance to counter-attack when hit
+                    if (stats.retaliate > 0 && reducedDmg > 0 && Math.random() * 100 < stats.retaliate) {
+                        const retaliateDmg = Math.floor(playerDmg * 0.5);
+                        newState.enemyHp -= retaliateDmg;
+                        this.callbacks.onFloatingText(`⚔️${retaliateDmg}`, 'retaliate', 'enemy');
                     }
                 }
+            }
 
-                if (reducedDmg > 0) {
-                    newState.playerHp -= reducedDmg;
-                    this.callbacks.onFloatingText(`-${reducedDmg}`, 'enemyDmg', 'player');
-                }
-                combatUpdates.lastDamage = reducedDmg;
-                combatUpdates.isPlayerTurn = false;
-
-                // Thorns
-                if (stats.thorns > 0) {
-                    const thornsDmg = Math.floor(reducedDmg * stats.thorns / 100);
-                    newState.enemyHp -= thornsDmg;
-                    if (thornsDmg > 0) this.callbacks.onFloatingText(`-${thornsDmg}`, 'thorns', 'enemy');
-                }
-
-                // Retaliate: chance to counter-attack when hit
-                if (stats.retaliate > 0 && reducedDmg > 0 && Math.random() * 100 < stats.retaliate) {
-                    const retaliateDmg = Math.floor(playerDmg * 0.5); // Counter does 50% of player damage
-                    newState.enemyHp -= retaliateDmg;
-                    this.callbacks.onFloatingText(`⚔️${retaliateDmg}`, 'retaliate', 'enemy');
-                }
+            // Second Wind: emergency heal when dropping below 20% HP (once per fight)
+            if (stats.secondWind > 0 && !newState.combatState.secondWindUsed && newState.playerHp > 0 && newState.playerHp < safeMaxHp * 0.2) {
+                const secondWindHeal = Math.floor(safeMaxHp * stats.secondWind / 100);
+                newState.playerHp = Math.min(newState.playerHp + secondWindHeal, safeMaxHp);
+                newState.combatState.secondWindUsed = true;
+                this.callbacks.onFloatingText(`SECOND WIND +${secondWindHeal}!`, 'secondWind', 'player');
             }
 
             // Check Player Death

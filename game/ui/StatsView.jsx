@@ -172,15 +172,36 @@ export default function StatsView() {
                             <MobileStatRow label="Armor" value={calculated.armor} color="text-blue-300" />
                             <MobileStatRow label="Crit %" value={formatPercent(calculated.critChance)} color="text-yellow-300" />
                             {calculated.ascendedCrit > 0 && (
-                                <MobileStatRow label="Ascended" value={formatPercent(calculated.ascendedCrit)} color="text-cyan-300" />
+                                <MobileStatRow label="↳Ascend" value={formatPercent(calculated.ascendedCrit)} color="text-cyan-400" />
                             )}
                             <MobileStatRow label="Crit DMG" value={formatPercent(calculated.critDamage, 0)} color="text-orange-300" />
+                            {calculated.annihilate > 0 && (
+                                <MobileStatRow label="↳Annihi" value={formatPercent(calculated.annihilate)} color="text-orange-400" />
+                            )}
                             <MobileStatRow label="Speed" value={formatMultiplier(calculated.speedMult)} color="text-cyan-300" />
+                            {calculated.frenzy > 0 && (
+                                <MobileStatRow label="↳Frenzy" value={formatPercent(calculated.frenzy)} color="text-purple-400" />
+                            )}
                             <MobileStatRow label="Dodge" value={formatPercent(calculated.dodge)} color="text-green-300" />
+                            {calculated.phantom > 0 && (
+                                <MobileStatRow label="↳Phantom" value={formatPercent(calculated.phantom)} color="text-violet-400" />
+                            )}
                             <MobileStatRow label="Lifesteal" value={formatPercent(calculated.lifesteal)} color="text-pink-300" />
-                            <MobileStatRow label="Thorns" value={calculated.thorns || 0} color="text-purple-300" />
+                            {calculated.overheal > 0 && (
+                                <MobileStatRow label="↳Overheal" value={formatPercent(calculated.overheal)} color="text-cyan-400" />
+                            )}
+                            <MobileStatRow label="Thorns" value={formatPercent(calculated.thorns)} color="text-purple-300" />
+                            {calculated.vengeance > 0 && (
+                                <MobileStatRow label="↳Venge" value={formatPercent(calculated.vengeance)} color="text-rose-400" />
+                            )}
                             <MobileStatRow label="HP Regen" value={`${(calculated.hpRegen || 0).toFixed(1)}%/s`} color="text-emerald-300" />
+                            {calculated.secondWind > 0 && (
+                                <MobileStatRow label="↳2ndWind" value={`${calculated.secondWind.toFixed(0)}%`} color="text-emerald-400" />
+                            )}
                             <MobileStatRow label="Dmg Red." value={formatPercent(calculated.damageReduction || 0)} color="text-sky-300" />
+                            {calculated.immunity > 0 && (
+                                <MobileStatRow label="↳Immune" value={formatPercent(calculated.immunity)} color="text-amber-400" />
+                            )}
                         </div>
                         <div className="border-t border-slate-700/50 mt-2 pt-2 grid grid-cols-2 gap-x-4 gap-y-1">
                             <MobileStatRow label="Silver %" value={formatBonus((calculated.goldMult - 1) * 100)} color="text-slate-300" />
@@ -360,15 +381,36 @@ export default function StatsView() {
                             <StatRow label="Armor" value={calculated.armor} color="text-blue-300" />
                             <StatRow label="Crit %" value={formatPercent(calculated.critChance)} color="text-yellow-300" />
                             {calculated.ascendedCrit > 0 && (
-                                <StatRow label="Ascended Crit" value={formatPercent(calculated.ascendedCrit)} color="text-cyan-300" />
+                                <StatRow label="  ↳ Ascended" value={formatPercent(calculated.ascendedCrit)} color="text-cyan-400" />
                             )}
                             <StatRow label="Crit DMG" value={formatPercent(calculated.critDamage, 0)} color="text-orange-300" />
+                            {calculated.annihilate > 0 && (
+                                <StatRow label="  ↳ Annihilate" value={formatPercent(calculated.annihilate)} color="text-orange-400" />
+                            )}
                             <StatRow label="Speed" value={formatMultiplier(calculated.speedMult)} color="text-cyan-300" />
+                            {calculated.frenzy > 0 && (
+                                <StatRow label="  ↳ Frenzy" value={formatPercent(calculated.frenzy)} color="text-purple-400" />
+                            )}
                             <StatRow label="Dodge" value={formatPercent(calculated.dodge)} color="text-green-300" />
+                            {calculated.phantom > 0 && (
+                                <StatRow label="  ↳ Phantom" value={formatPercent(calculated.phantom)} color="text-violet-400" />
+                            )}
                             <StatRow label="Lifesteal" value={formatPercent(calculated.lifesteal)} color="text-pink-300" />
-                            <StatRow label="Thorns" value={calculated.thorns || 0} color="text-purple-300" />
+                            {calculated.overheal > 0 && (
+                                <StatRow label="  ↳ Overheal" value={formatPercent(calculated.overheal)} color="text-cyan-400" />
+                            )}
+                            <StatRow label="Thorns" value={formatPercent(calculated.thorns)} color="text-purple-300" />
+                            {calculated.vengeance > 0 && (
+                                <StatRow label="  ↳ Vengeance" value={formatPercent(calculated.vengeance)} color="text-rose-400" />
+                            )}
                             <StatRow label="HP Regen" value={`${(calculated.hpRegen || 0).toFixed(1)}%/s`} color="text-emerald-300" />
+                            {calculated.secondWind > 0 && (
+                                <StatRow label="  ↳ Second Wind" value={`${calculated.secondWind.toFixed(0)}% heal`} color="text-emerald-400" />
+                            )}
                             <StatRow label="Dmg Reduction" value={formatPercent(calculated.damageReduction || 0)} color="text-sky-300" />
+                            {calculated.immunity > 0 && (
+                                <StatRow label="  ↳ Immunity" value={formatPercent(calculated.immunity)} color="text-amber-400" />
+                            )}
                             <div className="border-t border-slate-700/50 my-2 pt-2">
                                 <StatRow label="Silver %" value={formatBonus((calculated.goldMult - 1) * 100)} color="text-slate-300" />
                                 <StatRow label="XP %" value={formatBonus(calculated.xpBonus || 0)} color="text-purple-400" />

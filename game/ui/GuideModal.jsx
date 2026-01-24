@@ -430,6 +430,20 @@ function StatsSection() {
         <div>
             <SectionTitle>Character Stats</SectionTitle>
 
+            <SubSection title="Overflow Effects">
+                <p className="mb-2">When stats exceed their caps, overflow converts to <span className="text-yellow-400">powerful special effects</span>:</p>
+                <div className="space-y-1 text-sm">
+                    <p><span className="text-cyan-400">Ascended Crit</span> - Crit over 100% → Double crit damage chance</p>
+                    <p><span className="text-orange-400">Annihilate</span> - Crit DMG over 300% → 5x damage crit chance</p>
+                    <p><span className="text-purple-400">Frenzy</span> - Speed over 200% → Triple attack chance</p>
+                    <p><span className="text-violet-400">Phantom</span> - Dodge over 80% → Counter-attack on dodge</p>
+                    <p><span className="text-cyan-400">Overheal</span> - Lifesteal over 100% → Excess heal becomes shield</p>
+                    <p><span className="text-rose-400">Vengeance</span> - Thorns over 100% → Full damage counter-attack</p>
+                    <p><span className="text-emerald-400">Second Wind</span> - HP Regen over 5%/s → Emergency heal when low</p>
+                    <p><span className="text-amber-400">Immunity</span> - Dmg Red. over 75% → Full damage negation chance</p>
+                </div>
+            </SubSection>
+
             <SubSection title="Primary Stats">
                 <div className="space-y-2">
                     <div className="p-2 bg-slate-800/50 rounded">
