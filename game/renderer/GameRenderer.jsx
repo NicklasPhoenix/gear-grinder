@@ -214,8 +214,9 @@ export default function GameRenderer() {
             gameContainerRef.current = gameContainer;
 
             // Calculate positions based on canvas size (scale for mobile)
-            // Use 25% from center for characters, with minimum spacing
-            const charSpacing = Math.min(200, canvasWidth * 0.25);
+            // Use 35% from center for characters to spread them across the screen
+            // Player on left side, enemy on right side (will be behind menu when expanded)
+            const charSpacing = Math.min(350, canvasWidth * 0.35);
             const playerX = centerX - charSpacing;
             const enemyX = centerX + charSpacing;
             const characterY = groundY - 25;
@@ -962,7 +963,7 @@ export default function GameRenderer() {
                     ? containerHeight * 0.75
                     : containerHeight - 160;
 
-                const charSpacing = Math.min(200, containerWidth * 0.25);
+                const charSpacing = Math.min(350, containerWidth * 0.35);
                 const playerX = centerX - charSpacing;
                 const enemyX = centerX + charSpacing;
                 const characterY = groundY - 25;

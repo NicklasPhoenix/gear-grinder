@@ -104,7 +104,7 @@ function DesktopGameLayout() {
     const [showKeyboardHelp, setShowKeyboardHelp] = useState(false);
     const [showDailyRewards, setShowDailyRewards] = useState(false);
     const [showGuide, setShowGuide] = useState(false);
-    const [menuCollapsed, setMenuCollapsed] = useState(false);
+    const [menuCollapsed, setMenuCollapsed] = useState(true); // Start collapsed - canvas is always full width
     const dailyRewardAvailable = useDailyRewardAvailable();
     const prevLevelRef = useRef(state?.level || 1);
 
@@ -236,8 +236,8 @@ function DesktopGameLayout() {
                 <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl" />
             </div>
 
-            {/* Left Panel: Game Viewport - no padding, canvas fills the space */}
-            <div className="h-[40vh] lg:h-full lg:flex-1 relative flex flex-col">
+            {/* Left Panel: Game Viewport - always full width, menu overlays on top */}
+            <div className="h-full w-full relative flex flex-col">
                 {/* Top Info Bar - overlaid on canvas */}
                 <div className="absolute top-2 left-2 right-2 lg:top-4 lg:left-4 lg:right-4 flex justify-between items-start z-10">
                     {/* Zone Info + Stats */}
@@ -327,18 +327,16 @@ function DesktopGameLayout() {
                 </div>
             </div>
 
-            {/* Right Panel: UI Sidebar */}
+            {/* Right Panel: UI Sidebar - Overlay on top of canvas */}
             <div
-                className="w-full h-[60vh] lg:h-full lg:w-[550px] flex-shrink-0 flex flex-col border-t lg:border-t-0 lg:border-l border-slate-800/50 bg-slate-900/80 backdrop-blur-sm shadow-2xl z-20 transition-transform duration-300 relative"
-                style={{
-                    transform: menuCollapsed ? 'translateX(100%)' : 'translateX(0)',
-                    marginRight: menuCollapsed ? '-550px' : '0'
-                }}
+                className={`fixed lg:absolute top-0 right-0 h-full lg:w-[550px] w-full flex flex-col border-l border-slate-800/50 bg-slate-900/95 backdrop-blur-md shadow-2xl z-40 transition-transform duration-300 ${
+                    menuCollapsed ? 'translate-x-full' : 'translate-x-0'
+                }`}
             >
-                {/* Menu Collapse Toggle Button - inside the panel */}
+                {/* Menu Collapse Toggle Button - attached to left edge of panel */}
                 <button
                     onClick={() => setMenuCollapsed(prev => !prev)}
-                    className="hidden lg:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full z-30 items-center justify-center w-6 h-16 bg-slate-800/90 hover:bg-slate-700 border border-slate-700 rounded-l-lg"
+                    className="hidden lg:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full z-50 items-center justify-center w-6 h-16 bg-slate-800/90 hover:bg-slate-700 border border-slate-700 rounded-l-lg"
                     title={menuCollapsed ? 'Expand Menu (M)' : 'Collapse Menu (M)'}
                 >
                     <svg className={`w-4 h-4 text-slate-400 transition-transform ${menuCollapsed ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
