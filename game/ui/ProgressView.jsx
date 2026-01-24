@@ -6,9 +6,9 @@ import { getEndlessTitle, getNextMilestone, startEndlessRun, endEndlessRun, ENDL
 import { MaterialIcon } from './MaterialIcons';
 
 const SUB_TABS = [
-    { id: 'objectives', label: 'Objectives', icon: '📋' },
-    { id: 'collections', label: 'Collections', icon: '🏆' },
-    { id: 'endless', label: 'Endless', icon: '♾️' },
+    { id: 'objectives', label: 'Objectives', icon: '/assets/ui-icons/chest-daily-rewards.png' },
+    { id: 'collections', label: 'Collections', icon: '/assets/ui-icons/crown-achievements.png' },
+    { id: 'endless', label: 'Endless', icon: '/assets/ui-icons/skull.png' },
 ];
 
 export default function ProgressView() {
@@ -24,13 +24,13 @@ export default function ProgressView() {
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
-                        className={`flex-1 px-3 py-2 rounded text-sm font-semibold transition-all ${
+                        className={`flex-1 px-3 py-2 rounded text-sm font-semibold transition-all flex items-center justify-center gap-1.5 ${
                             activeTab === tab.id
                                 ? 'bg-blue-600 text-white'
                                 : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
                         }`}
                     >
-                        <span className="mr-1">{tab.icon}</span>
+                        <img src={tab.icon} alt="" className="w-4 h-4" style={{ imageRendering: 'pixelated' }} />
                         {tab.label}
                     </button>
                 ))}
@@ -84,7 +84,8 @@ function ObjectivesSection({ state, gameManager }) {
     return (
         <div className="space-y-4">
             <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <span>📋</span> Daily & Weekly Objectives
+                <img src="/assets/ui-icons/chest-daily-rewards.png" alt="" className="w-5 h-5" style={{ imageRendering: 'pixelated' }} />
+                Daily & Weekly Objectives
             </h3>
 
             {/* Daily Objective */}
@@ -189,7 +190,8 @@ function CollectionsSection({ state, selectedCategory, setSelectedCategory }) {
             <div className="bg-slate-800/60 rounded-lg p-4 border border-slate-700">
                 <div className="flex justify-between items-center mb-2">
                     <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                        <span>🏆</span> Collection Progress
+                        <img src="/assets/ui-icons/crown-achievements.png" alt="" className="w-5 h-5" style={{ imageRendering: 'pixelated' }} />
+                        Collection Progress
                     </h3>
                     <span className="text-2xl font-bold text-yellow-400">{overall.percentage}%</span>
                 </div>
@@ -221,7 +223,7 @@ function CollectionsSection({ state, selectedCategory, setSelectedCategory }) {
                                         : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
                             }`}
                         >
-                            {cat.icon} {cat.name}
+                            {cat.name}
                             <span className="ml-1 opacity-60">{catProgress?.percentage}%</span>
                         </button>
                     );
@@ -293,7 +295,8 @@ function EndlessSection({ state, gameManager }) {
     return (
         <div className="space-y-4">
             <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <span>♾️</span> Endless Mode
+                <img src="/assets/ui-icons/skull.png" alt="" className="w-5 h-5" style={{ imageRendering: 'pixelated' }} />
+                Endless Mode
             </h3>
 
             {/* Best Wave / Title */}
