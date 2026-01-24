@@ -239,6 +239,7 @@ export default function InventoryView({ onHover }) {
     // Loot filter state
     const autoSalvageTier = state.autoSalvageTier ?? -1;
     const autoSalvageKeepEffects = state.autoSalvageKeepEffects ?? true;
+    const autoSalvageBossItems = state.autoSalvageBossItems ?? false;
 
     // Equipment slot component for the paper doll
     const EquipSlot = ({ slot, className = '' }) => {
@@ -538,13 +539,13 @@ export default function InventoryView({ onHover }) {
                             <button
                                 onClick={toggleSalvageBossItems}
                                 className={`px-1.5 py-0.5 text-xs rounded transition-all ${
-                                    state.autoSalvageBossItems
+                                    autoSalvageBossItems
                                         ? 'bg-orange-600/40 text-orange-300'
                                         : 'bg-slate-600/40 text-slate-300'
                                 }`}
                                 title="Warning: Enabling this will auto-salvage boss set items!"
                             >
-                                {state.autoSalvageBossItems ? 'ON' : 'OFF'}
+                                {autoSalvageBossItems ? 'ON' : 'OFF'}
                             </button>
                         </div>
                     </div>
