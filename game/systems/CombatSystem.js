@@ -493,12 +493,10 @@ export class CombatSystem {
             newState.endlessEnemyHp = newState.enemyHp;
         }
 
-        // DEBUG: Log HP changes
+        // DEBUG: Log HP every tick to see why it stops changing
         const prevHp = state.playerHp;
         const newHp = newState.playerHp;
-        if (prevHp !== newHp) {
-            console.log(`HP: ${prevHp} -> ${newHp} (diff: ${newHp - prevHp})`);
-        }
+        console.log(`Tick: HP ${prevHp} -> ${newHp}, enemyHp: ${newState.enemyHp}, maxHp: ${safeMaxHp}`);
 
         this.stateManager.setState(newState);
         return combatUpdates;
