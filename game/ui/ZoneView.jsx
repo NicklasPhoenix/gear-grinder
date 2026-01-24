@@ -28,10 +28,6 @@ export default function ZoneView() {
 
     const allZones = [...ZONES, ...PRESTIGE_ZONES.filter(z => (state.prestigeLevel || 0) >= (z.prestigeReq || 0))];
 
-    const toggleAutoProgress = () => {
-        gameManager.setState(prev => ({ ...prev, autoProgress: !prev.autoProgress }));
-    };
-
     return (
         <div className="h-full flex flex-col gap-2">
             {/* Header */}
@@ -41,7 +37,7 @@ export default function ZoneView() {
                     <div className="flex items-center gap-3">
                         {/* Auto-progress toggle */}
                         <button
-                            onClick={toggleAutoProgress}
+                            onClick={() => gameManager.toggleAutoProgress()}
                             className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs font-semibold transition-all ${
                                 state.autoProgress
                                     ? 'bg-green-600/40 text-green-300 hover:bg-green-600/50'

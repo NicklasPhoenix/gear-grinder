@@ -104,6 +104,13 @@ export default function GameRenderer() {
     const [isInitialized, setIsInitialized] = useState(false);
     const [loadingProgress, setLoadingProgress] = useState({ loaded: 0, total: 10, status: 'Initializing...' });
 
+    // Resize handler refs
+    const resizeObserverRef = useRef(null);
+    const uiContainerRef = useRef(null);
+    const mainContainerRef = useRef(null);
+    const groundRef = useRef(null);
+    const gridLinesRef = useRef(null);
+
     // Entities refs for updating
     const playerRef = useRef(null);
     const enemyRef = useRef(null);
@@ -918,10 +925,122 @@ export default function GameRenderer() {
             });
         }
 
+        // Resize handler to recalculate positions when container size changes
+        const handleResize = () => {
+            if (!appRef.current || !containerRef.current) return;
+
+            const containerWidth = containerRef.current.clientWidth || 800;
+            const containerHeight = containerRef.current.clientHeight || 600;
+
+            // Recalculate positions
+            const centerX = containerWidth / 2;
+            const scaleFactor = Math.min(1, containerHeight / 400);
+            const groundY = scaleFactor < 1
+                ? containerHeight * 0.75
+                : containerHeight - 160;
+
+            const charSpacing = Math.min(200, containerWidth * 0.25);
+            const playerX = centerX - charSpacing;
+            const enemyX = centerX + charSpacing;
+            const characterY = groundY - 25;
+
+            // Update positions ref
+            positionsRef.current = {
+                playerX,
+                enemyX,
+                characterY,
+                centerX,
+                groundY,
+                canvasWidth: containerWidth,
+                canvasHeight: containerHeight,
+                scaleFactor,
+            };
+
+            // Update player position
+            if (playerRef.current) {
+                playerRef.current.baseX = playerX;
+                playerRef.current.baseY = characterY;
+                playerRef.current.x = playerX;
+                playerRef.current.y = characterY - 25 * scaleFactor;
+                const playerScale = (ENEMY_SPRITES['Knight'].scale || 4) * 1.5 * scaleFactor;
+                playerRef.current.scale.set(-playerScale, playerScale);
+
+                // Update player shadow and glow
+                if (playerRef.current.shadow) {
+                    playerRef.current.shadow.clear();
+                    playerRef.current.shadow.ellipse(playerX, groundY - 2, 35 * scaleFactor, 12 * scaleFactor);
+                    playerRef.current.shadow.fill({ color: 0x000000, alpha: 0.4 });
+                }
+                if (playerRef.current.glow) {
+                    playerRef.current.glow.clear();
+                    playerRef.current.glow.circle(playerX, characterY - 40 * scaleFactor, 60 * scaleFactor);
+                    playerRef.current.glow.fill({ color: 0x3b82f6, alpha: 0.1 });
+                }
+            }
+
+            // Update enemy position
+            if (enemyRef.current) {
+                enemyRef.current.baseX = enemyX;
+                enemyRef.current.baseY = characterY;
+                enemyRef.current.x = enemyX;
+                enemyRef.current.y = characterY - 25 * scaleFactor;
+                enemyRef.current.scaleFactor = scaleFactor;
+                enemyRef.current.shadowX = enemyX;
+                enemyRef.current.auraX = enemyX;
+                enemyRef.current.auraY = characterY - 25;
+
+                const zone = getZoneById(gameManager.getState()?.currentZone || 0);
+                const baseScale = (zone?.isBoss ? 6.5 : 5) * scaleFactor;
+                enemyRef.current.baseScale = baseScale;
+                enemyRef.current.scale.set(-baseScale, baseScale);
+
+                if (enemyRef.current.shadow) {
+                    enemyRef.current.shadow.clear();
+                    const shadowSize = zone?.isBoss ? 45 : 35;
+                    enemyRef.current.shadow.ellipse(enemyX, groundY - 2, shadowSize * scaleFactor, (zone?.isBoss ? 15 : 12) * scaleFactor);
+                    enemyRef.current.shadow.fill({ color: 0x000000, alpha: zone?.isBoss ? 0.5 : 0.4 });
+                }
+            }
+
+            // Update HP bars
+            const hpBarWidth = Math.min(180, containerWidth * 0.22);
+            const hpBarY = Math.min(groundY + 40, containerHeight - 30);
+
+            if (playerHpBarRef.current) {
+                playerHpBarRef.current.position.set(playerX, hpBarY);
+            }
+            if (enemyHpBarRef.current) {
+                enemyHpBarRef.current.position.set(enemyX, hpBarY);
+            }
+
+            // Update background
+            if (bgSpriteRef.current && bgSpriteRef.current.texture) {
+                const texture = bgSpriteRef.current.texture;
+                const scaleX = containerWidth / texture.width;
+                const scaleY = containerHeight / texture.height;
+                const coverScale = Math.max(scaleX, scaleY);
+                bgSpriteRef.current.scale.set(coverScale, coverScale);
+                bgSpriteRef.current.x = (containerWidth - texture.width * coverScale) / 2;
+                bgSpriteRef.current.y = (containerHeight - texture.height * coverScale) / 2;
+            }
+        };
+
+        // Set up ResizeObserver
+        resizeObserverRef.current = new ResizeObserver(() => {
+            handleResize();
+        });
+        if (containerRef.current) {
+            resizeObserverRef.current.observe(containerRef.current);
+        }
+
         return () => {
             cleanupText();
             cleanupLoot();
             cleanupDeath();
+            // Clean up resize observer
+            if (resizeObserverRef.current) {
+                resizeObserverRef.current.disconnect();
+            }
             // Clean up graphics pool to prevent memory leaks
             if (graphicsPoolRef.current) {
                 graphicsPoolRef.current.destroy();

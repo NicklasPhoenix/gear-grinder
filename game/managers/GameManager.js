@@ -46,6 +46,21 @@ export class GameManager {
         }));
     }
 
+    // --- Auto-Progress Control ---
+    toggleAutoProgress() {
+        this.setState(prev => ({
+            ...prev,
+            autoProgress: !prev.autoProgress
+        }));
+    }
+
+    setAutoProgress(enabled) {
+        this.setState(prev => ({
+            ...prev,
+            autoProgress: enabled
+        }));
+    }
+
     // --- State Management ---
     getState() {
         return this.state;
