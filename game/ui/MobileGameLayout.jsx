@@ -16,6 +16,7 @@ import AchievementsView from './AchievementsView';
 import SettingsView from './SettingsView';
 import ShopView from './ShopView';
 import DailyRewardsModal from './DailyRewardsModal';
+import GuideModal from './GuideModal';
 import GameTooltip from './GameTooltip';
 
 // Import sub-components (will create these)
@@ -31,6 +32,7 @@ export default function MobileGameLayout() {
     const [activeTab, setActiveTab] = useState('inventory');
     const [tooltipData, setTooltipData] = useState(null);
     const [showDailyRewards, setShowDailyRewards] = useState(false);
+    const [showGuide, setShowGuide] = useState(false);
     const [showMoreMenu, setShowMoreMenu] = useState(false);
     const [moreSubTab, setMoreSubTab] = useState(null); // 'shop' | 'prestige' | 'achievements' | 'settings'
 
@@ -103,6 +105,7 @@ export default function MobileGameLayout() {
                     <MoreMenuContent
                         onSelect={handleMoreSelect}
                         onDailyRewards={() => setShowDailyRewards(true)}
+                        onGuide={() => setShowGuide(true)}
                     />
                 );
             default:
@@ -157,6 +160,9 @@ export default function MobileGameLayout() {
 
             {/* Daily Rewards Modal */}
             {showDailyRewards && <DailyRewardsModal onClose={() => setShowDailyRewards(false)} />}
+
+            {/* Game Guide Modal */}
+            {showGuide && <GuideModal onClose={() => setShowGuide(false)} />}
         </div>
     );
 }
@@ -164,7 +170,7 @@ export default function MobileGameLayout() {
 /**
  * More menu content - shows when "More" tab is selected
  */
-function MoreMenuContent({ onSelect, onDailyRewards }) {
+function MoreMenuContent({ onSelect, onDailyRewards, onGuide }) {
     const menuItems = [
         { id: 'shop', label: 'Shop', icon: <svg className="w-8 h-8 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>, description: 'Exchange resources' },
         { id: 'prestige', label: 'Prestige', icon: <img src="/assets/ui-icons/star-prestige.png" alt="" className="w-8 h-8" />, description: 'Reset for permanent bonuses' },
@@ -174,17 +180,29 @@ function MoreMenuContent({ onSelect, onDailyRewards }) {
 
     return (
         <div className="space-y-2">
-            {/* Daily Rewards Button */}
-            <button
-                onClick={onDailyRewards}
-                className="w-full p-4 bg-gradient-to-r from-yellow-600/20 to-orange-600/20 border border-yellow-500/30 rounded-xl flex items-center gap-4 active:scale-[0.98] transition-transform"
-            >
-                <img src="/assets/ui-icons/chest-daily-rewards.png" alt="" className="w-8 h-8" />
-                <div className="text-left">
-                    <div className="font-bold text-yellow-400">Daily Rewards</div>
-                    <div className="text-sm text-slate-400">Claim your daily bonus</div>
-                </div>
-            </button>
+            {/* Top Row: Guide + Daily */}
+            <div className="flex gap-2">
+                <button
+                    onClick={onGuide}
+                    className="flex-1 p-4 bg-gradient-to-r from-blue-600/20 to-blue-500/20 border border-blue-500/30 rounded-xl flex items-center gap-3 active:scale-[0.98] transition-transform"
+                >
+                    <span className="text-2xl">📖</span>
+                    <div className="text-left">
+                        <div className="font-bold text-blue-400">Guide</div>
+                        <div className="text-xs text-slate-400">Learn the game</div>
+                    </div>
+                </button>
+                <button
+                    onClick={onDailyRewards}
+                    className="flex-1 p-4 bg-gradient-to-r from-yellow-600/20 to-orange-600/20 border border-yellow-500/30 rounded-xl flex items-center gap-3 active:scale-[0.98] transition-transform"
+                >
+                    <span className="text-2xl">🎁</span>
+                    <div className="text-left">
+                        <div className="font-bold text-yellow-400">Daily</div>
+                        <div className="text-xs text-slate-400">Claim bonus</div>
+                    </div>
+                </button>
+            </div>
 
             {/* Menu Items */}
             {menuItems.map((item) => (

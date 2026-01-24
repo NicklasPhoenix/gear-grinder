@@ -1,0 +1,401 @@
+import React, { useState, useEffect } from 'react';
+import { TIERS, SPECIAL_EFFECTS, EFFECT_TIER_CAPS } from '../data/items';
+import { MaterialIcon } from './MaterialIcons';
+
+const GUIDE_SECTIONS = [
+    { id: 'basics', label: 'Basics' },
+    { id: 'gear', label: 'Gear & Effects' },
+    { id: 'enhancement', label: 'Enhancement' },
+    { id: 'resources', label: 'Resources' },
+    { id: 'prestige', label: 'Prestige' },
+    { id: 'bosses', label: 'Bosses' },
+    { id: 'stats', label: 'Stats' },
+];
+
+export default function GuideModal({ onClose }) {
+    const [activeSection, setActiveSection] = useState('basics');
+
+    // Close on Escape
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') onClose();
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [onClose]);
+
+    return (
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+            onClick={onClose}
+        >
+            <div
+                className="bg-slate-900 rounded-xl border-2 border-slate-700 w-full max-w-3xl max-h-[85vh] flex flex-col shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+            >
+                {/* Header */}
+                <div className="flex items-center justify-between p-4 border-b border-slate-700">
+                    <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                        <span className="text-2xl">📖</span>
+                        Game Guide
+                    </h2>
+                    <button
+                        onClick={onClose}
+                        className="text-slate-400 hover:text-white transition-colors p-2"
+                    >
+                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div className="flex flex-1 overflow-hidden">
+                    {/* Sidebar Navigation */}
+                    <div className="w-40 border-r border-slate-700 p-2 flex flex-col gap-1">
+                        {GUIDE_SECTIONS.map((section) => (
+                            <button
+                                key={section.id}
+                                onClick={() => setActiveSection(section.id)}
+                                className={`px-3 py-2 rounded text-left text-sm font-semibold transition-all ${
+                                    activeSection === section.id
+                                        ? 'bg-blue-600 text-white'
+                                        : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                                }`}
+                            >
+                                {section.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Content Area */}
+                    <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+                        {activeSection === 'basics' && <BasicsSection />}
+                        {activeSection === 'gear' && <GearSection />}
+                        {activeSection === 'enhancement' && <EnhancementSection />}
+                        {activeSection === 'resources' && <ResourcesSection />}
+                        {activeSection === 'prestige' && <PrestigeSection />}
+                        {activeSection === 'bosses' && <BossesSection />}
+                        {activeSection === 'stats' && <StatsSection />}
+                    </div>
+                </div>
+
+                {/* Footer */}
+                <div className="p-3 border-t border-slate-700 text-center text-slate-500 text-xs">
+                    Press <kbd className="px-1.5 py-0.5 bg-slate-800 rounded font-mono">Esc</kbd> to close
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function SectionTitle({ children }) {
+    return <h3 className="text-xl font-bold text-white mb-4">{children}</h3>;
+}
+
+function SubSection({ title, children }) {
+    return (
+        <div className="mb-6">
+            <h4 className="text-sm font-bold text-blue-400 uppercase tracking-wider mb-2">{title}</h4>
+            <div className="text-slate-300 text-sm space-y-2">{children}</div>
+        </div>
+    );
+}
+
+function BasicsSection() {
+    return (
+        <div>
+            <SectionTitle>Game Basics</SectionTitle>
+
+            <SubSection title="How to Play">
+                <p>Your character automatically fights enemies in the current zone. Defeat enemies to earn XP, Silver, and gear drops.</p>
+                <p>Equip better gear to increase your stats and progress to harder zones with better rewards.</p>
+            </SubSection>
+
+            <SubSection title="Leveling Up">
+                <p>Gain XP from defeating enemies. Each level grants <span className="text-purple-400 font-bold">+3 Stat Points</span> to allocate in the Stats tab.</p>
+            </SubSection>
+
+            <SubSection title="Combat">
+                <p>Combat is automatic. Your damage, armor, and special effects determine how quickly you defeat enemies.</p>
+                <p>Use the <span className="text-green-400">Fight/Rest</span> button to pause combat when needed.</p>
+            </SubSection>
+
+            <SubSection title="Progression">
+                <p>1. Farm zones for gear upgrades</p>
+                <p>2. Enhance your best gear with materials</p>
+                <p>3. Allocate stat points for your build</p>
+                <p>4. Unlock skills for permanent bonuses</p>
+                <p>5. Challenge bosses for unique gear</p>
+                <p>6. Prestige for permanent multipliers</p>
+            </SubSection>
+        </div>
+    );
+}
+
+function GearSection() {
+    return (
+        <div>
+            <SectionTitle>Gear & Effects</SectionTitle>
+
+            <SubSection title="Gear Tiers">
+                <div className="grid grid-cols-2 gap-2">
+                    {TIERS.map((tier, idx) => (
+                        <div key={tier.id} className="flex items-center gap-2 p-2 bg-slate-800/50 rounded">
+                            <span className="font-bold" style={{ color: tier.color }}>{tier.name}</span>
+                            <span className="text-slate-500 text-xs">Tier {idx}</span>
+                        </div>
+                    ))}
+                </div>
+            </SubSection>
+
+            <SubSection title="Special Effects">
+                <p className="mb-2">Gear can roll special effects. Each effect slot rolls independently:</p>
+                <div className="bg-slate-800/50 rounded p-3 mb-3">
+                    <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div><span className="text-slate-400">1st Effect:</span> 15-60%</div>
+                        <div><span className="text-slate-400">2nd Effect:</span> 5-32%</div>
+                        <div><span className="text-slate-400">3rd Effect:</span> 5-14%*</div>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-2">*Divine tier and above only. Chances increase with tier.</p>
+                </div>
+                <div className="space-y-1">
+                    {SPECIAL_EFFECTS.map((effect) => (
+                        <div key={effect.id} className="flex justify-between p-2 bg-slate-800/30 rounded text-xs">
+                            <span className="text-yellow-400">{effect.name}</span>
+                            <span className="text-slate-400">
+                                {effect.isPercent ? `${effect.minVal}% - ${effect.maxVal}%` : `${effect.minVal} - ${effect.maxVal}`}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            </SubSection>
+
+            <SubSection title="Effect Tier Caps">
+                <p className="mb-2">Lower tier items can't roll maximum effect values:</p>
+                <div className="grid grid-cols-2 gap-1 text-xs">
+                    {Object.entries(EFFECT_TIER_CAPS).slice(0, 7).map(([tierIdx, cap]) => (
+                        <div key={tierIdx} className="flex justify-between p-1.5 bg-slate-800/30 rounded">
+                            <span style={{ color: TIERS[tierIdx]?.color }}>{TIERS[tierIdx]?.name}</span>
+                            <span className="text-slate-400">{Math.round(cap * 100)}% of max</span>
+                        </div>
+                    ))}
+                </div>
+            </SubSection>
+
+            <SubSection title="Gear Slots">
+                <p>Weapon, Helmet, Chest, Gloves, Boots, Accessory</p>
+                <p className="text-slate-400">Each slot can be equipped with one piece of gear.</p>
+            </SubSection>
+        </div>
+    );
+}
+
+function EnhancementSection() {
+    return (
+        <div>
+            <SectionTitle>Enhancement</SectionTitle>
+
+            <SubSection title="How Enhancement Works">
+                <p>Enhance gear to increase its stats. Each <span className="text-blue-400">+1</span> level adds bonus stats to the item.</p>
+                <p>Higher enhancement levels have lower success rates and may require better materials.</p>
+            </SubSection>
+
+            <SubSection title="Enhancement Materials">
+                <div className="space-y-2">
+                    <div className="flex items-center gap-2 p-2 bg-slate-800/50 rounded">
+                        <MaterialIcon type="enhanceStone" size={20} />
+                        <span className="text-blue-400 font-bold">Enhancement Stones</span>
+                        <span className="text-slate-400 text-xs ml-auto">+1 to +10</span>
+                    </div>
+                    <div className="flex items-center gap-2 p-2 bg-slate-800/50 rounded">
+                        <MaterialIcon type="blessedOrb" size={20} />
+                        <span className="text-purple-400 font-bold">Blessed Orbs</span>
+                        <span className="text-slate-400 text-xs ml-auto">+10 to +15</span>
+                    </div>
+                    <div className="flex items-center gap-2 p-2 bg-slate-800/50 rounded">
+                        <MaterialIcon type="celestialShard" size={20} />
+                        <span className="text-yellow-300 font-bold">Celestial Shards</span>
+                        <span className="text-slate-400 text-xs ml-auto">+15 to +20</span>
+                    </div>
+                </div>
+            </SubSection>
+
+            <SubSection title="Success Rates">
+                <p>Success rate decreases as enhancement level increases.</p>
+                <p>Failed enhancements may decrease the item's level (protection items coming soon).</p>
+            </SubSection>
+
+            <SubSection title="Salvaging">
+                <p>Salvage unwanted gear to get Enhancement Stones back.</p>
+                <p>Higher tier gear returns more materials. Enhanced gear returns bonus materials.</p>
+            </SubSection>
+        </div>
+    );
+}
+
+function ResourcesSection() {
+    return (
+        <div>
+            <SectionTitle>Resources</SectionTitle>
+
+            <SubSection title="Currency Types">
+                <div className="space-y-2">
+                    <div className="flex items-center gap-3 p-2 bg-slate-800/50 rounded">
+                        <MaterialIcon type="gold" size={24} />
+                        <div>
+                            <span className="text-slate-200 font-bold">Silver</span>
+                            <p className="text-xs text-slate-400">Main currency. Dropped by all enemies.</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-3 p-2 bg-slate-800/50 rounded">
+                        <MaterialIcon type="enhanceStone" size={24} />
+                        <div>
+                            <span className="text-blue-400 font-bold">Enhancement Stones</span>
+                            <p className="text-xs text-slate-400">Used for enhancing gear +1 to +10. Dropped by enemies, salvaged from gear.</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-3 p-2 bg-slate-800/50 rounded">
+                        <MaterialIcon type="blessedOrb" size={24} />
+                        <div>
+                            <span className="text-purple-400 font-bold">Blessed Orbs</span>
+                            <p className="text-xs text-slate-400">Used for enhancing +10 to +15. Dropped in higher zones.</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-3 p-2 bg-slate-800/50 rounded">
+                        <MaterialIcon type="celestialShard" size={24} />
+                        <div>
+                            <span className="text-yellow-300 font-bold">Celestial Shards</span>
+                            <p className="text-xs text-slate-400">Used for enhancing +15 to +20. Rare drops from bosses and high zones.</p>
+                        </div>
+                    </div>
+                </div>
+            </SubSection>
+
+            <SubSection title="Resource Exchange (Shop)">
+                <p>Convert surplus resources in the Shop tab. Exchange rates are intentionally inefficient - farming is always better!</p>
+                <div className="mt-2 space-y-1 text-xs">
+                    <p>• 1,000 Silver → 10 Enhancement Stones</p>
+                    <p>• 100 Enhancement Stones → 5 Blessed Orbs</p>
+                    <p>• 50 Blessed Orbs → 3 Celestial Shards</p>
+                </div>
+            </SubSection>
+        </div>
+    );
+}
+
+function PrestigeSection() {
+    return (
+        <div>
+            <SectionTitle>Prestige</SectionTitle>
+
+            <SubSection title="What is Prestige?">
+                <p>Prestige resets your progress but grants <span className="text-pink-400 font-bold">permanent multipliers</span> that make future runs faster.</p>
+                <p>Each prestige level increases your damage, XP gain, and drop rates.</p>
+            </SubSection>
+
+            <SubSection title="Prestige Requirements">
+                <p>Reach higher zones to unlock prestige. The further you progress, the more prestige points you'll earn.</p>
+            </SubSection>
+
+            <SubSection title="What Resets">
+                <p className="text-red-400">• Level, XP, and stat points allocation</p>
+                <p className="text-red-400">• All gear and inventory</p>
+                <p className="text-red-400">• Silver and enhancement materials</p>
+                <p className="text-red-400">• Zone progress</p>
+            </SubSection>
+
+            <SubSection title="What's Kept">
+                <p className="text-green-400">• Prestige level and bonuses</p>
+                <p className="text-green-400">• Prestige Stones (currency)</p>
+                <p className="text-green-400">• Achievement progress and rewards</p>
+                <p className="text-green-400">• Unlocked skills</p>
+            </SubSection>
+
+            <SubSection title="Prestige Tiers">
+                <p>After prestiging, you can find gear from prestige tiers:</p>
+                <div className="mt-2 space-y-1">
+                    {TIERS.slice(7).map((tier, idx) => (
+                        <div key={tier.id} className="flex items-center gap-2 p-2 bg-slate-800/50 rounded">
+                            <span className="font-bold" style={{ color: tier.color }}>{tier.name}</span>
+                            <span className="text-slate-500 text-xs">Prestige tier {idx + 1}</span>
+                        </div>
+                    ))}
+                </div>
+            </SubSection>
+        </div>
+    );
+}
+
+function BossesSection() {
+    return (
+        <div>
+            <SectionTitle>Bosses</SectionTitle>
+
+            <SubSection title="Boss Zones">
+                <p>Special zones with powerful boss enemies. Bosses have more HP and deal more damage than regular enemies.</p>
+                <p>Boss zones are marked with a <span className="text-red-400">fire icon</span> on the map.</p>
+            </SubSection>
+
+            <SubSection title="Boss Drops">
+                <p>Bosses drop <span className="text-yellow-400 font-bold">unique set gear</span> with guaranteed special effects.</p>
+                <p>Boss gear always has:</p>
+                <p>• One fixed effect unique to that boss set</p>
+                <p>• One random bonus effect</p>
+            </SubSection>
+
+            <SubSection title="Boss Stones">
+                <p>Defeating bosses also drops <span className="text-orange-400 font-bold">Boss Stones</span> specific to that boss.</p>
+                <p>Boss Stones are used for special crafting and upgrades (coming soon).</p>
+            </SubSection>
+
+            <SubSection title="Boss Strategy">
+                <p>• Ensure you have enough armor/HP to survive</p>
+                <p>• Lifesteal effect helps sustain through long fights</p>
+                <p>• Farm the zone before the boss to gear up first</p>
+            </SubSection>
+        </div>
+    );
+}
+
+function StatsSection() {
+    return (
+        <div>
+            <SectionTitle>Character Stats</SectionTitle>
+
+            <SubSection title="Primary Stats">
+                <div className="space-y-2">
+                    <div className="p-2 bg-slate-800/50 rounded">
+                        <span className="text-red-400 font-bold">STR (Strength)</span>
+                        <p className="text-xs text-slate-400">+2 base damage per point</p>
+                    </div>
+                    <div className="p-2 bg-slate-800/50 rounded">
+                        <span className="text-green-400 font-bold">VIT (Vitality)</span>
+                        <p className="text-xs text-slate-400">+5 max HP per point</p>
+                    </div>
+                    <div className="p-2 bg-slate-800/50 rounded">
+                        <span className="text-blue-400 font-bold">AGI (Agility)</span>
+                        <p className="text-xs text-slate-400">+0.5% crit chance, +1% crit damage per point</p>
+                    </div>
+                    <div className="p-2 bg-slate-800/50 rounded">
+                        <span className="text-yellow-400 font-bold">LUK (Luck)</span>
+                        <p className="text-xs text-slate-400">+0.5% silver find, +0.3% item drop rate per point</p>
+                    </div>
+                </div>
+            </SubSection>
+
+            <SubSection title="Combat Stats">
+                <p><span className="text-white font-bold">Damage:</span> Base weapon damage + STR bonus + gear bonuses</p>
+                <p><span className="text-white font-bold">Armor:</span> Reduces incoming damage from enemies</p>
+                <p><span className="text-white font-bold">HP:</span> Your health pool. Regenerates over time.</p>
+                <p><span className="text-white font-bold">Crit Rate:</span> Chance to deal critical damage (capped at 100%)</p>
+                <p><span className="text-white font-bold">Crit Damage:</span> Multiplier for critical hits (default 150%)</p>
+            </SubSection>
+
+            <SubSection title="Stat Point Sources">
+                <p>• <span className="text-purple-400">+3 per level up</span></p>
+                <p>• <span className="text-yellow-400">Achievement rewards</span> (permanent, kept through prestige)</p>
+                <p>• <span className="text-pink-400">Prestige bonuses</span></p>
+            </SubSection>
+        </div>
+    );
+}

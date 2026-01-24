@@ -11,6 +11,7 @@ import AchievementsView from './AchievementsView';
 import SettingsView from './SettingsView';
 import ShopView from './ShopView';
 import DailyRewardsModal, { useDailyRewardAvailable } from './DailyRewardsModal';
+import GuideModal from './GuideModal';
 import OfflineRewardsModal from './OfflineRewardsModal';
 import { ToastContainer } from './ToastNotification';
 import GameTooltip from './GameTooltip';
@@ -96,6 +97,7 @@ function DesktopGameLayout() {
     const [levelUpAnimation, setLevelUpAnimation] = useState(null);
     const [showKeyboardHelp, setShowKeyboardHelp] = useState(false);
     const [showDailyRewards, setShowDailyRewards] = useState(false);
+    const [showGuide, setShowGuide] = useState(false);
     const dailyRewardAvailable = useDailyRewardAvailable();
     const prevLevelRef = useRef(state?.level || 1);
 
@@ -351,6 +353,14 @@ function DesktopGameLayout() {
                         <SpeedControl />
                         <div className="flex items-center gap-3">
                             <button
+                                onClick={() => setShowGuide(true)}
+                                className="flex items-center gap-1.5 px-3 py-1 rounded bg-blue-600/30 text-blue-300 hover:bg-blue-600/50 transition-all font-semibold"
+                                title="Game Guide"
+                            >
+                                <span>📖</span>
+                                <span>Guide</span>
+                            </button>
+                            <button
                                 onClick={() => setShowDailyRewards(true)}
                                 className={`relative px-2 py-1 rounded text-xs transition-all ${
                                     dailyRewardAvailable
@@ -390,6 +400,9 @@ function DesktopGameLayout() {
 
             {/* Daily Rewards Modal */}
             {showDailyRewards && <DailyRewardsModal onClose={() => setShowDailyRewards(false)} />}
+
+            {/* Game Guide Modal */}
+            {showGuide && <GuideModal onClose={() => setShowGuide(false)} />}
 
             {/* Offline Rewards Modal */}
             {offlineRewards && <OfflineRewardsModal rewards={offlineRewards} onClose={clearOfflineRewards} />}
