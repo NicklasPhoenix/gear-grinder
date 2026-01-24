@@ -212,6 +212,7 @@ export default function GameRenderer() {
             bgContainerRef.current = bgContainer;
             particleContainerRef.current = particleContainer;
             gameContainerRef.current = gameContainer;
+            uiContainerRef.current = uiContainer;
 
             // Calculate positions based on canvas size (scale for mobile)
             // Use 35% from center for characters to spread them across the screen
