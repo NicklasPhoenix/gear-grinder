@@ -308,42 +308,35 @@ export default function StatsView() {
                                 <MobileStatRow label="Max HP" value={calculated.maxHp} color="text-green-300" />
                                 <MobileStatRow label="Armor" value={calculated.armor} color="text-blue-300" />
                                 <MobileStatRow label="Crit %" value={formatPercent(calculated.critChance)} color="text-yellow-300" />
-                                {calculated.ascendedCrit > 0 && (
-                                    <MobileStatRow label="  Ascend" value={formatPercent(calculated.ascendedCrit)} color="text-cyan-400" />
-                                )}
                                 <MobileStatRow label="Crit DMG" value={formatPercent(calculated.critDamage, 0)} color="text-orange-300" />
-                                {calculated.annihilate > 0 && (
-                                    <MobileStatRow label="  Annihi" value={formatPercent(calculated.annihilate)} color="text-orange-400" />
-                                )}
                                 <MobileStatRow label="Speed" value={formatMultiplier(calculated.speedMult)} color="text-cyan-300" />
-                                {calculated.frenzy > 0 && (
-                                    <MobileStatRow label="  Frenzy" value={formatPercent(calculated.frenzy)} color="text-purple-400" />
-                                )}
                                 <MobileStatRow label="Dodge" value={formatPercent(calculated.dodge)} color="text-green-300" />
-                                {calculated.phantom > 0 && (
-                                    <MobileStatRow label="  Phantom" value={formatPercent(calculated.phantom)} color="text-violet-400" />
-                                )}
                                 <MobileStatRow label="Lifesteal" value={formatPercent(calculated.lifesteal)} color="text-pink-300" />
-                                {calculated.overheal > 0 && (
-                                    <MobileStatRow label="  Overheal" value={formatPercent(calculated.overheal)} color="text-cyan-400" />
-                                )}
                                 <MobileStatRow label="Thorns" value={formatPercent(calculated.thorns)} color="text-purple-300" />
-                                {calculated.vengeance > 0 && (
-                                    <MobileStatRow label="  Venge" value={formatPercent(calculated.vengeance)} color="text-rose-400" />
-                                )}
                                 <MobileStatRow label="HP Regen" value={`${(calculated.hpRegen || 0).toFixed(1)}%/s`} color="text-emerald-300" />
-                                {calculated.secondWind > 0 && (
-                                    <MobileStatRow label="  2ndWind" value={`${calculated.secondWind.toFixed(0)}%`} color="text-emerald-400" />
-                                )}
                                 <MobileStatRow label="Dmg Red." value={formatPercent(calculated.damageReduction || 0)} color="text-sky-300" />
-                                {calculated.immunity > 0 && (
-                                    <MobileStatRow label="  Immune" value={formatPercent(calculated.immunity)} color="text-amber-400" />
-                                )}
                             </div>
                             <div className="border-t border-slate-700/50 mt-2 pt-2 grid grid-cols-2 gap-x-4 gap-y-1">
                                 <MobileStatRow label="Silver %" value={formatBonus((calculated.goldMult - 1) * 100)} color="text-slate-300" />
                                 <MobileStatRow label="XP %" value={formatBonus(calculated.xpBonus || 0)} color="text-purple-400" />
                                 <MobileStatRow label="Drop Rate" value={formatBonus((calculated.matMult - 1) * 100)} color="text-teal-300" />
+                            </div>
+
+                            {/* Overflow Abilities Section */}
+                            <div className="border-t border-purple-500/30 mt-3 pt-3">
+                                <div className="text-[10px] text-purple-400 uppercase font-bold mb-2 tracking-wider">
+                                    ✦ Overflow Abilities
+                                </div>
+                                <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
+                                    <MobileOverflowStatRow name="Ascended" value={calculated.ascendedCrit} color="text-cyan-400" source="Crit >100%" />
+                                    <MobileOverflowStatRow name="Annihilate" value={calculated.annihilate} color="text-orange-400" source="CritDMG >300%" />
+                                    <MobileOverflowStatRow name="Phantom" value={calculated.phantom} color="text-violet-400" source="Dodge >80%" />
+                                    <MobileOverflowStatRow name="Immunity" value={calculated.immunity} color="text-amber-400" source="DR >75%" />
+                                    <MobileOverflowStatRow name="Second Wind" value={calculated.secondWind} color="text-emerald-400" source="Regen >25%/s" maxValue={50} />
+                                    <MobileOverflowStatRow name="Frenzy" value={calculated.frenzy} color="text-purple-400" source="Speed >200%" />
+                                    <MobileOverflowStatRow name="Overheal" value={calculated.overheal} color="text-cyan-400" source="Lifesteal >100%" maxValue={50} />
+                                    <MobileOverflowStatRow name="Vengeance" value={calculated.vengeance} color="text-rose-400" source="Thorns >100%" />
+                                </div>
                             </div>
                         </div>
 
@@ -516,41 +509,83 @@ export default function StatsView() {
                             <StatRow label="Max HP" value={calculated.maxHp} color="text-green-300" />
                             <StatRow label="Armor" value={calculated.armor} color="text-blue-300" />
                             <StatRow label="Crit %" value={formatPercent(calculated.critChance)} color="text-yellow-300" />
-                            {calculated.ascendedCrit > 0 && (
-                                <StatRow label="  Ascended" value={formatPercent(calculated.ascendedCrit)} color="text-cyan-400" />
-                            )}
                             <StatRow label="Crit DMG" value={formatPercent(calculated.critDamage, 0)} color="text-orange-300" />
-                            {calculated.annihilate > 0 && (
-                                <StatRow label="  Annihilate" value={formatPercent(calculated.annihilate)} color="text-orange-400" />
-                            )}
                             <StatRow label="Speed" value={formatMultiplier(calculated.speedMult)} color="text-cyan-300" />
-                            {calculated.frenzy > 0 && (
-                                <StatRow label="  Frenzy" value={formatPercent(calculated.frenzy)} color="text-purple-400" />
-                            )}
                             <StatRow label="Dodge" value={formatPercent(calculated.dodge)} color="text-green-300" />
-                            {calculated.phantom > 0 && (
-                                <StatRow label="  Phantom" value={formatPercent(calculated.phantom)} color="text-violet-400" />
-                            )}
                             <StatRow label="Lifesteal" value={formatPercent(calculated.lifesteal)} color="text-pink-300" />
-                            {calculated.overheal > 0 && (
-                                <StatRow label="  Overheal" value={formatPercent(calculated.overheal)} color="text-cyan-400" />
-                            )}
                             <StatRow label="Thorns" value={formatPercent(calculated.thorns)} color="text-purple-300" />
-                            {calculated.vengeance > 0 && (
-                                <StatRow label="  Vengeance" value={formatPercent(calculated.vengeance)} color="text-rose-400" />
-                            )}
                             <StatRow label="HP Regen" value={`${(calculated.hpRegen || 0).toFixed(1)}%/s`} color="text-emerald-300" />
-                            {calculated.secondWind > 0 && (
-                                <StatRow label="  Second Wind" value={`${calculated.secondWind.toFixed(0)}% heal`} color="text-emerald-400" />
-                            )}
                             <StatRow label="Dmg Reduction" value={formatPercent(calculated.damageReduction || 0)} color="text-sky-300" />
-                            {calculated.immunity > 0 && (
-                                <StatRow label="  Immunity" value={formatPercent(calculated.immunity)} color="text-amber-400" />
-                            )}
+
                             <div className="border-t border-slate-700/50 my-2 pt-2">
                                 <StatRow label="Silver %" value={formatBonus((calculated.goldMult - 1) * 100)} color="text-slate-300" />
                                 <StatRow label="XP %" value={formatBonus(calculated.xpBonus || 0)} color="text-purple-400" />
                                 <StatRow label="Drop Rate" value={formatBonus((calculated.matMult - 1) * 100)} color="text-teal-300" />
+                            </div>
+
+                            {/* Overflow Effects Section */}
+                            <div className="border-t border-purple-500/30 my-3 pt-3">
+                                <div className="text-[10px] text-purple-400 uppercase font-bold mb-2 tracking-wider">
+                                    ✦ Overflow Abilities
+                                </div>
+                                <OverflowStatRow
+                                    name="Ascended"
+                                    value={calculated.ascendedCrit}
+                                    color="text-cyan-400"
+                                    source="Crit >100%"
+                                    description="Crits deal double crit damage"
+                                />
+                                <OverflowStatRow
+                                    name="Annihilate"
+                                    value={calculated.annihilate}
+                                    color="text-orange-400"
+                                    source="Crit DMG >300%"
+                                    description="Crits deal 5x damage instead"
+                                />
+                                <OverflowStatRow
+                                    name="Phantom"
+                                    value={calculated.phantom}
+                                    color="text-violet-400"
+                                    source="Dodge >80%"
+                                    description="Counter-attack when you dodge"
+                                />
+                                <OverflowStatRow
+                                    name="Immunity"
+                                    value={calculated.immunity}
+                                    color="text-amber-400"
+                                    source="DR >75%"
+                                    description="Chance to negate all damage"
+                                />
+                                <OverflowStatRow
+                                    name="Second Wind"
+                                    value={calculated.secondWind}
+                                    color="text-emerald-400"
+                                    source="Regen >25%/s"
+                                    description="Emergency heal when HP is low"
+                                    maxValue={50}
+                                />
+                                <OverflowStatRow
+                                    name="Frenzy"
+                                    value={calculated.frenzy}
+                                    color="text-purple-400"
+                                    source="Speed >200%"
+                                    description="Chance for triple attack"
+                                />
+                                <OverflowStatRow
+                                    name="Overheal"
+                                    value={calculated.overheal}
+                                    color="text-cyan-400"
+                                    source="Lifesteal >100%"
+                                    description="Excess healing becomes shield"
+                                    maxValue={50}
+                                />
+                                <OverflowStatRow
+                                    name="Vengeance"
+                                    value={calculated.vengeance}
+                                    color="text-rose-400"
+                                    source="Thorns >100%"
+                                    description="Full damage counter-attack"
+                                />
                             </div>
                         </div>
 
@@ -650,6 +685,100 @@ function MobileStatRow({ label, value, color = "text-slate-200" }) {
         <div className="flex justify-between py-1">
             <span className="text-sm text-slate-400">{label}</span>
             <span className={`text-sm font-mono font-bold ${color}`}>{value}</span>
+        </div>
+    );
+}
+
+// Overflow effect stat row - distinct styling to show it's a special ability
+function OverflowStatRow({ name, value, color, source, description, maxValue = 100 }) {
+    const isActive = value > 0;
+    const isMaxed = value >= maxValue;
+
+    return (
+        <div className={`relative my-1 py-2 px-3 rounded-lg border transition-all ${
+            isActive
+                ? isMaxed
+                    ? 'bg-gradient-to-r from-amber-900/40 via-amber-800/30 to-amber-900/40 border-amber-500/50 shadow-[0_0_10px_rgba(245,158,11,0.2)]'
+                    : 'bg-gradient-to-r from-purple-900/40 via-indigo-900/30 to-purple-900/40 border-purple-500/40 shadow-[0_0_8px_rgba(139,92,246,0.15)]'
+                : 'bg-slate-800/20 border-slate-700/30'
+        }`}>
+            <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                    <span className={`text-lg ${isActive ? '' : 'grayscale opacity-50'}`}>
+                        {name === 'Ascended' && '✦'}
+                        {name === 'Annihilate' && '💀'}
+                        {name === 'Frenzy' && '⚡'}
+                        {name === 'Phantom' && '👻'}
+                        {name === 'Overheal' && '🛡️'}
+                        {name === 'Vengeance' && '⚔️'}
+                        {name === 'Second Wind' && '💨'}
+                        {name === 'Immunity' && '🔰'}
+                    </span>
+                    <div>
+                        <span className={`text-sm font-bold ${isActive ? color : 'text-slate-600'}`}>
+                            {name}
+                        </span>
+                        <span className={`text-[10px] ml-2 ${isActive ? 'text-slate-400' : 'text-slate-600'}`}>
+                            {source}
+                        </span>
+                    </div>
+                </div>
+                <div className="text-right">
+                    <span className={`text-base font-mono font-bold ${
+                        isActive
+                            ? isMaxed ? 'text-amber-400' : color
+                            : 'text-slate-600'
+                    }`}>
+                        {isActive ? formatPercent(value) : 'LOCKED'}
+                    </span>
+                    {isMaxed && <span className="ml-1 text-[10px] text-amber-400">MAX</span>}
+                </div>
+            </div>
+            {isActive && (
+                <div className="text-[10px] text-slate-400 mt-1">{description}</div>
+            )}
+            {!isActive && (
+                <div className="text-[10px] text-slate-600 mt-1">Overflow {source} to unlock</div>
+            )}
+        </div>
+    );
+}
+
+// Mobile version of overflow stat row
+function MobileOverflowStatRow({ name, value, color, source, maxValue = 100 }) {
+    const isActive = value > 0;
+    const isMaxed = value >= maxValue;
+
+    return (
+        <div className={`col-span-2 my-0.5 py-1.5 px-2 rounded border transition-all ${
+            isActive
+                ? isMaxed
+                    ? 'bg-gradient-to-r from-amber-900/40 to-amber-900/40 border-amber-500/40'
+                    : 'bg-gradient-to-r from-purple-900/30 to-indigo-900/30 border-purple-500/30'
+                : 'bg-slate-800/20 border-slate-700/20'
+        }`}>
+            <div className="flex justify-between items-center">
+                <span className={`text-xs font-bold ${isActive ? color : 'text-slate-600'}`}>
+                    {name === 'Ascended' && '✦ '}
+                    {name === 'Annihilate' && '💀 '}
+                    {name === 'Frenzy' && '⚡ '}
+                    {name === 'Phantom' && '👻 '}
+                    {name === 'Overheal' && '🛡️ '}
+                    {name === 'Vengeance' && '⚔️ '}
+                    {name === 'Second Wind' && '💨 '}
+                    {name === 'Immunity' && '🔰 '}
+                    {name}
+                    <span className="text-[9px] text-slate-500 ml-1">({source})</span>
+                </span>
+                <span className={`text-xs font-mono font-bold ${
+                    isActive
+                        ? isMaxed ? 'text-amber-400' : color
+                        : 'text-slate-600'
+                }`}>
+                    {isActive ? formatPercent(value) : '---'}
+                    {isMaxed && <span className="ml-1 text-[9px]">MAX</span>}
+                </span>
+            </div>
         </div>
     );
 }
