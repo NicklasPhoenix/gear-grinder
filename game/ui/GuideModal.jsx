@@ -430,58 +430,118 @@ function StatsSection() {
         <div>
             <SectionTitle>Character Stats</SectionTitle>
 
-            <SubSection title="Overflow Effects">
-                <p className="mb-2">When stats exceed their caps, overflow converts to <span className="text-yellow-400">powerful special effects</span>:</p>
-                <div className="space-y-1 text-sm">
-                    <p><span className="text-cyan-400">Ascended Crit</span> - Crit over 100% → Double crit damage chance</p>
-                    <p><span className="text-orange-400">Annihilate</span> - Crit DMG over 300% → 5x damage crit chance</p>
-                    <p><span className="text-purple-400">Frenzy</span> - Speed over 200% → Triple attack chance</p>
-                    <p><span className="text-violet-400">Phantom</span> - Dodge over 80% → Counter-attack on dodge</p>
-                    <p><span className="text-cyan-400">Overheal</span> - Lifesteal over 100% → Excess heal becomes shield</p>
-                    <p><span className="text-rose-400">Vengeance</span> - Thorns over 100% → Full damage counter-attack</p>
-                    <p><span className="text-emerald-400">Second Wind</span> - HP Regen over 5%/s → Emergency heal when low</p>
-                    <p><span className="text-amber-400">Immunity</span> - Dmg Red. over 75% → Full damage negation chance</p>
-                </div>
+            <SubSection title="Stat System Overview">
+                <p className="mb-2">Stats are divided into <span className="text-red-400">Primary</span> and <span className="text-yellow-400">Secondary</span> categories:</p>
+                <p className="text-xs text-slate-400">• Primary stats provide weapon scaling + one basic bonus</p>
+                <p className="text-xs text-slate-400">• Secondary stats provide specialized combat bonuses</p>
+                <p className="text-xs text-slate-400">• Both use the same stat point pool (3 points per level)</p>
             </SubSection>
 
             <SubSection title="Primary Stats">
+                <p className="text-xs text-slate-500 mb-2">Weapon damage scaling + one basic bonus per point</p>
                 <div className="space-y-2">
                     <div className="p-2 bg-slate-800/50 rounded">
                         <span className="text-red-400 font-bold">STR (Strength)</span>
-                        <p className="text-xs text-slate-400">+2 base damage per point</p>
-                        <p className="text-xs text-slate-500">+3% damage with STR weapons (Sword, Scythe, Greataxe)</p>
+                        <p className="text-xs text-slate-400">+1 base damage, +3% damage with STR weapons</p>
+                        <p className="text-xs text-slate-500">Weapons: Sword, Scythe, Greataxe</p>
                     </div>
                     <div className="p-2 bg-slate-800/50 rounded">
                         <span className="text-purple-400 font-bold">INT (Intelligence)</span>
-                        <p className="text-xs text-slate-400">+1% XP bonus per point</p>
-                        <p className="text-xs text-slate-500">+3% damage with INT weapons (Staff)</p>
+                        <p className="text-xs text-slate-400">+1 base damage, +3% damage with INT weapons</p>
+                        <p className="text-xs text-slate-500">Weapons: Staff</p>
                     </div>
                     <div className="p-2 bg-slate-800/50 rounded">
                         <span className="text-green-400 font-bold">VIT (Vitality)</span>
-                        <p className="text-xs text-slate-400">+8 max HP, +1 armor per point</p>
-                        <p className="text-xs text-slate-500">+0.15% HP regen/sec, +0.3% damage reduction, +2% damage with Mace</p>
+                        <p className="text-xs text-slate-400">+10 max HP, +2% damage with VIT weapons</p>
+                        <p className="text-xs text-slate-500">Weapons: Mace</p>
                     </div>
                     <div className="p-2 bg-slate-800/50 rounded">
-                        <span className="text-blue-400 font-bold">AGI (Agility)</span>
-                        <p className="text-xs text-slate-400">+0.5% crit chance, +1% attack speed, +0.3% dodge per point</p>
-                        <p className="text-xs text-slate-500">+2% damage with AGI weapons (Dagger, Katana)</p>
-                    </div>
-                    <div className="p-2 bg-slate-800/50 rounded">
-                        <span className="text-yellow-400 font-bold">LCK (Luck)</span>
-                        <p className="text-xs text-slate-400">+0.5% silver find, +0.5% material drop rate per point</p>
-                        <p className="text-xs text-slate-500">+2% crit damage per point</p>
+                        <span className="text-amber-400 font-bold">AGI (Agility)</span>
+                        <p className="text-xs text-slate-400">+1% attack speed, +2% damage with AGI weapons</p>
+                        <p className="text-xs text-slate-500">Weapons: Dagger, Katana</p>
                     </div>
                 </div>
             </SubSection>
 
-            <SubSection title="Combat Stats">
-                <p><span className="text-white font-bold">Damage:</span> Base + STR bonus + gear + weapon scaling</p>
-                <p><span className="text-white font-bold">Armor:</span> Reduces damage (Armor / (Armor + 250))</p>
-                <p><span className="text-white font-bold">HP:</span> Your health pool. Regenerates based on VIT.</p>
-                <p><span className="text-white font-bold">Crit Rate:</span> Chance to crit (base 3%, capped at 100%)</p>
-                <p><span className="text-white font-bold">Crit Damage:</span> Crit multiplier (base 150%)</p>
-                <p><span className="text-white font-bold">Dodge:</span> Chance to avoid damage (capped at 80%)</p>
-                <p><span className="text-white font-bold">Damage Reduction:</span> Flat % reduction (capped)</p>
+            <SubSection title="Secondary Stats">
+                <p className="text-xs text-slate-500 mb-2">Specialized combat stats - must be skilled separately</p>
+                <div className="grid grid-cols-2 gap-1 text-xs">
+                    <div className="p-1.5 bg-slate-800/30 rounded">
+                        <span className="text-yellow-400">Crit Chance</span>
+                        <span className="text-slate-500 ml-1">+1%/pt</span>
+                    </div>
+                    <div className="p-1.5 bg-slate-800/30 rounded">
+                        <span className="text-orange-400">Crit Damage</span>
+                        <span className="text-slate-500 ml-1">+5%/pt</span>
+                    </div>
+                    <div className="p-1.5 bg-slate-800/30 rounded">
+                        <span className="text-green-400">Dodge</span>
+                        <span className="text-slate-500 ml-1">+1%/pt</span>
+                    </div>
+                    <div className="p-1.5 bg-slate-800/30 rounded">
+                        <span className="text-blue-400">Armor</span>
+                        <span className="text-slate-500 ml-1">+3/pt</span>
+                    </div>
+                    <div className="p-1.5 bg-slate-800/30 rounded">
+                        <span className="text-emerald-400">HP Regen</span>
+                        <span className="text-slate-500 ml-1">+0.2%/s/pt</span>
+                    </div>
+                    <div className="p-1.5 bg-slate-800/30 rounded">
+                        <span className="text-sky-400">Dmg Reduction</span>
+                        <span className="text-slate-500 ml-1">+0.5%/pt</span>
+                    </div>
+                    <div className="p-1.5 bg-slate-800/30 rounded">
+                        <span className="text-purple-400">XP Bonus</span>
+                        <span className="text-slate-500 ml-1">+2%/pt</span>
+                    </div>
+                    <div className="p-1.5 bg-slate-800/30 rounded">
+                        <span className="text-slate-400">Silver Find</span>
+                        <span className="text-slate-500 ml-1">+1%/pt</span>
+                    </div>
+                    <div className="p-1.5 bg-slate-800/30 rounded col-span-2">
+                        <span className="text-teal-400">Drop Rate</span>
+                        <span className="text-slate-500 ml-1">+1%/pt</span>
+                    </div>
+                </div>
+            </SubSection>
+
+            <SubSection title="Overflow Effects">
+                <p className="mb-2">When stats exceed their caps, overflow converts to <span className="text-yellow-400">powerful special effects</span>:</p>
+                <div className="space-y-1.5 text-xs">
+                    <div className="p-1.5 bg-slate-800/30 rounded flex justify-between">
+                        <span><span className="text-cyan-400">Ascended</span> - Crit &gt;100%</span>
+                        <span className="text-slate-500">Double crit dmg (max 100%)</span>
+                    </div>
+                    <div className="p-1.5 bg-slate-800/30 rounded flex justify-between">
+                        <span><span className="text-orange-400">Annihilate</span> - Crit DMG &gt;300%</span>
+                        <span className="text-slate-500">5x dmg crit (max 100%)</span>
+                    </div>
+                    <div className="p-1.5 bg-slate-800/30 rounded flex justify-between">
+                        <span><span className="text-violet-400">Phantom</span> - Dodge &gt;80%</span>
+                        <span className="text-slate-500">Counter on dodge (max 100%)</span>
+                    </div>
+                    <div className="p-1.5 bg-slate-800/30 rounded flex justify-between">
+                        <span><span className="text-amber-400">Immunity</span> - DR &gt;75%</span>
+                        <span className="text-slate-500">Full negation (max 100%)</span>
+                    </div>
+                    <div className="p-1.5 bg-slate-800/30 rounded flex justify-between">
+                        <span><span className="text-emerald-400">Second Wind</span> - Regen &gt;25%/s</span>
+                        <span className="text-slate-500">Emergency heal (max 50%)</span>
+                    </div>
+                    <div className="p-1.5 bg-slate-800/30 rounded flex justify-between">
+                        <span><span className="text-purple-400">Frenzy</span> - Speed &gt;200%</span>
+                        <span className="text-slate-500">Triple attack (max 100%)</span>
+                    </div>
+                    <div className="p-1.5 bg-slate-800/30 rounded flex justify-between">
+                        <span><span className="text-cyan-400">Overheal</span> - Lifesteal &gt;100%</span>
+                        <span className="text-slate-500">Shield gen (max 50%)</span>
+                    </div>
+                    <div className="p-1.5 bg-slate-800/30 rounded flex justify-between">
+                        <span><span className="text-rose-400">Vengeance</span> - Thorns &gt;100%</span>
+                        <span className="text-slate-500">Full counter (max 100%)</span>
+                    </div>
+                </div>
+                <p className="text-xs text-amber-400 mt-2">Stats show (MAX) when their overflow effect is capped - further points are wasted!</p>
             </SubSection>
 
             <SubSection title="Stat Point Sources">
