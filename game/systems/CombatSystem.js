@@ -43,22 +43,48 @@ export class CombatSystem {
      * Called periodically to batch floating text and reduce visual clutter.
      */
     flushAccumulatedText() {
-        // Show accumulated damage dealt to enemy (left side of enemy)
+        // Show accumulated damage dealt to enemy
         if (this.accumulatedDamageToEnemy > 0) {
             const type = this.lastCritType || 'playerDmg';
-            const text = this.lastCritType ? `${this.accumulatedDamageToEnemy}!` : `-${this.accumulatedDamageToEnemy}`;
+            let text;
+            // Add label prefix for special attacks
+            switch (this.lastCritType) {
+                case 'crit':
+                    text = `CRIT ${this.accumulatedDamageToEnemy}!`;
+                    break;
+                case 'ascendedCrit':
+                    text = `ASCEND ${this.accumulatedDamageToEnemy}!`;
+                    break;
+                case 'annihilate':
+                    text = `ANNIHL ${this.accumulatedDamageToEnemy}!`;
+                    break;
+                case 'frenzy':
+                    text = `FRENZYx3 ${this.accumulatedDamageToEnemy}!`;
+                    break;
+                case 'multiStrike':
+                    text = `x2 ${this.accumulatedDamageToEnemy}!`;
+                    break;
+                case 'vengeance':
+                    text = `VENGE ${this.accumulatedDamageToEnemy}!`;
+                    break;
+                case 'retaliate':
+                    text = `COUNTER ${this.accumulatedDamageToEnemy}!`;
+                    break;
+                default:
+                    text = `${this.accumulatedDamageToEnemy}`;
+            }
             this.callbacks.onFloatingText(text, type, 'enemy');
             this.accumulatedDamageToEnemy = 0;
             this.lastCritType = null;
         }
 
-        // Show accumulated healing to player (right side of player)
+        // Show accumulated healing to player
         if (this.accumulatedHealToPlayer > 0) {
             this.callbacks.onFloatingText(`+${this.accumulatedHealToPlayer}`, 'heal', 'player');
             this.accumulatedHealToPlayer = 0;
         }
 
-        // Show accumulated damage to player (left side of player)
+        // Show accumulated damage to player
         if (this.accumulatedDamageToPlayer > 0) {
             this.callbacks.onFloatingText(`-${this.accumulatedDamageToPlayer}`, 'enemyDmg', 'player');
             this.accumulatedDamageToPlayer = 0;
@@ -258,7 +284,7 @@ export class CombatSystem {
             newState.enemyHp -= frenzyDmg * 2;
             totalDamageDealt += frenzyDmg * 2;
             this.accumulatedDamageToEnemy += frenzyDmg * 2;
-            this.callbacks.onFloatingText('FRENZY!', 'frenzy', 'enemy');
+            this.lastCritType = 'frenzy';
         }
         // Multi-Strike: chance to hit again (not on ascended crit or frenzy)
         else if (!isAscendedCrit && stats.multiStrike > 0 && Math.random() * 100 < stats.multiStrike) {
@@ -266,19 +292,17 @@ export class CombatSystem {
             newState.enemyHp -= multiDmg;
             totalDamageDealt += multiDmg;
             this.accumulatedDamageToEnemy += multiDmg;
-            this.callbacks.onFloatingText('x2!', 'multiStrike', 'enemy');
+            this.lastCritType = 'multiStrike';
         }
 
         // Accumulate damage to enemy (shown in batches to reduce clutter)
         this.accumulatedDamageToEnemy += playerDmg;
 
-        // Track crit type for display (special crits show label immediately)
+        // Track crit type for combined display with damage number
         if (isAscendedCrit) {
             this.lastCritType = 'ascendedCrit';
-            this.callbacks.onFloatingText('ASCENDED!', 'ascendedCrit', 'enemy');
         } else if (isAnnihilate) {
             this.lastCritType = 'annihilate';
-            this.callbacks.onFloatingText('ANNIHILATE!', 'annihilate', 'enemy');
         } else if (isCrit) {
             this.lastCritType = 'crit';
         }
@@ -485,12 +509,12 @@ export class CombatSystem {
                     combatUpdates.actualDamageTaken = reducedDmg;
                     combatUpdates.isPlayerTurn = false;
 
-                    // Vengeance: overflow thorns becomes full damage counter (show immediately)
+                    // Vengeance: overflow thorns becomes full damage counter
                     if (stats.vengeance > 0 && reducedDmg > 0 && Math.random() * 100 < stats.vengeance) {
                         const vengDmg = playerDmg; // Full player damage
                         newState.enemyHp -= vengDmg;
                         this.accumulatedDamageToEnemy += vengDmg;
-                        this.callbacks.onFloatingText('VENGEANCE!', 'vengeance', 'enemy');
+                        this.lastCritType = 'vengeance';
                     }
 
                     // Thorns (only if not vengeance) - accumulate with regular damage
@@ -500,12 +524,12 @@ export class CombatSystem {
                         this.accumulatedDamageToEnemy += thornsDmg;
                     }
 
-                    // Retaliate: chance to counter-attack when hit (show immediately)
+                    // Retaliate: chance to counter-attack when hit
                     if (stats.retaliate > 0 && reducedDmg > 0 && Math.random() * 100 < stats.retaliate) {
                         const retaliateDmg = Math.floor(playerDmg * 0.5);
                         newState.enemyHp -= retaliateDmg;
                         this.accumulatedDamageToEnemy += retaliateDmg;
-                        this.callbacks.onFloatingText('COUNTER!', 'retaliate', 'enemy');
+                        if (!this.lastCritType) this.lastCritType = 'retaliate';
                     }
                 }
             }
