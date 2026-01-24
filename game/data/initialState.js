@@ -11,6 +11,7 @@ export const initialState = {
     autoSalvageBossItems: false, // Include boss set items in auto-salvage (dangerous!)
     inventorySort: 'none', // Inventory sort: 'none', 'slot', 'tier', 'score'
     combatPaused: false, // Pause combat to take a breather
+    autoProgress: false, // Automatically advance to next zone when unlocked
     // Boss stones - dropped by bosses, needed to enhance boss gear past +10
     bossStones: {
         crow: 0, cerberus: 0, demon: 0, spider: 0, shadow: 0,

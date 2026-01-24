@@ -28,13 +28,31 @@ export default function ZoneView() {
 
     const allZones = [...ZONES, ...PRESTIGE_ZONES.filter(z => (state.prestigeLevel || 0) >= (z.prestigeReq || 0))];
 
+    const toggleAutoProgress = () => {
+        gameManager.setState(prev => ({ ...prev, autoProgress: !prev.autoProgress }));
+    };
+
     return (
         <div className="h-full flex flex-col gap-2">
             {/* Header */}
             <div className="game-panel">
                 <div className="game-panel-header flex justify-between items-center">
                     <span className="text-sm">World Map</span>
-                    <span className="text-sm text-slate-400">Zone {state.currentZone + 1}/{allZones.length}</span>
+                    <div className="flex items-center gap-3">
+                        {/* Auto-progress toggle */}
+                        <button
+                            onClick={toggleAutoProgress}
+                            className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs font-semibold transition-all ${
+                                state.autoProgress
+                                    ? 'bg-green-600/40 text-green-300 hover:bg-green-600/50'
+                                    : 'bg-slate-700/40 text-slate-400 hover:bg-slate-700/50'
+                            }`}
+                        >
+                            <span className={`w-2.5 h-2.5 rounded-full ${state.autoProgress ? 'bg-green-400' : 'bg-slate-500'}`} />
+                            Auto
+                        </button>
+                        <span className="text-sm text-slate-400">Zone {state.currentZone + 1}/{allZones.length}</span>
+                    </div>
                 </div>
             </div>
 
@@ -134,13 +152,28 @@ export default function ZoneView() {
                                     );
                                 })()}
 
-                                {/* Progress bar */}
+                                {/* Progress bar with requirements */}
                                 {zone.killsRequired > 0 && (
-                                    <div className="mt-2 h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                                        <div
-                                            className={`h-full transition-all ${progress >= 100 ? 'bg-green-500' : 'bg-blue-500'}`}
-                                            style={{ width: `${progress}%` }}
-                                        />
+                                    <div className="mt-2">
+                                        <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                                            <div
+                                                className={`h-full transition-all ${progress >= 100 ? 'bg-green-500' : 'bg-blue-500'}`}
+                                                style={{ width: `${progress}%` }}
+                                            />
+                                        </div>
+                                        <div className="flex justify-between items-center mt-1">
+                                            <span className={`text-[10px] ${progress >= 100 ? 'text-green-400' : 'text-slate-500'}`}>
+                                                {kills}/{zone.killsRequired} kills
+                                            </span>
+                                            {progress < 100 && (
+                                                <span className="text-[10px] text-slate-500">
+                                                    {zone.killsRequired - kills} to unlock next
+                                                </span>
+                                            )}
+                                            {progress >= 100 && (
+                                                <span className="text-[10px] text-green-400">Completed</span>
+                                            )}
+                                        </div>
                                     </div>
                                 )}
 

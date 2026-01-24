@@ -370,7 +370,7 @@ export default function GameTooltip({ tooltip }) {
                 const regularEffects = effects.filter(e => !e.isAwakened);
                 const awakenedEffects = effects.filter(e => e.isAwakened);
 
-                // Helper to get roll quality percentage
+                // Helper to get roll quality percentage (capped at 100)
                 const getRollQuality = (effectId, value) => {
                     const effectDef = SPECIAL_EFFECTS.find(e => e.id === effectId);
                     if (!effectDef) return null;
@@ -378,8 +378,10 @@ export default function GameTooltip({ tooltip }) {
                     const minVal = effectDef.minVal;
                     const range = maxForTier - minVal;
                     if (range <= 0) return { percent: 100, max: maxForTier };
-                    const percent = Math.round(((value - minVal) / range) * 100);
-                    return { percent, max: maxForTier, min: minVal };
+                    const rawPercent = Math.round(((value - minVal) / range) * 100);
+                    // Cap at 100% - values exceeding tier max are legacy items
+                    const percent = Math.min(100, rawPercent);
+                    return { percent, max: maxForTier, min: minVal, isMaxed: rawPercent >= 100 };
                 };
 
                 // Get color based on roll quality
@@ -418,10 +420,10 @@ export default function GameTooltip({ tooltip }) {
                                                                     backgroundColor: `${getQualityColor(quality.percent)}20`
                                                                 }}
                                                             >
-                                                                {quality.percent}%
+                                                                {quality.isMaxed ? 'MAX' : `${quality.percent}%`}
                                                             </span>
                                                             <span className="text-[10px] text-slate-500">
-                                                                max: {quality.max}
+                                                                max: {Math.round(quality.max)}
                                                             </span>
                                                         </>
                                                     )}

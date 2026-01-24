@@ -1,4 +1,4 @@
-import { getZoneById } from '../data/zones';
+import { getZoneById, ZONES, PRESTIGE_ZONES } from '../data/zones';
 import { BOSS_SETS, PRESTIGE_BOSS_SETS, BOSS_STONES, MATERIALS, getSalvageReturns, addItemToInventory, generateGearDrop, TIERS, SPECIAL_EFFECTS, getEffectMaxForTier } from '../data/items';
 import { SKILLS } from '../data/skills';
 import { calculatePlayerStats } from './PlayerSystem';
@@ -537,6 +537,25 @@ export class CombatSystem {
         // Zone Kills
         state.zoneKills = { ...state.zoneKills };
         state.zoneKills[state.currentZone] = (state.zoneKills[state.currentZone] || 0) + 1;
+
+        // Auto-progress to next zone if enabled and unlocked
+        if (state.autoProgress && !state.endlessActive) {
+            const allZones = [...ZONES, ...PRESTIGE_ZONES.filter(z => (state.prestigeLevel || 0) >= (z.prestigeReq || 0))];
+            const currentIndex = allZones.findIndex(z => z.id === state.currentZone);
+            if (currentIndex >= 0 && currentIndex < allZones.length - 1) {
+                const currentZoneData = allZones[currentIndex];
+                const nextZone = allZones[currentIndex + 1];
+                const currentKills = state.zoneKills[currentZoneData.id] || 0;
+                // Check if we just reached the kill requirement for current zone
+                if (currentKills >= currentZoneData.killsRequired && currentZoneData.killsRequired > 0) {
+                    state.currentZone = nextZone.id;
+                    state.enemyHp = nextZone.enemyHp;
+                    state.enemyMaxHp = nextZone.enemyHp;
+                    log.push({ type: 'progress', msg: `Moved to ${nextZone.name}!` });
+                    this.callbacks.onFloatingText(`ZONE: ${nextZone.name}`, 'milestone', 'player');
+                }
+            }
+        }
 
         // Handle gear drop with loot filter
         if (droppedGear) {
