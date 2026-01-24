@@ -117,6 +117,20 @@ export class CombatSystem {
         let log = [...state.combatLog].slice(-UI.COMBAT_LOG_MAX_ENTRIES);
         let combatUpdates = {}; // Track what happened for visuals
 
+        // Initialize combat state tracking for unique effects
+        if (!newState.combatState) {
+            newState.combatState = {
+                rageStacks: 0,        // Rage stacks (0-10)
+                damageShield: 0,      // Current damage shield amount
+                bleedTimer: 0,        // DOT timers (in ticks)
+                burnTimer: 0,
+                poisonTimer: 0,
+                bleedDamage: 0,       // DOT damage per tick
+                burnDamage: 0,
+                poisonDamage: 0,
+            };
+        }
+
         // Ensure playerHp is valid before combat
         if (typeof newState.playerHp !== 'number' || isNaN(newState.playerHp)) {
             newState.playerHp = safeMaxHp;
@@ -140,12 +154,38 @@ export class CombatSystem {
             }
         }
 
-        // Player Turn
+        // ========== PLAYER TURN ==========
         let playerDmg = stats.damage || PLAYER_BASE.DEFAULT_DAMAGE;
         let isCrit = Math.random() * 100 < (stats.critChance || PLAYER_BASE.DEFAULT_CRIT_CHANCE);
+
+        // Last Stand: bonus damage when below 30% HP
+        if (stats.lastStand > 0 && newState.playerHp < safeMaxHp * 0.3) {
+            playerDmg = Math.floor(playerDmg * (1 + stats.lastStand / 100));
+        }
+
+        // Rage: stacking damage bonus
+        if (stats.rage > 0 && newState.combatState.rageStacks > 0) {
+            playerDmg = Math.floor(playerDmg * (1 + (stats.rage * newState.combatState.rageStacks) / 100));
+        }
+
         if (isCrit) playerDmg = Math.floor(playerDmg * (stats.critDamage || PLAYER_BASE.CRIT_DAMAGE) / 100);
 
+        // Apply armor penetration (enemies have effective armor based on zone level)
+        // For simplicity, armorPen increases effective damage
+        if (stats.armorPen > 0) {
+            playerDmg = Math.floor(playerDmg * (1 + stats.armorPen / 200)); // 50% armorPen = +25% damage
+        }
+
         newState.enemyHp -= playerDmg;
+        let totalDamageDealt = playerDmg;
+
+        // Multi-Strike: chance to hit again
+        if (stats.multiStrike > 0 && Math.random() * 100 < stats.multiStrike) {
+            const multiDmg = Math.floor(playerDmg * 0.75); // Second hit does 75% damage
+            newState.enemyHp -= multiDmg;
+            totalDamageDealt += multiDmg;
+            this.callbacks.onFloatingText(`x2 ${multiDmg}!`, 'multiStrike', 'enemy');
+        }
 
         // Visuals: Damage Text
         this.callbacks.onFloatingText(
@@ -156,31 +196,129 @@ export class CombatSystem {
         combatUpdates.lastDamage = playerDmg;
         combatUpdates.isPlayerTurn = true;
 
-        // Lifesteal (soft cap with diminishing returns applied in PlayerSystem)
-        if (stats.lifesteal > 0) {
-            const healed = Math.floor(playerDmg * stats.lifesteal / 100);
-            newState.playerHp = Math.min(newState.playerHp + healed, safeMaxHp);
+        // Stack rage after hitting
+        if (stats.rage > 0) {
+            newState.combatState.rageStacks = Math.min(10, newState.combatState.rageStacks + 1);
+        }
 
-            if (healed > 0) {
-                this.callbacks.onFloatingText(`+${healed}`, 'heal', 'player');
-                combatUpdates.lastHeal = healed;
+        // Apply DOT effects
+        const baseDmg = stats.damage || PLAYER_BASE.DEFAULT_DAMAGE;
+        const ticksPerSecond = COMBAT.ATTACKS_PER_SECOND;
+
+        // Bleed: 25% weapon damage over 3 seconds
+        if (stats.bleed > 0) {
+            const bleedTotal = Math.floor(baseDmg * stats.bleed / 100);
+            const bleedTicks = 3 * ticksPerSecond;
+            newState.combatState.bleedDamage = Math.floor(bleedTotal / bleedTicks);
+            newState.combatState.bleedTimer = bleedTicks;
+        }
+
+        // Burn: deals more upfront damage over 3 seconds
+        if (stats.burn > 0) {
+            const burnTotal = Math.floor(baseDmg * stats.burn / 100);
+            const burnTicks = 3 * ticksPerSecond;
+            newState.combatState.burnDamage = Math.floor(burnTotal / burnTicks);
+            newState.combatState.burnTimer = burnTicks;
+        }
+
+        // Poison: slower but longer lasting, 4 seconds
+        if (stats.poison > 0) {
+            const poisonTotal = Math.floor(baseDmg * stats.poison / 100);
+            const poisonTicks = 4 * ticksPerSecond;
+            newState.combatState.poisonDamage = Math.floor(poisonTotal / poisonTicks);
+            newState.combatState.poisonTimer = poisonTicks;
+        }
+
+        // Process DOT ticks (damage applied each tick)
+        let dotDamage = 0;
+        if (newState.combatState.bleedTimer > 0) {
+            dotDamage += newState.combatState.bleedDamage;
+            newState.combatState.bleedTimer--;
+            if (Math.random() < 0.2) this.callbacks.onFloatingText(`🩸${newState.combatState.bleedDamage}`, 'bleed', 'enemy');
+        }
+        if (newState.combatState.burnTimer > 0) {
+            dotDamage += newState.combatState.burnDamage;
+            newState.combatState.burnTimer--;
+            if (Math.random() < 0.2) this.callbacks.onFloatingText(`🔥${newState.combatState.burnDamage}`, 'burn', 'enemy');
+        }
+        if (newState.combatState.poisonTimer > 0) {
+            dotDamage += newState.combatState.poisonDamage;
+            newState.combatState.poisonTimer--;
+            if (Math.random() < 0.2) this.callbacks.onFloatingText(`☠️${newState.combatState.poisonDamage}`, 'poison', 'enemy');
+        }
+        newState.enemyHp -= dotDamage;
+        totalDamageDealt += dotDamage;
+
+        // Execute: instant kill enemies below 15% HP
+        if (stats.executeChance > 0 && newState.enemyHp > 0 && newState.enemyHp < zone.enemyHp * 0.15) {
+            if (Math.random() * 100 < stats.executeChance) {
+                newState.enemyHp = 0;
+                this.callbacks.onFloatingText('EXECUTE!', 'execute', 'enemy');
             }
+        }
+
+        // Lifesteal (soft cap with diminishing returns applied in PlayerSystem)
+        let totalHealed = 0;
+        if (stats.lifesteal > 0) {
+            const healed = Math.floor(totalDamageDealt * stats.lifesteal / 100);
+            totalHealed += healed;
+        }
+
+        // Vampiric: enhanced lifesteal on top of regular lifesteal
+        if (stats.vampiric > 0) {
+            const vampHealed = Math.floor(totalDamageDealt * stats.vampiric / 100);
+            totalHealed += vampHealed;
+        }
+
+        // Last Stand lifesteal bonus when below 30% HP
+        if (stats.lastStand > 0 && newState.playerHp < safeMaxHp * 0.3) {
+            const lastStandHeal = Math.floor(totalDamageDealt * stats.lastStand / 100);
+            totalHealed += lastStandHeal;
+        }
+
+        if (totalHealed > 0) {
+            newState.playerHp = Math.min(newState.playerHp + totalHealed, safeMaxHp);
+            this.callbacks.onFloatingText(`+${totalHealed}`, 'heal', 'player');
+            combatUpdates.lastHeal = totalHealed;
+        }
+
+        // Silver on Hit: chance for bonus silver
+        if (stats.silverOnHit > 0 && Math.random() * 100 < stats.silverOnHit) {
+            const bonusSilver = Math.floor(zone.goldMin * 0.5);
+            newState.gold += bonusSilver;
+            this.callbacks.onFloatingText(`+${bonusSilver}s`, 'silver', 'player');
         }
 
         // Check Enemy Death
         if (newState.enemyHp <= 0) {
             this.handleEnemyDeath(newState, stats, zone, log, safeMaxHp);
-            // Post-death cleanup/reset is handled inside handleEnemyDeath
+            // Reset combat state on enemy death
+            newState.combatState.rageStacks = 0;
+            newState.combatState.bleedTimer = 0;
+            newState.combatState.burnTimer = 0;
+            newState.combatState.poisonTimer = 0;
+            // Refresh damage shield on kill
+            if (stats.damageShield > 0) {
+                newState.combatState.damageShield = stats.damageShield;
+            }
         } else {
-            // Enemy Return Fire (if alive)
+            // ========== ENEMY TURN ==========
             const dodged = Math.random() * 100 < stats.dodge;
             if (dodged) {
                 this.callbacks.onFloatingText('DODGE!', 'dodge', 'player');
-                combatUpdates.lastDamage = 0; // Dodged
+                combatUpdates.lastDamage = 0;
             } else {
+                // Calculate enemy damage
+                let enemyDmg = zone.enemyDmg;
+
+                // Frostbite: slow enemy attacks (reduce damage as a simplification)
+                if (stats.frostbite > 0) {
+                    enemyDmg = Math.floor(enemyDmg * (1 - stats.frostbite / 100));
+                }
+
                 // Armor reduction (logarithmic diminishing returns)
                 const armorReduction = stats.armor / (stats.armor + COMBAT.ARMOR_CONSTANT);
-                let reducedDmg = Math.floor(zone.enemyDmg * (1 - armorReduction));
+                let reducedDmg = Math.floor(enemyDmg * (1 - armorReduction));
 
                 // Flat damage reduction (applied after armor, enables tank builds)
                 if (stats.damageReduction > 0) {
@@ -190,8 +328,23 @@ export class CombatSystem {
                 // Minimum 1 damage to prevent immortality
                 reducedDmg = Math.max(1, reducedDmg);
 
-                newState.playerHp -= reducedDmg;
-                this.callbacks.onFloatingText(`-${reducedDmg}`, 'enemyDmg', 'player');
+                // Damage Shield: absorbs damage before HP
+                if (newState.combatState.damageShield > 0) {
+                    if (newState.combatState.damageShield >= reducedDmg) {
+                        newState.combatState.damageShield -= reducedDmg;
+                        this.callbacks.onFloatingText(`🛡️${reducedDmg}`, 'shield', 'player');
+                        reducedDmg = 0;
+                    } else {
+                        reducedDmg -= newState.combatState.damageShield;
+                        this.callbacks.onFloatingText(`🛡️${newState.combatState.damageShield}`, 'shield', 'player');
+                        newState.combatState.damageShield = 0;
+                    }
+                }
+
+                if (reducedDmg > 0) {
+                    newState.playerHp -= reducedDmg;
+                    this.callbacks.onFloatingText(`-${reducedDmg}`, 'enemyDmg', 'player');
+                }
                 combatUpdates.lastDamage = reducedDmg;
                 combatUpdates.isPlayerTurn = false;
 
@@ -200,6 +353,13 @@ export class CombatSystem {
                     const thornsDmg = Math.floor(reducedDmg * stats.thorns / 100);
                     newState.enemyHp -= thornsDmg;
                     if (thornsDmg > 0) this.callbacks.onFloatingText(`-${thornsDmg}`, 'thorns', 'enemy');
+                }
+
+                // Retaliate: chance to counter-attack when hit
+                if (stats.retaliate > 0 && reducedDmg > 0 && Math.random() * 100 < stats.retaliate) {
+                    const retaliateDmg = Math.floor(playerDmg * 0.5); // Counter does 50% of player damage
+                    newState.enemyHp -= retaliateDmg;
+                    this.callbacks.onFloatingText(`⚔️${retaliateDmg}`, 'retaliate', 'enemy');
                 }
             }
 
@@ -230,15 +390,25 @@ export class CombatSystem {
         const drops = zone.drops;
         const zoneBonus = Math.floor(state.currentZone / 2) + 1;
 
+        // Kill Heal: heal % of max HP on kill (from set bonuses)
+        if (stats.killHeal > 0) {
+            const killHealAmount = Math.floor(safeMaxHp * stats.killHeal / 100);
+            state.playerHp = Math.min(state.playerHp + killHealAmount, safeMaxHp);
+            this.callbacks.onFloatingText(`+${killHealAmount}`, 'killHeal', 'player');
+        }
+
         // Roll Material Drops
         const enhanceStoneDropped = Math.random() < drops.enhanceStone ? Math.ceil(Math.random() * Math.max(1, zoneBonus / 2)) : 0;
         const blessedOrbDropped = Math.random() < drops.blessedOrb ? Math.ceil(Math.random() * Math.max(1, zoneBonus / 3)) : 0;
         const celestialShardDropped = Math.random() < drops.celestialShard ? Math.ceil(Math.random() * Math.max(1, zoneBonus / 4)) : 0;
         const prestigeStoneDropped = drops.prestigeStone && Math.random() < drops.prestigeStone ? Math.ceil(Math.random() * 2) : 0;
 
+        // Item Find: increased gear drop chance
+        const itemFindBonus = stats.itemFind > 0 ? (1 + stats.itemFind / 100) : 1;
+
         // Roll Gear Drop (non-boss zones only)
         let droppedGear = null;
-        if (!zone.isBoss && zone.gearChance && Math.random() < zone.gearChance * stats.matMult) {
+        if (!zone.isBoss && zone.gearChance && Math.random() < zone.gearChance * stats.matMult * itemFindBonus) {
             droppedGear = generateGearDrop(zone.gearTier || 0, zone.id, zone.prestigeReq || 0);
         }
 

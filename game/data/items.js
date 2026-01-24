@@ -55,187 +55,247 @@ export const GEAR_NAMES = {
     amulet: ['Bead Necklace', 'Bronze Pendant', 'Silver Locket', 'Mystic Amulet', 'Dragon Heart', 'Soul Gem', 'Tear of the Gods', 'Astral Pendant', 'Cosmic Amulet', 'Primordial Heart'],
 };
 
+// Unique boss effects - gameplay-changing abilities beyond simple stat bonuses
+export const UNIQUE_EFFECTS = {
+    // Damage over time effects
+    bleed: { id: 'bleed', name: 'Bleed', desc: 'Attacks cause bleeding for {value}% weapon damage over 3s', isPercent: true, color: '#dc2626' },
+    burn: { id: 'burn', name: 'Burn', desc: 'Attacks ignite enemies for {value}% weapon damage over 3s', isPercent: true, color: '#f97316' },
+    poison: { id: 'poison', name: 'Poison', desc: 'Attacks poison enemies for {value}% weapon damage over 4s', isPercent: true, color: '#22c55e' },
+
+    // Attack modifiers
+    multiStrike: { id: 'multiStrike', name: 'Multi-Strike', desc: '{value}% chance to strike twice', isPercent: true, color: '#8b5cf6' },
+    executeChance: { id: 'executeChance', name: 'Execute', desc: '{value}% chance to instantly kill enemies below 15% HP', isPercent: true, color: '#ef4444' },
+    armorPen: { id: 'armorPen', name: 'Armor Pierce', desc: 'Attacks ignore {value}% of enemy armor', isPercent: true, color: '#6b7280' },
+
+    // Defensive effects
+    damageShield: { id: 'damageShield', name: 'Damage Shield', desc: 'Absorb {value} damage before taking HP damage', isPercent: false, color: '#3b82f6' },
+    retaliate: { id: 'retaliate', name: 'Retaliate', desc: '{value}% chance to counter-attack when hit', isPercent: true, color: '#eab308' },
+    lastStand: { id: 'lastStand', name: 'Last Stand', desc: 'Below 30% HP: +{value}% damage and lifesteal', isPercent: true, color: '#dc2626' },
+
+    // Utility effects
+    silverOnHit: { id: 'silverOnHit', name: 'Silver Strike', desc: 'Attacks have {value}% chance to drop bonus silver', isPercent: true, color: '#fbbf24' },
+    xpBonus: { id: 'xpBonus', name: 'Wisdom', desc: '+{value}% XP gained from kills', isPercent: true, color: '#a855f7' },
+    itemFind: { id: 'itemFind', name: 'Treasure Hunter', desc: '+{value}% chance to find items', isPercent: true, color: '#22d3ee' },
+
+    // Special mechanics
+    rage: { id: 'rage', name: 'Rage', desc: 'Each hit increases damage by {value}%, stacks up to 10x', isPercent: true, color: '#b91c1c' },
+    vampiric: { id: 'vampiric', name: 'Vampiric', desc: 'Heal for {value}% of damage dealt (enhanced lifesteal)', isPercent: true, color: '#7f1d1d' },
+    frostbite: { id: 'frostbite', name: 'Frostbite', desc: 'Attacks slow enemy attacks by {value}%', isPercent: true, color: '#06b6d4' },
+};
+
 export const BOSS_SETS = {
-    // Rebalanced: lower stat bonuses (1.2-1.4), reduced set bonuses for slower progression
-    // Each boss has a specific weapon type for build variety
+    // ============ CROW DEMON - The Shadow Assassin ============
+    // Theme: Quick strikes, bleeding wounds, aerial evasion
     crow: {
-        name: "Crow Demon", color: '#22c55e', tier: 1, statBonus: 1.2, weaponType: 'sword', // Zone 4 boss - STR
+        name: "Crow Demon", color: '#22c55e', tier: 1, statBonus: 1.2, weaponType: 'dagger',
+        lore: "Once a fallen warrior, now reborn as a demon of shadow and vengeance.",
         items: {
-            weapon: { name: "Crow Demon Talon", effect: { id: 'bonusDmg', name: '+DMG', value: 15 } },
-            helmet: { name: "Crow Demon Crown", effect: { id: 'bonusHp', name: '+HP', value: 50 } },
-            armor: { name: "Crow Demon Wings", effect: { id: 'thorns', name: 'Thorns', value: 8 } },
+            weapon: { name: "Crow's Talon", effect: { id: 'bleed', name: 'Bleed', value: 25, unique: true }, desc: "A curved blade that never stops cutting" },
+            helmet: { name: "Crow Demon Visage", effect: { id: 'critChance', name: 'Crit', value: 5 }, desc: "See through the eyes of darkness" },
+            armor: { name: "Crow Demon Wings", effect: { id: 'dodge', name: 'Dodge', value: 6 }, desc: "Feathers that bend around attacks" },
             legs: { name: "Crow Demon Greaves", effect: { id: 'bonusHp', name: '+HP', value: 40 } },
-            boots: { name: "Crow Demon Claws", effect: { id: 'dodge', name: 'Dodge', value: 4 } },
-            gloves: { name: "Crow Demon Grasp", effect: { id: 'bonusDmg', name: '+DMG', value: 10 } },
-            shield: { name: "Crow Demon Ward", effect: { id: 'bonusHp', name: '+HP', value: 70 } },
-            belt: { name: "Crow Demon Girdle", effect: { id: 'critChance', name: 'Crit', value: 4 } },
-            amulet: { name: "Crow Demon Feather", effect: { id: 'lifesteal', name: 'Lifesteal', value: 2 } },
+            boots: { name: "Silent Talons", effect: { id: 'multiStrike', name: 'Multi-Strike', value: 8, unique: true }, desc: "Strike twice before they blink" },
+            gloves: { name: "Crow Demon Grasp", effect: { id: 'critDamage', name: 'Crit DMG', value: 20 } },
+            shield: { name: "Feather Ward", effect: { id: 'retaliate', name: 'Retaliate', value: 10, unique: true }, desc: "Those who strike you feel the murder's wrath" },
+            belt: { name: "Crow Demon Girdle", effect: { id: 'bonusDmg', name: '+DMG', value: 10 } },
+            amulet: { name: "Murder's Feather", effect: { id: 'bleed', name: 'Bleed', value: 15, unique: true }, desc: "A single black feather, always dripping" },
         },
         setBonuses: [
-            { pieces: 2, desc: '+10% HP', effect: { hpMult: 0.10 } },
-            { pieces: 4, desc: '+15% DMG, +5% Thorns', effect: { dmgMult: 0.15, thorns: 5 } },
-            { pieces: 6, desc: '+10% All Stats', effect: { dmgMult: 0.10, hpMult: 0.10, speedMult: 0.05 } },
-            { pieces: 8, desc: 'Crow Flight: +20% HP, +8% Dodge', effect: { hpMult: 0.20, dodge: 8 } },
+            { pieces: 2, desc: 'Shadow Step: +10% Dodge', effect: { dodge: 10 } },
+            { pieces: 4, desc: 'Death From Above: +20% Crit DMG, Bleed +15%', effect: { critDamage: 20, bleedBonus: 0.15 } },
+            { pieces: 6, desc: 'Murder of Crows: +25% DMG, +15% Multi-Strike', effect: { dmgMult: 0.25, multiStrike: 15 } },
+            { pieces: 8, desc: 'CARRION FEAST: Kills heal 5% HP, +50% Bleed damage', effect: { killHeal: 5, bleedBonus: 0.50 } },
         ]
     },
+
+    // ============ CERBERUS - The Hellfire Guardian ============
+    // Theme: Burning damage, triple attacks, hellish resilience
     cerberus: {
-        name: "Cerberus", color: '#8b5cf6', tier: 2, statBonus: 1.25, weaponType: 'staff', // Zone 9 boss - INT
+        name: "Cerberus", color: '#8b5cf6', tier: 2, statBonus: 1.25, weaponType: 'staff',
+        lore: "The three-headed guardian of the underworld gates, wreathed in eternal flame.",
         items: {
-            weapon: { name: "Cerberus Fang", effect: { id: 'critDamage', name: 'Crit DMG', value: 35 } },
-            helmet: { name: "Cerberus Skull", effect: { id: 'lifesteal', name: 'Lifesteal', value: 3 } },
-            armor: { name: "Cerberus Hide", effect: { id: 'bonusHp', name: '+HP', value: 90 } },
-            legs: { name: "Cerberus Greaves", effect: { id: 'critChance', name: 'Crit', value: 4 } },
+            weapon: { name: "Hellfire Staff", effect: { id: 'burn', name: 'Burn', value: 30, unique: true }, desc: "Channels the flames of three hells" },
+            helmet: { name: "Triple Crown", effect: { id: 'multiStrike', name: 'Multi-Strike', value: 12, unique: true }, desc: "Three minds, three attacks" },
+            armor: { name: "Cerberus Hide", effect: { id: 'bonusHp', name: '+HP', value: 90 }, desc: "Thick hide scarred by hellfire" },
+            legs: { name: "Cerberus Greaves", effect: { id: 'burn', name: 'Burn', value: 15, unique: true } },
             boots: { name: "Cerberus Paws", effect: { id: 'dodge', name: 'Dodge', value: 5 } },
-            gloves: { name: "Cerberus Claws", effect: { id: 'critChance', name: 'Crit', value: 6 } },
-            shield: { name: "Cerberus Guard", effect: { id: 'bonusDmg', name: '+DMG', value: 20 } },
-            belt: { name: "Cerberus Chain", effect: { id: 'lifesteal', name: 'Lifesteal', value: 2 } },
-            amulet: { name: "Cerberus Heart", effect: { id: 'critDamage', name: 'Crit DMG', value: 25 } },
+            gloves: { name: "Fangs of the Three", effect: { id: 'critChance', name: 'Crit', value: 6 } },
+            shield: { name: "Gate Guardian", effect: { id: 'damageShield', name: 'Shield', value: 50, unique: true }, desc: "None shall pass unscathed" },
+            belt: { name: "Chain of Binding", effect: { id: 'lifesteal', name: 'Lifesteal', value: 2 } },
+            amulet: { name: "Heart of Hellfire", effect: { id: 'burn', name: 'Burn', value: 20, unique: true }, desc: "Burns with the fury of the underworld" },
         },
         setBonuses: [
-            { pieces: 2, desc: '+3% Lifesteal', effect: { lifesteal: 3 } },
-            { pieces: 4, desc: '+20% Crit DMG, +15% DMG', effect: { critDamage: 20, dmgMult: 0.15 } },
-            { pieces: 6, desc: '+6% Crit Chance, +15% HP', effect: { critChance: 6, hpMult: 0.15 } },
-            { pieces: 8, desc: 'Hellhound Fury: +5% Lifesteal, +30% Crit DMG', effect: { lifesteal: 5, critDamage: 30 } },
+            { pieces: 2, desc: 'Hellfire Aura: Burn damage +25%', effect: { burnBonus: 0.25 } },
+            { pieces: 4, desc: 'Three Heads: +20% Multi-Strike, +20% Crit DMG', effect: { multiStrike: 20, critDamage: 20 } },
+            { pieces: 6, desc: 'Guardian\'s Might: +100 Shield, +20% HP', effect: { damageShield: 100, hpMult: 0.20 } },
+            { pieces: 8, desc: 'INFERNAL REBIRTH: Survive fatal blow once per fight with 30% HP', effect: { phoenixOnce: true, hpMult: 0.15 } },
         ]
     },
+
+    // ============ DEMON LORD - The Bloodletter ============
+    // Theme: Stacking bleeds, execute, demonic fury
     demon: {
-        name: "Demon Lord", color: '#ef4444', tier: 3, statBonus: 1.25, weaponType: 'dagger', // Zone 14 boss - AGI
+        name: "Demon Lord", color: '#ef4444', tier: 3, statBonus: 1.25, weaponType: 'dagger',
+        lore: "A prince of the abyss who bathes in the blood of his enemies.",
         items: {
-            weapon: { name: "Demon Lord Blade", effect: { id: 'bonusDmg', name: '+DMG', value: 30 } },
-            helmet: { name: "Demon Lord Crown", effect: { id: 'critChance', name: 'Crit', value: 8 } },
+            weapon: { name: "Bloodletter", effect: { id: 'bleed', name: 'Bleed', value: 40, unique: true }, desc: "Each wound opens ten more" },
+            helmet: { name: "Demon Lord Crown", effect: { id: 'executeChance', name: 'Execute', value: 5, unique: true }, desc: "The weak deserve no mercy" },
             armor: { name: "Demon Lord Plate", effect: { id: 'bonusHp', name: '+HP', value: 130 } },
-            legs: { name: "Demon Lord Greaves", effect: { id: 'bonusDmg', name: '+DMG', value: 20 } },
+            legs: { name: "Demon Lord Greaves", effect: { id: 'lastStand', name: 'Last Stand', value: 25, unique: true }, desc: "Wounded demons fight hardest" },
             boots: { name: "Demon Lord Hooves", effect: { id: 'dodge', name: 'Dodge', value: 6 } },
-            gloves: { name: "Demon Lord Claws", effect: { id: 'critDamage', name: 'Crit DMG', value: 35 } },
-            shield: { name: "Demon Lord Aegis", effect: { id: 'thorns', name: 'Thorns', value: 12 } },
-            belt: { name: "Demon Lord Girdle", effect: { id: 'bonusHp', name: '+HP', value: 100 } },
-            amulet: { name: "Demon Lord Heart", effect: { id: 'bonusDmg', name: '+DMG', value: 25 } },
+            gloves: { name: "Torture's Touch", effect: { id: 'bleed', name: 'Bleed', value: 25, unique: true }, desc: "Every touch brings agony" },
+            shield: { name: "Aegis of Suffering", effect: { id: 'thorns', name: 'Thorns', value: 12 } },
+            belt: { name: "Bloodsoaked Girdle", effect: { id: 'vampiric', name: 'Vampiric', value: 3, unique: true }, desc: "Drink deep of their pain" },
+            amulet: { name: "Demon Lord Heart", effect: { id: 'critDamage', name: 'Crit DMG', value: 35 } },
         },
         setBonuses: [
-            { pieces: 2, desc: '+15% DMG', effect: { dmgMult: 0.15 } },
-            { pieces: 4, desc: '+12% HP, +8% Crit Chance', effect: { hpMult: 0.12, critChance: 8 } },
-            { pieces: 6, desc: '+25% Crit DMG, +10% Thorns', effect: { critDamage: 25, thorns: 10 } },
-            { pieces: 8, desc: 'Demon Fury: +30% DMG, +15% Speed', effect: { dmgMult: 0.30, speedMult: 0.15 } },
+            { pieces: 2, desc: 'Blood Scent: +5% Execute chance on bleeding targets', effect: { executeChance: 5 } },
+            { pieces: 4, desc: 'Sadistic: +30% Bleed damage, +3% Vampiric', effect: { bleedBonus: 0.30, vampiric: 3 } },
+            { pieces: 6, desc: 'Demon Fury: +30% DMG when below 50% HP', effect: { lastStand: 30 } },
+            { pieces: 8, desc: 'LORD OF PAIN: Bleeds stack infinitely, +10% Execute', effect: { bleedStack: true, executeChance: 10 } },
         ]
     },
+
+    // ============ SPIDER MATRIARCH - The Venomweaver ============
+    // Theme: Poison DOT, web slows, patient predator
     spider: {
-        name: "Spider Matriarch", color: '#06b6d4', tier: 4, statBonus: 1.3, weaponType: 'mace', // Zone 19 boss - VIT
+        name: "Spider Matriarch", color: '#06b6d4', tier: 4, statBonus: 1.3, weaponType: 'mace',
+        lore: "Mother of a million spiders, her venom dissolves flesh and spirit alike.",
         items: {
-            weapon: { name: "Matriarch Fang", effect: { id: 'bonusDmg', name: '+DMG', value: 45 } },
-            helmet: { name: "Matriarch Crown", effect: { id: 'dodge', name: 'Dodge', value: 7 } },
-            armor: { name: "Matriarch Carapace", effect: { id: 'bonusHp', name: '+HP', value: 180 } },
-            legs: { name: "Matriarch Legguards", effect: { id: 'bonusHp', name: '+HP', value: 120 } },
-            boots: { name: "Matriarch Treads", effect: { id: 'dodge', name: 'Dodge', value: 5 } },
-            gloves: { name: "Matriarch Spinnerets", effect: { id: 'critChance', name: 'Crit', value: 8 } },
-            shield: { name: "Matriarch Web", effect: { id: 'thorns', name: 'Thorns', value: 12 } },
-            belt: { name: "Matriarch Silk", effect: { id: 'lifesteal', name: 'Lifesteal', value: 3 } },
-            amulet: { name: "Matriarch Eye", effect: { id: 'critDamage', name: 'Crit DMG', value: 40 } },
+            weapon: { name: "Venom Fang Mace", effect: { id: 'poison', name: 'Poison', value: 45, unique: true }, desc: "Dripping with paralytic venom" },
+            helmet: { name: "Matriarch Crown", effect: { id: 'critChance', name: 'Crit', value: 7 } },
+            armor: { name: "Matriarch Carapace", effect: { id: 'bonusHp', name: '+HP', value: 180 }, desc: "Chitin harder than steel" },
+            legs: { name: "Matriarch Legguards", effect: { id: 'frostbite', name: 'Frostbite', value: 15, unique: true }, desc: "Webs that slow the prey" },
+            boots: { name: "Silk Treads", effect: { id: 'dodge', name: 'Dodge', value: 8 } },
+            gloves: { name: "Spinnerets", effect: { id: 'poison', name: 'Poison', value: 30, unique: true }, desc: "Weave death with every touch" },
+            shield: { name: "Web Cocoon", effect: { id: 'frostbite', name: 'Frostbite', value: 20, unique: true }, desc: "Ensnare attackers in sticky silk" },
+            belt: { name: "Egg Sac Belt", effect: { id: 'retaliate', name: 'Retaliate', value: 15, unique: true }, desc: "Disturb the eggs, face the swarm" },
+            amulet: { name: "Matriarch's Eye", effect: { id: 'itemFind', name: 'Treasure Hunter', value: 10, unique: true }, desc: "Spiders find what others miss" },
         },
         setBonuses: [
-            { pieces: 2, desc: '+8% Dodge', effect: { dodge: 8 } },
-            { pieces: 4, desc: '+20% DMG, +18% HP', effect: { dmgMult: 0.20, hpMult: 0.18 } },
-            { pieces: 6, desc: '+10% Crit, +35% Crit DMG', effect: { critChance: 10, critDamage: 35 } },
-            { pieces: 8, desc: 'Spider Sense: +12% All Stats', effect: { dmgMult: 0.12, hpMult: 0.12, speedMult: 0.12 } },
+            { pieces: 2, desc: 'Paralytic Venom: +25% Poison damage', effect: { poisonBonus: 0.25 } },
+            { pieces: 4, desc: 'Web Trap: +25% Slow, +20% DMG to slowed', effect: { frostbite: 25, dmgMult: 0.20 } },
+            { pieces: 6, desc: 'Patient Hunter: +15% Item Find, +20% HP', effect: { itemFind: 15, hpMult: 0.20 } },
+            { pieces: 8, desc: 'BROOD MOTHER: Poison spreads on kill, +50% Poison DMG', effect: { poisonSpread: true, poisonBonus: 0.50 } },
         ]
     },
+
+    // ============ SHADOW WOLF - The Phantom Hunter ============
+    // Theme: Stealth, crits from shadows, pack tactics
     shadow: {
-        name: "Shadow Wolf", color: '#dc2626', tier: 5, statBonus: 1.3, weaponType: 'sword', // Zone 24 boss - STR
+        name: "Shadow Wolf", color: '#dc2626', tier: 5, statBonus: 1.3, weaponType: 'sword',
+        lore: "Alpha of a spectral pack, hunting between worlds.",
         items: {
-            weapon: { name: "Shadow Wolf Fang", effect: { id: 'lifesteal', name: 'Lifesteal', value: 4 } },
-            helmet: { name: "Shadow Wolf Mask", effect: { id: 'bonusDmg', name: '+DMG', value: 55 } },
-            armor: { name: "Shadow Wolf Hide", effect: { id: 'thorns', name: 'Thorns', value: 15 } },
-            legs: { name: "Shadow Wolf Greaves", effect: { id: 'lifesteal', name: 'Lifesteal', value: 2 } },
-            boots: { name: "Shadow Wolf Treads", effect: { id: 'dodge', name: 'Dodge', value: 7 } },
-            gloves: { name: "Shadow Wolf Claws", effect: { id: 'critDamage', name: 'Crit DMG', value: 45 } },
-            shield: { name: "Shadow Wolf Guard", effect: { id: 'bonusHp', name: '+HP', value: 200 } },
-            belt: { name: "Shadow Wolf Cord", effect: { id: 'critChance', name: 'Crit', value: 9 } },
-            amulet: { name: "Shadow Wolf Heart", effect: { id: 'lifesteal', name: 'Lifesteal', value: 3 } },
+            weapon: { name: "Phantom Fang", effect: { id: 'multiStrike', name: 'Multi-Strike', value: 20, unique: true }, desc: "Strikes from the shadow realm" },
+            helmet: { name: "Shadow Wolf Mask", effect: { id: 'critChance', name: 'Crit', value: 10 } },
+            armor: { name: "Shadow Wolf Hide", effect: { id: 'dodge', name: 'Dodge', value: 10 }, desc: "Phase through attacks" },
+            legs: { name: "Shadow Wolf Greaves", effect: { id: 'armorPen', name: 'Armor Pierce', value: 20, unique: true }, desc: "Fangs that ignore armor" },
+            boots: { name: "Ghost Step", effect: { id: 'dodge', name: 'Dodge', value: 8 } },
+            gloves: { name: "Shadow Wolf Claws", effect: { id: 'critDamage', name: 'Crit DMG', value: 50 } },
+            shield: { name: "Spectral Guard", effect: { id: 'damageShield', name: 'Shield', value: 100, unique: true } },
+            belt: { name: "Pack Leader Cord", effect: { id: 'rage', name: 'Rage', value: 3, unique: true }, desc: "Each strike fuels the hunt" },
+            amulet: { name: "Shadow Wolf Heart", effect: { id: 'vampiric', name: 'Vampiric', value: 4, unique: true }, desc: "Feed on the essence of prey" },
         },
         setBonuses: [
-            { pieces: 2, desc: '+4% Lifesteal', effect: { lifesteal: 4 } },
-            { pieces: 4, desc: '+25% DMG, +12% Thorns', effect: { dmgMult: 0.25, thorns: 12 } },
-            { pieces: 6, desc: '+22% HP, +40% Crit DMG', effect: { hpMult: 0.22, critDamage: 40 } },
-            { pieces: 8, desc: 'Shadow Pact: +6% Lifesteal, +40% DMG', effect: { lifesteal: 6, dmgMult: 0.40 } },
+            { pieces: 2, desc: 'Shadow Strike: +15% Armor Penetration', effect: { armorPen: 15 } },
+            { pieces: 4, desc: 'Pack Tactics: +30% Crit DMG, +15% Multi-Strike', effect: { critDamage: 30, multiStrike: 15 } },
+            { pieces: 6, desc: 'Phantom Form: +15% Dodge, +20% DMG', effect: { dodge: 15, dmgMult: 0.20 } },
+            { pieces: 8, desc: 'ALPHA HOWL: Crits deal 2x damage, +5% Vampiric', effect: { critMultiplier: 2.0, vampiric: 5 } },
         ]
     },
+
+    // ============ ABYSSAL EYE - The Mind Breaker ============
+    // Theme: Armor penetration, damage reflection, madness
     abyss: {
-        name: "Abyssal Eye", color: '#fbbf24', tier: 6, statBonus: 1.35, weaponType: 'staff', // Zone 29 boss - INT
+        name: "Abyssal Eye", color: '#fbbf24', tier: 6, statBonus: 1.35, weaponType: 'staff',
+        lore: "An eldritch horror from beyond the void, its gaze shatters sanity.",
         items: {
-            weapon: { name: "Abyssal Staff", effect: { id: 'bonusDmg', name: '+DMG', value: 75 } },
-            helmet: { name: "Abyssal Gaze", effect: { id: 'critChance', name: 'Crit', value: 10 } },
-            armor: { name: "Abyssal Shroud", effect: { id: 'bonusHp', name: '+HP', value: 280 } },
-            legs: { name: "Abyssal Greaves", effect: { id: 'bonusDmg', name: '+DMG', value: 55 } },
-            boots: { name: "Abyssal Treads", effect: { id: 'dodge', name: 'Dodge', value: 8 } },
-            gloves: { name: "Abyssal Touch", effect: { id: 'lifesteal', name: 'Lifesteal', value: 4 } },
-            shield: { name: "Abyssal Ward", effect: { id: 'thorns', name: 'Thorns', value: 16 } },
-            belt: { name: "Abyssal Sash", effect: { id: 'critDamage', name: 'Crit DMG', value: 50 } },
-            amulet: { name: "Abyssal Core", effect: { id: 'bonusDmg', name: '+DMG', value: 65 } },
+            weapon: { name: "Void Gaze Staff", effect: { id: 'armorPen', name: 'Armor Pierce', value: 35, unique: true }, desc: "Gaze through all defenses" },
+            helmet: { name: "Eye of Madness", effect: { id: 'critChance', name: 'Crit', value: 12 } },
+            armor: { name: "Abyssal Shroud", effect: { id: 'retaliate', name: 'Retaliate', value: 25, unique: true }, desc: "Strike the void, the void strikes back" },
+            legs: { name: "Tentacle Greaves", effect: { id: 'frostbite', name: 'Frostbite', value: 25, unique: true }, desc: "Tendrils that bind and slow" },
+            boots: { name: "Abyssal Treads", effect: { id: 'dodge', name: 'Dodge', value: 10 } },
+            gloves: { name: "Void Touch", effect: { id: 'armorPen', name: 'Armor Pierce', value: 20, unique: true } },
+            shield: { name: "Reality Barrier", effect: { id: 'damageShield', name: 'Shield', value: 150, unique: true }, desc: "Bend reality to block attacks" },
+            belt: { name: "Abyssal Sash", effect: { id: 'xpBonus', name: 'Wisdom', value: 15, unique: true }, desc: "Forbidden knowledge flows through you" },
+            amulet: { name: "Core of the Void", effect: { id: 'critDamage', name: 'Crit DMG', value: 60 } },
         },
         setBonuses: [
-            { pieces: 2, desc: '+10% Crit Chance', effect: { critChance: 10 } },
-            { pieces: 4, desc: '+30% DMG, +25% HP', effect: { dmgMult: 0.30, hpMult: 0.25 } },
-            { pieces: 6, desc: '+12% All Stats', effect: { dmgMult: 0.12, hpMult: 0.12, speedMult: 0.12 } },
-            { pieces: 8, desc: 'Abyss Gaze: +18% All Stats, +4% Lifesteal', effect: { dmgMult: 0.18, hpMult: 0.18, speedMult: 0.18, lifesteal: 4 } },
+            { pieces: 2, desc: 'Piercing Gaze: +20% Armor Penetration', effect: { armorPen: 20 } },
+            { pieces: 4, desc: 'Void Reflection: +30% Retaliate, +200 Shield', effect: { retaliate: 30, damageShield: 200 } },
+            { pieces: 6, desc: 'Eldritch Wisdom: +25% XP, +30% Crit DMG', effect: { xpBonus: 25, critDamage: 30 } },
+            { pieces: 8, desc: 'GAZE OF OBLIVION: Ignore 50% armor, 20% chance to stun', effect: { armorPen: 50, stunChance: 20 } },
         ]
     },
+
+    // ============ BEHEMOTH - The Unstoppable Force ============
+    // Theme: Massive slow hits, rage stacking, cannot be stopped
     behemoth: {
-        name: "Behemoth", color: '#7c3aed', tier: 6, statBonus: 1.35, weaponType: 'dagger', // Zone 34 boss - AGI
+        name: "Behemoth", color: '#7c3aed', tier: 6, statBonus: 1.35, weaponType: 'mace',
+        lore: "An ancient titan of pure destruction, each step shakes the world.",
         items: {
-            weapon: { name: "Behemoth Horn", effect: { id: 'critDamage', name: 'Crit DMG', value: 65 } },
-            helmet: { name: "Behemoth Skull", effect: { id: 'critChance', name: 'Crit', value: 11 } },
-            armor: { name: "Behemoth Hide", effect: { id: 'bonusHp', name: '+HP', value: 350 } },
-            legs: { name: "Behemoth Legguards", effect: { id: 'critChance', name: 'Crit', value: 8 } },
-            boots: { name: "Behemoth Hooves", effect: { id: 'dodge', name: 'Dodge', value: 9 } },
-            gloves: { name: "Behemoth Fists", effect: { id: 'bonusDmg', name: '+DMG', value: 90 } },
-            shield: { name: "Behemoth Barrier", effect: { id: 'dodge', name: 'Dodge', value: 8 } },
-            belt: { name: "Behemoth Girdle", effect: { id: 'lifesteal', name: 'Lifesteal', value: 4 } },
-            amulet: { name: "Behemoth Heart", effect: { id: 'critChance', name: 'Crit', value: 10 } },
+            weapon: { name: "Worldbreaker", effect: { id: 'rage', name: 'Rage', value: 5, unique: true }, desc: "Hits harder with each swing (-20% speed, +50% DMG)" },
+            helmet: { name: "Behemoth Skull", effect: { id: 'bonusHp', name: '+HP', value: 300 } },
+            armor: { name: "Titan Plate", effect: { id: 'lastStand', name: 'Last Stand', value: 40, unique: true }, desc: "The wounded titan rages" },
+            legs: { name: "Behemoth Legguards", effect: { id: 'bonusHp', name: '+HP', value: 200 } },
+            boots: { name: "Earthshaker Treads", effect: { id: 'frostbite', name: 'Frostbite', value: 20, unique: true }, desc: "Tremors slow all nearby" },
+            gloves: { name: "Titan Fists", effect: { id: 'rage', name: 'Rage', value: 4, unique: true } },
+            shield: { name: "Mountain Shield", effect: { id: 'damageShield', name: 'Shield', value: 200, unique: true }, desc: "Immovable as a mountain" },
+            belt: { name: "Titan Girdle", effect: { id: 'bonusHp', name: '+HP', value: 150 } },
+            amulet: { name: "Heart of the Mountain", effect: { id: 'bonusDmg', name: '+DMG', value: 80 } },
         },
         setBonuses: [
-            { pieces: 2, desc: '+12% Crit Chance', effect: { critChance: 12 } },
-            { pieces: 4, desc: '+35% DMG, +30% HP', effect: { dmgMult: 0.35, hpMult: 0.30 } },
-            { pieces: 6, desc: '+30% Crit DMG, +8% Dodge', effect: { critDamage: 30, dodge: 8 } },
-            { pieces: 8, desc: 'Behemoth Might: +60% Crit DMG, +12% Dodge', effect: { critDamage: 60, dodge: 12 } },
+            { pieces: 2, desc: 'Titan\'s Strength: +30% HP', effect: { hpMult: 0.30 } },
+            { pieces: 4, desc: 'Rampage: Rage stacks +50% faster, +40% DMG', effect: { rageBonus: 0.50, dmgMult: 0.40 } },
+            { pieces: 6, desc: 'Unstoppable: +300 Shield, +30% Last Stand', effect: { damageShield: 300, lastStand: 30 } },
+            { pieces: 8, desc: 'CATACLYSM: -30% attack speed, +100% damage, Rage uncapped', effect: { speedMult: -0.30, dmgMult: 1.00, rageUncapped: true } },
         ]
     },
+
+    // ============ DARK WOLF KING - The Ultimate Predator ============
+    // Theme: All-around power, execute, vampiric mastery
     darkwolf: {
-        name: "Dark Wolf King", color: '#ec4899', tier: 6, statBonus: 1.4, weaponType: 'sword', // Zone 39 boss - Final boss - STR
+        name: "Dark Wolf King", color: '#ec4899', tier: 6, statBonus: 1.4, weaponType: 'sword',
+        lore: "King of all wolves, his howl commands life and death itself.",
         items: {
-            weapon: { name: "Wolf King Fang", effect: { id: 'bonusDmg', name: '+DMG', value: 120 } },
+            weapon: { name: "Kingslayer Fang", effect: { id: 'executeChance', name: 'Execute', value: 10, unique: true }, desc: "Ends kings and peasants alike" },
             helmet: { name: "Wolf King Crown", effect: { id: 'critChance', name: 'Crit', value: 12 } },
-            armor: { name: "Wolf King Pelt", effect: { id: 'bonusHp', name: '+HP', value: 450 } },
-            legs: { name: "Wolf King Legguards", effect: { id: 'critDamage', name: 'Crit DMG', value: 50 } },
-            boots: { name: "Wolf King Treads", effect: { id: 'dodge', name: 'Dodge', value: 10 } },
+            armor: { name: "Wolf King Pelt", effect: { id: 'vampiric', name: 'Vampiric', value: 5, unique: true }, desc: "Drink the life of your prey" },
+            legs: { name: "Wolf King Legguards", effect: { id: 'multiStrike', name: 'Multi-Strike', value: 15, unique: true } },
+            boots: { name: "Apex Predator Treads", effect: { id: 'dodge', name: 'Dodge', value: 12 } },
             gloves: { name: "Wolf King Claws", effect: { id: 'critDamage', name: 'Crit DMG', value: 70 } },
-            shield: { name: "Wolf King Barrier", effect: { id: 'thorns', name: 'Thorns', value: 20 } },
-            belt: { name: "Wolf King Girdle", effect: { id: 'lifesteal', name: 'Lifesteal', value: 5 } },
-            amulet: { name: "Wolf King Heart", effect: { id: 'bonusDmg', name: '+DMG', value: 100 } },
+            shield: { name: "Alpha's Barrier", effect: { id: 'retaliate', name: 'Retaliate', value: 20, unique: true } },
+            belt: { name: "Wolf King Girdle", effect: { id: 'rage', name: 'Rage', value: 4, unique: true } },
+            amulet: { name: "Wolf King Heart", effect: { id: 'silverOnHit', name: 'Gold Strike', value: 15, unique: true }, desc: "The king claims his tribute" },
         },
         setBonuses: [
-            { pieces: 2, desc: '+25% Crit DMG', effect: { critDamage: 25 } },
-            { pieces: 4, desc: '+40% DMG, +35% HP', effect: { dmgMult: 0.40, hpMult: 0.35 } },
-            { pieces: 6, desc: '+15% All Stats', effect: { dmgMult: 0.15, hpMult: 0.15, speedMult: 0.15 } },
-            { pieces: 8, desc: 'Wolf King Fury: +60% DMG, +50% HP', effect: { dmgMult: 0.60, hpMult: 0.50 } },
+            { pieces: 2, desc: 'Alpha Presence: +10% Execute, +20% Silver Find', effect: { executeChance: 10, silverOnHit: 20 } },
+            { pieces: 4, desc: 'King\'s Fury: +40% Crit DMG, +5% Vampiric', effect: { critDamage: 40, vampiric: 5 } },
+            { pieces: 6, desc: 'Pack Lord: +25% All Stats', effect: { dmgMult: 0.25, hpMult: 0.25, speedMult: 0.15 } },
+            { pieces: 8, desc: 'APEX PREDATOR: Execute threshold 30%, Full heal on execute', effect: { executeThreshold: 30, executeHeal: true } },
         ]
     },
+    // ============ ETERNAL - The Timeless Warrior ============
+    // Theme: Pure power, all effects combined, time manipulation
     eternal: {
-        name: "Eternal", color: '#f97316', tier: 6, statBonus: 1.5, weaponType: 'sword', // Prestige only - best gear
+        name: "Eternal", color: '#f97316', tier: 6, statBonus: 1.5, weaponType: 'sword',
+        lore: "Forged at the beginning of time, worn by those who transcend mortality.",
         items: {
-            weapon: { name: "Eternal Annihilator", effect: { id: 'bonusDmg', name: '+DMG', value: 180 } },
-            helmet: { name: "Eternal Diadem", effect: { id: 'critChance', name: 'Crit', value: 14 } },
-            armor: { name: "Eternal Plate", effect: { id: 'bonusHp', name: '+HP', value: 600 } },
-            legs: { name: "Eternal Legguards", effect: { id: 'bonusDmg', name: '+DMG', value: 120 } },
-            boots: { name: "Eternal Walkers", effect: { id: 'dodge', name: 'Dodge', value: 11 } },
-            gloves: { name: "Eternal Gauntlets", effect: { id: 'critDamage', name: 'Crit DMG', value: 85 } },
-            shield: { name: "Eternal Aegis", effect: { id: 'thorns', name: 'Thorns', value: 22 } },
-            belt: { name: "Eternal Waistguard", effect: { id: 'lifesteal', name: 'Lifesteal', value: 5 } },
-            amulet: { name: "Eternal Heart", effect: { id: 'bonusDmg', name: '+DMG', value: 140 } },
+            weapon: { name: "Timekeeper's Blade", effect: { id: 'multiStrike', name: 'Multi-Strike', value: 25, unique: true }, desc: "Strike the past, present, and future" },
+            helmet: { name: "Eternal Diadem", effect: { id: 'xpBonus', name: 'Wisdom', value: 25, unique: true }, desc: "Knowledge of all ages" },
+            armor: { name: "Eternal Plate", effect: { id: 'damageShield', name: 'Shield', value: 300, unique: true }, desc: "Time itself shields you" },
+            legs: { name: "Eternal Legguards", effect: { id: 'rage', name: 'Rage', value: 5, unique: true } },
+            boots: { name: "Timeless Walkers", effect: { id: 'dodge', name: 'Dodge', value: 15 } },
+            gloves: { name: "Hands of Eternity", effect: { id: 'executeChance', name: 'Execute', value: 12, unique: true }, desc: "End their timeline" },
+            shield: { name: "Eternal Aegis", effect: { id: 'retaliate', name: 'Retaliate', value: 30, unique: true } },
+            belt: { name: "Time Loop Girdle", effect: { id: 'vampiric', name: 'Vampiric', value: 6, unique: true }, desc: "Heal wounds before they happen" },
+            amulet: { name: "Heart of Eternity", effect: { id: 'itemFind', name: 'Treasure Hunter', value: 20, unique: true }, desc: "See treasures across all timelines" },
         },
         setBonuses: [
-            { pieces: 2, desc: '+20% All Stats', effect: { dmgMult: 0.20, hpMult: 0.20, speedMult: 0.10 } },
-            { pieces: 4, desc: '+50% DMG, +40% HP', effect: { dmgMult: 0.50, hpMult: 0.40 } },
-            { pieces: 6, desc: '+15% Crit Chance, +50% Crit DMG', effect: { critChance: 15, critDamage: 50 } },
-            { pieces: 8, desc: 'Eternal Power: +70% All Stats', effect: { dmgMult: 0.70, hpMult: 0.70, speedMult: 0.25 } },
+            { pieces: 2, desc: 'Timeless: +30% All Stats', effect: { dmgMult: 0.30, hpMult: 0.30, speedMult: 0.15 } },
+            { pieces: 4, desc: 'Temporal Mastery: +25% Multi-Strike, +15% Execute', effect: { multiStrike: 25, executeChance: 15 } },
+            { pieces: 6, desc: 'Eternal Youth: +8% Vampiric, +500 Shield', effect: { vampiric: 8, damageShield: 500 } },
+            { pieces: 8, desc: 'LORD OF TIME: All unique effects +50%, Immune to death once per zone', effect: { uniqueBonus: 0.50, phoenixOnce: true } },
         ]
     },
 };
@@ -338,66 +398,77 @@ export function isEnhanceMilestone(plus) {
 }
 
 export const PRESTIGE_BOSS_SETS = {
+    // ============ EYE TYRANT - The Mind Dominator ============
+    // Theme: Psychic powers, disintegration, mind control
     tyrant: {
-        name: "Eye Tyrant", color: '#38bdf8', tier: 6, statBonus: 2.5,
+        name: "Eye Tyrant", color: '#38bdf8', tier: 6, statBonus: 2.5, weaponType: 'staff',
+        lore: "A beholder-like horror whose many eyes each hold a different doom.",
         items: {
-            weapon: { name: "Tyrant Gaze", effect: { id: 'bonusDmg', name: '+DMG', value: 800 } },
-            helmet: { name: "Tyrant Crown", effect: { id: 'critChance', name: 'Crit', value: 35 } },
-            armor: { name: "Tyrant Carapace", effect: { id: 'bonusHp', name: '+HP', value: 4000 } },
-            legs: { name: "Tyrant Legguards", effect: { id: 'bonusDmg', name: '+DMG', value: 500 } },
-            boots: { name: "Tyrant Treads", effect: { id: 'dodge', name: 'Dodge', value: 28 } },
-            gloves: { name: "Tyrant Grips", effect: { id: 'critDamage', name: 'Crit DMG', value: 280 } },
-            shield: { name: "Tyrant Ward", effect: { id: 'thorns', name: 'Thorns', value: 60 } },
-            belt: { name: "Tyrant Girdle", effect: { id: 'lifesteal', name: 'Lifesteal', value: 14 } },
-            amulet: { name: "Tyrant Eye", effect: { id: 'bonusDmg', name: '+DMG', value: 600 } },
+            weapon: { name: "Disintegration Ray", effect: { id: 'armorPen', name: 'Armor Pierce', value: 60, unique: true }, desc: "Erases matter from existence" },
+            helmet: { name: "Crown of Eyes", effect: { id: 'multiStrike', name: 'Multi-Strike', value: 40, unique: true }, desc: "Ten eyes, ten strikes" },
+            armor: { name: "Tyrant Carapace", effect: { id: 'damageShield', name: 'Shield', value: 500, unique: true } },
+            legs: { name: "Tyrant Legguards", effect: { id: 'frostbite', name: 'Frostbite', value: 40, unique: true }, desc: "Telekinesis holds them in place" },
+            boots: { name: "Levitation Treads", effect: { id: 'dodge', name: 'Dodge', value: 28 } },
+            gloves: { name: "Charm Touch", effect: { id: 'executeChance', name: 'Execute', value: 20, unique: true }, desc: "Command them to die" },
+            shield: { name: "Anti-Magic Shell", effect: { id: 'retaliate', name: 'Retaliate', value: 50, unique: true }, desc: "Magic reflects back" },
+            belt: { name: "Tyrant Girdle", effect: { id: 'xpBonus', name: 'Wisdom', value: 50, unique: true } },
+            amulet: { name: "Central Eye", effect: { id: 'burn', name: 'Burn', value: 100, unique: true }, desc: "The death ray incinerates all" },
         },
         setBonuses: [
-            { pieces: 2, desc: '+150% All Stats', effect: { dmgMult: 1.50, hpMult: 1.50, speedMult: 0.50 } },
-            { pieces: 4, desc: '+400% DMG, +300% HP', effect: { dmgMult: 4.00, hpMult: 3.00 } },
-            { pieces: 6, desc: '+60% Crit, +250% Crit DMG', effect: { critChance: 60, critDamage: 250 } },
-            { pieces: 8, desc: 'Tyrant Dominion: +600% All Stats', effect: { dmgMult: 6.0, hpMult: 6.0, speedMult: 1.0 } },
+            { pieces: 2, desc: 'Many Eyes: +40% Multi-Strike, +150% Stats', effect: { multiStrike: 40, dmgMult: 1.50, hpMult: 1.50 } },
+            { pieces: 4, desc: 'Disintegrate: +60% Armor Pen, +25% Execute', effect: { armorPen: 60, executeChance: 25 } },
+            { pieces: 6, desc: 'Domination: +1000 Shield, +50% Slow', effect: { damageShield: 1000, frostbite: 50 } },
+            { pieces: 8, desc: 'SUPREME TYRANT: All attacks bypass armor, 30% instant kill', effect: { armorPen: 100, executeChance: 30 } },
             { pieces: 9, desc: 'SECRET: +100% Drop Rate', effect: { matMult: 2.0 }, secret: true },
         ]
     },
+
+    // ============ INFERNO FOX - The Nine-Tailed Flame ============
+    // Theme: Burning everything, phoenix rebirth, speed
     inferno: {
-        name: "Inferno Fox", color: '#a78bfa', tier: 6, statBonus: 3.0,
+        name: "Inferno Fox", color: '#a78bfa', tier: 6, statBonus: 3.0, weaponType: 'katana',
+        lore: "A nine-tailed fox spirit of pure flame, each tail a blazing inferno.",
         items: {
-            weapon: { name: "Inferno Fang", effect: { id: 'bonusDmg', name: '+DMG', value: 1500 } },
-            helmet: { name: "Inferno Crown", effect: { id: 'critChance', name: 'Crit', value: 40 } },
-            armor: { name: "Inferno Pelt", effect: { id: 'bonusHp', name: '+HP', value: 8000 } },
-            legs: { name: "Inferno Legguards", effect: { id: 'critChance', name: 'Crit', value: 30 } },
-            boots: { name: "Inferno Paws", effect: { id: 'dodge', name: 'Dodge', value: 32 } },
-            gloves: { name: "Inferno Claws", effect: { id: 'critDamage', name: 'Crit DMG', value: 350 } },
-            shield: { name: "Inferno Barrier", effect: { id: 'thorns', name: 'Thorns', value: 80 } },
-            belt: { name: "Inferno Sash", effect: { id: 'critChance', name: 'Crit', value: 35 } },
-            amulet: { name: "Inferno Heart", effect: { id: 'lifesteal', name: 'Lifesteal', value: 15 } },
+            weapon: { name: "Tail of Flames", effect: { id: 'burn', name: 'Burn', value: 150, unique: true }, desc: "Nine tails, nine infernos" },
+            helmet: { name: "Fox Fire Crown", effect: { id: 'multiStrike', name: 'Multi-Strike', value: 50, unique: true }, desc: "Attack with every tail" },
+            armor: { name: "Inferno Pelt", effect: { id: 'lastStand', name: 'Last Stand', value: 80, unique: true }, desc: "Burns brighter near death" },
+            legs: { name: "Fox Spirit Greaves", effect: { id: 'burn', name: 'Burn', value: 80, unique: true } },
+            boots: { name: "Inferno Paws", effect: { id: 'dodge', name: 'Dodge', value: 35 } },
+            gloves: { name: "Claws of Wildfire", effect: { id: 'rage', name: 'Rage', value: 8, unique: true } },
+            shield: { name: "Flame Barrier", effect: { id: 'retaliate', name: 'Retaliate', value: 60, unique: true }, desc: "Those who touch you burn" },
+            belt: { name: "Nine Tails Sash", effect: { id: 'critChance', name: 'Crit', value: 40 } },
+            amulet: { name: "Heart of Wildfire", effect: { id: 'vampiric', name: 'Vampiric', value: 12, unique: true }, desc: "Consume their life force" },
         },
         setBonuses: [
-            { pieces: 2, desc: '+250% All Stats', effect: { dmgMult: 2.50, hpMult: 2.50, speedMult: 0.80 } },
-            { pieces: 4, desc: '+700% DMG, +500% HP', effect: { dmgMult: 7.00, hpMult: 5.00 } },
-            { pieces: 6, desc: '+50% Crit, +300% Crit DMG', effect: { critChance: 50, critDamage: 300 } },
-            { pieces: 8, desc: 'Inferno Blaze: +1200% All Stats', effect: { dmgMult: 12.0, hpMult: 12.0, speedMult: 1.5 } },
+            { pieces: 2, desc: 'Wildfire: +100% Burn damage, +250% Stats', effect: { burnBonus: 1.00, dmgMult: 2.50, hpMult: 2.50 } },
+            { pieces: 4, desc: 'Fox Fury: +50% Multi-Strike, +10% Rage/hit', effect: { multiStrike: 50, rage: 10 } },
+            { pieces: 6, desc: 'Undying Flame: +100% Last Stand, +15% Vampiric', effect: { lastStand: 100, vampiric: 15 } },
+            { pieces: 8, desc: 'PHOENIX REBIRTH: Revive at full HP once per fight, +200% Burn', effect: { phoenixFull: true, burnBonus: 2.00 } },
             { pieces: 9, desc: 'SECRET: +100% Drop Rate', effect: { matMult: 2.0 }, secret: true },
         ]
     },
+
+    // ============ SCORPION KING - The Lethal Monarch ============
+    // Theme: Deadly poison, armor piercing stinger, death touch
     scorpion: {
-        name: "Scorpion King", color: '#f472b6', tier: 6, statBonus: 4.0,
+        name: "Scorpion King", color: '#f472b6', tier: 6, statBonus: 4.0, weaponType: 'dagger',
+        lore: "Emperor of the desert wastes, his venom kills gods.",
         items: {
-            weapon: { name: "Scorpion Stinger", effect: { id: 'bonusDmg', name: '+DMG', value: 3000 } },
-            helmet: { name: "Scorpion Crown", effect: { id: 'critChance', name: 'Crit', value: 50 } },
-            armor: { name: "Scorpion Carapace", effect: { id: 'bonusHp', name: '+HP', value: 15000 } },
-            legs: { name: "Scorpion Legguards", effect: { id: 'bonusHp', name: '+HP', value: 10000 } },
-            boots: { name: "Scorpion Treads", effect: { id: 'dodge', name: 'Dodge', value: 35 } },
-            gloves: { name: "Scorpion Pincers", effect: { id: 'critDamage', name: 'Crit DMG', value: 500 } },
-            shield: { name: "Scorpion Shell", effect: { id: 'thorns', name: 'Thorns', value: 100 } },
-            belt: { name: "Scorpion Girdle", effect: { id: 'lifesteal', name: 'Lifesteal', value: 20 } },
-            amulet: { name: "Scorpion Heart", effect: { id: 'bonusDmg', name: '+DMG', value: 2000 } },
+            weapon: { name: "Godkiller Stinger", effect: { id: 'poison', name: 'Poison', value: 200, unique: true }, desc: "Venom that slays immortals" },
+            helmet: { name: "Scorpion Crown", effect: { id: 'executeChance', name: 'Execute', value: 25, unique: true }, desc: "A king's judgment is death" },
+            armor: { name: "Divine Carapace", effect: { id: 'damageShield', name: 'Shield', value: 1000, unique: true } },
+            legs: { name: "Scorpion Legguards", effect: { id: 'poison', name: 'Poison', value: 120, unique: true } },
+            boots: { name: "Death's Approach", effect: { id: 'armorPen', name: 'Armor Pierce', value: 50, unique: true } },
+            gloves: { name: "Pincers of Doom", effect: { id: 'bleed', name: 'Bleed', value: 100, unique: true }, desc: "Crush and tear" },
+            shield: { name: "Exoskeleton", effect: { id: 'retaliate', name: 'Retaliate', value: 75, unique: true } },
+            belt: { name: "King's Girdle", effect: { id: 'vampiric', name: 'Vampiric', value: 15, unique: true } },
+            amulet: { name: "Heart of Venom", effect: { id: 'poison', name: 'Poison', value: 150, unique: true }, desc: "Pure concentrated death" },
         },
         setBonuses: [
-            { pieces: 2, desc: '+500% All Stats', effect: { dmgMult: 5.00, hpMult: 5.00, speedMult: 1.00 } },
-            { pieces: 4, desc: '+1500% DMG, +1000% HP', effect: { dmgMult: 15.00, hpMult: 10.00 } },
-            { pieces: 6, desc: '+75% Crit, +500% Crit DMG', effect: { critChance: 75, critDamage: 500 } },
-            { pieces: 8, desc: 'Scorpion Venom: +3000% All', effect: { dmgMult: 30.0, hpMult: 30.0, speedMult: 2.0 } },
+            { pieces: 2, desc: 'King\'s Venom: +150% Poison, +500% Stats', effect: { poisonBonus: 1.50, dmgMult: 5.00, hpMult: 5.00 } },
+            { pieces: 4, desc: 'Death Touch: +40% Execute, Poison spreads', effect: { executeChance: 40, poisonSpread: true } },
+            { pieces: 6, desc: 'Immortal King: +2000 Shield, +25% Vampiric', effect: { damageShield: 2000, vampiric: 25 } },
+            { pieces: 8, desc: 'GOD SLAYER: Execute at 50% HP, Poison ignores immunity', effect: { executeThreshold: 50, poisonPierce: true } },
             { pieces: 9, desc: 'SECRET: +100% Drop Rate', effect: { matMult: 2.0 }, secret: true },
         ]
     },

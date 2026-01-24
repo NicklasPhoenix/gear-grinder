@@ -385,6 +385,31 @@ function BossesSection() {
                 <p>• One random bonus effect</p>
             </SubSection>
 
+            <SubSection title="Unique Boss Effects">
+                <p className="mb-2">Boss sets grant powerful <span className="text-yellow-400">unique effects</span> not found on regular gear:</p>
+                <div className="space-y-1 text-sm">
+                    <p><span className="text-red-500">Bleed</span> - Attacks cause bleeding damage over 3 seconds</p>
+                    <p><span className="text-orange-500">Burn</span> - Attacks ignite enemies for fire damage over 3 seconds</p>
+                    <p><span className="text-green-500">Poison</span> - Attacks poison enemies for damage over 4 seconds</p>
+                    <p><span className="text-purple-500">Multi-Strike</span> - Chance to strike twice per attack</p>
+                    <p><span className="text-red-400">Execute</span> - Chance to instantly kill low HP enemies</p>
+                    <p><span className="text-cyan-400">Frostbite</span> - Slows enemy attack damage</p>
+                    <p><span className="text-blue-400">Damage Shield</span> - Absorbs damage before HP</p>
+                    <p><span className="text-yellow-400">Retaliate</span> - Chance to counter-attack when hit</p>
+                    <p><span className="text-red-600">Last Stand</span> - Bonus damage and lifesteal when low HP</p>
+                    <p><span className="text-red-800">Rage</span> - Each hit increases damage (stacks)</p>
+                    <p><span className="text-red-900">Vampiric</span> - Enhanced lifesteal</p>
+                </div>
+            </SubSection>
+
+            <SubSection title="Set Bonuses">
+                <p>Wearing multiple pieces from the same boss set unlocks <span className="text-purple-400">set bonuses</span>:</p>
+                <p>• <span className="text-green-400">2-piece</span>: Minor passive bonus</p>
+                <p>• <span className="text-blue-400">4-piece</span>: Stronger combat bonus</p>
+                <p>• <span className="text-purple-400">6-piece</span>: Powerful special ability</p>
+                <p>• <span className="text-yellow-400">8-piece (Full Set)</span>: Ultimate set mastery effect</p>
+            </SubSection>
+
             <SubSection title="Boss Stones">
                 <p>Defeating bosses also drops <span className="text-orange-400 font-bold">Boss Stones</span> specific to that boss.</p>
                 <p>Boss Stones are used for enhancing Boss Equipment past +10.</p>
@@ -394,6 +419,7 @@ function BossesSection() {
                 <p>• Ensure you have enough armor/HP to survive</p>
                 <p>• Lifesteal effect helps sustain through long fights</p>
                 <p>• Farm the zone before the boss to gear up first</p>
+                <p>• Build around set bonuses for maximum power</p>
             </SubSection>
         </div>
     );

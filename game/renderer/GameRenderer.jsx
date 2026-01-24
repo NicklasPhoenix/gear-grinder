@@ -681,6 +681,7 @@ export default function GameRenderer() {
                     audioManager.playSfxHit();
                     break;
                 case 'heal':
+                case 'killHeal':
                     audioManager.playSfxHeal();
                     break;
                 case 'dodge':
@@ -688,6 +689,11 @@ export default function GameRenderer() {
                     break;
                 case 'levelup':
                     audioManager.playSfxLevelUp();
+                    break;
+                case 'multiStrike':
+                case 'execute':
+                case 'retaliate':
+                    audioManager.playSfxCrit();
                     break;
             }
 
@@ -700,10 +706,29 @@ export default function GameRenderer() {
                 // Spawn hit particles at enemy position
                 spawnHitParticles(pos.enemyX, pos.characterY - 55, data.type === 'crit' ? 0xfde047 : 0xffffff, data.type === 'crit' ? 20 : 10);
             }
+            // Multi-strike and execute get extra visual effects
+            if (data.type === 'multiStrike') {
+                animStateRef.current.enemyHitFlash = 10;
+                animStateRef.current.screenShake.intensity = 8;
+                spawnHitParticles(pos.enemyX, pos.characterY - 55, 0x8b5cf6, 15);
+            }
+            if (data.type === 'execute') {
+                animStateRef.current.enemyHitFlash = 15;
+                animStateRef.current.screenShake.intensity = 15;
+                spawnHitParticles(pos.enemyX, pos.characterY - 55, 0xef4444, 25);
+            }
+            if (data.type === 'retaliate') {
+                animStateRef.current.enemyHitFlash = 6;
+                spawnHitParticles(pos.enemyX, pos.characterY - 55, 0xeab308, 10);
+            }
             if (data.type === 'enemyDmg') {
                 animStateRef.current.playerHitFlash = 8;
                 animStateRef.current.screenShake.intensity = 4;
                 spawnHitParticles(pos.playerX, pos.characterY - 55, 0xef4444, 8);
+            }
+            if (data.type === 'shield') {
+                // Blue shield absorb effect
+                spawnHitParticles(pos.playerX, pos.characterY - 55, 0x3b82f6, 6);
             }
         });
 
@@ -1512,17 +1537,6 @@ function spawnFloatingText(app, container, { text, type, target }, positions = {
 
     const { playerX = 200, enemyX = 600, characterY = 350, scaleFactor = 1 } = positions;
 
-    const isCrit = type === 'crit';
-    const isHeal = type === 'heal';
-    const isDodge = type === 'dodge';
-    const isPlayerDmg = type === 'playerDmg';
-    const isEnemyDmg = type === 'enemyDmg';
-    const isThorns = type === 'thorns';
-    const isSilver = type === 'silver';
-    const isSilverLoss = type === 'silverLoss';
-    const isXp = type === 'xp';
-    const isLoot = type === 'loot';
-
     let fillColor = '#ffffff';
     let fontSize = 24;
 
@@ -1530,46 +1544,106 @@ function spawnFloatingText(app, container, { text, type, target }, positions = {
     let offsetX = 0;
     let offsetY = 0;
 
-    if (isCrit) {
-        fillColor = '#fde047';
-        fontSize = 32;
-        offsetY = -10;
-    } else if (isHeal) {
-        fillColor = '#4ade80';
-        fontSize = 22;
-        offsetX = -60;
-        offsetY = 20;
-    } else if (isDodge) {
-        fillColor = '#67e8f9';
-        fontSize = 20;
-        offsetX = 50;
-        offsetY = -20;
-    } else if (isPlayerDmg) {
-        fillColor = '#f87171';
-        fontSize = 24;
-        offsetY = 0;
-    } else if (isEnemyDmg) {
-        fillColor = '#f87171';
-        fontSize = 22;
-        offsetX = 40;
-        offsetY = 10;
-    } else if (isThorns) {
-        fillColor = '#c084fc';
-        fontSize = 18;
-        offsetX = -40;
-        offsetY = 30;
-    } else if (isSilver) {
-        fillColor = '#c0c0c0';
-        fontSize = 22;
-    } else if (isSilverLoss) {
-        fillColor = '#ef4444';
-        fontSize = 20;
-    } else if (isXp) {
-        fillColor = '#a78bfa';
-        fontSize = 22;
-    } else if (isLoot) {
-        fillColor = '#34d399';
-        fontSize = 24;
+    // Map type to color and style
+    switch (type) {
+        case 'crit':
+            fillColor = '#fde047';
+            fontSize = 32;
+            offsetY = -10;
+            break;
+        case 'heal':
+        case 'killHeal':
+            fillColor = '#4ade80';
+            fontSize = 22;
+            offsetX = -60;
+            offsetY = 20;
+            break;
+        case 'dodge':
+            fillColor = '#67e8f9';
+            fontSize = 20;
+            offsetX = 50;
+            offsetY = -20;
+            break;
+        case 'playerDmg':
+            fillColor = '#f87171';
+            fontSize = 24;
+            offsetY = 0;
+            break;
+        case 'enemyDmg':
+            fillColor = '#f87171';
+            fontSize = 22;
+            offsetX = 40;
+            offsetY = 10;
+            break;
+        case 'thorns':
+            fillColor = '#c084fc';
+            fontSize = 18;
+            offsetX = -40;
+            offsetY = 30;
+            break;
+        case 'silver':
+            fillColor = '#c0c0c0';
+            fontSize = 22;
+            break;
+        case 'silverLoss':
+            fillColor = '#ef4444';
+            fontSize = 20;
+            break;
+        case 'xp':
+            fillColor = '#a78bfa';
+            fontSize = 22;
+            break;
+        case 'loot':
+            fillColor = '#34d399';
+            fontSize = 24;
+            break;
+        // New unique effect types
+        case 'bleed':
+            fillColor = '#dc2626';
+            fontSize = 18;
+            offsetX = 30;
+            offsetY = 20;
+            break;
+        case 'burn':
+            fillColor = '#f97316';
+            fontSize = 18;
+            offsetX = -30;
+            offsetY = 25;
+            break;
+        case 'poison':
+            fillColor = '#22c55e';
+            fontSize = 18;
+            offsetX = 0;
+            offsetY = 35;
+            break;
+        case 'multiStrike':
+            fillColor = '#8b5cf6';
+            fontSize = 26;
+            offsetY = -20;
+            break;
+        case 'execute':
+            fillColor = '#ef4444';
+            fontSize = 28;
+            offsetY = -15;
+            break;
+        case 'shield':
+            fillColor = '#3b82f6';
+            fontSize = 20;
+            offsetX = -50;
+            offsetY = 0;
+            break;
+        case 'retaliate':
+            fillColor = '#eab308';
+            fontSize = 20;
+            offsetX = 20;
+            offsetY = 40;
+            break;
+        case 'regen':
+            fillColor = '#86efac';
+            fontSize = 18;
+            offsetX = -70;
+            offsetY = 30;
+            break;
     }
 
     // Scale font size and offsets for mobile

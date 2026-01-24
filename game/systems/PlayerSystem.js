@@ -32,6 +32,14 @@ export const calculatePlayerStats = (gameState) => {
     let dodge = s.agi * STAT_SCALING.AGI_DODGE;
     let xpBonus = s.int * STAT_SCALING.INT_XP_BONUS;
 
+    // Unique boss set effects
+    let bleed = 0, burn = 0, poison = 0;           // DOT effects (% weapon damage)
+    let multiStrike = 0, executeChance = 0, armorPen = 0;  // Attack modifiers
+    let damageShield = 0, retaliate = 0, lastStand = 0;    // Defensive effects
+    let silverOnHit = 0, itemFind = 0;             // Utility effects
+    let rage = 0, vampiric = 0, frostbite = 0;     // Special mechanics
+    let killHeal = 0;                              // Set bonus: heal on kill
+
     // Weapon-specific damage multipliers (all weapon types now have scaling)
     let magicDmgMult = 1 + s.int * STAT_SCALING.INT_MAGIC_DAMAGE;      // INT weapons (staff)
     let meleeDmgMult = 1 + s.str * STAT_SCALING.STR_MELEE_DAMAGE;      // STR weapons (sword, scythe, greataxe)
@@ -87,6 +95,7 @@ export const calculatePlayerStats = (gameState) => {
                 gear.effects.forEach(effect => {
                     const effectValue = effect.value * (1 + enhanceBonus.effectBonus / 100);
                     switch (effect.id) {
+                        // Standard effects
                         case 'lifesteal': lifesteal += effectValue; break;
                         case 'thorns': thorns += effectValue; break;
                         case 'critChance': critChance += effectValue; break;
@@ -98,6 +107,25 @@ export const calculatePlayerStats = (gameState) => {
                         case 'dodge': dodge += effectValue; break;
                         case 'hpRegen': hpRegen += effectValue; break;
                         case 'damageReduction': damageReduction += effectValue; break;
+                        // Unique boss set effects - DOTs
+                        case 'bleed': bleed += effectValue; break;
+                        case 'burn': burn += effectValue; break;
+                        case 'poison': poison += effectValue; break;
+                        // Unique boss set effects - Attack modifiers
+                        case 'multiStrike': multiStrike += effectValue; break;
+                        case 'executeChance': executeChance += effectValue; break;
+                        case 'armorPen': armorPen += effectValue; break;
+                        // Unique boss set effects - Defensive
+                        case 'damageShield': damageShield += effectValue; break;
+                        case 'retaliate': retaliate += effectValue; break;
+                        case 'lastStand': lastStand += effectValue; break;
+                        // Unique boss set effects - Utility
+                        case 'silverOnHit': silverOnHit += effectValue; break;
+                        case 'itemFind': itemFind += effectValue; break;
+                        // Unique boss set effects - Special mechanics
+                        case 'rage': rage += effectValue; break;
+                        case 'vampiric': vampiric += effectValue; break;
+                        case 'frostbite': frostbite += effectValue; break;
                     }
                 });
             }
@@ -136,6 +164,7 @@ export const calculatePlayerStats = (gameState) => {
         if (bossSet) {
             bossSet.setBonuses.forEach(bonus => {
                 if (count >= bonus.pieces) {
+                    // Standard bonuses
                     if (bonus.effect.dmgMult) dmgMult += bonus.effect.dmgMult;
                     if (bonus.effect.hpMult) hpMult += bonus.effect.hpMult;
                     if (bonus.effect.speedMult) speedMult += bonus.effect.speedMult;
@@ -149,6 +178,26 @@ export const calculatePlayerStats = (gameState) => {
                     if (bonus.effect.xpBonus) xpBonus += bonus.effect.xpBonus;
                     if (bonus.effect.hpRegen) hpRegen += bonus.effect.hpRegen;
                     if (bonus.effect.damageReduction) damageReduction += bonus.effect.damageReduction;
+                    // Unique boss set effects - DOTs
+                    if (bonus.effect.bleed) bleed += bonus.effect.bleed;
+                    if (bonus.effect.burn) burn += bonus.effect.burn;
+                    if (bonus.effect.poison) poison += bonus.effect.poison;
+                    // Unique boss set effects - Attack modifiers
+                    if (bonus.effect.multiStrike) multiStrike += bonus.effect.multiStrike;
+                    if (bonus.effect.executeChance) executeChance += bonus.effect.executeChance;
+                    if (bonus.effect.armorPen) armorPen += bonus.effect.armorPen;
+                    // Unique boss set effects - Defensive
+                    if (bonus.effect.damageShield) damageShield += bonus.effect.damageShield;
+                    if (bonus.effect.retaliate) retaliate += bonus.effect.retaliate;
+                    if (bonus.effect.lastStand) lastStand += bonus.effect.lastStand;
+                    // Unique boss set effects - Utility
+                    if (bonus.effect.silverOnHit) silverOnHit += bonus.effect.silverOnHit;
+                    if (bonus.effect.itemFind) itemFind += bonus.effect.itemFind;
+                    // Unique boss set effects - Special mechanics
+                    if (bonus.effect.rage) rage += bonus.effect.rage;
+                    if (bonus.effect.vampiric) vampiric += bonus.effect.vampiric;
+                    if (bonus.effect.frostbite) frostbite += bonus.effect.frostbite;
+                    if (bonus.effect.killHeal) killHeal += bonus.effect.killHeal;
                 }
             });
         }
@@ -207,5 +256,21 @@ export const calculatePlayerStats = (gameState) => {
         xpBonus,
         hpRegen: Math.min(COMBAT.HP_REGEN_CAP, hpRegen),
         damageReduction: Math.min(COMBAT.DAMAGE_REDUCTION_CAP, damageReduction),
+        // Unique boss set effects
+        bleed,
+        burn,
+        poison,
+        multiStrike: Math.min(50, multiStrike),  // Cap at 50%
+        executeChance: Math.min(25, executeChance), // Cap at 25%
+        armorPen: Math.min(75, armorPen),  // Cap at 75%
+        damageShield,
+        retaliate: Math.min(50, retaliate), // Cap at 50%
+        lastStand,
+        silverOnHit,
+        itemFind,
+        rage: Math.min(5, rage),  // Cap at 5% per stack (50% max with 10 stacks)
+        vampiric,
+        frostbite: Math.min(50, frostbite),  // Cap at 50% slow
+        killHeal,
     };
 };
