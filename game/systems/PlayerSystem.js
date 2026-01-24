@@ -16,21 +16,38 @@ import { PLAYER_BASE, STAT_SCALING, LEVEL_UP, COMBAT } from '../data/constants';
  * @returns {Object} Calculated stats object with damage, maxHp, armor, critChance, etc.
  */
 export const calculatePlayerStats = (gameState) => {
-    const s = gameState.stats;
-    // Base stats from character stats
-    let baseDmg = PLAYER_BASE.DAMAGE + s.str * STAT_SCALING.STR_DAMAGE;
-    let baseHp = PLAYER_BASE.HP + s.vit * STAT_SCALING.VIT_HP;
-    let armor = s.vit * STAT_SCALING.VIT_ARMOR;
-    // Reduced gold/mat multipliers - resources should feel scarce
+    // PRIMARY STATS (weapon scaling + basic bonus)
+    const p = gameState.stats || {};  // Primary stats: str, int, vit, agi
+    // SECONDARY STATS (specialized combat stats)
+    const sec = gameState.secondaryStats || {};
+
+    // Base damage from STR and INT
+    let baseDmg = PLAYER_BASE.DAMAGE + (p.str || 0) * STAT_SCALING.STR_DAMAGE + (p.int || 0) * STAT_SCALING.INT_DAMAGE;
+    // Base HP from VIT
+    let baseHp = PLAYER_BASE.HP + (p.vit || 0) * STAT_SCALING.VIT_HP;
+    // Base speed from AGI
+    let speedMult = 1 + (p.agi || 0) * STAT_SCALING.AGI_SPEED;
+
+    // Weapon-specific damage multipliers from primary stats
+    let strWeaponMult = 1 + (p.str || 0) * STAT_SCALING.STR_WEAPON_DAMAGE;  // STR weapons (sword, scythe, greataxe)
+    let intWeaponMult = 1 + (p.int || 0) * STAT_SCALING.INT_WEAPON_DAMAGE;  // INT weapons (staff)
+    let vitWeaponMult = 1 + (p.vit || 0) * STAT_SCALING.VIT_WEAPON_DAMAGE;  // VIT weapons (mace)
+    let agiWeaponMult = 1 + (p.agi || 0) * STAT_SCALING.AGI_WEAPON_DAMAGE;  // AGI weapons (dagger, katana)
+
+    // SECONDARY STATS - from secondary stat allocation
+    let armor = (sec.armor || 0) * STAT_SCALING.ARMOR;
+    let critChance = PLAYER_BASE.CRIT_CHANCE + (sec.critChance || 0) * STAT_SCALING.CRIT_CHANCE;
+    let critDamage = PLAYER_BASE.CRIT_DAMAGE + (sec.critDamage || 0) * STAT_SCALING.CRIT_DAMAGE;
+    let dodge = (sec.dodge || 0) * STAT_SCALING.DODGE;
+    let hpRegen = COMBAT.BASE_HP_REGEN + (sec.hpRegen || 0) * STAT_SCALING.HP_REGEN;
+    let damageReduction = (sec.dmgReduction || 0) * STAT_SCALING.DMG_REDUCTION;
+    let xpBonus = (sec.xpBonus || 0) * STAT_SCALING.XP_BONUS;
+    let goldMult = 1 + (sec.silverFind || 0) * STAT_SCALING.SILVER_FIND;
+    let matMult = 1 + (sec.dropRate || 0) * STAT_SCALING.DROP_RATE;
+
+    // Multipliers
     let dmgMult = 1, hpMult = 1;
-    let goldMult = 1 + s.lck * STAT_SCALING.LCK_GOLD;
-    let speedMult = 1 + s.agi * STAT_SCALING.AGI_SPEED;
-    let matMult = 1 + s.lck * STAT_SCALING.LCK_MAT;
     let lifesteal = 0, thorns = 0;
-    let critChance = PLAYER_BASE.CRIT_CHANCE + s.agi * STAT_SCALING.AGI_CRIT_CHANCE;
-    let critDamage = PLAYER_BASE.CRIT_DAMAGE + s.lck * STAT_SCALING.LCK_CRIT_DAMAGE;
-    let dodge = s.agi * STAT_SCALING.AGI_DODGE;
-    let xpBonus = s.int * STAT_SCALING.INT_XP_BONUS;
 
     // Unique boss set effects
     let bleed = 0, burn = 0, poison = 0;           // DOT effects (% weapon damage)
@@ -39,16 +56,6 @@ export const calculatePlayerStats = (gameState) => {
     let silverOnHit = 0, itemFind = 0;             // Utility effects
     let rage = 0, vampiric = 0, frostbite = 0;     // Special mechanics
     let killHeal = 0;                              // Set bonus: heal on kill
-
-    // Weapon-specific damage multipliers (all weapon types now have scaling)
-    let magicDmgMult = 1 + s.int * STAT_SCALING.INT_MAGIC_DAMAGE;      // INT weapons (staff)
-    let meleeDmgMult = 1 + s.str * STAT_SCALING.STR_MELEE_DAMAGE;      // STR weapons (sword, scythe, greataxe)
-    let precisionDmgMult = 1 + s.agi * STAT_SCALING.AGI_PRECISION_DAMAGE; // AGI weapons (dagger, katana)
-    let tankDmgMult = 1 + s.vit * STAT_SCALING.VIT_TANK_DAMAGE;        // VIT weapons (mace)
-
-    // NEW: Defensive stats for tank/regen builds
-    let hpRegen = COMBAT.BASE_HP_REGEN + s.vit * STAT_SCALING.VIT_HP_REGEN;  // % max HP per second
-    let damageReduction = s.vit * STAT_SCALING.VIT_DAMAGE_REDUCTION;          // Flat % damage reduction
 
     // Gear contributions
     let enhanceDmgMult = 1; // Cumulative enhancement damage multiplier
@@ -85,7 +92,7 @@ export const calculatePlayerStats = (gameState) => {
             enhanceDmgMult *= enhanceBonus.dmgMult;
 
             // Stat scaling bonus: gear is stronger if you have the right stat
-            const scalingStat = s[gearBase.scaling] || 0;
+            const scalingStat = p[gearBase.scaling] || 0;
             const scalingBonus = 1 + scalingStat * STAT_SCALING.GEAR_STAT_SCALING;
             baseDmg += Math.floor(gearBase.baseDmg * tierMult * bossStatBonus * (scalingBonus - 1));
             baseHp += Math.floor(gearBase.baseHp * tierMult * bossStatBonus * (scalingBonus - 1) * STAT_SCALING.GEAR_HP_SCALING);
@@ -226,10 +233,10 @@ export const calculatePlayerStats = (gameState) => {
     // Apply weapon-specific damage multiplier based on scaling stat
     let weaponDmgMult = 1;
     switch (weaponScaling) {
-        case 'int': weaponDmgMult = magicDmgMult; break;      // Staff: INT scaling
-        case 'str': weaponDmgMult = meleeDmgMult; break;      // Sword, Scythe, Greataxe: STR scaling
-        case 'agi': weaponDmgMult = precisionDmgMult; break;  // Dagger, Katana: AGI scaling
-        case 'vit': weaponDmgMult = tankDmgMult; break;       // Mace: VIT scaling
+        case 'int': weaponDmgMult = intWeaponMult; break;    // Staff: INT scaling
+        case 'str': weaponDmgMult = strWeaponMult; break;    // Sword, Scythe, Greataxe: STR scaling
+        case 'agi': weaponDmgMult = agiWeaponMult; break;    // Dagger, Katana: AGI scaling
+        case 'vit': weaponDmgMult = vitWeaponMult; break;    // Mace: VIT scaling
     }
     const finalDmgMult = dmgMult * weaponDmgMult;
 

@@ -17,8 +17,20 @@ export const initialState = {
         abyss: 0, behemoth: 0, darkwolf: 0,
         tyrant: 0, inferno: 0, scorpion: 0,
     },
-    // Base stats - player can allocate points
-    stats: { str: 5, int: 5, vit: 5, agi: 5, lck: 5 },
+    // Primary stats - weapon scaling + basic bonus
+    stats: { str: 5, int: 5, vit: 5, agi: 5 },
+    // Secondary stats - specialized combat stats (must be skilled separately)
+    secondaryStats: {
+        critChance: 0,
+        critDamage: 0,
+        dodge: 0,
+        armor: 0,
+        hpRegen: 0,
+        dmgReduction: 0,
+        xpBonus: 0,
+        silverFind: 0,
+        dropRate: 0
+    },
     statPoints: 0, // Points available to allocate (3 per level up)
     gear: {
         weapon: {

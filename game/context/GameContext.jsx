@@ -11,7 +11,8 @@ const HighFrequencyContext = createContext(null);
 function validateSave(parsed) {
     const errors = [];
     const defaults = {
-        stats: { ...DEFAULTS.BASE_STATS },
+        stats: { ...DEFAULTS.BASE_PRIMARY_STATS },
+        secondaryStats: { ...DEFAULTS.BASE_SECONDARY_STATS },
         playerHp: DEFAULTS.PLAYER_HP,
         playerMaxHp: DEFAULTS.PLAYER_MAX_HP,
         enemyHp: DEFAULTS.ENEMY_HP,
@@ -44,15 +45,30 @@ function validateSave(parsed) {
         parsed.saveVersion = SAVE.SAVE_VERSION;
     }
 
-    // Validate stats object
+    // Validate primary stats object
     if (!parsed.stats || typeof parsed.stats !== 'object') {
         errors.push('Invalid stats object, resetting to defaults');
         parsed.stats = { ...defaults.stats };
     } else {
+        // Remove old 'lck' stat if present (migrated to secondary stats)
+        if ('lck' in parsed.stats) {
+            delete parsed.stats.lck;
+        }
         for (const [key, defaultVal] of Object.entries(defaults.stats)) {
             if (typeof parsed.stats[key] !== 'number' || isNaN(parsed.stats[key]) || parsed.stats[key] < 0) {
                 errors.push(`Invalid stat ${key}, resetting to ${defaultVal}`);
                 parsed.stats[key] = defaultVal;
+            }
+        }
+    }
+
+    // Validate secondary stats object (new stat system)
+    if (!parsed.secondaryStats || typeof parsed.secondaryStats !== 'object') {
+        parsed.secondaryStats = { ...defaults.secondaryStats };
+    } else {
+        for (const [key, defaultVal] of Object.entries(defaults.secondaryStats)) {
+            if (typeof parsed.secondaryStats[key] !== 'number' || isNaN(parsed.secondaryStats[key]) || parsed.secondaryStats[key] < 0) {
+                parsed.secondaryStats[key] = defaultVal;
             }
         }
     }
@@ -282,6 +298,7 @@ export function GameProvider({ children }) {
                     newState.inventory !== lastState?.inventory ||
                     newState.gear !== lastState?.gear ||
                     newState.stats !== lastState?.stats ||
+                    newState.secondaryStats !== lastState?.secondaryStats ||
                     newState.statPoints !== lastState?.statPoints ||
                     newState.enhanceStone !== lastState?.enhanceStone ||
                     newState.blessedOrb !== lastState?.blessedOrb ||

@@ -14,31 +14,33 @@ export const PLAYER_BASE = {
 
 // === STAT SCALING (per point) ===
 export const STAT_SCALING = {
-    // STR - Melee damage scaling (matches INT for balance)
-    STR_DAMAGE: 2,
-    STR_MELEE_DAMAGE: 0.03,  // +3% damage per STR for melee weapons
+    // PRIMARY STATS - Weapon damage + one basic bonus
+    // STR - Base damage + STR weapon scaling
+    STR_DAMAGE: 1,           // +1 flat damage per point
+    STR_WEAPON_DAMAGE: 0.03, // +3% damage per STR for STR weapons (sword, scythe, greataxe)
 
-    // VIT - Tank/regen build enabler
-    VIT_HP: 8,
-    VIT_ARMOR: 1,
-    VIT_HP_REGEN: 0.15,      // +0.15% max HP regen per second per VIT point
-    VIT_DAMAGE_REDUCTION: 0.3, // +0.3% damage reduction per VIT point
-    VIT_TANK_DAMAGE: 0.02,   // +2% damage per VIT for maces
+    // INT - Base damage + INT weapon scaling
+    INT_DAMAGE: 1,           // +1 flat damage per point
+    INT_WEAPON_DAMAGE: 0.03, // +3% damage per INT for INT weapons (staff)
 
-    // AGI - Evasion and speed (now with damage scaling for daggers)
-    AGI_CRIT_CHANCE: 0.5,
-    AGI_SPEED: 0.01,
-    AGI_DODGE: 0.3,
-    AGI_PRECISION_DAMAGE: 0.02, // +2% damage per AGI for agility weapons
+    // VIT - HP + VIT weapon scaling
+    VIT_HP: 10,              // +10 HP per point
+    VIT_WEAPON_DAMAGE: 0.02, // +2% damage per VIT for VIT weapons (mace)
 
-    // LCK
-    LCK_GOLD: 0.005,
-    LCK_MAT: 0.005,
-    LCK_CRIT_DAMAGE: 2,
+    // AGI - Speed + AGI weapon scaling
+    AGI_SPEED: 0.01,         // +1% attack speed per point
+    AGI_WEAPON_DAMAGE: 0.02, // +2% damage per AGI for AGI weapons (dagger, katana)
 
-    // INT
-    INT_XP_BONUS: 1,
-    INT_MAGIC_DAMAGE: 0.03,
+    // SECONDARY STATS - Must be skilled separately
+    CRIT_CHANCE: 1,          // +1% crit chance per point
+    CRIT_DAMAGE: 5,          // +5% crit damage per point
+    DODGE: 1,                // +1% dodge per point
+    ARMOR: 3,                // +3 armor per point
+    HP_REGEN: 0.2,           // +0.2% HP regen/sec per point
+    DMG_REDUCTION: 0.5,      // +0.5% damage reduction per point
+    XP_BONUS: 2,             // +2% XP per point
+    SILVER_FIND: 0.01,       // +1% silver find per point
+    DROP_RATE: 0.01,         // +1% drop rate per point
 
     // Gear scaling
     GEAR_STAT_SCALING: 0.02, // +2% per matching stat point
@@ -139,6 +141,21 @@ export const SAVE = {
 
 // === DEFAULT STATE VALUES ===
 export const DEFAULTS = {
+    // Primary stats - weapon scaling + basic bonus
+    BASE_PRIMARY_STATS: { str: 5, int: 5, vit: 5, agi: 5 },
+    // Secondary stats - specialized combat stats (start at 0)
+    BASE_SECONDARY_STATS: {
+        critChance: 0,
+        critDamage: 0,
+        dodge: 0,
+        armor: 0,
+        hpRegen: 0,
+        dmgReduction: 0,
+        xpBonus: 0,
+        silverFind: 0,
+        dropRate: 0
+    },
+    // Legacy support
     BASE_STATS: { str: 5, int: 5, vit: 5, agi: 5, lck: 5 },
     PLAYER_HP: 100,
     PLAYER_MAX_HP: 100,

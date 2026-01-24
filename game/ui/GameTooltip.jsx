@@ -377,11 +377,12 @@ export default function GameTooltip({ tooltip }) {
                     const maxForTier = getEffectMaxForTier(effectDef, item.tier);
                     const minVal = effectDef.minVal;
                     const range = maxForTier - minVal;
-                    if (range <= 0) return { percent: 100, max: maxForTier };
+                    if (range <= 0) return { percent: 100, max: Math.round(maxForTier) };
+                    // If value exceeds max by 20%+, it's likely an awakening bonus without the flag
+                    const isLikelyAwakened = value > maxForTier * 1.2;
+                    if (isLikelyAwakened) return null; // Don't show roll quality for likely awakening effects
                     const percent = Math.min(100, Math.round(((value - minVal) / range) * 100));
-                    // If value exceeds max (boss fixed effects), show as perfect roll
-                    const isOverMax = value > maxForTier;
-                    return { percent: isOverMax ? 100 : percent, max: maxForTier, min: minVal, isOverMax };
+                    return { percent, max: Math.round(maxForTier), min: minVal };
                 };
 
                 // Get color based on roll quality
@@ -405,27 +406,35 @@ export default function GameTooltip({ tooltip }) {
                             <div className="space-y-1.5 mb-2">
                                 {regularEffects.map((eff, i) => {
                                     const desc = EFFECT_DESCRIPTIONS[eff.id];
-                                    const quality = getRollQuality(eff.id, eff.value);
+                                    // Only show roll quality for non-unique effects (unique = boss fixed)
+                                    const quality = !eff.unique ? getRollQuality(eff.id, eff.value) : null;
+                                    const isMaxRoll = quality && quality.percent >= 95;
                                     return (
                                         <div key={i}>
                                             <div className="flex justify-between items-center">
-                                                <span className="text-sm font-bold text-purple-300">{eff.name}</span>
+                                                <span className="text-sm font-bold text-purple-300">
+                                                    {eff.name}
+                                                    {eff.unique && <span className="ml-1 text-[9px] text-yellow-500">(SET)</span>}
+                                                </span>
                                                 <div className="flex items-center gap-2">
                                                     {shiftHeld && quality && (
                                                         <>
                                                             <span
                                                                 className="text-[10px] font-bold px-1.5 py-0.5 rounded"
                                                                 style={{
-                                                                    color: quality.isOverMax ? '#fbbf24' : getQualityColor(quality.percent),
-                                                                    backgroundColor: quality.isOverMax ? '#fbbf2430' : `${getQualityColor(quality.percent)}20`
+                                                                    color: getQualityColor(quality.percent),
+                                                                    backgroundColor: `${getQualityColor(quality.percent)}20`
                                                                 }}
                                                             >
-                                                                {quality.isOverMax ? 'MAX+' : `${quality.percent}%`}
+                                                                {quality.percent}%
                                                             </span>
                                                             <span className="text-[10px] text-slate-500">
                                                                 max: {quality.max}
                                                             </span>
                                                         </>
+                                                    )}
+                                                    {shiftHeld && eff.unique && (
+                                                        <span className="text-[10px] text-yellow-500">fixed</span>
                                                     )}
                                                     <span className="font-mono font-bold text-sm text-purple-300">+{eff.value}</span>
                                                 </div>
@@ -433,7 +442,7 @@ export default function GameTooltip({ tooltip }) {
                                             {desc && (
                                                 <div className="text-[10px] text-slate-400">{desc(eff.value)}</div>
                                             )}
-                                            {/* Roll quality bar when shift held */}
+                                            {/* Roll quality bar when shift held - only for rolled effects */}
                                             {shiftHeld && quality && (
                                                 <div className="mt-1 h-1 bg-slate-700 rounded-full overflow-hidden">
                                                     <div
