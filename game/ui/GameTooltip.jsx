@@ -1,5 +1,5 @@
-import React from 'react';
-import { TIERS, GEAR_BASES, WEAPON_TYPES, PRESTIGE_WEAPONS, BOSS_SETS, PRESTIGE_BOSS_SETS, getItemScore, getEnhanceStage } from '../data/items';
+import React, { useState, useEffect } from 'react';
+import { TIERS, GEAR_BASES, WEAPON_TYPES, PRESTIGE_WEAPONS, BOSS_SETS, PRESTIGE_BOSS_SETS, SPECIAL_EFFECTS, getItemScore, getEnhanceStage, getEffectMaxForTier } from '../data/items';
 import { getEnhanceBonus } from '../utils/formulas';
 import { formatBonus } from '../utils/format';
 
@@ -47,6 +47,24 @@ function calculateItemStats(item) {
 }
 
 export default function GameTooltip({ tooltip }) {
+    const [shiftHeld, setShiftHeld] = useState(false);
+
+    // Track shift key state
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Shift') setShiftHeld(true);
+        };
+        const handleKeyUp = (e) => {
+            if (e.key === 'Shift') setShiftHeld(false);
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('keyup', handleKeyUp);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener('keyup', handleKeyUp);
+        };
+    }, []);
+
     if (!tooltip || !tooltip.item) return null;
 
     const { item, position, gear, isInventoryItem } = tooltip;
@@ -352,23 +370,78 @@ export default function GameTooltip({ tooltip }) {
                 const regularEffects = effects.filter(e => !e.isAwakened);
                 const awakenedEffects = effects.filter(e => e.isAwakened);
 
+                // Helper to get roll quality percentage
+                const getRollQuality = (effectId, value) => {
+                    const effectDef = SPECIAL_EFFECTS.find(e => e.id === effectId);
+                    if (!effectDef) return null;
+                    const maxForTier = getEffectMaxForTier(effectDef, item.tier);
+                    const minVal = effectDef.minVal;
+                    const range = maxForTier - minVal;
+                    if (range <= 0) return { percent: 100, max: maxForTier };
+                    const percent = Math.round(((value - minVal) / range) * 100);
+                    return { percent, max: maxForTier, min: minVal };
+                };
+
+                // Get color based on roll quality
+                const getQualityColor = (percent) => {
+                    if (percent >= 95) return '#fbbf24'; // Gold - perfect
+                    if (percent >= 80) return '#22c55e'; // Green - great
+                    if (percent >= 60) return '#3b82f6'; // Blue - good
+                    if (percent >= 40) return '#94a3b8'; // Gray - average
+                    return '#ef4444'; // Red - poor
+                };
+
                 return (
                     <div className="px-4 py-3 border-b border-slate-700/30">
-                        <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">Special Effects</div>
+                        <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-2 flex justify-between items-center">
+                            <span>Special Effects</span>
+                            {!shiftHeld && <span className="text-slate-600 normal-case">[Shift] max rolls</span>}
+                        </div>
 
                         {/* Regular effects - full display with descriptions */}
                         {regularEffects.length > 0 && (
                             <div className="space-y-1.5 mb-2">
                                 {regularEffects.map((eff, i) => {
                                     const desc = EFFECT_DESCRIPTIONS[eff.id];
+                                    const quality = getRollQuality(eff.id, eff.value);
                                     return (
                                         <div key={i}>
                                             <div className="flex justify-between items-center">
                                                 <span className="text-sm font-bold text-purple-300">{eff.name}</span>
-                                                <span className="font-mono font-bold text-sm text-purple-300">+{eff.value}</span>
+                                                <div className="flex items-center gap-2">
+                                                    {shiftHeld && quality && (
+                                                        <>
+                                                            <span
+                                                                className="text-[10px] font-bold px-1.5 py-0.5 rounded"
+                                                                style={{
+                                                                    color: getQualityColor(quality.percent),
+                                                                    backgroundColor: `${getQualityColor(quality.percent)}20`
+                                                                }}
+                                                            >
+                                                                {quality.percent}%
+                                                            </span>
+                                                            <span className="text-[10px] text-slate-500">
+                                                                max: {quality.max}
+                                                            </span>
+                                                        </>
+                                                    )}
+                                                    <span className="font-mono font-bold text-sm text-purple-300">+{eff.value}</span>
+                                                </div>
                                             </div>
                                             {desc && (
                                                 <div className="text-[10px] text-slate-400">{desc(eff.value)}</div>
+                                            )}
+                                            {/* Roll quality bar when shift held */}
+                                            {shiftHeld && quality && (
+                                                <div className="mt-1 h-1 bg-slate-700 rounded-full overflow-hidden">
+                                                    <div
+                                                        className="h-full transition-all"
+                                                        style={{
+                                                            width: `${quality.percent}%`,
+                                                            backgroundColor: getQualityColor(quality.percent)
+                                                        }}
+                                                    />
+                                                </div>
                                             )}
                                         </div>
                                     );
