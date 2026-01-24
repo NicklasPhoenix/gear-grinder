@@ -240,6 +240,16 @@ export const calculatePlayerStats = (gameState) => {
         effectiveLifesteal = COMBAT.LIFESTEAL_SOFT_CAP + (overCap * COMBAT.LIFESTEAL_FALLOFF);
     }
 
+    // Ascended Crit: overflow crit above 100% becomes execute chance
+    // Every 9% crit over 100% = 1% Ascended Crit (so 1000% crit = 100% Ascended)
+    let ascendedCrit = 0;
+    let effectiveCritChance = critChance;
+    if (critChance > 100) {
+        const overflowCrit = critChance - 100;
+        ascendedCrit = Math.min(100, overflowCrit / 9); // Cap at 100%
+        effectiveCritChance = 100; // Cap normal crit at 100%
+    }
+
     return {
         damage: Math.floor(baseDmg * finalDmgMult * enhanceDmgMult),
         maxHp: Math.floor(baseHp * hpMult),
@@ -247,8 +257,10 @@ export const calculatePlayerStats = (gameState) => {
         goldMult,
         matMult,
         speedMult,
-        critChance,
+        critChance: effectiveCritChance,
+        critChanceRaw: critChance, // For display (show total before cap)
         critDamage,
+        ascendedCrit, // Execute chance from overflow crit
         lifesteal: effectiveLifesteal,
         lifestealRaw: lifesteal, // For display purposes (show actual vs effective)
         thorns,

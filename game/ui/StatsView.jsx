@@ -171,6 +171,9 @@ export default function StatsView() {
                             <MobileStatRow label="Damage" value={calculated.damage} color="text-red-300" />
                             <MobileStatRow label="Armor" value={calculated.armor} color="text-blue-300" />
                             <MobileStatRow label="Crit %" value={formatPercent(calculated.critChance)} color="text-yellow-300" />
+                            {calculated.ascendedCrit > 0 && (
+                                <MobileStatRow label="Ascended" value={formatPercent(calculated.ascendedCrit)} color="text-cyan-300" />
+                            )}
                             <MobileStatRow label="Crit DMG" value={formatPercent(calculated.critDamage, 0)} color="text-orange-300" />
                             <MobileStatRow label="Speed" value={formatMultiplier(calculated.speedMult)} color="text-cyan-300" />
                             <MobileStatRow label="Dodge" value={formatPercent(calculated.dodge)} color="text-green-300" />
@@ -356,6 +359,9 @@ export default function StatsView() {
                             <StatRow label="Damage" value={calculated.damage} color="text-red-300" />
                             <StatRow label="Armor" value={calculated.armor} color="text-blue-300" />
                             <StatRow label="Crit %" value={formatPercent(calculated.critChance)} color="text-yellow-300" />
+                            {calculated.ascendedCrit > 0 && (
+                                <StatRow label="Ascended Crit" value={formatPercent(calculated.ascendedCrit)} color="text-cyan-300" />
+                            )}
                             <StatRow label="Crit DMG" value={formatPercent(calculated.critDamage, 0)} color="text-orange-300" />
                             <StatRow label="Speed" value={formatMultiplier(calculated.speedMult)} color="text-cyan-300" />
                             <StatRow label="Dodge" value={formatPercent(calculated.dodge)} color="text-green-300" />

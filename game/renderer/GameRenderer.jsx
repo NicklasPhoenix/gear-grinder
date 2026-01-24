@@ -693,6 +693,7 @@ export default function GameRenderer() {
                 case 'multiStrike':
                 case 'execute':
                 case 'retaliate':
+                case 'ascendedCrit':
                     audioManager.playSfxCrit();
                     break;
             }
@@ -716,6 +717,12 @@ export default function GameRenderer() {
                 animStateRef.current.enemyHitFlash = 15;
                 animStateRef.current.screenShake.intensity = 15;
                 spawnHitParticles(pos.enemyX, pos.characterY - 55, 0xef4444, 25);
+            }
+            if (data.type === 'ascendedCrit') {
+                // Ascended crit - big cyan/light blue explosion
+                animStateRef.current.enemyHitFlash = 20;
+                animStateRef.current.screenShake.intensity = 18;
+                spawnHitParticles(pos.enemyX, pos.characterY - 55, 0x67e8f9, 35);
             }
             if (data.type === 'retaliate') {
                 animStateRef.current.enemyHitFlash = 6;
@@ -1644,6 +1651,11 @@ function spawnFloatingText(app, container, { text, type, target }, positions = {
             offsetX = -70;
             offsetY = 30;
             break;
+        case 'ascendedCrit':
+            fillColor = '#67e8f9'; // Light blue/cyan
+            fontSize = 32;
+            offsetY = -15;
+            break;
     }
 
     // Scale font size and offsets for mobile
@@ -1678,7 +1690,7 @@ function spawnFloatingText(app, container, { text, type, target }, positions = {
 
     container.addChild(pixiText);
 
-    const isBigHit = type === 'crit' || type === 'execute' || type === 'multiStrike';
+    const isBigHit = type === 'crit' || type === 'execute' || type === 'multiStrike' || type === 'ascendedCrit';
     let velocityY = (isBigHit ? -2.5 : -1.5) * scaleFactor;
     let velocityX = (Math.random() - 0.5) * 0.6 * scaleFactor;
     let tick = 0;
