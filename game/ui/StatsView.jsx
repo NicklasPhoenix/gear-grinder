@@ -8,6 +8,36 @@ import { getZoneById } from '../data/zones';
 import { COMBAT } from '../data/constants';
 import { formatPercent, formatMultiplier, formatBonus, formatWithCommas, formatTime } from '../utils/format';
 
+// Check if a secondary stat's overflow effect is maxed (further investment is wasted)
+const isOverflowMaxed = (statKey, calculated) => {
+    switch (statKey) {
+        case 'critChance':
+            return calculated.ascendedCrit >= 100;
+        case 'critDamage':
+            return calculated.annihilate >= 100;
+        case 'dodge':
+            return calculated.phantom >= 100;
+        case 'dmgReduction':
+            return calculated.immunity >= 100;
+        case 'hpRegen':
+            return calculated.secondWind >= 50; // Second Wind caps at 50%
+        default:
+            return false; // armor, xpBonus, silverFind, dropRate have no overflow cap
+    }
+};
+
+// Get the overflow effect name for a stat
+const getOverflowName = (statKey) => {
+    switch (statKey) {
+        case 'critChance': return 'Ascended';
+        case 'critDamage': return 'Annihilate';
+        case 'dodge': return 'Phantom';
+        case 'dmgReduction': return 'Immunity';
+        case 'hpRegen': return 'Second Wind';
+        default: return null;
+    }
+};
+
 export default function StatsView() {
     const { state, gameManager } = useGame();
     const { isMobile } = useIsMobile();
@@ -96,45 +126,59 @@ export default function StatsView() {
     };
 
     // Render stat allocation button group
-    const StatButtons = ({ onStatUp, statKey, isPrimary = true }) => (
+    const StatButtons = ({ onStatUp, statKey, isPrimary = true, isMaxed = false }) => {
+        const noPoints = state.statPoints <= 0;
+        const disabled = noPoints || isMaxed;
+
+        return (
         <div className="flex gap-1 flex-shrink-0">
             <button
                 onClick={() => onStatUp(statKey, 1)}
-                disabled={state.statPoints <= 0}
+                disabled={disabled}
                 className={`px-2 py-1 rounded text-xs font-bold transition-all ${
-                    state.statPoints > 0
-                        ? 'bg-blue-600 hover:bg-blue-500 active:bg-blue-500 text-white active:scale-95'
-                        : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                    isMaxed
+                        ? 'bg-amber-900/50 text-amber-500/50 cursor-not-allowed'
+                        : state.statPoints > 0
+                            ? 'bg-blue-600 hover:bg-blue-500 active:bg-blue-500 text-white active:scale-95'
+                            : 'bg-slate-700 text-slate-500 cursor-not-allowed'
                 }`}
+                title={isMaxed ? 'Overflow effect is maxed - further points are wasted' : ''}
             >
                 +1
             </button>
             <button
                 onClick={() => onStatUp(statKey, 10)}
-                disabled={state.statPoints <= 0}
+                disabled={disabled}
                 className={`px-2 py-1 rounded text-xs font-bold transition-all ${
-                    state.statPoints >= 10
-                        ? 'bg-green-600 hover:bg-green-500 active:bg-green-500 text-white active:scale-95'
-                        : state.statPoints > 0
-                            ? 'bg-green-600/50 hover:bg-green-500/50 active:bg-green-500/50 text-green-200 active:scale-95'
-                            : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                    isMaxed
+                        ? 'bg-amber-900/50 text-amber-500/50 cursor-not-allowed'
+                        : state.statPoints >= 10
+                            ? 'bg-green-600 hover:bg-green-500 active:bg-green-500 text-white active:scale-95'
+                            : state.statPoints > 0
+                                ? 'bg-green-600/50 hover:bg-green-500/50 active:bg-green-500/50 text-green-200 active:scale-95'
+                                : 'bg-slate-700 text-slate-500 cursor-not-allowed'
                 }`}
+                title={isMaxed ? 'Overflow effect is maxed - further points are wasted' : ''}
             >
                 +10
             </button>
             <button
                 onClick={() => onStatUp(statKey, state.statPoints)}
-                disabled={state.statPoints <= 0}
+                disabled={disabled}
                 className={`px-2 py-1 rounded text-xs font-bold transition-all ${
-                    state.statPoints > 0
-                        ? 'bg-purple-600 hover:bg-purple-500 active:bg-purple-500 text-white active:scale-95'
-                        : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                    isMaxed
+                        ? 'bg-amber-900/50 text-amber-500/50 cursor-not-allowed'
+                        : state.statPoints > 0
+                            ? 'bg-purple-600 hover:bg-purple-500 active:bg-purple-500 text-white active:scale-95'
+                            : 'bg-slate-700 text-slate-500 cursor-not-allowed'
                 }`}
+                title={isMaxed ? 'Overflow effect is maxed - further points are wasted' : ''}
             >
                 MAX
             </button>
         </div>
-    );
+        );
+    };
 
     // Mobile layout
     if (isMobile) {
@@ -226,22 +270,30 @@ export default function StatsView() {
                     <div className="p-2">
                         <div className="text-xs text-slate-500 uppercase font-bold mb-2 px-1">Secondary Stats (Combat Specialization)</div>
                         <div className="space-y-2">
-                            {Object.entries(SECONDARY_STATS).map(([key, stat]) => (
-                                <div key={key} className="p-3 bg-slate-900/50 rounded-lg border border-slate-800/50">
+                            {Object.entries(SECONDARY_STATS).map(([key, stat]) => {
+                                const maxed = isOverflowMaxed(key, calculated);
+                                const overflowName = getOverflowName(key);
+                                return (
+                                <div key={key} className={`p-3 bg-slate-900/50 rounded-lg border ${maxed ? 'border-amber-500/30' : 'border-slate-800/50'}`}>
                                     <div className="flex items-center gap-2">
                                         <span className="text-sm font-bold flex-shrink-0" style={{ color: stat.color }}>
                                             {stat.name}
+                                            {maxed && <span className="ml-1 text-[9px] text-amber-400">(MAX)</span>}
                                         </span>
                                         <span className="text-lg font-mono font-bold text-white ml-auto">
                                             {state.secondaryStats?.[key] || 0}
                                         </span>
-                                        <StatButtons onStatUp={handleSecondaryStatUp} statKey={key} isPrimary={false} />
+                                        <StatButtons onStatUp={handleSecondaryStatUp} statKey={key} isPrimary={false} isMaxed={maxed} />
                                     </div>
                                     <div className="text-xs text-slate-500 mt-2 leading-relaxed">
                                         {stat.desc}
+                                        {maxed && overflowName && (
+                                            <span className="text-amber-400 ml-1">({overflowName} maxed)</span>
+                                        )}
                                     </div>
                                 </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
                 )}
@@ -427,22 +479,30 @@ export default function StatsView() {
                     <div className="game-panel flex flex-col min-h-0 flex-1">
                         <div className="game-panel-header text-sm text-yellow-400">Secondary Stats</div>
                         <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1.5">
-                            {Object.entries(SECONDARY_STATS).map(([key, stat]) => (
-                                <div key={key} className="p-2 bg-slate-900/50 rounded hover:bg-slate-800/50 transition-colors">
+                            {Object.entries(SECONDARY_STATS).map(([key, stat]) => {
+                                const maxed = isOverflowMaxed(key, calculated);
+                                const overflowName = getOverflowName(key);
+                                return (
+                                <div key={key} className={`p-2 bg-slate-900/50 rounded hover:bg-slate-800/50 transition-colors ${maxed ? 'border border-amber-500/30' : ''}`}>
                                     <div className="flex items-center gap-2">
                                         <span className="text-sm font-bold flex-shrink-0" style={{ color: stat.color }}>
                                             {stat.name}
+                                            {maxed && <span className="ml-1 text-[9px] text-amber-400">(MAX)</span>}
                                         </span>
                                         <span className="text-lg font-mono font-bold text-white ml-auto">
                                             {state.secondaryStats?.[key] || 0}
                                         </span>
-                                        <StatButtons onStatUp={handleSecondaryStatUp} statKey={key} isPrimary={false} />
+                                        <StatButtons onStatUp={handleSecondaryStatUp} statKey={key} isPrimary={false} isMaxed={maxed} />
                                     </div>
                                     <div className="text-[10px] text-slate-500 mt-1 leading-tight">
                                         {stat.desc}
+                                        {maxed && overflowName && (
+                                            <span className="text-amber-400 ml-1">({overflowName} maxed)</span>
+                                        )}
                                     </div>
                                 </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
                 </div>
