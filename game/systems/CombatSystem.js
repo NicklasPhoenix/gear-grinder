@@ -493,6 +493,13 @@ export class CombatSystem {
             newState.endlessEnemyHp = newState.enemyHp;
         }
 
+        // DEBUG: Log HP changes
+        const prevHp = state.playerHp;
+        const newHp = newState.playerHp;
+        if (prevHp !== newHp) {
+            console.log(`HP: ${prevHp} -> ${newHp} (diff: ${newHp - prevHp})`);
+        }
+
         this.stateManager.setState(newState);
         return combatUpdates;
     }
