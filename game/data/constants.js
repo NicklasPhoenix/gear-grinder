@@ -77,7 +77,7 @@ export const COMBAT = {
 
 // === DEATH PENALTIES ===
 export const DEATH_PENALTY = {
-    GOLD_LOSS: 0.25,    // Lose 25% gold on death
+    GOLD_LOSS: 0.25,    // Lose 25% silver on death
     STONE_LOSS: 0.10,   // Lose 10% enhance stones on death
 };
 

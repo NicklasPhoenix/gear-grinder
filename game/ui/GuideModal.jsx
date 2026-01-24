@@ -333,8 +333,8 @@ function PrestigeSection() {
             <SubSection title="Prestige Stones">
                 <p>Earned on prestige: <span className="text-pink-400">10 + (Level ÷ 2)</span> stones</p>
                 <p>Spend on Prestige Skills for permanent bonuses like:</p>
-                <p className="text-xs text-slate-400 mt-1">• +Damage%, +HP%, +Speed%, +Crit, +XP, +Gold</p>
-                <p className="text-xs text-slate-400">• Starting gold bonus for faster restarts</p>
+                <p className="text-xs text-slate-400 mt-1">• +Damage%, +HP%, +Speed%, +Crit, +XP, +Silver</p>
+                <p className="text-xs text-slate-400">• Starting silver bonus for faster restarts</p>
             </SubSection>
 
             <SubSection title="What Resets">

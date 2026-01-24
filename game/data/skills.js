@@ -1,7 +1,7 @@
 export const SKILLS = [
     { id: 0, name: 'Power Strike', desc: '+15% damage', unlockLevel: 3, effect: { dmgMult: 0.15 } },
     { id: 1, name: 'Toughness', desc: '+20% HP', unlockLevel: 6, effect: { hpMult: 0.2 } },
-    { id: 2, name: 'Gold Rush', desc: '+10% gold', unlockLevel: 10, effect: { goldMult: 0.10 } },
+    { id: 2, name: 'Silver Rush', desc: '+10% silver', unlockLevel: 10, effect: { goldMult: 0.10 } },
     { id: 3, name: 'Swift Blade', desc: '+20% attack speed', unlockLevel: 15, effect: { speedMult: 0.2 } },
     { id: 4, name: 'Berserker', desc: '+30% damage', unlockLevel: 22, effect: { dmgMult: 0.3 } },
     { id: 5, name: 'Fortitude', desc: '+35% HP', unlockLevel: 30, effect: { hpMult: 0.35 } },
@@ -18,7 +18,7 @@ export const SKILLS = [
 export const PRESTIGE_SKILLS = [
     { id: 0, name: 'Eternal Strength', desc: '+10% base DMG per level', maxLevel: 20, cost: (lvl) => Math.floor(2 * Math.pow(1.5, lvl)), effect: { dmgMult: 0.10 } },
     { id: 1, name: 'Eternal Vitality', desc: '+10% base HP per level', maxLevel: 20, cost: (lvl) => Math.floor(2 * Math.pow(1.5, lvl)), effect: { hpMult: 0.10 } },
-    { id: 2, name: 'Eternal Fortune', desc: '+5% gold find per level', maxLevel: 15, cost: (lvl) => Math.floor(3 * Math.pow(1.4, lvl)), effect: { goldMult: 0.05 } },
+    { id: 2, name: 'Eternal Fortune', desc: '+5% silver find per level', maxLevel: 15, cost: (lvl) => Math.floor(3 * Math.pow(1.4, lvl)), effect: { goldMult: 0.05 } },
     { id: 3, name: 'Eternal Haste', desc: '+5% attack speed per level', maxLevel: 10, cost: (lvl) => Math.floor(5 * Math.pow(1.6, lvl)), effect: { speedMult: 0.05 } },
     { id: 4, name: 'Eternal Precision', desc: '+3% crit chance per level', maxLevel: 15, cost: (lvl) => Math.floor(4 * Math.pow(1.5, lvl)), effect: { critChance: 3 } },
     { id: 5, name: 'Eternal Fury', desc: '+15% crit damage per level', maxLevel: 20, cost: (lvl) => Math.floor(3 * Math.pow(1.4, lvl)), effect: { critDamage: 15 } },

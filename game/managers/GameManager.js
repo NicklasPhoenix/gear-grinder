@@ -290,7 +290,7 @@ export class GameManager {
                 bossStones,
             };
         });
-        console.log('🎮 CHEAT ACTIVATED: +9.9M gold, +99K enhance stones, +9K orbs, +999 shards, +999 prestige stones, +500 stat points, +99 each boss stone, level 100');
+        console.log('🎮 CHEAT ACTIVATED: +9.9M silver, +99K enhance stones, +9K orbs, +999 shards, +999 prestige stones, +500 stat points, +99 each boss stone, level 100');
         this.emit('floatingText', { text: "CHEATS ON!", type: "levelup", target: "player" });
     }
 }
