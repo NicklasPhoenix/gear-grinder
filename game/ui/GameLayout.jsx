@@ -113,12 +113,16 @@ function DesktopGameLayout() {
             // Don't intercept if user is typing in an input
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
-            // Number keys 1-9 for tab switching
+            // Number keys 1-9 for tab switching, 0 for last tab (Settings)
             if (e.key >= '1' && e.key <= '9') {
                 const tabIndex = parseInt(e.key) - 1;
                 if (tabIndex < TABS.length) {
                     setActiveTab(TABS[tabIndex]);
                 }
+                return;
+            }
+            if (e.key === '0') {
+                setActiveTab(TABS[TABS.length - 1]); // Settings (last tab)
                 return;
             }
 
@@ -788,10 +792,12 @@ function KeyboardHelpModal({ onClose }) {
     }, [onClose]);
 
     const shortcuts = [
-        { keys: ['1', '2', '3', '4', '5', '6', '7', '8', '9'], action: 'Switch tabs (Inventory, Stats, Enhance, Skills, Map, Shop, Prestige, Achievements, Settings)' },
+        { keys: ['1', '2', '...', '0'], action: 'Switch tabs (1-9 for first 9 tabs, 0 for Settings)' },
         { keys: ['\u2190', '\u2192'], action: 'Navigate between tabs' },
+        { keys: ['Shift'], action: 'Hold while hovering item to show max possible rolls' },
+        { keys: ['Middle Click'], action: 'Lock/unlock item in inventory' },
         { keys: ['?'], action: 'Toggle this help menu' },
-        { keys: ['Esc'], action: 'Close this menu' },
+        { keys: ['Esc'], action: 'Close modals and menus' },
     ];
 
     return (
