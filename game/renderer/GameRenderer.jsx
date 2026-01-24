@@ -686,6 +686,17 @@ export default function GameRenderer() {
                         : 20;
                     updateHpBar(enemyHpBarRef.current, enemyHp, enemyMaxHp, false);
                 }
+
+                // Update endless wave counter
+                if (uiContainerRef.current?.waveText) {
+                    const waveText = uiContainerRef.current.waveText;
+                    if (gmState?.endlessActive && gmState.endlessWave > 0) {
+                        waveText.text = `Wave ${gmState.endlessWave}`;
+                        waveText.visible = true;
+                    } else {
+                        waveText.visible = false;
+                    }
+                }
             });
         };
 
@@ -1063,6 +1074,12 @@ export default function GameRenderer() {
                 }
                 if (enemyHpBarRef.current) {
                     enemyHpBarRef.current.position.set(enemyX, hpBarY);
+                }
+
+                // Update wave text position (endless mode)
+                if (uiContainerRef.current?.waveText) {
+                    uiContainerRef.current.waveText.x = enemyX;
+                    uiContainerRef.current.waveText.y = characterY - 120 * scaleFactor;
                 }
 
                 // Update background

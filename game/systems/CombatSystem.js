@@ -757,11 +757,10 @@ export class CombatSystem {
         // Process the kill and get rewards
         const result = processEndlessKill(state);
 
-        // Show loot visuals
+        // Show loot visuals (wave is now shown as persistent UI element above enemy)
         const lootItems = [];
         lootItems.push({ text: `+${result.gold}s`, color: '#c0c0c0' });
         lootItems.push({ text: `+${result.xp}xp`, color: '#a855f7' });
-        lootItems.push({ text: `Wave ${state.endlessWave}`, color: '#22c55e' });
 
         if (result.drops.enhanceStone > 0) {
             lootItems.push({ text: `+${result.drops.enhanceStone} E.Stone`, color: '#3b82f6' });
