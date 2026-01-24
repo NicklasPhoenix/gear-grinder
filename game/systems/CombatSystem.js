@@ -26,7 +26,7 @@ export class CombatSystem {
         this.accumulatedHealToPlayer = 0;
         this.accumulatedDamageToPlayer = 0;
         this.ticksSinceLastDisplay = 0;
-        this.displayInterval = 3; // Show accumulated numbers every N ticks
+        this.displayInterval = 2; // Show accumulated numbers every N ticks (2 = ~0.33s at 6 ticks/sec)
         this.lastCritType = null; // Track if we had a crit for display
     }
 
@@ -418,6 +418,9 @@ export class CombatSystem {
 
         // Check Enemy Death
         if (newState.enemyHp <= 0) {
+            // Flush accumulated text before death so killing blow shows
+            this.flushAccumulatedText();
+
             if (isEndless) {
                 this.handleEndlessEnemyDeath(newState, stats, log, safeMaxHp);
             } else {
