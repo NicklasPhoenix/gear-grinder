@@ -329,7 +329,7 @@ function DesktopGameLayout() {
 
             {/* Right Panel: UI Sidebar - Overlay on top of canvas */}
             <div
-                className={`fixed lg:absolute top-0 right-0 h-full lg:w-[550px] w-full flex flex-col border-l border-slate-800/50 bg-slate-900/95 backdrop-blur-md shadow-2xl z-40 transition-transform duration-300 ${
+                className={`fixed lg:absolute top-0 right-0 h-full lg:w-[650px] w-full flex flex-col border-l border-slate-800/50 bg-slate-900/95 backdrop-blur-md shadow-2xl z-40 transition-transform duration-300 ${
                     menuCollapsed ? 'translate-x-full' : 'translate-x-0'
                 }`}
             >
