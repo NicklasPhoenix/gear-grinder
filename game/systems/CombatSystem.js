@@ -147,6 +147,10 @@ export class CombatSystem {
         if (typeof newState.enemyHp !== 'number' || isNaN(newState.enemyHp)) {
             newState.enemyHp = enemyMaxHp;
         }
+        // Also ensure enemyMaxHp is valid (can be NaN after ending endless mode)
+        if (typeof newState.enemyMaxHp !== 'number' || isNaN(newState.enemyMaxHp)) {
+            newState.enemyMaxHp = enemyMaxHp;
+        }
 
         // HP Regeneration (% of max HP per second, applied per tick)
         // Tick rate is ATTACKS_PER_SECOND times per second, so divide regen accordingly
