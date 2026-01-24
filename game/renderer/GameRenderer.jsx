@@ -642,28 +642,26 @@ export default function GameRenderer() {
                     spawnAmbientParticle();
                 }
 
-                // Update HP bars periodically (every 10 frames) from gameManager state
-                if (Math.floor(time / 16) % 10 === 0) {
-                    const gmState = gameManager.getState();
-                    if (gmState && playerHpBarRef.current) {
-                        // Use typeof checks - don't use || which treats 0 as falsy
-                        const playerHp = typeof gmState.playerHp === 'number' && !isNaN(gmState.playerHp)
-                            ? gmState.playerHp
-                            : gmState.playerMaxHp;
-                        const playerMaxHp = typeof gmState.playerMaxHp === 'number' && !isNaN(gmState.playerMaxHp)
-                            ? gmState.playerMaxHp
-                            : 100;
-                        updateHpBar(playerHpBarRef.current, playerHp, playerMaxHp, true);
-                    }
-                    if (gmState && enemyHpBarRef.current) {
-                        const enemyHp = typeof gmState.enemyHp === 'number' && !isNaN(gmState.enemyHp)
-                            ? gmState.enemyHp
-                            : gmState.enemyMaxHp;
-                        const enemyMaxHp = typeof gmState.enemyMaxHp === 'number' && !isNaN(gmState.enemyMaxHp)
-                            ? gmState.enemyMaxHp
-                            : 20;
-                        updateHpBar(enemyHpBarRef.current, enemyHp, enemyMaxHp, false);
-                    }
+                // Update HP bars every frame from gameManager state
+                const gmState = gameManager.getState();
+                if (gmState && playerHpBarRef.current) {
+                    // Use typeof checks - don't use || which treats 0 as falsy
+                    const playerHp = typeof gmState.playerHp === 'number' && !isNaN(gmState.playerHp)
+                        ? gmState.playerHp
+                        : gmState.playerMaxHp;
+                    const playerMaxHp = typeof gmState.playerMaxHp === 'number' && !isNaN(gmState.playerMaxHp)
+                        ? gmState.playerMaxHp
+                        : 100;
+                    updateHpBar(playerHpBarRef.current, playerHp, playerMaxHp, true);
+                }
+                if (gmState && enemyHpBarRef.current) {
+                    const enemyHp = typeof gmState.enemyHp === 'number' && !isNaN(gmState.enemyHp)
+                        ? gmState.enemyHp
+                        : gmState.enemyMaxHp;
+                    const enemyMaxHp = typeof gmState.enemyMaxHp === 'number' && !isNaN(gmState.enemyMaxHp)
+                        ? gmState.enemyMaxHp
+                        : 20;
+                    updateHpBar(enemyHpBarRef.current, enemyHp, enemyMaxHp, false);
                 }
             });
         };
