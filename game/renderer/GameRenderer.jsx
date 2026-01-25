@@ -19,7 +19,7 @@ const ANIMATED_SPRITES = {
             attack: { frames: 4, prefix: 'attack', fps: 12, indices: [0, 1, 2, 4] },
             hurt: { frames: 2, prefix: 'hurt', fps: 8 },
         },
-        scale: 1.6,
+        scale: 2.0,
         anchorY: 0.95,  // Knight feet at 95% down in 128x128 sprite
         flipX: false,
     },
