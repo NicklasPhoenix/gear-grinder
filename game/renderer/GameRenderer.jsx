@@ -19,7 +19,7 @@ const ANIMATED_SPRITES = {
         },
         scale: 0.8,  // 128px * 0.8 = ~100px (similar to old 16px * 6)
         anchorY: 1,
-        flipX: true,  // Knight sprite faces left, flip to face right
+        flipX: false,  // Knight sprite already faces right toward enemy
     },
     // Zone 0 enemy - Lizard warrior (256x256 sprite)
     lizard: {
@@ -32,7 +32,7 @@ const ANIMATED_SPRITES = {
         },
         scale: 0.35,  // 256px * 0.35 = ~90px (similar to old 16px * 5)
         anchorY: 0.9,
-        flipX: false,  // Lizard faces right (toward player) by default
+        flipX: true,  // Lizard needs to be flipped to face left toward player
     },
 };
 
@@ -838,7 +838,8 @@ export default function GameRenderer() {
 
                         // Shrink and fade
                         const deathScale = enemyBaseScale * (1 - progress * 0.6);
-                        enemyRef.current.scale.set(-deathScale, deathScale);
+                        const flipX = enemyRef.current.flipX || -1;
+                        enemyRef.current.scale.set(deathScale * flipX, deathScale);
 
                         // Flash white then fade to red
                         if (progress < 0.2) {
@@ -2042,12 +2043,17 @@ export default function GameRenderer() {
                 }
             }
 
-            // Scale for 32x32 sprites - larger for bosses (increased by 1.5x)
+            // Scale for sprites - check if animated sprite for this zone
             // Use stored scaleFactor for consistent mobile scaling
             const sf = enemyRef.current.scaleFactor || 1;
-            const baseScale = (zone.isBoss ? 6.5 : 5) * sf;
+            const animSpriteKey = ANIMATED_ZONE_SPRITES[zone.id];
+            const animConfig = animSpriteKey ? ANIMATED_SPRITES[animSpriteKey] : null;
+            const baseScale = (enemyRef.current.animController && animConfig)
+                ? (animConfig.scale || 0.35) * sf
+                : (zone.isBoss ? 6.5 : 5) * sf;
+            const flipX = enemyRef.current.flipX || -1;
             enemyRef.current.baseScale = baseScale; // Store for animation reference
-            enemyRef.current.scale.set(-baseScale, baseScale); // Negative x to face player
+            enemyRef.current.scale.set(baseScale * flipX, baseScale);
             enemyRef.current.alpha = 1; // Ensure visible after zone change
 
             if (zone.isBoss) {
