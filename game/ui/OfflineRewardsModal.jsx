@@ -85,6 +85,33 @@ export default function OfflineRewardsModal({ rewards, onClose }) {
                             </div>
                             <span className="text-xl font-bold text-blue-400">+{formatWithCommas(rewards.xp)}</span>
                         </div>
+
+                        {/* Materials Section - only show if any materials earned */}
+                        {(rewards.enhanceStone > 0 || rewards.blessedOrb > 0 || rewards.celestialShard > 0) && (
+                            <div className="pt-2 mt-2 border-t border-slate-600/50">
+                                <div className="text-xs text-slate-500 mb-2 text-center">Materials</div>
+                                <div className="flex flex-wrap gap-2 justify-center">
+                                    {rewards.enhanceStone > 0 && (
+                                        <div className="flex items-center gap-1.5 bg-slate-700/40 rounded-lg px-3 py-2">
+                                            <MaterialIcon type="enhanceStone" size={20} />
+                                            <span className="text-sm font-bold text-emerald-400">+{formatWithCommas(rewards.enhanceStone)}</span>
+                                        </div>
+                                    )}
+                                    {rewards.blessedOrb > 0 && (
+                                        <div className="flex items-center gap-1.5 bg-slate-700/40 rounded-lg px-3 py-2">
+                                            <MaterialIcon type="blessedOrb" size={20} />
+                                            <span className="text-sm font-bold text-purple-400">+{formatWithCommas(rewards.blessedOrb)}</span>
+                                        </div>
+                                    )}
+                                    {rewards.celestialShard > 0 && (
+                                        <div className="flex items-center gap-1.5 bg-slate-700/40 rounded-lg px-3 py-2">
+                                            <MaterialIcon type="celestialShard" size={20} />
+                                            <span className="text-sm font-bold text-cyan-400">+{formatWithCommas(rewards.celestialShard)}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 

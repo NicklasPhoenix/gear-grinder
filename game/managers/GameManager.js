@@ -149,12 +149,31 @@ export class GameManager {
         const goldGain = kills * (10 + zone * 5);
         const xpGain = kills * (20 + zone * 10);
 
+        // Calculate material gains based on zone and kills
+        // Enhance stones: ~1 per 5 kills, scaling with zone
+        const enhanceStoneGain = Math.floor(kills / 5) * Math.max(1, Math.floor(zone / 5));
+        // Blessed orbs: ~1 per 50 kills if zone >= 10
+        const blessedOrbGain = zone >= 10 ? Math.floor(kills / 50) : 0;
+        // Celestial shards: ~1 per 200 kills if zone >= 20
+        const celestialShardGain = zone >= 20 ? Math.floor(kills / 200) : 0;
+
         this.state.gold += goldGain;
         this.state.xp += xpGain;
         this.state.totalGold += goldGain;
+        this.state.enhanceStone = (this.state.enhanceStone || 0) + enhanceStoneGain;
+        this.state.blessedOrb = (this.state.blessedOrb || 0) + blessedOrbGain;
+        this.state.celestialShard = (this.state.celestialShard || 0) + celestialShardGain;
 
-        // Return rewards for modal display (floating text removed in favor of modal)
-        return { time: secondsOffline, kills, gold: goldGain, xp: xpGain };
+        // Return rewards for modal display
+        return {
+            time: secondsOffline,
+            kills,
+            gold: goldGain,
+            xp: xpGain,
+            enhanceStone: enhanceStoneGain,
+            blessedOrb: blessedOrbGain,
+            celestialShard: celestialShardGain,
+        };
     }
 
     gameLoop() {
