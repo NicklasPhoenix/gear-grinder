@@ -1266,8 +1266,8 @@ export default function GameRenderer() {
                 // Player taking damage - make it very noticeable
                 animStateRef.current.playerHitFlash = 15;
                 animStateRef.current.screenShake.intensity = 12;
-                // Trigger player hurt sprite animation
-                if (playerRef.current?.animController) {
+                // Trigger player hurt sprite animation (but not if dying)
+                if (playerRef.current?.animController && !animStateRef.current.playerDying && !animStateRef.current.playerDead) {
                     playerRef.current.animController.play('hurt', false, () => {
                         playerRef.current?.animController?.play('ready', true);
                     });
@@ -1327,6 +1327,9 @@ export default function GameRenderer() {
 
         // Listen for Player Attack - trigger player attack animation
         const cleanupPlayerAttack = gameManager.on('playerAttack', () => {
+            // Don't play attack animation if player is dying/dead
+            if (animStateRef.current.playerDying || animStateRef.current.playerDead) return;
+
             animStateRef.current.playerAttackCooldown = 15;
             audioManager.playSfxHit();
             // Trigger attack animation - plays once, then returns to ready stance
