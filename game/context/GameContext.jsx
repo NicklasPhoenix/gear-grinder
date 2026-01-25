@@ -146,6 +146,11 @@ function validateSave(parsed) {
         parsed.inventorySort = defaults.inventorySort;
     }
 
+    // Gameplay settings
+    if (typeof parsed.pauseOnLevelUp !== 'boolean') {
+        parsed.pauseOnLevelUp = true; // Default ON
+    }
+
     // Validate endless mode state (reset if corrupted to prevent stuck state)
     if (typeof parsed.endlessActive !== 'boolean') {
         parsed.endlessActive = false;

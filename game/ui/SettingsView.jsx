@@ -228,6 +228,41 @@ export default function SettingsView() {
                     </div>
                 </div>
 
+                {/* Gameplay Settings */}
+                <div className="game-panel">
+                    <div className="game-panel-header">Gameplay</div>
+                    <div className="p-4 space-y-4">
+                        {/* Pause on Level Up */}
+                        <div className="bg-slate-900/50 rounded-lg p-4 border border-slate-700">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <span className="font-bold text-white">Pause on Level Up</span>
+                                    <p className="text-xs text-slate-500">Automatically pause combat when you level up</p>
+                                </div>
+                                <button
+                                    onClick={() => gameManager?.setState(prev => ({
+                                        ...prev,
+                                        pauseOnLevelUp: !(prev.pauseOnLevelUp ?? true)
+                                    }))}
+                                    className={`relative w-14 h-7 rounded-full transition-colors ${
+                                        (state?.pauseOnLevelUp ?? true)
+                                            ? 'bg-green-600'
+                                            : 'bg-slate-700'
+                                    }`}
+                                >
+                                    <div
+                                        className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                                            (state?.pauseOnLevelUp ?? true)
+                                                ? 'translate-x-8'
+                                                : 'translate-x-1'
+                                        }`}
+                                    />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 {/* Inventory Settings */}
                 <div className="game-panel">
                     <div className="game-panel-header">Inventory</div>

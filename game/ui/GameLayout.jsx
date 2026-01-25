@@ -14,6 +14,7 @@ import ProgressView from './ProgressView';
 import DailyRewardsModal, { useDailyRewardAvailable } from './DailyRewardsModal';
 import GuideModal from './GuideModal';
 import OfflineRewardsModal from './OfflineRewardsModal';
+import LevelUpModal from './LevelUpModal';
 import { ToastContainer } from './ToastNotification';
 import GameTooltip from './GameTooltip';
 import { MaterialIcon, BossStoneIcon } from './MaterialIcons';
@@ -164,9 +165,7 @@ function DesktopGameLayout() {
         const currentLevel = state.level || 1;
         if (currentLevel > prevLevelRef.current) {
             // Level up detected!
-            setLevelUpAnimation({ level: currentLevel, startTime: Date.now() });
-            // Auto-hide after animation
-            setTimeout(() => setLevelUpAnimation(null), 3000);
+            setLevelUpAnimation({ level: currentLevel });
         }
         prevLevelRef.current = currentLevel;
     }, [state?.level]);
@@ -468,8 +467,13 @@ function DesktopGameLayout() {
             {/* Tooltip Layer - outside panels to avoid stacking context issues */}
             {tooltipUser && <GameTooltip tooltip={tooltipUser} />}
 
-            {/* Level Up Animation Overlay */}
-            {levelUpAnimation && <LevelUpOverlay level={levelUpAnimation.level} />}
+            {/* Level Up Modal */}
+            {levelUpAnimation && (
+                <LevelUpModal
+                    level={levelUpAnimation.level}
+                    onClose={() => setLevelUpAnimation(null)}
+                />
+            )}
 
             {/* Keyboard Shortcuts Help */}
             {showKeyboardHelp && <KeyboardHelpModal onClose={() => setShowKeyboardHelp(false)} />}
@@ -809,150 +813,6 @@ function XPBar({ level, xp }) {
                 .animate-xp-gain {
                     animation: xp-gain 1.5s ease-out forwards;
                 }
-            `}</style>
-        </div>
-    );
-}
-
-function LevelUpOverlay({ level }) {
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
-            {/* Radial flash */}
-            <div
-                className="absolute inset-0 animate-levelup-flash"
-                style={{
-                    background: 'radial-gradient(circle at center, rgba(147, 51, 234, 0.4) 0%, rgba(147, 51, 234, 0) 70%)'
-                }}
-            />
-
-            {/* Rays emanating from center */}
-            <div className="absolute inset-0 flex items-center justify-center">
-                {[...Array(12)].map((_, i) => (
-                    <div
-                        key={i}
-                        className="absolute w-1 bg-gradient-to-t from-purple-500/80 to-transparent animate-levelup-ray"
-                        style={{
-                            height: '50vh',
-                            transformOrigin: 'bottom center',
-                            transform: `rotate(${i * 30}deg)`,
-                            animationDelay: `${i * 0.05}s`
-                        }}
-                    />
-                ))}
-            </div>
-
-            {/* Main content */}
-            <div className="relative flex flex-col items-center animate-levelup-content">
-                {/* Glow ring */}
-                <div className="absolute w-64 h-64 rounded-full border-4 border-purple-500/50 animate-levelup-ring" />
-                <div className="absolute w-80 h-80 rounded-full border-2 border-yellow-400/30 animate-levelup-ring-slow" />
-
-                {/* Stars burst */}
-                <div className="absolute">
-                    {[...Array(8)].map((_, i) => (
-                        <div
-                            key={i}
-                            className="absolute text-yellow-400 text-2xl animate-levelup-star"
-                            style={{
-                                transform: `rotate(${i * 45}deg) translateY(-100px)`,
-                                animationDelay: `${i * 0.1}s`
-                            }}
-                        >
-                            ★
-                        </div>
-                    ))}
-                </div>
-
-                {/* Text */}
-                <div className="text-center relative">
-                    <div
-                        className="text-6xl font-black tracking-wider animate-levelup-text"
-                        style={{
-                            color: '#fbbf24',
-                            textShadow: '0 0 20px rgba(251, 191, 36, 0.8), 0 0 40px rgba(147, 51, 234, 0.6), 0 4px 0 #b45309'
-                        }}
-                    >
-                        LEVEL UP!
-                    </div>
-                    <div
-                        className="text-8xl font-black mt-2 animate-levelup-number"
-                        style={{
-                            color: '#ffffff',
-                            textShadow: '0 0 30px rgba(147, 51, 234, 1), 0 0 60px rgba(147, 51, 234, 0.8), 0 6px 0 #7c3aed'
-                        }}
-                    >
-                        {level}
-                    </div>
-                    <div className="text-lg text-purple-300 mt-2 animate-levelup-subtitle">
-                        +3 Stat Points
-                    </div>
-                </div>
-            </div>
-
-            {/* CSS Animations */}
-            <style>{`
-                @keyframes levelup-flash {
-                    0% { opacity: 0; transform: scale(0.5); }
-                    20% { opacity: 1; transform: scale(1.5); }
-                    100% { opacity: 0; transform: scale(2); }
-                }
-                @keyframes levelup-ray {
-                    0% { opacity: 0; height: 0; }
-                    30% { opacity: 1; height: 50vh; }
-                    100% { opacity: 0; height: 60vh; }
-                }
-                @keyframes levelup-content {
-                    0% { opacity: 0; transform: scale(0.5); }
-                    20% { opacity: 1; transform: scale(1.1); }
-                    30% { transform: scale(1); }
-                    80% { opacity: 1; transform: scale(1); }
-                    100% { opacity: 0; transform: scale(0.9); }
-                }
-                @keyframes levelup-ring {
-                    0% { opacity: 0; transform: scale(0.3); }
-                    30% { opacity: 1; transform: scale(1); }
-                    100% { opacity: 0; transform: scale(1.5); }
-                }
-                @keyframes levelup-ring-slow {
-                    0% { opacity: 0; transform: scale(0.2) rotate(0deg); }
-                    30% { opacity: 0.8; transform: scale(1) rotate(180deg); }
-                    100% { opacity: 0; transform: scale(1.3) rotate(360deg); }
-                }
-                @keyframes levelup-star {
-                    0% { opacity: 0; transform: rotate(var(--rotation, 0deg)) translateY(-50px) scale(0); }
-                    30% { opacity: 1; transform: rotate(var(--rotation, 0deg)) translateY(-120px) scale(1.2); }
-                    100% { opacity: 0; transform: rotate(var(--rotation, 0deg)) translateY(-180px) scale(0); }
-                }
-                @keyframes levelup-text {
-                    0% { opacity: 0; transform: translateY(30px) scale(0.5); }
-                    20% { opacity: 1; transform: translateY(-10px) scale(1.1); }
-                    30% { transform: translateY(0) scale(1); }
-                    80% { opacity: 1; }
-                    100% { opacity: 0; }
-                }
-                @keyframes levelup-number {
-                    0% { opacity: 0; transform: scale(3); }
-                    25% { opacity: 1; transform: scale(0.9); }
-                    35% { transform: scale(1.05); }
-                    45% { transform: scale(1); }
-                    80% { opacity: 1; }
-                    100% { opacity: 0; }
-                }
-                @keyframes levelup-subtitle {
-                    0% { opacity: 0; transform: translateY(20px); }
-                    40% { opacity: 1; transform: translateY(0); }
-                    80% { opacity: 1; }
-                    100% { opacity: 0; }
-                }
-                .animate-levelup-flash { animation: levelup-flash 3s ease-out forwards; }
-                .animate-levelup-ray { animation: levelup-ray 2.5s ease-out forwards; }
-                .animate-levelup-content { animation: levelup-content 3s ease-out forwards; }
-                .animate-levelup-ring { animation: levelup-ring 2s ease-out forwards; }
-                .animate-levelup-ring-slow { animation: levelup-ring-slow 3s ease-out forwards; }
-                .animate-levelup-star { animation: levelup-star 2s ease-out forwards; }
-                .animate-levelup-text { animation: levelup-text 3s ease-out forwards; }
-                .animate-levelup-number { animation: levelup-number 3s ease-out forwards; }
-                .animate-levelup-subtitle { animation: levelup-subtitle 3s ease-out forwards; }
             `}</style>
         </div>
     );
