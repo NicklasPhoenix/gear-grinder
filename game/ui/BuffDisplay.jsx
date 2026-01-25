@@ -6,11 +6,13 @@ import { calculatePlayerStats } from '../systems/PlayerSystem';
  * BuffDisplay - Shows active combat buffs/effects with stack counts and bonuses
  *
  * Displays:
- * - Rage stacks (0-10) with current damage bonus
- * - Damage Shield amount
- * - Overheal Shield amount
+ * - Rage stacks (0-10) with current damage bonus (+X% per stack)
+ * - Damage Shield amount (absorbs damage, refreshes on kill)
+ * - Overheal Shield amount (excess healing becomes shield)
+ * - Second Wind availability (heals when HP drops below 20%)
+ * - Frostbite (reduces enemy damage by X%)
+ * - Last Stand (below 30% HP: +X% damage and lifesteal)
  * - Active DOTs (bleed, burn, poison) with remaining time
- * - Second Wind availability
  */
 export default function BuffDisplay({ compact = false }) {
     const { state } = useGame();
@@ -83,6 +85,37 @@ export default function BuffDisplay({ compact = false }) {
             bgColor: 'rgba(52, 211, 153, 0.3)',
             active: !combatState.secondWindUsed,
             used: combatState.secondWindUsed,
+        });
+    }
+
+    // Frostbite - reduces enemy damage
+    if (stats.frostbite > 0) {
+        activeBuffs.push({
+            id: 'frostbite',
+            name: 'Frostbite',
+            icon: '/assets/ui-icons/buffs/frostbite.png',
+            value: `-${stats.frostbite}% Enemy DMG`,
+            description: `Reduces all enemy damage by ${stats.frostbite}%`,
+            color: '#06b6d4',
+            bgColor: 'rgba(6, 182, 212, 0.3)',
+            active: true, // Always active as a passive effect
+        });
+    }
+
+    // Last Stand - bonus damage and lifesteal when low HP
+    if (stats.lastStand > 0) {
+        const playerMaxHp = state.playerMaxHp || 100;
+        const isLowHp = state.playerHp < playerMaxHp * 0.3;
+        activeBuffs.push({
+            id: 'lastStand',
+            name: 'Last Stand',
+            icon: '/assets/ui-icons/buffs/laststand.png',
+            value: `+${stats.lastStand}% DMG/Steal`,
+            description: `Below 30% HP: +${stats.lastStand}% damage AND +${stats.lastStand}% lifesteal`,
+            color: '#dc2626',
+            bgColor: 'rgba(220, 38, 38, 0.3)',
+            active: isLowHp,
+            conditional: true, // Shows when not active but available
         });
     }
 
@@ -165,12 +198,14 @@ export default function BuffDisplay({ compact = false }) {
  */
 function BuffIcon({ buff }) {
     const isInactive = !buff.active || buff.used;
+    // Conditional buffs (like Last Stand) show as "ready" when not yet active
+    const isConditionalWaiting = buff.conditional && !buff.active;
 
     return (
         <div
             className={`relative flex items-center gap-1 px-1.5 py-1 rounded-md border transition-all ${
-                isInactive ? 'opacity-40 grayscale' : ''
-            }`}
+                isInactive && !isConditionalWaiting ? 'opacity-40 grayscale' : ''
+            } ${isConditionalWaiting ? 'opacity-60' : ''}`}
             style={{
                 backgroundColor: buff.bgColor,
                 borderColor: buff.color,
@@ -217,6 +252,16 @@ function BuffIcon({ buff }) {
             {buff.used && (
                 <span className="text-[9px] text-slate-500 font-bold">USED</span>
             )}
+
+            {/* Conditional waiting indicator (e.g., Last Stand when HP > 30%) */}
+            {buff.conditional && !buff.active && !buff.used && (
+                <span className="text-[9px] text-slate-400 font-bold">READY</span>
+            )}
+
+            {/* Active indicator for conditional buffs when triggered */}
+            {buff.conditional && buff.active && (
+                <span className="text-[9px] text-yellow-400 font-bold animate-pulse">ACTIVE!</span>
+            )}
         </div>
     );
 }
@@ -226,12 +271,13 @@ function BuffIcon({ buff }) {
  */
 function BuffIconCompact({ buff }) {
     const isInactive = !buff.active || buff.used;
+    const isConditionalWaiting = buff.conditional && !buff.active;
 
     return (
         <div
             className={`relative flex items-center justify-center w-7 h-7 rounded border transition-all ${
-                isInactive ? 'opacity-40 grayscale' : ''
-            }`}
+                isInactive && !isConditionalWaiting ? 'opacity-40 grayscale' : ''
+            } ${isConditionalWaiting ? 'opacity-60' : ''}`}
             style={{
                 backgroundColor: buff.bgColor,
                 borderColor: buff.color,
@@ -269,6 +315,14 @@ function BuffIconCompact({ buff }) {
                 <div className="absolute inset-0 flex items-center justify-center">
                     <span className="text-red-500 text-lg font-bold opacity-80">X</span>
                 </div>
+            )}
+
+            {/* Conditional active glow */}
+            {buff.conditional && buff.active && (
+                <div
+                    className="absolute inset-0 rounded border-2 animate-pulse"
+                    style={{ borderColor: buff.color }}
+                />
             )}
         </div>
     );

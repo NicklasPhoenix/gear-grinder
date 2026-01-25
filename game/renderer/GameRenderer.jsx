@@ -612,35 +612,64 @@ export default function GameRenderer() {
                     // Use stored base scale (not current scale which changes during animations)
                     const enemyBaseScale = enemyRef.current.baseScale || 5;
 
-                    // Death animation - very fast (~0.05 seconds)
+                    // Death animation - dramatic knockback and fall
                     if (animState.enemyDying) {
-                        animState.enemyDeathProgress += delta * 0.25;
+                        animState.enemyDeathProgress += delta * 0.08; // Slower for more visible death
                         const progress = Math.min(1, animState.enemyDeathProgress);
+                        const pos = positionsRef.current;
+                        const baseX = enemyRef.current.baseX || pos.enemyX;
+                        const baseY = enemyRef.current.baseY || pos.characterY;
 
-                        // Quick shrink and fade
-                        const deathScale = enemyBaseScale * (1 - progress * 0.5);
+                        // Knockback away from player + fall down
+                        const knockbackDist = 80 * (pos.scaleFactor || 1);
+                        const fallDist = 60 * (pos.scaleFactor || 1);
+                        enemyRef.current.x = baseX + progress * knockbackDist;
+                        enemyRef.current.y = baseY - 25 * (pos.scaleFactor || 1) + progress * fallDist;
+
+                        // Rotate as if falling backwards
+                        enemyRef.current.rotation = progress * 1.2; // ~70 degrees rotation
+
+                        // Shrink and fade
+                        const deathScale = enemyBaseScale * (1 - progress * 0.6);
                         enemyRef.current.scale.set(-deathScale, deathScale);
-                        enemyRef.current.alpha = 1 - progress;
-                        enemyRef.current.tint = 0xff4444;
 
-                        // When death completes, immediately start spawn
+                        // Flash white then fade to red
+                        if (progress < 0.2) {
+                            enemyRef.current.tint = 0xffffff;
+                            enemyRef.current.alpha = 1;
+                        } else {
+                            enemyRef.current.tint = 0xff4444;
+                            enemyRef.current.alpha = 1 - ((progress - 0.2) / 0.8);
+                        }
+
+                        // When death completes, start spawn after brief pause
                         if (progress >= 1) {
                             animState.enemyDying = false;
                             animState.enemyDeathProgress = 0;
                             animState.enemySpawning = true;
                             animState.enemySpawnProgress = 0;
                             enemyRef.current.rotation = 0;
+                            // Reset position for spawn
+                            enemyRef.current.x = baseX;
+                            enemyRef.current.y = baseY - 25 * (pos.scaleFactor || 1);
                         }
                     }
-                    // Spawn animation - instant appearance
+                    // Spawn animation - slide in from right
                     else if (animState.enemySpawning) {
-                        animState.enemySpawnProgress += delta * 0.4;
+                        animState.enemySpawnProgress += delta * 0.15; // Slightly slower spawn
                         const progress = Math.min(1, animState.enemySpawnProgress);
+                        const pos = positionsRef.current;
+                        const baseX = enemyRef.current.baseX || pos.enemyX;
 
-                        // Quick pop-in
-                        const spawnScale = enemyBaseScale * (0.8 + progress * 0.2);
+                        // Slide in from right side
+                        const slideOffset = (1 - progress) * 100 * (pos.scaleFactor || 1);
+                        enemyRef.current.x = baseX + slideOffset;
+
+                        // Scale up with slight bounce
+                        const bounce = progress < 0.7 ? progress / 0.7 : 1 + Math.sin((progress - 0.7) / 0.3 * Math.PI) * 0.1;
+                        const spawnScale = enemyBaseScale * Math.min(1, bounce);
                         enemyRef.current.scale.set(-spawnScale, spawnScale);
-                        enemyRef.current.alpha = 0.5 + progress * 0.5; // Start at 50% alpha
+                        enemyRef.current.alpha = Math.min(1, progress * 2); // Fade in quickly
                         enemyRef.current.tint = 0xffffff;
 
                         if (progress >= 1) {
@@ -648,6 +677,7 @@ export default function GameRenderer() {
                             animState.enemySpawnProgress = 0;
                             enemyRef.current.scale.set(-enemyBaseScale, enemyBaseScale);
                             enemyRef.current.alpha = 1;
+                            enemyRef.current.x = baseX;
                         }
                     }
                     // Normal idle
