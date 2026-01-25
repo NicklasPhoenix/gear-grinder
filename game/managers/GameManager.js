@@ -111,6 +111,7 @@ export class GameManager {
             onEnemyDeath: (isBoss) => this.emit('enemyDeath', { isBoss }),
             onPlayerAttack: () => this.emit('playerAttack', {}),
             onEnemyAttack: () => this.emit('enemyAttack', {}),
+            onEnemyAttackWindup: () => this.emit('enemyAttackWindup', {}),
         });
 
         if (this.isRunning) return;

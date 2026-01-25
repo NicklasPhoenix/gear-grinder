@@ -30,7 +30,7 @@ const ANIMATED_SPRITES = {
             idle: { frames: 3, prefix: 'Idle', fps: 6 },
             attack: { frames: 5, prefix: 'Attack', fps: 10 },
             hurt: { frames: 2, prefix: 'Hurt', fps: 8 },
-            death: { frames: 6, prefix: 'Death', fps: 8 },
+            death: { frames: 6, prefix: 'Death', fps: 6 },  // 6 frames at 6 fps = 1 second
         },
         scale: 2.0,
         anchorY: 0.65,  // Lower anchor to bring lizard down
@@ -1257,15 +1257,19 @@ export default function GameRenderer() {
             }
         });
 
-        // Listen for Enemy Attack - trigger enemy attack animation
-        const cleanupEnemyAttack = gameManager.on('enemyAttack', () => {
-            animStateRef.current.enemyAttackCooldown = 15;
+        // Listen for Enemy Attack Windup - start attack animation before damage lands
+        const cleanupEnemyAttackWindup = gameManager.on('enemyAttackWindup', () => {
             // Trigger attack sprite animation - plays once, then returns to idle
-            if (enemyRef.current?.animController) {
+            if (enemyRef.current?.animController && !animStateRef.current.enemyDying) {
                 enemyRef.current.animController.play('attack', false, () => {
                     enemyRef.current?.animController?.play('idle', true);
                 });
             }
+        });
+
+        // Listen for Enemy Attack - when damage is dealt (animation already started via windup)
+        const cleanupEnemyAttack = gameManager.on('enemyAttack', () => {
+            animStateRef.current.enemyAttackCooldown = 15;
         });
 
         // Particle spawn functions
@@ -1375,6 +1379,7 @@ export default function GameRenderer() {
             cleanupLoot();
             cleanupDeath();
             cleanupPlayerAttack();
+            cleanupEnemyAttackWindup();
             cleanupEnemyAttack();
             // Clean up resize observer
             if (resizeObserverRef.current) {

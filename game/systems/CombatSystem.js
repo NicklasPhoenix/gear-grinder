@@ -21,7 +21,9 @@ export class CombatSystem {
             onEnemyDeath: () => { },
             onPlayerAttack: () => { },
             onEnemyAttack: () => { },
+            onEnemyAttackWindup: () => { }, // Fires before attack for animation anticipation
         };
+        this.enemyWindupFired = false; // Track if windup was fired this attack cycle
 
         // Accumulators for batching DOT floating text by type (reduces visual clutter)
         this.accumulatedBleed = 0;
@@ -292,6 +294,12 @@ export class CombatSystem {
         }
         if (newState.combatState.enemyAttackTimer > 0) {
             newState.combatState.enemyAttackTimer--;
+            // Fire windup callback when attack is imminent (8 ticks = ~400ms before hit)
+            // This lets the attack animation start before damage is dealt
+            if (newState.combatState.enemyAttackTimer === 8 && !this.enemyWindupFired) {
+                this.enemyWindupFired = true;
+                this.callbacks.onEnemyAttackWindup();
+            }
         }
 
         // Rage decay system - lose stacks if not killing enemies fast enough
@@ -415,8 +423,9 @@ export class CombatSystem {
                 state.endlessWave
             );
 
-            // Trigger enemy attack animation callback
+            // Trigger enemy attack animation callback and reset windup flag
             this.callbacks.onEnemyAttack();
+            this.enemyWindupFired = false;
 
             // Second Wind check after enemy attack
             if (stats.secondWind > 0 && !newState.combatState.secondWindUsed && newState.playerHp > 0 && newState.playerHp < safeMaxHp * 0.2) {
