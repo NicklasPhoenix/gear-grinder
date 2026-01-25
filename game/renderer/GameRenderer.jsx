@@ -837,19 +837,14 @@ export default function GameRenderer() {
                         // Just let the animation controller run
                     }
 
-                    // Position animation (bob + attack lunge)
-                    // Animated sprites use baseY directly (already at groundY), static sprites need -25 offset
-                    const bob = Math.sin(time * 0.003) * 3 * (pos.scaleFactor || 1);
+                    // Position - no programmatic movement, just use sprite animations
                     const playerYOffset = playerRef.current.animController ? 0 : -25 * (pos.scaleFactor || 1);
-                    playerRef.current.y = (playerRef.current.baseY || pos.characterY) + playerYOffset + bob;
+                    playerRef.current.y = (playerRef.current.baseY || pos.characterY) + playerYOffset;
+                    playerRef.current.x = playerRef.current.baseX || pos.playerX;
 
-                    // Attack cooldown movement
+                    // Track cooldown for state only
                     if (animState.playerAttackCooldown > 0) {
                         animState.playerAttackCooldown -= delta;
-                        const progress = animState.playerAttackCooldown / 15;
-                        playerRef.current.x = (playerRef.current.baseX || pos.playerX) + Math.sin(progress * Math.PI) * 50;
-                    } else {
-                        playerRef.current.x = playerRef.current.baseX || pos.playerX;
                     }
                 }
 
@@ -859,56 +854,37 @@ export default function GameRenderer() {
                     // Use stored base scale (not current scale which changes during animations)
                     const enemyBaseScale = enemyRef.current.baseScale || 5;
 
-                    // Death animation - dramatic knockback and fall (~1.2 seconds)
+                    // Death animation - use sprite animation
                     if (animState.enemyDying) {
-                        animState.enemyDeathProgress += delta * 0.015; // Slow death to fill respawn delay
-                        const progress = Math.min(1, animState.enemyDeathProgress);
                         const pos = positionsRef.current;
-                        const baseX = enemyRef.current.baseX || pos.enemyX;
-                        const baseY = enemyRef.current.baseY || pos.characterY;
-                        // Animated sprites use baseY directly, static sprites need -25 offset
-                        const enemyYOffset = enemyRef.current.animController ? 0 : -25 * (pos.scaleFactor || 1);
-
-                        // Knockback away from player + fall down
-                        const knockbackDist = 80 * (pos.scaleFactor || 1);
-                        const fallDist = 60 * (pos.scaleFactor || 1);
-                        enemyRef.current.x = baseX + progress * knockbackDist;
-                        enemyRef.current.y = baseY + enemyYOffset + progress * fallDist;
-
-                        // Rotate as if falling backwards
-                        enemyRef.current.rotation = progress * 1.2; // ~70 degrees rotation
-
-                        // Shrink and fade
-                        const deathScale = enemyBaseScale * (1 - progress * 0.6);
                         const flipX = enemyRef.current.flipX || -1;
-                        enemyRef.current.scale.set(deathScale * flipX, deathScale);
 
-                        // Flash white then fade to red
-                        if (progress < 0.2) {
-                            enemyRef.current.tint = 0xffffff;
-                            enemyRef.current.alpha = 1;
+                        // Update sprite animation
+                        if (enemyRef.current.animController) {
+                            const newTexture = enemyRef.current.animController.update(delta * 16.67);
+                            if (newTexture) {
+                                enemyRef.current.texture = newTexture;
+                            }
+                            // Check if death animation finished
+                            if (!enemyRef.current.animController.playing) {
+                                animState.enemyDying = false;
+                                animState.waitingForRespawn = true;
+                                enemyRef.current.alpha = 0;
+                                if (enemyRef.current.shadow) enemyRef.current.shadow.alpha = 0;
+                                if (enemyRef.current.aura) enemyRef.current.aura.alpha = 0;
+                            }
                         } else {
-                            enemyRef.current.tint = 0xff4444;
-                            enemyRef.current.alpha = 1 - ((progress - 0.2) / 0.8);
-                            // Fade shadow and aura with enemy
-                            if (enemyRef.current.shadow) {
-                                enemyRef.current.shadow.alpha = 1 - ((progress - 0.2) / 0.8);
+                            // Fallback for static sprites - just fade out
+                            animState.enemyDeathProgress += delta * 0.03;
+                            const progress = Math.min(1, animState.enemyDeathProgress);
+                            enemyRef.current.alpha = 1 - progress;
+                            if (progress >= 1) {
+                                animState.enemyDying = false;
+                                animState.enemyDeathProgress = 0;
+                                animState.waitingForRespawn = true;
+                                if (enemyRef.current.shadow) enemyRef.current.shadow.alpha = 0;
+                                if (enemyRef.current.aura) enemyRef.current.aura.alpha = 0;
                             }
-                            if (enemyRef.current.aura) {
-                                enemyRef.current.aura.alpha = 0;
-                            }
-                        }
-
-                        // When death completes, wait for respawn timer
-                        if (progress >= 1) {
-                            animState.enemyDying = false;
-                            animState.enemyDeathProgress = 0;
-                            animState.waitingForRespawn = true;
-                            enemyRef.current.alpha = 0; // Hide completely
-                            enemyRef.current.rotation = 0;
-                            // Reset position for spawn
-                            enemyRef.current.x = baseX;
-                            enemyRef.current.y = baseY + enemyYOffset;
                         }
                     }
                     // Waiting for respawn timer - enemy stays hidden
@@ -925,49 +901,26 @@ export default function GameRenderer() {
                         const respawnTimer = state.combatState?.enemyRespawnTimer || 0;
                         if (respawnTimer === 0 && state.enemyHp > 0) {
                             animState.waitingForRespawn = false;
-                            animState.enemySpawning = true;
-                            animState.enemySpawnProgress = 0;
-                            // Restore shadow and aura visibility
-                            if (enemyRef.current.shadow) {
-                                enemyRef.current.shadow.alpha = 1;
-                            }
-                            if (enemyRef.current.aura) {
-                                enemyRef.current.aura.alpha = 1;
-                            }
-                        }
-                    }
-                    // Spawn animation - slide in from right (~0.6 seconds)
-                    else if (animState.enemySpawning) {
-                        animState.enemySpawnProgress += delta * 0.028; // Slower spawn for smoother feel
-                        const progress = Math.min(1, animState.enemySpawnProgress);
-                        const pos = positionsRef.current;
-                        const baseX = enemyRef.current.baseX || pos.enemyX;
-                        const flipX = enemyRef.current.flipX || -1;
-
-                        // Slide in from right side
-                        const slideOffset = (1 - progress) * 100 * (pos.scaleFactor || 1);
-                        enemyRef.current.x = baseX + slideOffset;
-
-                        // Scale up with slight bounce
-                        const bounce = progress < 0.7 ? progress / 0.7 : 1 + Math.sin((progress - 0.7) / 0.3 * Math.PI) * 0.1;
-                        const spawnScale = enemyBaseScale * Math.min(1, bounce);
-                        enemyRef.current.scale.set(spawnScale * flipX, spawnScale);
-                        enemyRef.current.alpha = Math.min(1, progress * 2); // Fade in quickly
-                        enemyRef.current.tint = 0xffffff;
-
-                        if (progress >= 1) {
-                            animState.enemySpawning = false;
-                            animState.enemySpawnProgress = 0;
-                            enemyRef.current.scale.set(enemyBaseScale * flipX, enemyBaseScale);
+                            // Just show enemy immediately - no spawn animation
+                            const flipX = enemyRef.current.flipX || -1;
                             enemyRef.current.alpha = 1;
-                            enemyRef.current.x = baseX;
+                            enemyRef.current.scale.set(enemyBaseScale * flipX, enemyBaseScale);
+                            enemyRef.current.x = enemyRef.current.baseX || positionsRef.current.enemyX;
+                            if (enemyRef.current.shadow) enemyRef.current.shadow.alpha = 1;
+                            if (enemyRef.current.aura) enemyRef.current.aura.alpha = 1;
+                            // Reset to idle animation
+                            if (enemyRef.current.animController) {
+                                enemyRef.current.animController.play('idle', true);
+                            }
                         }
                     }
-                    // Normal idle
+                    // Normal state - just update sprite animation
                     else {
                         const pos = positionsRef.current;
+                        const flipX = enemyRef.current.flipX || -1;
+                        const enemyYOffset = enemyRef.current.animController ? 0 : -25 * (pos.scaleFactor || 1);
 
-                        // Update animated sprite frames if available
+                        // Update animated sprite frames
                         if (enemyRef.current.animController) {
                             const newTexture = enemyRef.current.animController.update(delta * 16.67);
                             if (newTexture) {
@@ -975,31 +928,16 @@ export default function GameRenderer() {
                             }
                         }
 
-                        const breathe = Math.sin(time * 0.0025 + 1) * 0.02;
-                        const bob = Math.sin(time * 0.004 + 1) * 4 * (pos.scaleFactor || 1);
-                        const flipX = enemyRef.current.flipX || -1;
-                        // Animated sprites use baseY directly, static sprites need -25 offset
-                        const enemyYOffset = enemyRef.current.animController ? 0 : -25 * (pos.scaleFactor || 1);
-                        enemyRef.current.scale.set(enemyBaseScale * flipX, enemyBaseScale * (1.0 + breathe));
-                        enemyRef.current.y = (enemyRef.current.baseY || pos.characterY) + enemyYOffset + bob;
+                        // Static position - no programmatic movement
+                        enemyRef.current.x = enemyRef.current.baseX || pos.enemyX;
+                        enemyRef.current.y = (enemyRef.current.baseY || pos.characterY) + enemyYOffset;
+                        enemyRef.current.scale.set(enemyBaseScale * flipX, enemyBaseScale);
                         enemyRef.current.alpha = 1;
                         enemyRef.current.rotation = 0;
 
-                        // Enemy attack animation - lunge towards player
+                        // Track attack cooldown
                         if (animState.enemyAttackCooldown > 0) {
-                            // Play attack animation for animated sprites (only at start)
-                            if (enemyRef.current.animController && animState.enemyAttackCooldown > 14) {
-                                enemyRef.current.animController.play('attack', false, () => {
-                                    enemyRef.current.animController.play('idle');
-                                });
-                            }
                             animState.enemyAttackCooldown -= delta;
-                            const progress = animState.enemyAttackCooldown / 15;
-                            // Lunge towards player (negative X direction)
-                            enemyRef.current.x = (enemyRef.current.baseX || pos.enemyX) - Math.sin(progress * Math.PI) * 40;
-                            // Slight scale up during attack for impact
-                            const attackScale = enemyBaseScale * (1.0 + Math.sin(progress * Math.PI) * 0.1);
-                            enemyRef.current.scale.set(attackScale * flipX, attackScale);
                         } else {
                             enemyRef.current.x = enemyRef.current.baseX || pos.enemyX;
                         }
@@ -1014,30 +952,17 @@ export default function GameRenderer() {
                     }
                 }
 
-                // Player hit flash with recoil
+                // Player hit flash (no programmatic movement - sprite animation handles it)
                 if (playerRef.current && animState.playerHitFlash > 0) {
                     animState.playerHitFlash -= delta;
-                    const pos = positionsRef.current;
-                    const baseX = playerRef.current.baseX || pos.playerX;
-
                     // Flash white first, then red
                     if (animState.playerHitFlash > 12) {
                         playerRef.current.tint = 0xffffff;
                     } else {
                         playerRef.current.tint = 0xff6666;
                     }
-
-                    // Recoil backwards (away from enemy)
-                    const recoilProgress = animState.playerHitFlash / 15;
-                    const recoilDist = Math.sin(recoilProgress * Math.PI) * 25 * (pos.scaleFactor || 1);
-                    playerRef.current.x = baseX - recoilDist;
                 } else if (playerRef.current) {
                     playerRef.current.tint = 0xffffff;
-                    // Reset position when not in hit animation
-                    const pos = positionsRef.current;
-                    if (animState.playerAttackCooldown <= 0) {
-                        playerRef.current.x = playerRef.current.baseX || pos.playerX;
-                    }
                 }
 
                 // Update particles
@@ -1141,59 +1066,113 @@ export default function GameRenderer() {
                 animStateRef.current.enemyHitFlash = 8;
                 animStateRef.current.screenShake.intensity = 6;
                 spawnHitParticles(pos.enemyX, pos.characterY - 55, 0xffffff, 10);
+                // Trigger enemy hurt sprite animation
+                if (enemyRef.current?.animController && !animStateRef.current.enemyDying) {
+                    enemyRef.current.animController.play('hurt', false, () => {
+                        enemyRef.current?.animController?.play('idle', true);
+                    });
+                }
             }
             if (data.type === 'crit') {
                 animStateRef.current.enemyHitFlash = 8;
                 animStateRef.current.screenShake.intensity = 12;
                 spawnHitParticles(pos.enemyX, pos.characterY - 55, 0xfde047, 20);
+                // Trigger enemy hurt sprite animation
+                if (enemyRef.current?.animController && !animStateRef.current.enemyDying) {
+                    enemyRef.current.animController.play('hurt', false, () => {
+                        enemyRef.current?.animController?.play('idle', true);
+                    });
+                }
             }
             if (data.type === 'multiStrike') {
                 animStateRef.current.enemyHitFlash = 10;
                 animStateRef.current.screenShake.intensity = 8;
                 spawnHitParticles(pos.enemyX, pos.characterY - 55, 0x8b5cf6, 15);
+                // Trigger enemy hurt sprite animation
+                if (enemyRef.current?.animController && !animStateRef.current.enemyDying) {
+                    enemyRef.current.animController.play('hurt', false, () => {
+                        enemyRef.current?.animController?.play('idle', true);
+                    });
+                }
             }
             if (data.type === 'execute') {
                 animStateRef.current.enemyHitFlash = 15;
                 animStateRef.current.screenShake.intensity = 15;
                 spawnHitParticles(pos.enemyX, pos.characterY - 55, 0xef4444, 25);
+                // Trigger enemy hurt sprite animation
+                if (enemyRef.current?.animController && !animStateRef.current.enemyDying) {
+                    enemyRef.current.animController.play('hurt', false, () => {
+                        enemyRef.current?.animController?.play('idle', true);
+                    });
+                }
             }
             if (data.type === 'ascendedCrit') {
                 animStateRef.current.enemyHitFlash = 20;
                 animStateRef.current.screenShake.intensity = 18;
                 spawnHitParticles(pos.enemyX, pos.characterY - 55, 0x67e8f9, 35);
+                // Trigger enemy hurt sprite animation
+                if (enemyRef.current?.animController && !animStateRef.current.enemyDying) {
+                    enemyRef.current.animController.play('hurt', false, () => {
+                        enemyRef.current?.animController?.play('idle', true);
+                    });
+                }
             }
             if (data.type === 'annihilate') {
                 animStateRef.current.enemyHitFlash = 25;
                 animStateRef.current.screenShake.intensity = 20;
                 spawnHitParticles(pos.enemyX, pos.characterY - 55, 0xfb923c, 40);
-            }
-            if (data.type === 'frenzy') {
-                animStateRef.current.enemyHitFlash = 12;
-                animStateRef.current.screenShake.intensity = 10;
-                spawnHitParticles(pos.enemyX, pos.characterY - 55, 0xf97316, 25);
-            }
-            if (data.type === 'vengeance' || data.type === 'retaliate') {
-                animStateRef.current.enemyHitFlash = 10;
-                animStateRef.current.screenShake.intensity = 8;
-                spawnHitParticles(pos.enemyX, pos.characterY - 55, 0xdc2626, 15);
+                // Trigger enemy hurt sprite animation
+                if (enemyRef.current?.animController && !animStateRef.current.enemyDying) {
+                    enemyRef.current.animController.play('hurt', false, () => {
+                        enemyRef.current?.animController?.play('idle', true);
+                    });
+                }
             }
             if (data.type === 'frenzy') {
                 // Frenzy - purple rapid strikes
                 animStateRef.current.enemyHitFlash = 12;
                 animStateRef.current.screenShake.intensity = 10;
                 spawnHitParticles(pos.enemyX, pos.characterY - 55, 0xc084fc, 25);
+                // Trigger enemy hurt sprite animation
+                if (enemyRef.current?.animController && !animStateRef.current.enemyDying) {
+                    enemyRef.current.animController.play('hurt', false, () => {
+                        enemyRef.current?.animController?.play('idle', true);
+                    });
+                }
             }
             if (data.type === 'phantom') {
                 // Phantom counter - purple ghost strike
                 animStateRef.current.enemyHitFlash = 10;
                 animStateRef.current.screenShake.intensity = 8;
                 spawnHitParticles(pos.enemyX, pos.characterY - 55, 0xa78bfa, 20);
+                // Trigger enemy hurt sprite animation
+                if (enemyRef.current?.animController && !animStateRef.current.enemyDying) {
+                    enemyRef.current.animController.play('hurt', false, () => {
+                        enemyRef.current?.animController?.play('idle', true);
+                    });
+                }
             }
             if (data.type === 'vengeance') {
                 // Vengeance - red counter
                 animStateRef.current.enemyHitFlash = 15;
                 animStateRef.current.screenShake.intensity = 12;
                 spawnHitParticles(pos.enemyX, pos.characterY - 55, 0xf43f5e, 30);
+                // Trigger enemy hurt sprite animation
+                if (enemyRef.current?.animController && !animStateRef.current.enemyDying) {
+                    enemyRef.current.animController.play('hurt', false, () => {
+                        enemyRef.current?.animController?.play('idle', true);
+                    });
+                }
+            }
+            if (data.type === 'retaliate') {
+                animStateRef.current.enemyHitFlash = 6;
+                spawnHitParticles(pos.enemyX, pos.characterY - 55, 0xeab308, 10);
+                // Trigger enemy hurt sprite animation
+                if (enemyRef.current?.animController && !animStateRef.current.enemyDying) {
+                    enemyRef.current.animController.play('hurt', false, () => {
+                        enemyRef.current?.animController?.play('idle', true);
+                    });
+                }
             }
             if (data.type === 'secondWind') {
                 // Second Wind - healing burst on player
@@ -1203,15 +1182,16 @@ export default function GameRenderer() {
                 // Immunity - golden shield effect
                 spawnHitParticles(pos.playerX, pos.characterY - 55, 0xfcd34d, 15);
             }
-            if (data.type === 'retaliate') {
-                animStateRef.current.enemyHitFlash = 6;
-                spawnHitParticles(pos.enemyX, pos.characterY - 55, 0xeab308, 10);
-            }
             if (data.type === 'enemyDmg') {
                 // Player taking damage - make it very noticeable
                 animStateRef.current.playerHitFlash = 15;
                 animStateRef.current.screenShake.intensity = 12;
-                animStateRef.current.enemyAttackCooldown = 15; // Enemy lunge animation
+                // Trigger player hurt sprite animation
+                if (playerRef.current?.animController) {
+                    playerRef.current.animController.play('hurt', false, () => {
+                        playerRef.current?.animController?.play('ready', true);
+                    });
+                }
                 // More particles, spread wider for impact feel
                 spawnHitParticles(pos.playerX, pos.characterY - 55, 0xef4444, 20);
                 spawnHitParticles(pos.playerX - 20, pos.characterY - 40, 0xff6666, 8);
@@ -1220,7 +1200,6 @@ export default function GameRenderer() {
             if (data.type === 'shield') {
                 // Blue shield absorb effect - slightly more visible
                 animStateRef.current.playerHitFlash = 6;
-                animStateRef.current.enemyAttackCooldown = 15;
                 spawnHitParticles(pos.playerX, pos.characterY - 55, 0x3b82f6, 15);
             }
         });
@@ -1257,6 +1236,11 @@ export default function GameRenderer() {
                 audioManager.playSfxEnemyDeath();
             }
 
+            // Trigger death sprite animation
+            if (enemyRef.current?.animController) {
+                enemyRef.current.animController.play('death', false);
+            }
+
             // Spawn death particles at enemy position
             spawnHitParticles(pos.enemyX, pos.characterY - 55, 0xff4444, isBoss ? 40 : 25);
         });
@@ -1276,6 +1260,12 @@ export default function GameRenderer() {
         // Listen for Enemy Attack - trigger enemy attack animation
         const cleanupEnemyAttack = gameManager.on('enemyAttack', () => {
             animStateRef.current.enemyAttackCooldown = 15;
+            // Trigger attack sprite animation - plays once, then returns to idle
+            if (enemyRef.current?.animController) {
+                enemyRef.current.animController.play('attack', false, () => {
+                    enemyRef.current?.animController?.play('idle', true);
+                });
+            }
         });
 
         // Particle spawn functions
