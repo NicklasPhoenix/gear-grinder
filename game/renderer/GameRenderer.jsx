@@ -418,8 +418,18 @@ export default function GameRenderer() {
             spriteSheetRef.current = spriteSheets;
 
             // Pre-load ALL monster sprites to prevent loading delays during gameplay
+            // Skip sprites that are animated (they load individual frames, not a single .png)
+            const animatedSpriteNames = Object.values(ANIMATED_ZONE_SPRITES).map(key => {
+                // Map animated sprite keys to their equivalent monster names
+                return key; // 'lizard' etc.
+            });
             setLoadingProgress({ loaded: loadedCount, total: totalAssetsFinal, status: 'Loading monsters...' });
             for (const spriteName of uniqueMonsters) {
+                // Skip animated sprites - they don't have a single .png file
+                if (animatedSpriteNames.includes(spriteName)) {
+                    loadedCount++;
+                    continue;
+                }
                 const spritePath = `/assets/monsters/${spriteName}.png`;
                 try {
                     setLoadingProgress({ loaded: loadedCount, total: totalAssetsFinal, status: `Loading ${spriteName}...` });
@@ -1436,7 +1446,9 @@ export default function GameRenderer() {
                     const baseScale = enemyRef.current.animController && animConfig
                         ? (animConfig.scale || 0.35) * scaleFactor
                         : (zone?.isBoss ? 6.5 : 5) * scaleFactor;
-                    const flipX = enemyRef.current.flipX || -1;
+                    // Use config flipX for animated sprites, or stored value, or default to -1 for static
+                    const flipX = animConfig ? (animConfig.flipX ? -1 : 1) : (enemyRef.current.flipX || -1);
+                    enemyRef.current.flipX = flipX;
                     enemyRef.current.baseScale = baseScale;
                     enemyRef.current.scale.set(baseScale * flipX, baseScale);
 
@@ -2052,7 +2064,11 @@ export default function GameRenderer() {
             const baseScale = (enemyRef.current.animController && animConfig)
                 ? (animConfig.scale || 0.35) * sf
                 : (zone.isBoss ? 6.5 : 5) * sf;
-            const flipX = enemyRef.current.flipX || -1;
+            // Update flipX based on current zone's config (animated sprites may face different directions)
+            // For animated sprites: use config flipX (false = 1, true = -1)
+            // For static sprites: always flip (-1) since DawnLike sprites face left
+            const flipX = animConfig ? (animConfig.flipX ? -1 : 1) : -1;
+            enemyRef.current.flipX = flipX; // Store for animation reference
             enemyRef.current.baseScale = baseScale; // Store for animation reference
             enemyRef.current.scale.set(baseScale * flipX, baseScale);
             enemyRef.current.alpha = 1; // Ensure visible after zone change

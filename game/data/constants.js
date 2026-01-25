@@ -59,7 +59,7 @@ export const LEVEL_UP = {
 // === COMBAT ===
 export const COMBAT = {
     ARMOR_CONSTANT: 250,      // Armor / (Armor + CONSTANT) = damage reduction
-    ATTACKS_PER_SECOND: 4,    // Base player attack speed (attacks per second at 1x speed)
+    ATTACKS_PER_SECOND: 1.5,  // Base player attack speed (attacks per second at 1x speed)
     TICK_RATE: 20,            // Combat ticks per second (50ms per tick)
     BASE_ENEMY_ATTACK_SPEED: 1.0, // Base enemy attacks per second
     ENEMY_SPEED_SCALING: 0.015,   // Enemy attack speed increase per zone
