@@ -558,7 +558,6 @@ export default function GameRenderer() {
             // --- Create Player (Hero) using animated sprite ---
             const playerAnimConfig = ANIMATED_SPRITES.player;
             const playerAnims = await loadAnimatedSpriteTextures('player');
-            console.log('Player animations loaded:', playerAnims ? Object.keys(playerAnims) : 'none');
 
             let player;
             let playerAnimController = null;
@@ -849,27 +848,25 @@ export default function GameRenderer() {
 
                     // Check for player death
                     if (gmState?.playerHp <= 0 && !animState.playerDying && !animState.playerDead) {
-                        console.log('Player death triggered, HP:', gmState.playerHp);
                         animState.playerDying = true;
                         animState.playerDeathHold = 0;
                         if (playerRef.current.animController) {
-                            console.log('Playing death animation...');
                             const texture = playerRef.current.animController.play('death', false);
-                            console.log('Death texture:', texture ? 'got texture' : 'NO TEXTURE');
-                            if (texture) playerRef.current.texture = texture;
-                        } else {
-                            console.log('No animController on player!');
+                            if (texture) {
+                                playerRef.current.texture = texture;
+                                // Death sprites are 256x256 vs 128x128 for others - halve the scale
+                                const baseScale = playerRef.current.baseScale || playerBaseScale;
+                                const flipX = playerRef.current.scale.x < 0 ? -1 : 1;
+                                playerRef.current.scale.set(baseScale * 0.5 * flipX, baseScale * 0.5);
+                            }
                         }
                     }
 
                     // Player death animation
                     if (animState.playerDying) {
                         if (playerRef.current.animController) {
-                            const ctrl = playerRef.current.animController;
-                            console.log('Death update - playing:', ctrl.playing, 'anim:', ctrl.currentAnim, 'frame:', ctrl.frameIndex);
-                            const newTexture = ctrl.update(delta * 16.67);
+                            const newTexture = playerRef.current.animController.update(delta * 16.67);
                             if (newTexture) {
-                                console.log('Death frame advanced to:', ctrl.frameIndex);
                                 playerRef.current.texture = newTexture;
                             }
                             // Check if death animation finished - start hold timer
@@ -893,6 +890,10 @@ export default function GameRenderer() {
                         if (gmState?.playerHp > 0) {
                             animState.playerDead = false;
                             playerRef.current.alpha = 1;
+                            // Restore normal scale (was halved for 256x256 death sprites)
+                            const baseScale = playerRef.current.baseScale || playerBaseScale;
+                            const flipX = playerRef.current.scale.x < 0 ? -1 : 1;
+                            playerRef.current.scale.set(baseScale * flipX, baseScale);
                             if (playerRef.current.animController) {
                                 playerRef.current.animController.play('ready', true);
                             }
