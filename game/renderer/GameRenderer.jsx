@@ -31,7 +31,7 @@ const ANIMATED_SPRITES = {
             hurt: { frames: 2, prefix: 'Hurt', fps: 8 },
             death: { frames: 6, prefix: 'Death', fps: 8 },
         },
-        scale: 1.0,
+        scale: 2.0,
         anchorY: 0.72,  // Lizard feet at 72% down in 256x256 sprite
         flipX: true,
     },
@@ -813,11 +813,16 @@ export default function GameRenderer() {
                             playerRef.current.texture = newTexture;
                         }
 
-                        // Switch to attack animation when attacking (only at start)
-                        if (animState.playerAttackCooldown > 14) {
-                            playerRef.current.animController.play('attack', false, () => {
-                                playerRef.current.animController.play('idle');
-                            });
+                        // Manage animation state based on attack cooldown
+                        const isAttacking = animState.playerAttackCooldown > 0;
+                        const ctrl = playerRef.current.animController;
+
+                        if (isAttacking && ctrl.currentAnim !== 'attack') {
+                            // Start attack animation (don't loop, no callback)
+                            ctrl.play('attack', false);
+                        } else if (!isAttacking && ctrl.currentAnim === 'attack') {
+                            // Attack finished, return to idle
+                            ctrl.play('idle', true);
                         }
                     }
 
