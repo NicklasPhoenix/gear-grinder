@@ -24,6 +24,7 @@ import { formatWithCommas } from '../utils/format';
 import { audioManager } from '../systems/AudioManager';
 import { useIsMobilePortrait } from '../hooks/useIsMobile';
 import MobileGameLayout from './MobileGameLayout';
+import BuffDisplay from './BuffDisplay';
 
 // Icons for tabs
 const TabIcons = {
@@ -315,6 +316,15 @@ function DesktopGameLayout() {
                 <div className="flex-1 w-full">
                     <GameRenderer />
                 </div>
+
+                {/* Active Buffs Display - bottom left, above controls */}
+                {state?.combatState && (
+                    <div className="absolute bottom-28 left-4 z-10">
+                        <div className="glass-card rounded-lg p-2 min-w-[200px]">
+                            <BuffDisplay />
+                        </div>
+                    </div>
+                )}
 
                 {/* Game Controls - bottom left overlay */}
                 <div className="absolute bottom-16 left-4 z-10 flex items-center gap-3">

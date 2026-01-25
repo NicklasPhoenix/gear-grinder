@@ -132,6 +132,7 @@ export default function GameRenderer() {
     // Animation state
     const animStateRef = useRef({
         playerAttackCooldown: 0,
+        enemyAttackCooldown: 0,
         enemyHitFlash: 0,
         playerHitFlash: 0,
         screenShake: { x: 0, y: 0, intensity: 0 },
@@ -640,6 +641,19 @@ export default function GameRenderer() {
                         enemyRef.current.alpha = 1;
                         enemyRef.current.rotation = 0;
 
+                        // Enemy attack animation - lunge towards player
+                        if (animState.enemyAttackCooldown > 0) {
+                            animState.enemyAttackCooldown -= delta;
+                            const progress = animState.enemyAttackCooldown / 15;
+                            // Lunge towards player (negative X direction)
+                            enemyRef.current.x = (enemyRef.current.baseX || pos.enemyX) - Math.sin(progress * Math.PI) * 40;
+                            // Slight scale up during attack for impact
+                            const attackScale = enemyBaseScale * (1.0 + Math.sin(progress * Math.PI) * 0.1);
+                            enemyRef.current.scale.set(-attackScale, attackScale);
+                        } else {
+                            enemyRef.current.x = enemyRef.current.baseX || pos.enemyX;
+                        }
+
                         // Hit flash
                         if (animState.enemyHitFlash > 0) {
                             animState.enemyHitFlash -= delta;
@@ -750,11 +764,9 @@ export default function GameRenderer() {
                     break;
             }
 
-            // Combat effects - all player attack types trigger movement animation
-            const playerAttackTypes = ['playerDmg', 'crit', 'ascendedCrit', 'annihilate', 'frenzy', 'multiStrike', 'vengeance', 'retaliate'];
-            if (playerAttackTypes.includes(data.type)) {
-                animStateRef.current.playerAttackCooldown = 15;
-            }
+            // Note: Player attack animation is now triggered by 'playerAttack' event
+            // Enemy hit flash on player damage types
+            const playerAttackTypes = ['playerDmg', 'crit', 'ascendedCrit', 'annihilate', 'frenzy', 'multiStrike', 'vengeance', 'retaliate', 'phantom', 'thorns'];
 
             // Visual effects per attack type
             if (data.type === 'playerDmg') {
@@ -874,6 +886,17 @@ export default function GameRenderer() {
             spawnHitParticles(pos.enemyX, pos.characterY - 55, 0xff4444, isBoss ? 40 : 25);
         });
 
+        // Listen for Player Attack - trigger player attack animation
+        const cleanupPlayerAttack = gameManager.on('playerAttack', () => {
+            animStateRef.current.playerAttackCooldown = 15;
+            audioManager.playSfxHit();
+        });
+
+        // Listen for Enemy Attack - trigger enemy attack animation
+        const cleanupEnemyAttack = gameManager.on('enemyAttack', () => {
+            animStateRef.current.enemyAttackCooldown = 15;
+        });
+
         // Particle spawn functions
         function spawnHitParticles(x, y, color, count) {
             for (let i = 0; i < count; i++) {
@@ -980,6 +1003,8 @@ export default function GameRenderer() {
             cleanupText();
             cleanupLoot();
             cleanupDeath();
+            cleanupPlayerAttack();
+            cleanupEnemyAttack();
             // Clean up resize observer
             if (resizeObserverRef.current) {
                 resizeObserverRef.current.disconnect();

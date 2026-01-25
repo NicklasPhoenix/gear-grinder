@@ -1,6 +1,7 @@
 import { initialState } from '../data/initialState';
 import { CombatSystem } from '../systems/CombatSystem';
 import { calculatePlayerStats } from '../systems/PlayerSystem';
+import { COMBAT } from '../data/constants';
 
 export class GameManager {
     constructor() {
@@ -108,6 +109,8 @@ export class GameManager {
             onFloatingText: (text, type, target) => this.emit('floatingText', { text, type, target }),
             onLootDrop: (items) => this.emit('lootDrop', { items }),
             onEnemyDeath: (isBoss) => this.emit('enemyDeath', { isBoss }),
+            onPlayerAttack: () => this.emit('playerAttack', {}),
+            onEnemyAttack: () => this.emit('enemyAttack', {}),
         });
 
         if (this.isRunning) return;
@@ -161,14 +164,13 @@ export class GameManager {
         const deltaTime = now - this.lastTime;
         this.lastTime = now;
 
-        const stats = calculatePlayerStats(this.state);
-        const baseTickSpeed = Math.max(200, 1000 - (stats.speedMult - 1) * 500);
-        const tickSpeed = Math.max(40, Math.floor(baseTickSpeed / this.gameSpeed));
+        // Fixed tick rate - combat system handles attack timing internally
+        const tickSpeed = Math.max(10, Math.floor(1000 / COMBAT.TICK_RATE / this.gameSpeed));
 
         this.accumulatedTime += deltaTime;
 
-        // Cap accumulated time to prevent spiral of death, but ensure at least one tick can happen
-        const maxAccumulated = Math.max(1000, tickSpeed * 2);
+        // Cap accumulated time to prevent spiral of death
+        const maxAccumulated = Math.max(500, tickSpeed * 5);
         if (this.accumulatedTime > maxAccumulated) this.accumulatedTime = maxAccumulated;
 
         while (this.accumulatedTime >= tickSpeed) {

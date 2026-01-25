@@ -4,6 +4,7 @@ import { formatNumber } from '../utils/format';
 import { MaterialIcon, BossStoneIcon } from './MaterialIcons';
 import { BOSS_STONES } from '../data/items';
 import GameRenderer from '../renderer/GameRenderer';
+import BuffDisplay from './BuffDisplay';
 
 /**
  * MobileCombatView - Uses the real GameRenderer in a compact mobile layout
@@ -117,6 +118,13 @@ export default function MobileCombatView({ currentZone, state, gameManager }) {
             <div className="relative h-44 w-full overflow-hidden">
                 <GameRenderer />
             </div>
+
+            {/* Active Buffs Display */}
+            {state?.combatState && (
+                <div className="px-2 py-1.5 bg-slate-900/60 border-t border-slate-800/30">
+                    <BuffDisplay compact />
+                </div>
+            )}
 
             {/* Controls Row */}
             <div className="flex items-center justify-between px-3 py-2 border-t border-slate-800/50 bg-slate-900/80">
