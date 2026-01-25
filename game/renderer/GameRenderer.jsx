@@ -6,8 +6,10 @@ import { getZoneById } from '../data/zones';
 import { audioManager } from '../systems/AudioManager';
 
 // Animated sprite configurations (frame-by-frame animation)
+// Note: These sprites are 128x128 (knight) and 256x256 (lizard) pixels
+// Original DawnLike sprites were 16x16, so scale accordingly
 const ANIMATED_SPRITES = {
-    // Player character - Knight
+    // Player character - Knight (128x128 sprite)
     player: {
         basePath: '/assets/characters/knight',
         animations: {
@@ -15,10 +17,11 @@ const ANIMATED_SPRITES = {
             attack: { frames: 4, prefix: 'attack', fps: 12, indices: [0, 1, 2, 4] },
             hurt: { frames: 2, prefix: 'hurt', fps: 8 },
         },
-        scale: 3,
+        scale: 0.8,  // 128px * 0.8 = ~100px (similar to old 16px * 6)
         anchorY: 1,
+        flipX: true,  // Knight sprite faces left, flip to face right
     },
-    // Zone 0 enemy - Lizard warrior
+    // Zone 0 enemy - Lizard warrior (256x256 sprite)
     lizard: {
         basePath: '/assets/monsters/lizard',
         animations: {
@@ -27,8 +30,9 @@ const ANIMATED_SPRITES = {
             hurt: { frames: 2, prefix: 'Hurt', fps: 8 },
             death: { frames: 6, prefix: 'Death', fps: 8 },
         },
-        scale: 2.5,
-        anchorY: 0.85,
+        scale: 0.35,  // 256px * 0.35 = ~90px (similar to old 16px * 5)
+        anchorY: 0.9,
+        flipX: false,  // Lizard faces right (toward player) by default
     },
 };
 
@@ -504,7 +508,8 @@ export default function GameRenderer() {
 
             let player;
             let playerAnimController = null;
-            const playerScale = (playerAnimConfig?.scale || 4) * scaleFactor;
+            // Scale for animated sprites (0.8 base) vs old DawnLike (4 * 1.5 = 6)
+            const playerScale = (playerAnimConfig?.scale || 0.8) * scaleFactor;
 
             if (playerAnims && playerAnims.idle) {
                 // Use animated sprite
@@ -523,12 +528,15 @@ export default function GameRenderer() {
             player.anchor.set(0.5, playerAnimConfig?.anchorY || 1);
             player.x = playerX;
             player.y = characterY;
-            player.scale.set(playerScale, playerScale); // Face right (positive X)
+            // Flip X if needed to face right (toward enemy)
+            const playerFlipX = playerAnimConfig?.flipX ? -1 : 1;
+            player.scale.set(playerScale * playerFlipX, playerScale);
             gameContainer.addChild(player);
             playerRef.current = player;
             player.baseX = playerX;
             player.baseY = characterY;
             player.baseScale = playerScale;
+            player.flipX = playerFlipX;
 
             // --- Player Shadow (scaled for mobile) ---
             const playerShadow = new PIXI.Graphics();
@@ -560,10 +568,13 @@ export default function GameRenderer() {
                     enemyAnimController = createAnimatedSpriteController(enemyAnims, 'idle');
                     enemy.animController = enemyAnimController;
                     enemy.animatedSpriteKey = animatedSpriteKey;
-                    const scale = (animConfig?.scale || 5) * scaleFactor;
+                    const scale = (animConfig?.scale || 0.35) * scaleFactor;
                     enemy.anchor.set(0.5, animConfig?.anchorY || 1);
-                    enemy.scale.set(-scale, scale); // Negative X to face player
+                    // Flip X if needed to face player (left)
+                    const flipX = animConfig?.flipX ? 1 : -1;
+                    enemy.scale.set(scale * flipX, scale);
                     enemy.baseScale = scale;
+                    enemy.flipX = flipX;
                 } else {
                     // Fallback to static
                     enemy = new PIXI.Sprite(PIXI.Texture.WHITE);
@@ -888,6 +899,7 @@ export default function GameRenderer() {
                         const progress = Math.min(1, animState.enemySpawnProgress);
                         const pos = positionsRef.current;
                         const baseX = enemyRef.current.baseX || pos.enemyX;
+                        const flipX = enemyRef.current.flipX || -1;
 
                         // Slide in from right side
                         const slideOffset = (1 - progress) * 100 * (pos.scaleFactor || 1);
@@ -896,14 +908,14 @@ export default function GameRenderer() {
                         // Scale up with slight bounce
                         const bounce = progress < 0.7 ? progress / 0.7 : 1 + Math.sin((progress - 0.7) / 0.3 * Math.PI) * 0.1;
                         const spawnScale = enemyBaseScale * Math.min(1, bounce);
-                        enemyRef.current.scale.set(-spawnScale, spawnScale);
+                        enemyRef.current.scale.set(spawnScale * flipX, spawnScale);
                         enemyRef.current.alpha = Math.min(1, progress * 2); // Fade in quickly
                         enemyRef.current.tint = 0xffffff;
 
                         if (progress >= 1) {
                             animState.enemySpawning = false;
                             animState.enemySpawnProgress = 0;
-                            enemyRef.current.scale.set(-enemyBaseScale, enemyBaseScale);
+                            enemyRef.current.scale.set(enemyBaseScale * flipX, enemyBaseScale);
                             enemyRef.current.alpha = 1;
                             enemyRef.current.x = baseX;
                         }
@@ -922,7 +934,8 @@ export default function GameRenderer() {
 
                         const breathe = Math.sin(time * 0.0025 + 1) * 0.02;
                         const bob = Math.sin(time * 0.004 + 1) * 4 * (pos.scaleFactor || 1);
-                        enemyRef.current.scale.y = enemyBaseScale * (1.0 + breathe);
+                        const flipX = enemyRef.current.flipX || -1;
+                        enemyRef.current.scale.set(enemyBaseScale * flipX, enemyBaseScale * (1.0 + breathe));
                         enemyRef.current.y = (enemyRef.current.baseY || pos.characterY) - 25 * (pos.scaleFactor || 1) + bob;
                         enemyRef.current.alpha = 1;
                         enemyRef.current.rotation = 0;
@@ -941,7 +954,7 @@ export default function GameRenderer() {
                             enemyRef.current.x = (enemyRef.current.baseX || pos.enemyX) - Math.sin(progress * Math.PI) * 40;
                             // Slight scale up during attack for impact
                             const attackScale = enemyBaseScale * (1.0 + Math.sin(progress * Math.PI) * 0.1);
-                            enemyRef.current.scale.set(-attackScale, attackScale);
+                            enemyRef.current.scale.set(attackScale * flipX, attackScale);
                         } else {
                             enemyRef.current.x = enemyRef.current.baseX || pos.enemyX;
                         }
