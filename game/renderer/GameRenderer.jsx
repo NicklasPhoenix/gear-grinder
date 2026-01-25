@@ -852,13 +852,7 @@ export default function GameRenderer() {
                         animState.playerDeathHold = 0;
                         if (playerRef.current.animController) {
                             const texture = playerRef.current.animController.play('death', false);
-                            if (texture) {
-                                playerRef.current.texture = texture;
-                                // Death sprites are 256x256 vs 128x128 for others - halve the scale
-                                const baseScale = playerRef.current.baseScale || playerBaseScale;
-                                const flipX = playerRef.current.scale.x < 0 ? -1 : 1;
-                                playerRef.current.scale.set(baseScale * 0.5 * flipX, baseScale * 0.5);
-                            }
+                            if (texture) playerRef.current.texture = texture;
                         }
                     }
 
@@ -890,10 +884,6 @@ export default function GameRenderer() {
                         if (gmState?.playerHp > 0) {
                             animState.playerDead = false;
                             playerRef.current.alpha = 1;
-                            // Restore normal scale (was halved for 256x256 death sprites)
-                            const baseScale = playerRef.current.baseScale || playerBaseScale;
-                            const flipX = playerRef.current.scale.x < 0 ? -1 : 1;
-                            playerRef.current.scale.set(baseScale * flipX, baseScale);
                             if (playerRef.current.animController) {
                                 playerRef.current.animController.play('ready', true);
                             }
