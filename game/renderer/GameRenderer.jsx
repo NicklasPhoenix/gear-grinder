@@ -849,7 +849,6 @@ export default function GameRenderer() {
                     // Check for player death
                     if (gmState?.playerHp <= 0 && !animState.playerDying && !animState.playerDead) {
                         animState.playerDying = true;
-                        animState.playerDeathHold = 0;
                         if (playerRef.current.animController) {
                             const texture = playerRef.current.animController.play('death', false);
                             if (texture) playerRef.current.texture = texture;
@@ -863,18 +862,11 @@ export default function GameRenderer() {
                             if (newTexture) {
                                 playerRef.current.texture = newTexture;
                             }
-                            // Check if death animation finished - start hold timer
-                            if (!playerRef.current.animController.playing && animState.playerDeathHold === 0) {
-                                animState.playerDeathHold = 90; // Hold death pose for ~1.5 seconds
-                            }
-                            // Count down hold timer
-                            if (animState.playerDeathHold > 0) {
-                                animState.playerDeathHold -= delta;
-                                if (animState.playerDeathHold <= 0) {
-                                    animState.playerDying = false;
-                                    animState.playerDeathHold = 0;
-                                    animState.playerDead = true;
-                                }
+                            // When animation finishes, hide sprite and mark as dead
+                            if (!playerRef.current.animController.playing) {
+                                animState.playerDying = false;
+                                animState.playerDead = true;
+                                playerRef.current.alpha = 0;
                             }
                         }
                     }
@@ -901,7 +893,11 @@ export default function GameRenderer() {
                     }
 
                     // Position - no programmatic movement, just use sprite animations
-                    const playerYOffset = playerRef.current.animController ? 0 : -25 * (pos.scaleFactor || 1);
+                    // Death sprites are 256x256 vs 128x128 - need Y offset to align feet
+                    let playerYOffset = playerRef.current.animController ? 0 : -25 * (pos.scaleFactor || 1);
+                    if (animState.playerDying) {
+                        playerYOffset += 50 * (pos.scaleFactor || 1);
+                    }
                     playerRef.current.y = (playerRef.current.baseY || pos.characterY) + playerYOffset;
                     playerRef.current.x = playerRef.current.baseX || pos.playerX;
 
