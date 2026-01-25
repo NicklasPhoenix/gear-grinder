@@ -1237,16 +1237,32 @@ export default function GameRenderer() {
     // Background image ref for zone changes
     const bgSpriteRef = useRef(null);
 
-    // Get background image path based on zone (progressive darkness)
+    // Get background image path based on zone
+    // Uses fight backgrounds: forest for zones 0-19, elven for zones 20+
     function getBackgroundForZone(zoneId) {
-        // Forest zones (0-4) use forest backgrounds progressively darker
-        if (zoneId <= 4) {
-            const bgIndex = Math.min(Math.floor(zoneId / 1.25) + 1, 4);
-            return `/assets/backgrounds/forest_0${bgIndex}.png`;
+        // Determine which background set to use based on zone range
+        // Zones 0-19: forest fight backgrounds
+        // Zones 20+: elven fight backgrounds
+        const isElven = zoneId >= 20;
+        const bgType = isElven ? 'elven' : 'forest';
+
+        // Each biome is 5 zones (4 regular + 1 boss)
+        // Cycle through 4 backgrounds within each set
+        const biome = Math.floor(zoneId / 5);
+        const zoneInBiome = zoneId % 5;
+
+        // Boss zones (every 5th zone: 4, 9, 14, etc.) use background 4 (most dramatic)
+        // Regular zones cycle through 1-4 based on position in biome
+        let bgIndex;
+        if (zoneInBiome === 4) {
+            // Boss zone - use the 4th (most dramatic) background
+            bgIndex = 4;
+        } else {
+            // Regular zones - cycle based on biome number for variety
+            bgIndex = ((biome + zoneInBiome) % 4) + 1;
         }
-        // Later zones also use forest backgrounds (cycle through them with increasing darkness)
-        const bgIndex = Math.min((zoneId % 4) + 1, 4);
-        return `/assets/backgrounds/forest_0${bgIndex}.png`;
+
+        return `/assets/backgrounds/fight_${bgType}_${bgIndex}.png`;
     }
 
     // Create animated background with forest image
