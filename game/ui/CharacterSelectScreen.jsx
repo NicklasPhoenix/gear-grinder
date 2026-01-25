@@ -1,30 +1,36 @@
 import React, { useState, useEffect } from 'react';
 
-// Character classes with their portraits and descriptions
+// Character classes with their portraits, descriptions, and avatar paths
 const CHARACTER_CLASSES = [
     {
         id: 'knight',
         name: 'Knight',
         portrait: '/assets/portraits/knight.png',
         description: 'A sturdy warrior with balanced stats.',
+        avatarPath: '/assets/avatars/dwarf',
     },
     {
         id: 'rogue',
         name: 'Rogue',
         portrait: '/assets/portraits/rogue.png',
         description: 'A swift assassin with deadly precision.',
+        avatarPath: '/assets/avatars/halfling',
     },
     {
         id: 'mage',
         name: 'Mage',
         portrait: '/assets/portraits/mage.png',
         description: 'A powerful spellcaster with arcane might.',
+        avatarPath: '/assets/avatars/fairy',
     },
 ];
 
-// Generate list of available avatars
+// Generate avatar list for a given class
 const AVATAR_COUNT = 48;
-const AVATARS = Array.from({ length: AVATAR_COUNT }, (_, i) => `/assets/avatars/dwarf/Icon${i + 1}.png`);
+const getAvatarsForClass = (classIndex) => {
+    const avatarPath = CHARACTER_CLASSES[classIndex]?.avatarPath || CHARACTER_CLASSES[0].avatarPath;
+    return Array.from({ length: AVATAR_COUNT }, (_, i) => `${avatarPath}/Icon${i + 1}.png`);
+};
 
 // Character slot storage keys
 const SLOT_KEYS = ['gearGrinderSlot1', 'gearGrinderSlot2', 'gearGrinderSlot3'];
@@ -97,9 +103,10 @@ export default function CharacterSelectScreen({ onSelectCharacter }) {
         if (!characterName.trim()) return;
 
         const charClass = CHARACTER_CLASSES[selectedClass];
+        const avatars = getAvatarsForClass(selectedClass);
         const newCharacter = {
             name: characterName.trim(),
-            avatar: AVATARS[selectedAvatar],
+            avatar: avatars[selectedAvatar],
             avatarIndex: selectedAvatar,
             characterClass: charClass.id,
             createdAt: Date.now(),
@@ -288,7 +295,10 @@ export default function CharacterSelectScreen({ onSelectCharacter }) {
                                     {CHARACTER_CLASSES.map((cls, index) => (
                                         <button
                                             key={cls.id}
-                                            onClick={() => setSelectedClass(index)}
+                                            onClick={() => {
+                                                setSelectedClass(index);
+                                                setSelectedAvatar(0); // Reset avatar when class changes
+                                            }}
                                             className={`flex flex-col items-center p-2 rounded-lg transition-all ${
                                                 selectedClass === index
                                                     ? 'bg-amber-600/50 border-2 border-amber-400 scale-105'
@@ -319,7 +329,7 @@ export default function CharacterSelectScreen({ onSelectCharacter }) {
                                 <label className="block text-amber-200/80 text-sm mb-2" style={{ textShadow: '1px 1px 1px #000' }}>
                                     Avatar
                                 </label>
-                                <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-4 justify-center">
                                     <button
                                         onClick={() => setSelectedAvatar((prev) => (prev - 1 + AVATAR_COUNT) % AVATAR_COUNT)}
                                         className="text-2xl text-amber-400 hover:text-amber-200"
@@ -327,7 +337,7 @@ export default function CharacterSelectScreen({ onSelectCharacter }) {
                                         ‹
                                     </button>
                                     <img
-                                        src={AVATARS[selectedAvatar]}
+                                        src={getAvatarsForClass(selectedClass)[selectedAvatar]}
                                         alt="Selected avatar"
                                         className="w-20 h-20 rounded-full border-2 border-amber-600"
                                         style={{ imageRendering: 'pixelated' }}
