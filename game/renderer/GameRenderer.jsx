@@ -1313,7 +1313,11 @@ export default function GameRenderer() {
             if (playerRef.current?.animController) {
                 playerRef.current.animController.play('attack', false, () => {
                     if (playerRef.current?.animController) {
-                        const texture = playerRef.current.animController.play('ready', true);
+                        // Try ready stance, fall back to idle if not available
+                        let texture = playerRef.current.animController.play('ready', true);
+                        if (!texture) {
+                            texture = playerRef.current.animController.play('idle', true);
+                        }
                         if (texture) playerRef.current.texture = texture;
                     }
                 });
