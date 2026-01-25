@@ -307,6 +307,7 @@ export default function GameRenderer() {
         lastZone: -1,
         enemyDying: false,
         enemyDeathProgress: 0,
+        enemyDeathHold: 0, // Frames to hold death pose before hiding
         waitingForRespawn: false,
         enemySpawning: false,
         enemySpawnProgress: 0,
@@ -867,13 +868,21 @@ export default function GameRenderer() {
                             if (newTexture) {
                                 enemyRef.current.texture = newTexture;
                             }
-                            // Check if death animation finished
-                            if (!enemyRef.current.animController.playing) {
-                                animState.enemyDying = false;
-                                animState.waitingForRespawn = true;
-                                enemyRef.current.alpha = 0;
-                                if (enemyRef.current.shadow) enemyRef.current.shadow.alpha = 0;
-                                if (enemyRef.current.aura) enemyRef.current.aura.alpha = 0;
+                            // Check if death animation finished - start hold timer
+                            if (!enemyRef.current.animController.playing && animState.enemyDeathHold === 0) {
+                                animState.enemyDeathHold = 60; // Hold death pose for ~1 second (60 frames)
+                            }
+                            // Count down hold timer, then hide
+                            if (animState.enemyDeathHold > 0) {
+                                animState.enemyDeathHold -= delta;
+                                if (animState.enemyDeathHold <= 0) {
+                                    animState.enemyDying = false;
+                                    animState.enemyDeathHold = 0;
+                                    animState.waitingForRespawn = true;
+                                    enemyRef.current.alpha = 0;
+                                    if (enemyRef.current.shadow) enemyRef.current.shadow.alpha = 0;
+                                    if (enemyRef.current.aura) enemyRef.current.aura.alpha = 0;
+                                }
                             }
                         } else {
                             // Fallback for static sprites - just fade out
