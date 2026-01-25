@@ -269,6 +269,19 @@ export function applyObjectiveReward(state, reward) {
 }
 
 /**
+ * Get progress for an objective by looking up its template
+ * This is needed because getProgress functions don't survive JSON serialization
+ */
+function getObjectiveProgress(objective, state, startState, templates) {
+    // Find the template by ID to get the getProgress function
+    const template = templates.find(t => t.id === objective?.id);
+    if (!template || !template.getProgress) {
+        return 0;
+    }
+    return template.getProgress(state, startState);
+}
+
+/**
  * Check and update objective state
  * @param {Object} state - Game state
  * @returns {Object} { daily: { objective, progress, complete }, weekly: { ... } }
@@ -310,9 +323,19 @@ export function checkObjectives(state) {
         state.weeklyObjectiveClaimed = false;
     }
 
-    // Calculate progress
-    const dailyProgress = state.dailyObjective.getProgress(state, state.dailyObjectiveStartState);
-    const weeklyProgress = state.weeklyObjective.getProgress(state, state.weeklyObjectiveStartState);
+    // Calculate progress using template lookup (functions don't survive JSON save/load)
+    const dailyProgress = getObjectiveProgress(
+        state.dailyObjective,
+        state,
+        state.dailyObjectiveStartState,
+        DAILY_OBJECTIVE_TEMPLATES
+    );
+    const weeklyProgress = getObjectiveProgress(
+        state.weeklyObjective,
+        state,
+        state.weeklyObjectiveStartState,
+        WEEKLY_OBJECTIVE_TEMPLATES
+    );
 
     return {
         daily: {

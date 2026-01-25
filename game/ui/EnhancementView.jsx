@@ -180,6 +180,10 @@ export default function EnhancementView() {
 
         if (!success) {
             newState.enhanceFails = (freshState.enhanceFails || 0) + 1;
+        } else {
+            // Track successful enhancements for objectives
+            newState.dailyEnhanceSuccess = (freshState.dailyEnhanceSuccess || 0) + 1;
+            newState.weeklyEnhanceSuccess = (freshState.weeklyEnhanceSuccess || 0) + 1;
         }
 
         gameManager.setState(newState);

@@ -162,10 +162,12 @@ export default function InventoryView({ onHover }) {
             totalStones += returns.enhanceStone;
         }
         const newInv = state.inventory.filter(item => !selectedForSalvage.has(item.id));
+        const salvageCount = itemsToSalvage.length;
         gameManager.setState(prev => ({
             ...prev, inventory: newInv,
             gold: (prev.gold || 0) + totalGold,
             enhanceStone: (prev.enhanceStone || 0) + totalStones,
+            dailySalvaged: (prev.dailySalvaged || 0) + salvageCount, // Track for objectives
         }));
         setSelectedForSalvage(new Set());
         gameManager.emit('floatingText', { text: `+${totalGold}g`, type: 'heal', target: 'player' });
@@ -182,10 +184,12 @@ export default function InventoryView({ onHover }) {
             totalGold += returns.gold;
             totalStones += returns.enhanceStone;
         }
+        const salvageCount = itemsToSalvage.length;
         gameManager.setState(prev => ({
             ...prev, inventory: lockedItems, // Keep only locked items
             gold: (prev.gold || 0) + totalGold,
             enhanceStone: (prev.enhanceStone || 0) + totalStones,
+            dailySalvaged: (prev.dailySalvaged || 0) + salvageCount, // Track for objectives
         }));
         setSelectedForSalvage(new Set());
         gameManager.emit('floatingText', { text: `+${totalGold}g`, type: 'heal', target: 'player' });
@@ -212,7 +216,12 @@ export default function InventoryView({ onHover }) {
             const result = addItemToInventory(newInv, { ...oldItem, id: Date.now() }, maxSlots);
             newInv = result.inventory; // Should succeed since we just removed an item
         }
-        gameManager.setState(prev => ({ ...prev, gear: newGear, inventory: newInv }));
+        gameManager.setState(prev => ({
+            ...prev,
+            gear: newGear,
+            inventory: newInv,
+            dailyEquipped: (prev.dailyEquipped || 0) + 1, // Track for objectives
+        }));
     };
 
     const handleUnequip = (item) => {

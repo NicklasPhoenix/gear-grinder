@@ -58,8 +58,9 @@ export default function ZoneView() {
                     {allZones.map((zone, index) => {
                         const kills = state.zoneKills?.[zone.id] || 0;
                         const prevZone = index > 0 ? allZones[index - 1] : null;
+                        // Zone is unlocked if: it's zone 0, OR kills in previous zone >= this zone's requirement
                         const isUnlocked = zone.id === 0 ||
-                            (prevZone && (state.zoneKills?.[prevZone.id] || 0) >= prevZone.killsRequired);
+                            (prevZone && (state.zoneKills?.[prevZone.id] || 0) >= zone.killsRequired);
                         const isCurrent = state.currentZone === zone.id;
                         const progress = zone.killsRequired > 0 ? Math.min(100, (kills / zone.killsRequired) * 100) : 100;
 
