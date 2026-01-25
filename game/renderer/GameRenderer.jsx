@@ -750,16 +750,23 @@ export default function GameRenderer() {
                     break;
             }
 
-            // Combat effects
-            if (data.type === 'playerDmg' || data.type === 'crit') {
-                animStateRef.current.enemyHitFlash = 8;
-                animStateRef.current.screenShake.intensity = data.type === 'crit' ? 12 : 6;
+            // Combat effects - all player attack types trigger movement animation
+            const playerAttackTypes = ['playerDmg', 'crit', 'ascendedCrit', 'annihilate', 'frenzy', 'multiStrike', 'vengeance', 'retaliate'];
+            if (playerAttackTypes.includes(data.type)) {
                 animStateRef.current.playerAttackCooldown = 15;
-
-                // Spawn hit particles at enemy position
-                spawnHitParticles(pos.enemyX, pos.characterY - 55, data.type === 'crit' ? 0xfde047 : 0xffffff, data.type === 'crit' ? 20 : 10);
             }
-            // Multi-strike and execute get extra visual effects
+
+            // Visual effects per attack type
+            if (data.type === 'playerDmg') {
+                animStateRef.current.enemyHitFlash = 8;
+                animStateRef.current.screenShake.intensity = 6;
+                spawnHitParticles(pos.enemyX, pos.characterY - 55, 0xffffff, 10);
+            }
+            if (data.type === 'crit') {
+                animStateRef.current.enemyHitFlash = 8;
+                animStateRef.current.screenShake.intensity = 12;
+                spawnHitParticles(pos.enemyX, pos.characterY - 55, 0xfde047, 20);
+            }
             if (data.type === 'multiStrike') {
                 animStateRef.current.enemyHitFlash = 10;
                 animStateRef.current.screenShake.intensity = 8;
@@ -771,16 +778,24 @@ export default function GameRenderer() {
                 spawnHitParticles(pos.enemyX, pos.characterY - 55, 0xef4444, 25);
             }
             if (data.type === 'ascendedCrit') {
-                // Ascended crit - big cyan/light blue explosion
                 animStateRef.current.enemyHitFlash = 20;
                 animStateRef.current.screenShake.intensity = 18;
                 spawnHitParticles(pos.enemyX, pos.characterY - 55, 0x67e8f9, 35);
             }
             if (data.type === 'annihilate') {
-                // Annihilate - massive orange explosion
                 animStateRef.current.enemyHitFlash = 25;
                 animStateRef.current.screenShake.intensity = 20;
                 spawnHitParticles(pos.enemyX, pos.characterY - 55, 0xfb923c, 40);
+            }
+            if (data.type === 'frenzy') {
+                animStateRef.current.enemyHitFlash = 12;
+                animStateRef.current.screenShake.intensity = 10;
+                spawnHitParticles(pos.enemyX, pos.characterY - 55, 0xf97316, 25);
+            }
+            if (data.type === 'vengeance' || data.type === 'retaliate') {
+                animStateRef.current.enemyHitFlash = 10;
+                animStateRef.current.screenShake.intensity = 8;
+                spawnHitParticles(pos.enemyX, pos.characterY - 55, 0xdc2626, 15);
             }
             if (data.type === 'frenzy') {
                 // Frenzy - purple rapid strikes
