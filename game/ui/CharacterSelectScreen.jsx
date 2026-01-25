@@ -137,7 +137,7 @@ export default function CharacterSelectScreen({ onSelectCharacter }) {
                         >
                             {/* Wooden panel background */}
                             <img
-                                src="/assets/ui-elements/large_sign.png"
+                                src="/assets/ui-elements/8.png"
                                 alt=""
                                 className="w-full h-auto"
                                 style={{ imageRendering: 'pixelated' }}
@@ -212,7 +212,7 @@ export default function CharacterSelectScreen({ onSelectCharacter }) {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
                     <div className="relative max-w-md w-full mx-4">
                         <img
-                            src="/assets/ui-elements/large_sign.png"
+                            src="/assets/ui-elements/8.png"
                             alt=""
                             className="w-full h-auto"
                             style={{ imageRendering: 'pixelated' }}

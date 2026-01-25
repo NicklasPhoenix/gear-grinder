@@ -243,8 +243,37 @@ function DesktopGameLayout() {
             <div className="h-full w-full relative flex flex-col">
                 {/* Top Info Bar - overlaid on canvas */}
                 <div className="absolute top-2 left-2 right-2 lg:top-4 lg:left-4 lg:right-4 flex justify-between items-start z-10">
-                    {/* Zone Info + Stats */}
+                    {/* Character + Zone Info + Stats */}
                     <div className="flex flex-col gap-1 lg:gap-2">
+                        {/* Character Display */}
+                        <div className="glass-card rounded-lg lg:rounded-xl p-2 lg:p-3 animate-fadeIn">
+                            <div className="flex items-center gap-2 lg:gap-3">
+                                {state.characterAvatar ? (
+                                    <img
+                                        src={state.characterAvatar}
+                                        alt={state.characterName}
+                                        className="w-10 h-10 lg:w-12 lg:h-12 rounded-full border-2 border-amber-600"
+                                        style={{ imageRendering: 'pixelated' }}
+                                    />
+                                ) : (
+                                    <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full border-2 border-amber-600 bg-slate-700 flex items-center justify-center">
+                                        <span className="text-amber-400 text-lg font-bold">
+                                            {(state.characterName || 'H')[0].toUpperCase()}
+                                        </span>
+                                    </div>
+                                )}
+                                <div>
+                                    <p className="font-bold text-sm lg:text-base text-amber-100" style={{ textShadow: '1px 1px 2px #000' }}>
+                                        {state.characterName || 'Hero'}
+                                    </p>
+                                    <p className="text-[10px] lg:text-xs text-amber-200/60">
+                                        Level {state.level || 1}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Zone Info */}
                         <div className="glass-card rounded-lg lg:rounded-xl p-2 lg:p-4 animate-fadeIn">
                             <div className="flex items-center gap-2 lg:gap-3">
                                 <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg bg-gradient-to-br from-yellow-500/20 to-orange-500/20 flex items-center justify-center">
@@ -966,7 +995,7 @@ function KeyboardHelpModal({ onClose }) {
             >
                 {/* Wooden sign background image */}
                 <img
-                    src="/assets/ui-elements/large_sign.png"
+                    src="/assets/ui-elements/8.png"
                     alt=""
                     className="w-full h-auto"
                     style={{ imageRendering: 'pixelated' }}

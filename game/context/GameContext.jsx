@@ -275,10 +275,11 @@ export function GameProvider({ children, initialCharacter = null, slotIndex = nu
                     gm.state = { ...gm.state, ...validated, combatLog: [], saveVersion: SAVE.SAVE_VERSION };
                 }
 
-                // Store character info in state for display
+                // Store character info in state for display (always set from initialCharacter if available)
                 if (initialCharacter) {
-                    gm.state.characterName = initialCharacter.name;
-                    gm.state.characterAvatar = initialCharacter.avatar;
+                    gm.state.characterName = initialCharacter.name || gm.state.characterName || 'Hero';
+                    gm.state.characterAvatar = initialCharacter.avatar || gm.state.characterAvatar || null;
+                    console.log('Character loaded:', gm.state.characterName, gm.state.characterAvatar);
                 }
             } catch (e) {
                 console.error("Save load error, starting fresh:", e);

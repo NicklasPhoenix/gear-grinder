@@ -186,7 +186,23 @@ export default function StatsView() {
             <div className="h-full flex flex-col overflow-y-auto custom-scrollbar">
                 {/* Header */}
                 <div className="flex items-center justify-between px-3 py-2 bg-slate-900/80 border-b border-slate-800 sticky top-0 z-10">
-                    <span className="text-sm font-bold text-slate-300">Stats</span>
+                    <div className="flex items-center gap-2">
+                        {state.characterAvatar ? (
+                            <img
+                                src={state.characterAvatar}
+                                alt={state.characterName}
+                                className="w-7 h-7 rounded-full border border-amber-600"
+                                style={{ imageRendering: 'pixelated' }}
+                            />
+                        ) : (
+                            <div className="w-7 h-7 rounded-full border border-amber-600 bg-slate-700 flex items-center justify-center">
+                                <span className="text-amber-400 text-xs font-bold">
+                                    {(state.characterName || 'H')[0].toUpperCase()}
+                                </span>
+                            </div>
+                        )}
+                        <span className="text-sm font-bold text-amber-100">{state.characterName || 'Hero'}</span>
+                    </div>
                     <div className="flex items-center gap-2">
                         <span className="text-sm text-green-400">
                             <span className="font-bold text-lg">{state.statPoints}</span> pts
@@ -427,7 +443,27 @@ export default function StatsView() {
             {/* Header */}
             <div className="game-panel">
                 <div className="game-panel-header flex justify-between items-center">
-                    <span className="text-sm">Stats</span>
+                    {/* Character Info */}
+                    <div className="flex items-center gap-3">
+                        {state.characterAvatar ? (
+                            <img
+                                src={state.characterAvatar}
+                                alt={state.characterName}
+                                className="w-8 h-8 rounded-full border-2 border-amber-600"
+                                style={{ imageRendering: 'pixelated' }}
+                            />
+                        ) : (
+                            <div className="w-8 h-8 rounded-full border-2 border-amber-600 bg-slate-700 flex items-center justify-center">
+                                <span className="text-amber-400 text-sm font-bold">
+                                    {(state.characterName || 'H')[0].toUpperCase()}
+                                </span>
+                            </div>
+                        )}
+                        <div>
+                            <span className="text-sm font-bold text-amber-100">{state.characterName || 'Hero'}</span>
+                            <span className="text-xs text-slate-400 ml-2">Lv. {state.level}</span>
+                        </div>
+                    </div>
                     <div className="flex items-center gap-3">
                         <span className="text-sm text-green-400">
                             Points: <span className="font-bold text-lg">{state.statPoints}</span>
