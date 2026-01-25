@@ -5,10 +5,42 @@ import { ASSET_BASE, ENEMY_SPRITES, SPRITE_CONFIG, ZONE_BACKGROUNDS } from '../.
 import { getZoneById } from '../data/zones';
 import { audioManager } from '../systems/AudioManager';
 
+// Animated sprite configurations (frame-by-frame animation)
+const ANIMATED_SPRITES = {
+    // Player character - Knight
+    player: {
+        basePath: '/assets/characters/knight',
+        animations: {
+            idle: { frames: 12, prefix: 'idle', fps: 10 },
+            attack: { frames: 4, prefix: 'attack', fps: 12, indices: [0, 1, 2, 4] },
+            hurt: { frames: 2, prefix: 'hurt', fps: 8 },
+        },
+        scale: 3,
+        anchorY: 1,
+    },
+    // Zone 0 enemy - Lizard warrior
+    lizard: {
+        basePath: '/assets/monsters/lizard',
+        animations: {
+            idle: { frames: 3, prefix: 'Idle', fps: 6 },
+            attack: { frames: 5, prefix: 'Attack', fps: 10 },
+            hurt: { frames: 2, prefix: 'Hurt', fps: 8 },
+            death: { frames: 6, prefix: 'Death', fps: 8 },
+        },
+        scale: 2.5,
+        anchorY: 0.85,
+    },
+};
+
+// Zones that use animated sprites (zone ID -> sprite key)
+const ANIMATED_ZONE_SPRITES = {
+    0: 'lizard',
+};
+
 // Direct zone ID to monster sprite mapping (descriptive names)
 const ZONE_MONSTER_SPRITES = {
-  // Forest region - zones 0-3
-  0: 'spider_red', 1: 'spider_dark', 2: 'mushroom', 3: 'ape',
+  // Forest region - zones 0-3 (zone 0 now uses animated lizard)
+  0: 'lizard', 1: 'spider_dark', 2: 'mushroom', 3: 'ape',
   // Swamp region - zones 5-8
   5: 'flower_blue', 6: 'imp', 7: 'pumpkin', 8: 'beetle_orange',
   // Undead region - zones 10-13
@@ -35,6 +67,114 @@ const ZONE_BOSS_SPRITES = {
 
 // Cache for loaded monster textures
 const monsterTextureCache = {};
+
+// Cache for animated sprite textures
+const animatedTextureCache = {};
+
+/**
+ * Load all frames for an animated sprite
+ * @param {string} spriteKey - Key from ANIMATED_SPRITES
+ * @returns {Promise<Object>} Object with animation name -> texture array
+ */
+async function loadAnimatedSpriteTextures(spriteKey) {
+    if (animatedTextureCache[spriteKey]) {
+        return animatedTextureCache[spriteKey];
+    }
+
+    const config = ANIMATED_SPRITES[spriteKey];
+    if (!config) return null;
+
+    const animations = {};
+
+    for (const [animName, animConfig] of Object.entries(config.animations)) {
+        const textures = [];
+        const indices = animConfig.indices || Array.from({ length: animConfig.frames }, (_, i) => i + 1);
+
+        for (const idx of indices) {
+            const path = `${config.basePath}/${animName.toLowerCase()}/${animConfig.prefix}${idx}.png`;
+            try {
+                let texture;
+                if (PIXI.Assets.cache.has(path)) {
+                    texture = PIXI.Assets.cache.get(path);
+                } else {
+                    texture = await PIXI.Assets.load(path);
+                }
+                textures.push(texture);
+            } catch (e) {
+                console.warn(`Failed to load animation frame: ${path}`, e);
+            }
+        }
+
+        if (textures.length > 0) {
+            animations[animName] = {
+                textures,
+                fps: animConfig.fps || 10,
+            };
+        }
+    }
+
+    animatedTextureCache[spriteKey] = animations;
+    return animations;
+}
+
+/**
+ * Create an animated sprite controller
+ */
+function createAnimatedSpriteController(animations, defaultAnim = 'idle') {
+    return {
+        animations,
+        currentAnim: defaultAnim,
+        frameIndex: 0,
+        frameTimer: 0,
+        playing: true,
+        loop: true,
+        onComplete: null,
+
+        update(delta) {
+            if (!this.playing || !this.animations[this.currentAnim]) return null;
+
+            const anim = this.animations[this.currentAnim];
+            this.frameTimer += delta;
+
+            const frameTime = 1000 / anim.fps;
+            if (this.frameTimer >= frameTime) {
+                this.frameTimer -= frameTime;
+                this.frameIndex++;
+
+                if (this.frameIndex >= anim.textures.length) {
+                    if (this.loop) {
+                        this.frameIndex = 0;
+                    } else {
+                        this.frameIndex = anim.textures.length - 1;
+                        this.playing = false;
+                        if (this.onComplete) this.onComplete();
+                    }
+                }
+                return anim.textures[this.frameIndex];
+            }
+            return null;
+        },
+
+        getCurrentTexture() {
+            const anim = this.animations[this.currentAnim];
+            if (!anim) return null;
+            return anim.textures[this.frameIndex] || anim.textures[0];
+        },
+
+        play(animName, loop = true, onComplete = null) {
+            if (this.currentAnim !== animName || !this.playing) {
+                this.currentAnim = animName;
+                this.frameIndex = 0;
+                this.frameTimer = 0;
+                this.loop = loop;
+                this.playing = true;
+                this.onComplete = onComplete;
+                return this.getCurrentTexture();
+            }
+            return null;
+        },
+    };
+}
 
 // Particle class for ambient effects
 class Particle {
@@ -358,23 +498,37 @@ export default function GameRenderer() {
             }
             bgContainer.addChild(gridLines);
 
-            // --- Create Player (Hero) using real sprite ---
-            // DawnLike sprites face LEFT by default, so flip player to face RIGHT (toward enemy)
-            const playerData = ENEMY_SPRITES['Knight'];
-            const playerTexture = getSpriteTexture(playerData);
-            const player = playerTexture
-                ? new PIXI.Sprite(playerTexture)
-                : new PIXI.Graphics().rect(-8, -8, 16, 16).fill(0x3b82f6);
-            player.anchor.set(0.5, 1);
+            // --- Create Player (Hero) using animated sprite ---
+            const playerAnimConfig = ANIMATED_SPRITES.player;
+            const playerAnims = await loadAnimatedSpriteTextures('player');
+
+            let player;
+            let playerAnimController = null;
+            const playerScale = (playerAnimConfig?.scale || 4) * scaleFactor;
+
+            if (playerAnims && playerAnims.idle) {
+                // Use animated sprite
+                player = new PIXI.Sprite(playerAnims.idle.textures[0]);
+                playerAnimController = createAnimatedSpriteController(playerAnims, 'idle');
+                player.animController = playerAnimController;
+            } else {
+                // Fallback to static sprite
+                const playerData = ENEMY_SPRITES['Knight'];
+                const playerTexture = getSpriteTexture(playerData);
+                player = playerTexture
+                    ? new PIXI.Sprite(playerTexture)
+                    : new PIXI.Graphics().rect(-8, -8, 16, 16).fill(0x3b82f6);
+            }
+
+            player.anchor.set(0.5, playerAnimConfig?.anchorY || 1);
             player.x = playerX;
             player.y = characterY;
-            // Scale sprites based on canvas size (smaller on mobile)
-            const playerScale = (playerData.scale || 4) * 1.5 * scaleFactor;
-            player.scale.set(-playerScale, playerScale); // Negative X to face right
+            player.scale.set(playerScale, playerScale); // Face right (positive X)
             gameContainer.addChild(player);
             playerRef.current = player;
             player.baseX = playerX;
             player.baseY = characterY;
+            player.baseScale = playerScale;
 
             // --- Player Shadow (scaled for mobile) ---
             const playerShadow = new PIXI.Graphics();
@@ -388,34 +542,62 @@ export default function GameRenderer() {
             playerGlow.fill({ color: 0x3b82f6, alpha: 0.1 });
             gameContainer.addChildAt(playerGlow, 0);
 
-            // --- Create Enemy using NEW sprite PNGs ---
-            // Start with a placeholder, will be updated by state change
-            const enemy = new PIXI.Sprite(PIXI.Texture.WHITE);
-            enemy.anchor.set(0.5, 1);
+            // --- Create Enemy using NEW sprite PNGs (with animation support) ---
+            const initialZone = getZoneById(gameManager.getState()?.currentZone || 0);
+            const animatedSpriteKey = ANIMATED_ZONE_SPRITES[initialZone.id];
+
+            let enemy;
+            let enemyAnimController = null;
+            const enemyBaseScale = 5 * scaleFactor;
+
+            if (animatedSpriteKey && !initialZone.isBoss) {
+                // Load animated sprite for this zone
+                const enemyAnims = await loadAnimatedSpriteTextures(animatedSpriteKey);
+                const animConfig = ANIMATED_SPRITES[animatedSpriteKey];
+
+                if (enemyAnims && enemyAnims.idle) {
+                    enemy = new PIXI.Sprite(enemyAnims.idle.textures[0]);
+                    enemyAnimController = createAnimatedSpriteController(enemyAnims, 'idle');
+                    enemy.animController = enemyAnimController;
+                    enemy.animatedSpriteKey = animatedSpriteKey;
+                    const scale = (animConfig?.scale || 5) * scaleFactor;
+                    enemy.anchor.set(0.5, animConfig?.anchorY || 1);
+                    enemy.scale.set(-scale, scale); // Negative X to face player
+                    enemy.baseScale = scale;
+                } else {
+                    // Fallback to static
+                    enemy = new PIXI.Sprite(PIXI.Texture.WHITE);
+                    enemy.anchor.set(0.5, 1);
+                    enemy.scale.set(-enemyBaseScale, enemyBaseScale);
+                    enemy.baseScale = enemyBaseScale;
+                }
+            } else {
+                // Static sprite enemy
+                enemy = new PIXI.Sprite(PIXI.Texture.WHITE);
+                enemy.anchor.set(0.5, 1);
+                enemy.scale.set(-enemyBaseScale, enemyBaseScale);
+                enemy.baseScale = enemyBaseScale;
+
+                // Load static sprite
+                const initialSpriteName = initialZone.isBoss
+                    ? (ZONE_BOSS_SPRITES[initialZone.id] || 'crow_demon')
+                    : (ZONE_MONSTER_SPRITES[initialZone.id] || 'spider_red');
+                const initialSpritePath = initialZone.isBoss
+                    ? `/assets/bosses/${initialSpriteName}.png`
+                    : `/assets/monsters/${initialSpriteName}.png`;
+
+                if (monsterTextureCache[initialSpritePath]) {
+                    enemy.texture = monsterTextureCache[initialSpritePath];
+                }
+            }
+
             enemy.x = enemyX;
             enemy.y = characterY;
-            const enemyBaseScale = 5 * scaleFactor;
-            enemy.scale.set(-enemyBaseScale, enemyBaseScale); // Larger enemy sprite, flipped to face left (toward player)
             gameContainer.addChild(enemy);
             enemyRef.current = enemy;
             enemy.baseX = enemyX;
             enemy.baseY = characterY;
-            enemy.baseScale = enemyBaseScale; // Store the base scale for animations
-            enemy.scaleFactor = scaleFactor; // Store for zone changes
-
-            // Load initial sprite based on current zone (use pre-cached texture)
-            const initialZone = getZoneById(gameManager.getState()?.currentZone || 0);
-            const initialSpriteName = initialZone.isBoss
-                ? (ZONE_BOSS_SPRITES[initialZone.id] || 'crow_demon')
-                : (ZONE_MONSTER_SPRITES[initialZone.id] || 'spider_red');
-            const initialSpritePath = initialZone.isBoss
-                ? `/assets/bosses/${initialSpriteName}.png`
-                : `/assets/monsters/${initialSpriteName}.png`;
-
-            // Use pre-cached texture (already loaded during init)
-            if (monsterTextureCache[initialSpritePath] && enemyRef.current) {
-                enemyRef.current.texture = monsterTextureCache[initialSpritePath];
-            }
+            enemy.scaleFactor = scaleFactor;
 
             // --- Enemy Shadow (scaled for mobile) ---
             const enemyShadow = new PIXI.Graphics();
@@ -586,17 +768,31 @@ export default function GameRenderer() {
                     }
                 }
 
-                // Player idle animation (breathing + slight bob)
-                // Player faces right (negative X scale)
+                // Player animation (animated sprite or fallback)
                 if (playerRef.current) {
                     const pos = positionsRef.current;
-                    const breathe = Math.sin(time * 0.002) * 0.02;
+                    const playerBaseScale = playerRef.current.baseScale || (ANIMATED_SPRITES.player?.scale || 4) * (pos.scaleFactor || 1);
+
+                    // Update animated sprite frames
+                    if (playerRef.current.animController) {
+                        const newTexture = playerRef.current.animController.update(delta * 16.67); // Convert to ms
+                        if (newTexture) {
+                            playerRef.current.texture = newTexture;
+                        }
+
+                        // Switch to attack animation when attacking
+                        if (animState.playerAttackCooldown > 0) {
+                            playerRef.current.animController.play('attack', false, () => {
+                                playerRef.current.animController.play('idle');
+                            });
+                        }
+                    }
+
+                    // Position animation (bob + attack lunge)
                     const bob = Math.sin(time * 0.003) * 3 * (pos.scaleFactor || 1);
-                    const playerBaseScale = (ENEMY_SPRITES['Knight'].scale || 4) * 1.5 * (pos.scaleFactor || 1);
-                    playerRef.current.scale.set(-playerBaseScale, playerBaseScale * (1.0 + breathe));
                     playerRef.current.y = (playerRef.current.baseY || pos.characterY) - 25 * (pos.scaleFactor || 1) + bob;
 
-                    // Attack cooldown animation
+                    // Attack cooldown movement
                     if (animState.playerAttackCooldown > 0) {
                         animState.playerAttackCooldown -= delta;
                         const progress = animState.playerAttackCooldown / 15;
@@ -612,9 +808,9 @@ export default function GameRenderer() {
                     // Use stored base scale (not current scale which changes during animations)
                     const enemyBaseScale = enemyRef.current.baseScale || 5;
 
-                    // Death animation - dramatic knockback and fall
+                    // Death animation - dramatic knockback and fall (~1.2 seconds)
                     if (animState.enemyDying) {
-                        animState.enemyDeathProgress += delta * 0.08; // Slower for more visible death
+                        animState.enemyDeathProgress += delta * 0.015; // Slow death to fill respawn delay
                         const progress = Math.min(1, animState.enemyDeathProgress);
                         const pos = positionsRef.current;
                         const baseX = enemyRef.current.baseX || pos.enemyX;
@@ -686,9 +882,9 @@ export default function GameRenderer() {
                             }
                         }
                     }
-                    // Spawn animation - slide in from right
+                    // Spawn animation - slide in from right (~0.6 seconds)
                     else if (animState.enemySpawning) {
-                        animState.enemySpawnProgress += delta * 0.15; // Slightly slower spawn
+                        animState.enemySpawnProgress += delta * 0.028; // Slower spawn for smoother feel
                         const progress = Math.min(1, animState.enemySpawnProgress);
                         const pos = positionsRef.current;
                         const baseX = enemyRef.current.baseX || pos.enemyX;
@@ -715,6 +911,15 @@ export default function GameRenderer() {
                     // Normal idle
                     else {
                         const pos = positionsRef.current;
+
+                        // Update animated sprite frames if available
+                        if (enemyRef.current.animController) {
+                            const newTexture = enemyRef.current.animController.update(delta * 16.67);
+                            if (newTexture) {
+                                enemyRef.current.texture = newTexture;
+                            }
+                        }
+
                         const breathe = Math.sin(time * 0.0025 + 1) * 0.02;
                         const bob = Math.sin(time * 0.004 + 1) * 4 * (pos.scaleFactor || 1);
                         enemyRef.current.scale.y = enemyBaseScale * (1.0 + breathe);
