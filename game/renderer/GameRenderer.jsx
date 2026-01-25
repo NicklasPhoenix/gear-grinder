@@ -16,7 +16,7 @@ const ANIMATED_SPRITES = {
         basePath: '/assets/characters/knight',
         animations: {
             idle: { frames: 12, prefix: 'idle', fps: 10 },  // Bored animation for long inactivity
-            ready: { frames: 1, prefix: 'attack', fps: 1, indices: [0], dir: 'attack' },  // Combat ready (uses attack frame 0)
+            ready: { frames: 1, prefix: 'ready', fps: 1, indices: [1], dir: 'idle' },  // Combat ready stance
             attack: { frames: 4, prefix: 'attack', fps: 12, indices: [0, 1, 2, 4] },
             hurt: { frames: 4, prefix: 'hurt', fps: 10 },
             death: { frames: 10, prefix: 'death', fps: 8 },  // 10 frames at 8 fps = 1.25 seconds
