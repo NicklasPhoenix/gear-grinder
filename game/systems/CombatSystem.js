@@ -777,6 +777,7 @@ export class CombatSystem {
                 const returns = getSalvageReturns(droppedGear, 1);
                 state.gold += returns.gold;
                 state.enhanceStone += returns.enhanceStone;
+                state.dailySalvaged = (state.dailySalvaged || 0) + 1; // Track for objectives
                 log.push({ type: 'autoSalvage', msg: `${droppedGear.name} salvaged!` });
             } else {
                 const maxSlots = state.inventorySlots || 50;
@@ -789,6 +790,7 @@ export class CombatSystem {
                     const returns = getSalvageReturns(droppedGear, 1);
                     state.gold += returns.gold;
                     state.enhanceStone += returns.enhanceStone;
+                    state.dailySalvaged = (state.dailySalvaged || 0) + 1; // Track for objectives
                     log.push({ type: 'inventoryFull', msg: `Inventory full! ${droppedGear.name} salvaged.` });
                 }
             }
@@ -904,6 +906,7 @@ export class CombatSystem {
                 const returns = getSalvageReturns(newBossItem, 1);
                 state.gold += returns.gold;
                 state.enhanceStone += returns.enhanceStone;
+                state.dailySalvaged = (state.dailySalvaged || 0) + 1; // Track for objectives
                 log.push({ type: 'autoSalvage', msg: `${bossItem.name} salvaged!` });
             } else {
                 const maxSlots = state.inventorySlots || 50;
@@ -916,6 +919,7 @@ export class CombatSystem {
                     const returns = getSalvageReturns(newBossItem, 1);
                     state.gold += returns.gold;
                     state.enhanceStone += returns.enhanceStone;
+                    state.dailySalvaged = (state.dailySalvaged || 0) + 1; // Track for objectives
                     log.push({ type: 'inventoryFull', msg: `Inventory full! ${bossItem.name} salvaged.` });
                 }
             }
