@@ -8,8 +8,10 @@ import { audioManager } from '../systems/AudioManager';
 // Animated sprite configurations (frame-by-frame animation)
 // Note: These sprites are 128x128 (knight) and 256x256 (lizard) pixels
 // Original DawnLike sprites were 16x16, so scale accordingly
+// Animated sprite configurations
+// anchorY = vertical position of feet within sprite (0=top, 1=bottom)
+// All sprites are positioned at the same feetY, anchor ensures feet alignment
 const ANIMATED_SPRITES = {
-    // Player character - Knight (128x128 sprite)
     player: {
         basePath: '/assets/characters/knight',
         animations: {
@@ -18,11 +20,9 @@ const ANIMATED_SPRITES = {
             hurt: { frames: 2, prefix: 'hurt', fps: 8 },
         },
         scale: 1.6,
-        anchorY: 1,  // Bottom of sprite
-        yOffset: 0,  // No offset - feet at ground level
+        anchorY: 0.95,  // Knight feet at 95% down in 128x128 sprite
         flipX: false,
     },
-    // Zone 0 enemy - Lizard warrior (256x256 canvas, character ~80px within)
     lizard: {
         basePath: '/assets/monsters/lizard',
         animations: {
@@ -31,9 +31,8 @@ const ANIMATED_SPRITES = {
             hurt: { frames: 2, prefix: 'Hurt', fps: 8 },
             death: { frames: 6, prefix: 'Death', fps: 8 },
         },
-        scale: 2.4,
-        anchorY: 0.85,  // Adjusted - feet closer to bottom
-        yOffset: 0,    // No offset - align with ground
+        scale: 1.0,
+        anchorY: 0.72,  // Lizard feet at 72% down in 256x256 sprite
         flipX: true,
     },
 };
@@ -368,13 +367,15 @@ export default function GameRenderer() {
             const charSpacing = Math.min(350, canvasWidth * 0.35);
             const playerX = centerX - charSpacing;
             const enemyX = centerX + charSpacing;
-            const characterY = Math.min(groundY - 55, canvasHeight * 0.5); // Position at ~50% height
+            const characterY = Math.min(groundY - 55, canvasHeight * 0.5); // Legacy position for static sprites
+            const feetY = characterY + 5; // Ground level where all sprite feet align
 
             // Store in ref for access throughout component
             positionsRef.current = {
                 playerX,
                 enemyX,
                 characterY,
+                feetY,
                 centerX,
                 groundY,
                 canvasWidth,
@@ -540,29 +541,29 @@ export default function GameRenderer() {
 
             player.anchor.set(0.5, playerAnimConfig?.anchorY || 1);
             player.x = playerX;
-            // Animated sprites position at groundY (they have proper anchors), static fallback uses old offset
-            const playerGroundY = playerAnimController ? groundY : characterY;
-            player.y = playerGroundY;
-            // Flip X if needed to face right (toward enemy)
+            // Animated sprites position at feetY (anchor handles foot alignment)
+            // Static sprites use legacy characterY with manual offset in animation loop
+            const playerY = playerAnimController ? feetY : characterY;
+            player.y = playerY;
             const playerFlipX = playerAnimConfig?.flipX ? -1 : 1;
             player.scale.set(playerScale * playerFlipX, playerScale);
             gameContainer.addChild(player);
             playerRef.current = player;
             player.baseX = playerX;
-            player.baseY = playerGroundY;
-            player.groundY = groundY;  // Store for animation reference
+            player.baseY = playerY;
+            player.isAnimated = !!playerAnimController;
             player.baseScale = playerScale;
             player.flipX = playerFlipX;
 
-            // --- Player Shadow (scaled for mobile) ---
+            // --- Player Shadow (at feetY) ---
             const playerShadow = new PIXI.Graphics();
-            playerShadow.ellipse(playerX, groundY - 2, 35 * scaleFactor, 12 * scaleFactor);
+            playerShadow.ellipse(playerX, feetY, 35 * scaleFactor, 12 * scaleFactor);
             playerShadow.fill({ color: 0x000000, alpha: 0.4 });
             gameContainer.addChildAt(playerShadow, 0);
 
-            // --- Player glow effect (scaled for mobile) ---
+            // --- Player glow effect ---
             const playerGlow = new PIXI.Graphics();
-            playerGlow.circle(playerX, characterY - 40 * scaleFactor, 60 * scaleFactor);
+            playerGlow.circle(playerX, feetY - 60 * scaleFactor, 60 * scaleFactor);
             playerGlow.fill({ color: 0x3b82f6, alpha: 0.1 });
             gameContainer.addChildAt(playerGlow, 0);
 
@@ -620,32 +621,33 @@ export default function GameRenderer() {
             }
 
             enemy.x = enemyX;
-            // Animated sprites position at groundY (they have proper anchors), static sprites use old offset
-            const enemyGroundY = enemy.animController ? groundY : characterY;
-            enemy.y = enemyGroundY;
+            // Animated sprites position at feetY (anchor handles foot alignment)
+            // Static sprites use legacy characterY with manual offset in animation loop
+            const enemyY = enemy.animController ? feetY : characterY;
+            enemy.y = enemyY;
             gameContainer.addChild(enemy);
             enemyRef.current = enemy;
             enemy.baseX = enemyX;
-            enemy.baseY = enemyGroundY;
-            enemy.groundY = groundY;  // Store for animation reference
+            enemy.baseY = enemyY;
+            enemy.isAnimated = !!enemy.animController;
             enemy.scaleFactor = scaleFactor;
 
-            // --- Enemy Shadow (scaled for mobile) ---
+            // --- Enemy Shadow (at feetY) ---
             const enemyShadow = new PIXI.Graphics();
-            enemyShadow.ellipse(enemyX, groundY - 2, 35 * scaleFactor, 12 * scaleFactor);
+            enemyShadow.ellipse(enemyX, feetY, 35 * scaleFactor, 12 * scaleFactor);
             enemyShadow.fill({ color: 0x000000, alpha: 0.4 });
             gameContainer.addChildAt(enemyShadow, 0);
 
-            // --- Enemy aura for bosses (scaled for mobile) ---
+            // --- Enemy aura for bosses ---
             const enemyAura = new PIXI.Graphics();
-            enemyAura.circle(enemyX, characterY - 40 * scaleFactor, 80 * scaleFactor);
+            enemyAura.circle(enemyX, feetY - 60 * scaleFactor, 80 * scaleFactor);
             enemyAura.fill({ color: 0xef4444, alpha: 0 });
             gameContainer.addChildAt(enemyAura, 0);
             enemy.aura = enemyAura;
             enemy.shadow = enemyShadow;
             enemy.shadowX = enemyX;
             enemy.auraX = enemyX;
-            enemy.auraY = characterY - 25;
+            enemy.auraY = feetY - 60 * scaleFactor;
 
             // Store shadow ref
             player.shadow = playerShadow;
@@ -1402,13 +1404,15 @@ export default function GameRenderer() {
                 const charSpacing = Math.min(350, containerWidth * 0.35);
                 const playerX = centerX - charSpacing;
                 const enemyX = centerX + charSpacing;
-                const characterY = Math.min(groundY - 55, containerHeight * 0.5); // Position at ~50% height
+                const characterY = Math.min(groundY - 55, containerHeight * 0.5);
+                const feetY = characterY + 5; // Ground level where all sprite feet align
 
                 // Update positions ref
                 positionsRef.current = {
                     playerX,
                     enemyX,
                     characterY,
+                    feetY,
                     centerX,
                     groundY,
                     canvasWidth: containerWidth,
@@ -1418,12 +1422,11 @@ export default function GameRenderer() {
 
                 // Update player position and base values
                 if (playerRef.current) {
-                    // Animated sprites position at groundY, static sprites at characterY
-                    const playerBaseY = playerRef.current.animController ? groundY : characterY;
+                    // Animated sprites position at feetY, static sprites at characterY with offset
+                    const playerBaseY = playerRef.current.animController ? feetY : characterY;
                     const playerYOffset = playerRef.current.animController ? 0 : -25 * scaleFactor;
                     playerRef.current.baseX = playerX;
                     playerRef.current.baseY = playerBaseY;
-                    playerRef.current.groundY = groundY;
                     playerRef.current.x = playerX;
                     playerRef.current.y = playerBaseY + playerYOffset;
                     // Use animated sprite scale if available, otherwise fallback to old scale
@@ -1437,30 +1440,29 @@ export default function GameRenderer() {
                     // Update player shadow and glow
                     if (playerRef.current.shadow) {
                         playerRef.current.shadow.clear();
-                        playerRef.current.shadow.ellipse(playerX, groundY - 2, 35 * scaleFactor, 12 * scaleFactor);
+                        playerRef.current.shadow.ellipse(playerX, feetY, 35 * scaleFactor, 12 * scaleFactor);
                         playerRef.current.shadow.fill({ color: 0x000000, alpha: 0.4 });
                     }
                     if (playerRef.current.glow) {
                         playerRef.current.glow.clear();
-                        playerRef.current.glow.circle(playerX, characterY - 40 * scaleFactor, 60 * scaleFactor);
+                        playerRef.current.glow.circle(playerX, feetY - 60 * scaleFactor, 60 * scaleFactor);
                         playerRef.current.glow.fill({ color: 0x3b82f6, alpha: 0.1 });
                     }
                 }
 
                 // Update enemy position
                 if (enemyRef.current) {
-                    // Animated sprites position at groundY, static sprites at characterY
-                    const enemyBaseY = enemyRef.current.animController ? groundY : characterY;
+                    // Animated sprites position at feetY, static sprites at characterY with offset
+                    const enemyBaseY = enemyRef.current.animController ? feetY : characterY;
                     const enemyYOffset = enemyRef.current.animController ? 0 : -25 * scaleFactor;
                     enemyRef.current.baseX = enemyX;
                     enemyRef.current.baseY = enemyBaseY;
-                    enemyRef.current.groundY = groundY;
                     enemyRef.current.x = enemyX;
                     enemyRef.current.y = enemyBaseY + enemyYOffset;
                     enemyRef.current.scaleFactor = scaleFactor;
                     enemyRef.current.shadowX = enemyX;
                     enemyRef.current.auraX = enemyX;
-                    enemyRef.current.auraY = characterY - 25;
+                    enemyRef.current.auraY = feetY - 60 * scaleFactor;
 
                     const zone = getZoneById(gameManager.getState()?.currentZone || 0);
                     // Use animated sprite scale if available
@@ -1478,13 +1480,13 @@ export default function GameRenderer() {
                     if (enemyRef.current.shadow) {
                         enemyRef.current.shadow.clear();
                         const shadowSize = zone?.isBoss ? 45 : 35;
-                        enemyRef.current.shadow.ellipse(enemyX, groundY - 2, shadowSize * scaleFactor, (zone?.isBoss ? 15 : 12) * scaleFactor);
+                        enemyRef.current.shadow.ellipse(enemyX, feetY, shadowSize * scaleFactor, (zone?.isBoss ? 15 : 12) * scaleFactor);
                         enemyRef.current.shadow.fill({ color: 0x000000, alpha: zone?.isBoss ? 0.5 : 0.4 });
                     }
                     if (enemyRef.current.aura) {
                         enemyRef.current.aura.clear();
                         if (zone?.isBoss) {
-                            enemyRef.current.aura.circle(enemyX, characterY - 40 * scaleFactor, 90 * scaleFactor);
+                            enemyRef.current.aura.circle(enemyX, feetY - 60 * scaleFactor, 90 * scaleFactor);
                             enemyRef.current.aura.fill({ color: 0xef4444, alpha: 0.15 });
                         }
                     }
@@ -2096,18 +2098,20 @@ export default function GameRenderer() {
             enemyRef.current.scale.set(baseScale * flipX, baseScale);
             enemyRef.current.alpha = 1; // Ensure visible after zone change
 
+            const pos = positionsRef.current;
+            const feetY = pos.feetY || pos.characterY + 5;
+
             if (zone.isBoss) {
                 if (enemyRef.current.aura) {
-                    const auraX = enemyRef.current.auraX || enemyRef.current.baseX || 600;
-                    const auraY = enemyRef.current.auraY || (enemyRef.current.baseY ? enemyRef.current.baseY - 40 : 350);
+                    const auraX = enemyRef.current.auraX || enemyRef.current.baseX || pos.enemyX;
                     enemyRef.current.aura.clear();
-                    enemyRef.current.aura.circle(auraX, auraY, 90);
+                    enemyRef.current.aura.circle(auraX, feetY - 60 * sf, 90 * sf);
                     enemyRef.current.aura.fill({ color: 0xef4444, alpha: 0.15 });
                 }
                 if (enemyRef.current.shadow) {
-                    const shadowX = enemyRef.current.shadowX || enemyRef.current.baseX || 600;
+                    const shadowX = enemyRef.current.shadowX || enemyRef.current.baseX || pos.enemyX;
                     enemyRef.current.shadow.clear();
-                    enemyRef.current.shadow.ellipse(shadowX, (enemyRef.current.baseY || 375) + 3, 45, 15);
+                    enemyRef.current.shadow.ellipse(shadowX, feetY, 45 * sf, 15 * sf);
                     enemyRef.current.shadow.fill({ color: 0x000000, alpha: 0.5 });
                 }
             } else {
@@ -2115,9 +2119,9 @@ export default function GameRenderer() {
                     enemyRef.current.aura.clear();
                 }
                 if (enemyRef.current.shadow) {
-                    const shadowX = enemyRef.current.shadowX || enemyRef.current.baseX || 600;
+                    const shadowX = enemyRef.current.shadowX || enemyRef.current.baseX || pos.enemyX;
                     enemyRef.current.shadow.clear();
-                    enemyRef.current.shadow.ellipse(shadowX, (enemyRef.current.baseY || 375) + 3, 35, 12);
+                    enemyRef.current.shadow.ellipse(shadowX, feetY, 35 * sf, 12 * sf);
                     enemyRef.current.shadow.fill({ color: 0x000000, alpha: 0.4 });
                 }
             }
