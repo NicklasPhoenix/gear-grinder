@@ -913,28 +913,22 @@ export default function GameRenderer() {
                             const pending = animState.pendingDamage;
                             if (pending && ctrl.currentAnim === pending.attackAnim && ctrl.frameIndex >= pending.impactFrame) {
                                 // Show damage now - we've reached the impact point
-                                // Use queueMicrotask to defer the call and avoid ticker initialization issues
-                                const damageInfo = { ...pending };
-                                const app = appRef.current;
-                                const container = effectsContainerRef.current;
-                                const positions = { ...positionsRef.current };
-                                animState.pendingDamage = null;
-                                if (app && container) {
-                                    queueMicrotask(() => {
-                                        let text = `${damageInfo.damage}`;
-                                        if (damageInfo.attackType === 'crit') text = `CRIT ${damageInfo.damage}!`;
-                                        else if (damageInfo.attackType === 'ascendedCrit') text = `ASCEND ${damageInfo.damage}!`;
-                                        else if (damageInfo.attackType === 'annihilate') text = `ANNIHILATE ${damageInfo.damage}!`;
-                                        spawnFloatingText(app, container,
-                                            { text, type: damageInfo.attackType || 'playerDmg', target: 'enemy' },
-                                            positions);
-                                    });
+                                if (appRef.current && effectsContainerRef.current) {
+                                    let text = `${pending.damage}`;
+                                    if (pending.attackType === 'crit') text = `CRIT ${pending.damage}!`;
+                                    else if (pending.attackType === 'ascendedCrit') text = `ASCEND ${pending.damage}!`;
+                                    else if (pending.attackType === 'annihilate') text = `ANNIHILATE ${pending.damage}!`;
+                                    spawnFloatingText(appRef.current, effectsContainerRef.current,
+                                        { text, type: pending.attackType || 'playerDmg', target: 'enemy' },
+                                        positionsRef.current);
                                 }
+                                animState.pendingDamage = null;
                             }
                         }
                     }
 
                     // Position - no programmatic movement, just use sprite animations
+                    const pos = positionsRef.current;
                     let playerYOffset = playerRef.current.animController ? 0 : -25 * (pos.scaleFactor || 1);
                     let playerXOffset = 0;
                     if (animState.playerDying) {
@@ -949,7 +943,6 @@ export default function GameRenderer() {
                             playerXOffset = -fallDistance * deathProgress;
                         }
                     }
-                    const pos = positionsRef.current;
                     if (animState.playerSpawning) {
                         // Spawn: arc from left off-screen to landing position
                         const progress = animState.playerSpawnProgress || 0;
