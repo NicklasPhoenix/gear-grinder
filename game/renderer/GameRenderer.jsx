@@ -1316,19 +1316,20 @@ export default function GameRenderer() {
             }
         });
 
-        // Listen for Enemy Attack Windup - start attack animation before damage lands
+        // Listen for Enemy Attack Windup - not used currently
         const cleanupEnemyAttackWindup = gameManager.on('enemyAttackWindup', () => {
+            // Could be used for anticipation effects
+        });
+
+        // Listen for Enemy Attack - trigger attack animation when damage is dealt
+        const cleanupEnemyAttack = gameManager.on('enemyAttack', () => {
+            animStateRef.current.enemyAttackCooldown = 15;
             // Trigger attack sprite animation - plays once, then returns to idle
             if (enemyRef.current?.animController && !animStateRef.current.enemyDying) {
                 enemyRef.current.animController.play('attack', false, () => {
                     enemyRef.current?.animController?.play('idle', true);
                 });
             }
-        });
-
-        // Listen for Enemy Attack - when damage is dealt (animation already started via windup)
-        const cleanupEnemyAttack = gameManager.on('enemyAttack', () => {
-            animStateRef.current.enemyAttackCooldown = 15;
         });
 
         // Particle spawn functions
