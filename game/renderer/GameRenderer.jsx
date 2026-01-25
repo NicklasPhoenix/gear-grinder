@@ -921,7 +921,14 @@ export default function GameRenderer() {
                     if (animState.playerDying) {
                         // Death sprites are 256x256 vs 128x128 - offset down to align
                         const scale = ANIMATED_SPRITES.player?.scale || 2.0;
-                        playerYOffset += 80 * scale * (pos.scaleFactor || 1);
+                        playerYOffset += 75 * scale * (pos.scaleFactor || 1);
+                        // Character falls backward (left) during death - sync with animation frames
+                        const ctrl = playerRef.current.animController;
+                        if (ctrl) {
+                            const deathProgress = ctrl.frameIndex / 9; // 10 frames (0-9)
+                            const fallDistance = 80 * scale * (pos.scaleFactor || 1);
+                            playerXOffset = -fallDistance * deathProgress;
+                        }
                     }
                     if (animState.playerSpawning) {
                         // Spawn: arc from left off-screen to landing position
