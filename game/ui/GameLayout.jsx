@@ -971,8 +971,8 @@ function KeyboardHelpModal({ onClose }) {
                     style={{ imageRendering: 'pixelated' }}
                 />
 
-                {/* Content overlay positioned on the wooden part */}
-                <div className="absolute inset-0 flex flex-col px-8 pt-16 pb-8">
+                {/* Content overlay positioned on the wooden part (skip chain at top) */}
+                <div className="absolute inset-0 flex flex-col px-12 pt-[28%] pb-[12%]">
                     {/* Header */}
                     <div className="flex justify-between items-center mb-3">
                         <h2
