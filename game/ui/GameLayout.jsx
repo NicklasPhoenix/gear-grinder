@@ -648,20 +648,15 @@ function CombatToggle({ compact = false }) {
         return (
             <button
                 onClick={handleToggle}
-                className={`flex items-center justify-center w-full p-1.5 rounded font-bold text-xs transition-all ${
-                    isPaused
-                        ? 'bg-green-600 hover:bg-green-500 text-white'
-                        : 'bg-red-600/80 hover:bg-red-500 text-white'
-                }`}
+                className="flex items-center justify-center w-full transition-transform hover:scale-110 active:scale-95"
                 title={isPaused ? 'Resume Combat' : 'Pause Combat'}
             >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                    {isPaused ? (
-                        <path d="M8 5v14l11-7z" />
-                    ) : (
-                        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-                    )}
-                </svg>
+                <img
+                    src={isPaused ? '/assets/ui-elements/10.png' : '/assets/ui-elements/dark_pause_button.png'}
+                    alt={isPaused ? 'Play' : 'Pause'}
+                    className="w-8 h-8"
+                    style={{ imageRendering: 'pixelated' }}
+                />
             </button>
         );
     }
@@ -669,28 +664,15 @@ function CombatToggle({ compact = false }) {
     return (
         <button
             onClick={handleToggle}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm transition-all shadow-lg ${
-                isPaused
-                    ? 'bg-green-600 hover:bg-green-500 text-white'
-                    : 'bg-red-600/80 hover:bg-red-500 text-white'
-            }`}
+            className="flex items-center justify-center transition-transform hover:scale-110 active:scale-95"
             title={isPaused ? 'Resume Combat' : 'Pause Combat'}
         >
-            {isPaused ? (
-                <>
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z" />
-                    </svg>
-                    Fight
-                </>
-            ) : (
-                <>
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-                    </svg>
-                    Rest
-                </>
-            )}
+            <img
+                src={isPaused ? '/assets/ui-elements/10.png' : '/assets/ui-elements/dark_pause_button.png'}
+                alt={isPaused ? 'Play' : 'Pause'}
+                className="w-10 h-10"
+                style={{ imageRendering: 'pixelated' }}
+            />
         </button>
     );
 }
@@ -704,48 +686,105 @@ function GameSpeedControl({ vertical = false }) {
         return gameManager.subscribeSpeed(setSpeed);
     }, [gameManager]);
 
-    const handleSpeedChange = (newSpeed) => {
-        if (gameManager) {
-            gameManager.setSpeed(newSpeed);
+    const handleSpeedDown = () => {
+        const currentIndex = SPEED_OPTIONS.indexOf(speed);
+        if (currentIndex > 0) {
+            gameManager?.setSpeed(SPEED_OPTIONS[currentIndex - 1]);
+        }
+    };
+
+    const handleSpeedUp = () => {
+        const currentIndex = SPEED_OPTIONS.indexOf(speed);
+        if (currentIndex < SPEED_OPTIONS.length - 1) {
+            gameManager?.setSpeed(SPEED_OPTIONS[currentIndex + 1]);
         }
     };
 
     if (vertical) {
         return (
-            <div className="flex flex-col gap-1">
-                {SPEED_OPTIONS.map(s => (
-                    <button
-                        key={s}
-                        onClick={() => handleSpeedChange(s)}
-                        className={`px-2 py-1 rounded text-xs font-bold transition-all ${
-                            speed === s
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-slate-700 text-slate-400 hover:bg-slate-600'
-                        }`}
-                    >
-                        {s}x
-                    </button>
-                ))}
+            <div className="flex flex-col items-center gap-1">
+                {/* Speed Up */}
+                <button
+                    onClick={handleSpeedUp}
+                    disabled={speed === SPEED_OPTIONS[SPEED_OPTIONS.length - 1]}
+                    className={`transition-transform hover:scale-110 active:scale-95 ${
+                        speed === SPEED_OPTIONS[SPEED_OPTIONS.length - 1] ? 'opacity-40' : ''
+                    }`}
+                    title="Increase Speed"
+                >
+                    <img
+                        src="/assets/ui-elements/dark_plus_button.png"
+                        alt="Speed Up"
+                        className="w-8 h-8"
+                        style={{ imageRendering: 'pixelated' }}
+                    />
+                </button>
+
+                {/* Current Speed Display */}
+                <div className="text-sm font-bold text-white bg-slate-800/80 px-2 py-0.5 rounded min-w-[32px] text-center">
+                    {speed}x
+                </div>
+
+                {/* Speed Down */}
+                <button
+                    onClick={handleSpeedDown}
+                    disabled={speed === SPEED_OPTIONS[0]}
+                    className={`transition-transform hover:scale-110 active:scale-95 ${
+                        speed === SPEED_OPTIONS[0] ? 'opacity-40' : ''
+                    }`}
+                    title="Decrease Speed"
+                >
+                    <img
+                        src="/assets/ui-elements/dark_minimize_button.png"
+                        alt="Speed Down"
+                        className="w-8 h-8"
+                        style={{ imageRendering: 'pixelated' }}
+                    />
+                </button>
             </div>
         );
     }
 
     return (
-        <div className="flex items-center gap-1 px-3 py-2 rounded-lg bg-slate-800/90 shadow-lg">
-            <span className="text-slate-300 text-sm font-semibold mr-1">Speed</span>
-            {SPEED_OPTIONS.map(s => (
-                <button
-                    key={s}
-                    onClick={() => handleSpeedChange(s)}
-                    className={`px-3 py-1 rounded text-sm font-bold transition-all ${
-                        speed === s
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-slate-700 text-slate-400 hover:bg-slate-600'
-                    }`}
-                >
-                    {s}x
-                </button>
-            ))}
+        <div className="flex items-center gap-2">
+            {/* Speed Down */}
+            <button
+                onClick={handleSpeedDown}
+                disabled={speed === SPEED_OPTIONS[0]}
+                className={`transition-transform hover:scale-110 active:scale-95 ${
+                    speed === SPEED_OPTIONS[0] ? 'opacity-40' : ''
+                }`}
+                title="Decrease Speed"
+            >
+                <img
+                    src="/assets/ui-elements/dark_minimize_button.png"
+                    alt="Speed Down"
+                    className="w-8 h-8"
+                    style={{ imageRendering: 'pixelated' }}
+                />
+            </button>
+
+            {/* Current Speed Display */}
+            <div className="text-sm font-bold text-white bg-slate-800/80 px-3 py-1 rounded min-w-[40px] text-center">
+                {speed}x
+            </div>
+
+            {/* Speed Up */}
+            <button
+                onClick={handleSpeedUp}
+                disabled={speed === SPEED_OPTIONS[SPEED_OPTIONS.length - 1]}
+                className={`transition-transform hover:scale-110 active:scale-95 ${
+                    speed === SPEED_OPTIONS[SPEED_OPTIONS.length - 1] ? 'opacity-40' : ''
+                }`}
+                title="Increase Speed"
+            >
+                <img
+                    src="/assets/ui-elements/dark_plus_button.png"
+                    alt="Speed Up"
+                    className="w-8 h-8"
+                    style={{ imageRendering: 'pixelated' }}
+                />
+            </button>
         </div>
     );
 }

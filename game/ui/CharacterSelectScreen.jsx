@@ -1,5 +1,27 @@
 import React, { useState, useEffect } from 'react';
 
+// Character classes with their portraits and descriptions
+const CHARACTER_CLASSES = [
+    {
+        id: 'knight',
+        name: 'Knight',
+        portrait: '/assets/portraits/knight.png',
+        description: 'A sturdy warrior with balanced stats.',
+    },
+    {
+        id: 'rogue',
+        name: 'Rogue',
+        portrait: '/assets/portraits/rogue.png',
+        description: 'A swift assassin with deadly precision.',
+    },
+    {
+        id: 'mage',
+        name: 'Mage',
+        portrait: '/assets/portraits/mage.png',
+        description: 'A powerful spellcaster with arcane might.',
+    },
+];
+
 // Generate list of available avatars
 const AVATAR_COUNT = 48;
 const AVATARS = Array.from({ length: AVATAR_COUNT }, (_, i) => `/assets/avatars/dwarf/Icon${i + 1}.png`);
@@ -55,6 +77,7 @@ export default function CharacterSelectScreen({ onSelectCharacter }) {
     const [showCreate, setShowCreate] = useState(false);
     const [createSlot, setCreateSlot] = useState(null);
     const [selectedAvatar, setSelectedAvatar] = useState(0);
+    const [selectedClass, setSelectedClass] = useState(0);
     const [characterName, setCharacterName] = useState('');
     const [confirmDelete, setConfirmDelete] = useState(null);
 
@@ -65,6 +88,7 @@ export default function CharacterSelectScreen({ onSelectCharacter }) {
     const handleCreateNew = (slotIndex) => {
         setCreateSlot(slotIndex);
         setSelectedAvatar(Math.floor(Math.random() * AVATAR_COUNT));
+        setSelectedClass(0);
         setCharacterName('');
         setShowCreate(true);
     };
@@ -72,10 +96,12 @@ export default function CharacterSelectScreen({ onSelectCharacter }) {
     const handleConfirmCreate = () => {
         if (!characterName.trim()) return;
 
+        const charClass = CHARACTER_CLASSES[selectedClass];
         const newCharacter = {
             name: characterName.trim(),
             avatar: AVATARS[selectedAvatar],
             avatarIndex: selectedAvatar,
+            characterClass: charClass.id,
             createdAt: Date.now(),
             gameState: null, // Will be populated with initial state when game starts
         };
@@ -171,7 +197,7 @@ export default function CharacterSelectScreen({ onSelectCharacter }) {
                                             {slot.name}
                                         </span>
                                         <div className="text-amber-200/60 text-xs" style={{ textShadow: '1px 1px 1px #000' }}>
-                                            Lv. {slot.gameState?.level || 1}
+                                            Lv. {slot.gameState?.level || 1} {slot.characterClass ? `• ${slot.characterClass.charAt(0).toUpperCase() + slot.characterClass.slice(1)}` : '• Knight'}
                                         </div>
 
                                         <div className="flex gap-2 mt-2">
@@ -251,6 +277,41 @@ export default function CharacterSelectScreen({ onSelectCharacter }) {
                                     placeholder="Enter name..."
                                     autoFocus
                                 />
+                            </div>
+
+                            {/* Class selection */}
+                            <div className="mb-4">
+                                <label className="block text-amber-200/80 text-sm mb-2" style={{ textShadow: '1px 1px 1px #000' }}>
+                                    Class
+                                </label>
+                                <div className="flex justify-center gap-3">
+                                    {CHARACTER_CLASSES.map((cls, index) => (
+                                        <button
+                                            key={cls.id}
+                                            onClick={() => setSelectedClass(index)}
+                                            className={`flex flex-col items-center p-2 rounded-lg transition-all ${
+                                                selectedClass === index
+                                                    ? 'bg-amber-600/50 border-2 border-amber-400 scale-105'
+                                                    : 'bg-slate-800/50 border-2 border-slate-600 hover:border-amber-600/50'
+                                            }`}
+                                        >
+                                            <img
+                                                src={cls.portrait}
+                                                alt={cls.name}
+                                                className="w-12 h-12"
+                                                style={{ imageRendering: 'pixelated' }}
+                                            />
+                                            <span className={`text-xs mt-1 font-semibold ${
+                                                selectedClass === index ? 'text-amber-200' : 'text-slate-400'
+                                            }`}>
+                                                {cls.name}
+                                            </span>
+                                        </button>
+                                    ))}
+                                </div>
+                                <p className="text-center text-amber-200/60 text-xs mt-2" style={{ textShadow: '1px 1px 1px #000' }}>
+                                    {CHARACTER_CLASSES[selectedClass].description}
+                                </p>
                             </div>
 
                             {/* Avatar selection */}

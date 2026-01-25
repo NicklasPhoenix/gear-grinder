@@ -1,6 +1,7 @@
 export const initialState = {
     gold: 50, enhanceStone: 5, blessedOrb: 0, celestialShard: 0,
     level: 1, xp: 0, currentZone: 0,
+    characterClass: 'knight', // Character class: 'knight', 'rogue', 'mage'
     // Display settings
     textSize: 'normal', // Text size: 'normal', 'large', 'xlarge'
     // Loot filter settings

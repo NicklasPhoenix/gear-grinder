@@ -522,7 +522,7 @@ export default function InventoryView({ onHover }) {
                                 disabled={!canUpgrade}
                                 className={`px-1.5 py-0.5 text-[10px] rounded transition-colors ${
                                     canUpgrade
-                                        ? 'bg-yellow-600/50 text-yellow-300 hover:bg-yellow-600/70'
+                                        ? 'bg-slate-500/50 text-slate-200 hover:bg-slate-500/70'
                                         : 'bg-slate-700/30 text-slate-500 cursor-not-allowed'
                                 }`}
                                 title={`+${INVENTORY.SLOTS_PER_UPGRADE} slots for ${formatNumber(upgradeCost)}s`}

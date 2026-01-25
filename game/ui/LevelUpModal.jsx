@@ -138,7 +138,7 @@ export default function LevelUpModal({ level, onClose }) {
                         style={{
                             imageRendering: 'pixelated',
                             filter: 'drop-shadow(0 0 20px rgba(147, 51, 234, 0.6))',
-                            transform: 'translateX(8px)'
+                            transform: 'translateX(32px)'
                         }}
                     />
                 </div>

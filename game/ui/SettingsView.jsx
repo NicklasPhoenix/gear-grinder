@@ -77,6 +77,13 @@ export default function SettingsView() {
         gameManager?.setState(prev => ({ ...prev, inventorySort: sort }));
     };
 
+    const handlePauseOnLevelUpToggle = () => {
+        gameManager?.setState(prev => ({ ...prev, pauseOnLevelUp: !(prev.pauseOnLevelUp ?? true) }));
+    };
+
+    // Gameplay settings
+    const pauseOnLevelUp = state?.pauseOnLevelUp ?? true;
+
     const handleMasterChange = (val) => {
         setMasterVolume(val);
         audioManager.setMasterVolume(val);
@@ -240,19 +247,16 @@ export default function SettingsView() {
                                     <p className="text-xs text-slate-500">Automatically pause combat when you level up</p>
                                 </div>
                                 <button
-                                    onClick={() => gameManager?.setState(prev => ({
-                                        ...prev,
-                                        pauseOnLevelUp: !(prev.pauseOnLevelUp ?? true)
-                                    }))}
+                                    onClick={handlePauseOnLevelUpToggle}
                                     className={`relative w-14 h-7 rounded-full transition-colors ${
-                                        (state?.pauseOnLevelUp ?? true)
+                                        pauseOnLevelUp
                                             ? 'bg-green-600'
                                             : 'bg-slate-700'
                                     }`}
                                 >
                                     <div
                                         className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow transition-transform ${
-                                            (state?.pauseOnLevelUp ?? true)
+                                            pauseOnLevelUp
                                                 ? 'translate-x-8'
                                                 : 'translate-x-1'
                                         }`}

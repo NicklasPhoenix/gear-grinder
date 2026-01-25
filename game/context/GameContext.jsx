@@ -283,7 +283,8 @@ export function GameProvider({ children, initialCharacter = null, slotIndex = nu
                 if (initialCharacter) {
                     gm.state.characterName = initialCharacter.name || gm.state.characterName || 'Hero';
                     gm.state.characterAvatar = initialCharacter.avatar || gm.state.characterAvatar || null;
-                    console.log('Character loaded:', gm.state.characterName, gm.state.characterAvatar);
+                    gm.state.characterClass = initialCharacter.characterClass || gm.state.characterClass || 'knight';
+                    console.log('Character loaded:', gm.state.characterName, gm.state.characterClass);
                 }
             } catch (e) {
                 console.error("Save load error, starting fresh:", e);
@@ -340,6 +341,7 @@ export function GameProvider({ children, initialCharacter = null, slotIndex = nu
                     newState.autoSalvageBossItems !== lastState?.autoSalvageBossItems ||
                     newState.textSize !== lastState?.textSize ||
                     newState.inventorySort !== lastState?.inventorySort ||
+                    newState.pauseOnLevelUp !== lastState?.pauseOnLevelUp ||
                     newState.combatPaused !== lastState?.combatPaused ||
                     newState.autoProgress !== lastState?.autoProgress ||
                     newState.unlockedAchievements !== lastState?.unlockedAchievements ||

@@ -11,22 +11,57 @@ import { audioManager } from '../systems/AudioManager';
 // Animated sprite configurations
 // anchorY = vertical position of feet within sprite (0=top, 1=bottom)
 // All sprites are positioned at the same feetY, anchor ensures feet alignment
-const ANIMATED_SPRITES = {
-    player: {
+// Character class sprite configurations
+const CHARACTER_SPRITES = {
+    knight: {
         basePath: '/assets/characters/knight',
         animations: {
-            idle: { frames: 12, prefix: 'idle', fps: 10 },  // Bored animation for long inactivity
-            ready: { frames: 1, prefix: 'ready', fps: 1, indices: [1], dir: 'idle' },  // Combat ready stance
+            idle: { frames: 12, prefix: 'idle', fps: 10 },
+            ready: { frames: 1, prefix: 'ready', fps: 1, indices: [1], dir: 'idle' },
             attack: { frames: 4, prefix: 'attack', fps: 12, indices: [0, 1, 2, 4] },
-            crit_attack: { frames: 8, prefix: 'attack_extra', fps: 14, dir: 'crit_attack' },  // Crit attack animation
+            crit_attack: { frames: 8, prefix: 'attack_extra', fps: 14, dir: 'crit_attack' },
             hurt: { frames: 4, prefix: 'hurt', fps: 10 },
-            death: { frames: 10, prefix: 'death', fps: 5 },  // 10 frames at 5 fps = 2 seconds
-            spawn: { frames: 12, prefix: 'high_jump', fps: 16 },  // Respawn animation (faster)
+            death: { frames: 10, prefix: 'death', fps: 5 },
+            spawn: { frames: 12, prefix: 'high_jump', fps: 16 },
         },
         scale: 2.0,
-        anchorY: 0.95,  // Knight feet at 95% down in 128x128 sprite
+        anchorY: 0.95,
         flipX: false,
     },
+    rogue: {
+        basePath: '/assets/characters/rogue',
+        animations: {
+            idle: { frames: 17, prefix: 'idle', fps: 10 },
+            ready: { frames: 1, prefix: 'ready', fps: 1, indices: [1], dir: 'idle' },
+            attack: { frames: 7, prefix: 'attack', fps: 14 },
+            crit_attack: { frames: 11, prefix: 'attack_extra', fps: 16, dir: 'crit_attack' },
+            hurt: { frames: 4, prefix: 'hurt', fps: 10 },
+            death: { frames: 10, prefix: 'death', fps: 5 },
+            spawn: { frames: 12, prefix: 'high_jump', fps: 16 },
+        },
+        scale: 2.0,
+        anchorY: 0.95,
+        flipX: false,
+    },
+    mage: {
+        basePath: '/assets/characters/mage',
+        animations: {
+            idle: { frames: 14, prefix: 'idle', fps: 10 },
+            ready: { frames: 1, prefix: 'ready', fps: 1, indices: [1], dir: 'idle' },
+            attack: { frames: 7, prefix: 'attack', fps: 14 },
+            crit_attack: { frames: 7, prefix: 'attack_extra', fps: 14, dir: 'crit_attack' },
+            hurt: { frames: 4, prefix: 'hurt', fps: 10 },
+            death: { frames: 10, prefix: 'death', fps: 5 },
+            spawn: { frames: 12, prefix: 'high_jump', fps: 16 },
+        },
+        scale: 2.0,
+        anchorY: 0.95,
+        flipX: false,
+    },
+};
+
+const ANIMATED_SPRITES = {
+    player: CHARACTER_SPRITES.knight, // Default, will be overridden based on character class
     lizard: {
         basePath: '/assets/monsters/lizard',
         animations: {
@@ -82,15 +117,17 @@ const animatedTextureCache = {};
 
 /**
  * Load all frames for an animated sprite
- * @param {string} spriteKey - Key from ANIMATED_SPRITES
+ * @param {string} spriteKey - Key from ANIMATED_SPRITES or CHARACTER_SPRITES
+ * @param {boolean} isCharacter - If true, loads from CHARACTER_SPRITES instead
  * @returns {Promise<Object>} Object with animation name -> texture array
  */
-async function loadAnimatedSpriteTextures(spriteKey) {
-    if (animatedTextureCache[spriteKey]) {
-        return animatedTextureCache[spriteKey];
+async function loadAnimatedSpriteTextures(spriteKey, isCharacter = false) {
+    const cacheKey = isCharacter ? `char_${spriteKey}` : spriteKey;
+    if (animatedTextureCache[cacheKey]) {
+        return animatedTextureCache[cacheKey];
     }
 
-    const config = ANIMATED_SPRITES[spriteKey];
+    const config = isCharacter ? CHARACTER_SPRITES[spriteKey] : ANIMATED_SPRITES[spriteKey];
     if (!config) return null;
 
     const animations = {};
@@ -124,7 +161,7 @@ async function loadAnimatedSpriteTextures(spriteKey) {
         }
     }
 
-    animatedTextureCache[spriteKey] = animations;
+    animatedTextureCache[cacheKey] = animations;
     return animations;
 }
 
@@ -557,8 +594,10 @@ export default function GameRenderer() {
             bgContainer.addChild(gridLines);
 
             // --- Create Player (Hero) using animated sprite ---
-            const playerAnimConfig = ANIMATED_SPRITES.player;
-            const playerAnims = await loadAnimatedSpriteTextures('player');
+            // Get character class from game state (defaults to knight for backwards compatibility)
+            const characterClass = gameManager.getState()?.characterClass || 'knight';
+            const playerAnimConfig = CHARACTER_SPRITES[characterClass] || CHARACTER_SPRITES.knight;
+            const playerAnims = await loadAnimatedSpriteTextures(characterClass, true);
 
             let player;
             let playerAnimController = null;
@@ -570,6 +609,7 @@ export default function GameRenderer() {
                 player = new PIXI.Sprite(playerAnims.ready?.textures[0] || playerAnims.idle.textures[0]);
                 playerAnimController = createAnimatedSpriteController(playerAnims, 'ready');
                 player.animController = playerAnimController;
+                player.characterClass = characterClass; // Store for reference
             } else {
                 // Fallback to static sprite
                 const playerData = ENEMY_SPRITES['Knight'];
@@ -934,7 +974,8 @@ export default function GameRenderer() {
                     let playerXOffset = 0;
                     if (animState.playerDying) {
                         // Death sprites are 256x256 vs 128x128 - offset down to align
-                        const scale = ANIMATED_SPRITES.player?.scale || 2.0;
+                        const charClass = playerRef.current.characterClass || 'knight';
+                        const scale = CHARACTER_SPRITES[charClass]?.scale || 2.0;
                         playerYOffset += 75 * scale * (pos.scaleFactor || 1);
                         // Character falls backward (left) during death - sync with animation frames
                         const ctrl = playerRef.current.animController;
@@ -1602,8 +1643,9 @@ export default function GameRenderer() {
                     playerRef.current.x = playerX;
                     playerRef.current.y = playerBaseY + playerYOffset;
                     // Use animated sprite scale if available, otherwise fallback to old scale
+                    const charClass = playerRef.current.characterClass || 'knight';
                     const playerScale = playerRef.current.animController
-                        ? (ANIMATED_SPRITES.player?.scale || 0.8) * scaleFactor
+                        ? (CHARACTER_SPRITES[charClass]?.scale || 0.8) * scaleFactor
                         : (ENEMY_SPRITES['Knight'].scale || 4) * 1.5 * scaleFactor;
                     const flipX = playerRef.current.flipX || -1;
                     playerRef.current.scale.set(playerScale * flipX, playerScale);
@@ -2103,7 +2145,7 @@ function spawnFloatingText(app, container, { text, type, target }, positions = {
     // Map type to color and style
     switch (type) {
         case 'crit':
-            fillColor = '#fde047';
+            fillColor = '#ff6b35'; // Bright orange for crits
             fontSize = 32;
             offsetY = -10;
             break;
