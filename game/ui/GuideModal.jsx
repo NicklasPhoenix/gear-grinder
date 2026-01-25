@@ -4,6 +4,7 @@ import { MaterialIcon } from './MaterialIcons';
 
 const GUIDE_SECTIONS = [
     { id: 'basics', label: 'Basics' },
+    { id: 'combat', label: 'Combat Colors' },
     { id: 'gear', label: 'Gear & Effects' },
     { id: 'enhancement', label: 'Enhancement' },
     { id: 'resources', label: 'Resources' },
@@ -69,6 +70,7 @@ export default function GuideModal({ onClose }) {
                     {/* Content Area */}
                     <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
                         {activeSection === 'basics' && <BasicsSection />}
+                        {activeSection === 'combat' && <CombatColorsSection />}
                         {activeSection === 'gear' && <GearSection />}
                         {activeSection === 'enhancement' && <EnhancementSection />}
                         {activeSection === 'resources' && <ResourcesSection />}
@@ -126,6 +128,102 @@ function BasicsSection() {
                 <p>4. Unlock skills for permanent bonuses</p>
                 <p>5. Challenge bosses for unique gear</p>
                 <p>6. Prestige for permanent multipliers</p>
+            </SubSection>
+        </div>
+    );
+}
+
+function CombatColorsSection() {
+    const damageColors = [
+        { color: '#fbbf24', name: 'Normal Hit', desc: 'Your basic attack damage' },
+        { color: '#fde047', name: 'Critical Hit', desc: 'Critical strike damage' },
+        { color: '#67e8f9', name: 'Ascended Crit', desc: 'Double damage critical (crit overflow)' },
+        { color: '#fb923c', name: 'Annihilate', desc: '5x damage critical (crit dmg overflow)' },
+        { color: '#8b5cf6', name: 'Multi-Strike', desc: 'Bonus hit from Multi-Strike effect' },
+        { color: '#c084fc', name: 'Frenzy', desc: 'Triple attack from speed overflow' },
+    ];
+
+    const dotColors = [
+        { color: '#dc2626', name: 'BLEED', desc: 'Bleeding damage over 3 seconds' },
+        { color: '#f97316', name: 'BURN', desc: 'Fire damage over 3 seconds' },
+        { color: '#22c55e', name: 'POISON', desc: 'Poison damage over 4 seconds' },
+    ];
+
+    const defenseColors = [
+        { color: '#f87171', name: 'Damage Taken', desc: 'Damage you receive from enemies' },
+        { color: '#67e8f9', name: 'DODGE', desc: 'Attack evaded (no damage)' },
+        { color: '#fcd34d', name: 'IMMUNE', desc: 'Full damage negation (DR overflow)' },
+        { color: '#3b82f6', name: 'Shield', desc: 'Damage absorbed by shield' },
+        { color: '#22d3ee', name: 'Overheal', desc: 'Excess healing converted to shield' },
+    ];
+
+    const healColors = [
+        { color: '#4ade80', name: 'Heal', desc: 'HP restored (lifesteal, on-kill heal)' },
+        { color: '#86efac', name: 'Regen', desc: 'HP from regeneration' },
+        { color: '#34d399', name: 'Second Wind', desc: 'Emergency heal from regen overflow' },
+    ];
+
+    const specialColors = [
+        { color: '#c084fc', name: 'Thorns', desc: 'Reflect damage to enemy' },
+        { color: '#f43f5e', name: 'Vengeance', desc: 'Full counter attack (thorns overflow)' },
+        { color: '#eab308', name: 'Retaliate', desc: 'Counter-attack on hit' },
+        { color: '#a78bfa', name: 'Phantom', desc: 'Counter on dodge (dodge overflow)' },
+        { color: '#ef4444', name: 'EXECUTE', desc: 'Instant kill on low HP enemy' },
+    ];
+
+    const lootColors = [
+        { color: '#c0c0c0', name: 'Silver', desc: 'Currency dropped' },
+        { color: '#a78bfa', name: 'XP', desc: 'Experience points gained' },
+        { color: '#34d399', name: 'Item Drop', desc: 'Equipment or materials' },
+    ];
+
+    const ColorRow = ({ color, name, desc }) => (
+        <div className="flex items-center gap-2 p-1.5 bg-slate-800/30 rounded">
+            <div className="w-4 h-4 rounded" style={{ backgroundColor: color }} />
+            <span className="font-bold text-sm min-w-[100px]" style={{ color }}>{name}</span>
+            <span className="text-slate-400 text-xs">{desc}</span>
+        </div>
+    );
+
+    return (
+        <div>
+            <SectionTitle>Combat Colors Legend</SectionTitle>
+            <p className="text-slate-400 text-sm mb-4">Reference guide for all floating combat text colors.</p>
+
+            <SubSection title="Damage Dealt (on Enemy)">
+                <div className="space-y-1">
+                    {damageColors.map((c) => <ColorRow key={c.name} {...c} />)}
+                </div>
+            </SubSection>
+
+            <SubSection title="DOT Effects (on Enemy)">
+                <div className="space-y-1">
+                    {dotColors.map((c) => <ColorRow key={c.name} {...c} />)}
+                </div>
+            </SubSection>
+
+            <SubSection title="Defense & Mitigation (on Player)">
+                <div className="space-y-1">
+                    {defenseColors.map((c) => <ColorRow key={c.name} {...c} />)}
+                </div>
+            </SubSection>
+
+            <SubSection title="Healing (on Player)">
+                <div className="space-y-1">
+                    {healColors.map((c) => <ColorRow key={c.name} {...c} />)}
+                </div>
+            </SubSection>
+
+            <SubSection title="Special Effects">
+                <div className="space-y-1">
+                    {specialColors.map((c) => <ColorRow key={c.name} {...c} />)}
+                </div>
+            </SubSection>
+
+            <SubSection title="Loot & Rewards">
+                <div className="space-y-1">
+                    {lootColors.map((c) => <ColorRow key={c.name} {...c} />)}
+                </div>
             </SubSection>
         </div>
     );

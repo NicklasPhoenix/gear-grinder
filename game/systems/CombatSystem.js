@@ -248,6 +248,7 @@ export class CombatSystem {
                 secondWindUsed: false,
                 playerAttackTimer: 0,  // Ticks until player attacks
                 enemyAttackTimer: 0,   // Ticks until enemy attacks
+                enemyRespawnTimer: 0,  // Ticks until next enemy spawns (0 = enemy alive)
             };
         } else {
             // Deep copy combatState to avoid mutating the original
@@ -337,6 +338,32 @@ export class CombatSystem {
             newState.enemyHp -= poisonDmg;
             this.accumulatedPoison += poisonDmg;
             newState.combatState.poisonTimer--;
+        }
+
+        // ========== ENEMY RESPAWN TIMER ==========
+        // 2 second delay (40 ticks) before next enemy spawns
+        if (newState.combatState.enemyRespawnTimer > 0) {
+            newState.combatState.enemyRespawnTimer--;
+
+            // When timer reaches 0, spawn the new enemy
+            if (newState.combatState.enemyRespawnTimer === 0) {
+                newState.enemyHp = enemyMaxHp;
+                newState.enemyMaxHp = enemyMaxHp;
+                newState.combatState.enemyAttackTimer = this.getEnemyAttackInterval(
+                    state.currentZone,
+                    isEndless,
+                    state.endlessWave
+                );
+            }
+
+            // Skip combat while waiting for respawn
+            newState.combatLog = log;
+            newState.playerMaxHp = stats.maxHp;
+            if (newState.endlessActive) {
+                newState.endlessEnemyHp = newState.enemyHp;
+            }
+            this.stateManager.setState(newState);
+            return combatUpdates;
         }
 
         // ========== PLAYER ATTACK ==========
@@ -837,9 +864,11 @@ export class CombatSystem {
             });
         }
 
-        // Reset Enemy
-        state.enemyHp = zone.enemyHp;
-        state.enemyMaxHp = zone.enemyHp;
+        // Set respawn timer instead of immediately resetting enemy
+        // 40 ticks = 2 seconds at 20 ticks/second
+        state.combatState.enemyRespawnTimer = 40;
+        // Keep enemy HP at 0 until respawn
+        state.enemyHp = 0;
 
         // Heal Player - use safeMaxHp to prevent NaN
         state.playerHp = Math.min(state.playerHp + Math.floor(safeMaxHp * COMBAT.HEAL_ON_KILL), safeMaxHp);
@@ -1003,7 +1032,9 @@ export class CombatSystem {
         // Heal player on kill
         state.playerHp = Math.min(state.playerHp + Math.floor(safeMaxHp * COMBAT.HEAL_ON_KILL), safeMaxHp);
 
-        // Enemy HP is already set by processEndlessKill via state mutation
+        // Set respawn timer (40 ticks = 2 seconds)
+        state.combatState.enemyRespawnTimer = 40;
+
         this.callbacks.onEnemyDeath(state.endlessWave % 10 === 0); // Boss every 10 waves
     }
 

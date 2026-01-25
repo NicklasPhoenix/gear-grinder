@@ -294,13 +294,14 @@ export function processEndlessKill(state) {
     // Advance to next wave
     state.endlessWave = nextWave;
     const nextEnemy = getEndlessEnemyStats(nextWave);
+    // Store next enemy stats for when respawn timer completes
     state.endlessEnemyHp = nextEnemy.hp;
     state.endlessEnemyMaxHp = nextEnemy.maxHp;
     state.endlessEnemyDmg = nextEnemy.damage;
     state.endlessEnemyName = nextEnemy.name;
 
-    // Also update the regular enemy HP used by combat system
-    state.enemyHp = nextEnemy.hp;
+    // Set enemy HP to 0 during respawn delay (timer set by CombatSystem)
+    state.enemyHp = 0;
     state.enemyMaxHp = nextEnemy.maxHp;
 
     return {
