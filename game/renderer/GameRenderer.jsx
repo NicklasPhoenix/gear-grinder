@@ -568,13 +568,14 @@ export default function GameRenderer() {
                     enemyAnimController = createAnimatedSpriteController(enemyAnims, 'idle');
                     enemy.animController = enemyAnimController;
                     enemy.animatedSpriteKey = animatedSpriteKey;
-                    const scale = (animConfig?.scale || 0.35) * scaleFactor;
+                    const scale = (animConfig?.scale || 1.2) * scaleFactor;
                     enemy.anchor.set(0.5, animConfig?.anchorY || 1);
-                    // Flip X if needed to face player (left)
-                    const flipX = animConfig?.flipX ? 1 : -1;
+                    // flipX: true means flip sprite, false means don't flip
+                    const flipX = animConfig?.flipX ? -1 : 1;
                     enemy.scale.set(scale * flipX, scale);
                     enemy.baseScale = scale;
                     enemy.flipX = flipX;
+                    enemy.alpha = 1; // Ensure visible
                 } else {
                     // Fallback to static
                     enemy = new PIXI.Sprite(PIXI.Texture.WHITE);
