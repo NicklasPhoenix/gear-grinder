@@ -1370,12 +1370,14 @@ export default function GameRenderer() {
             if (playerRef.current?.animController) {
                 playerRef.current.animController.play(attackAnim, false, () => {
                     // Show damage at end of attack animation
-                    if (damageToShow) {
+                    if (damageToShow && appRef.current && effectsContainerRef.current) {
                         let text = `${damageToShow}`;
                         if (attackType === 'crit') text = `CRIT ${damageToShow}!`;
                         else if (attackType === 'ascendedCrit') text = `ASCEND ${damageToShow}!`;
                         else if (attackType === 'annihilate') text = `ANNIHILATE ${damageToShow}!`;
-                        spawnFloatingText(text, attackType || 'playerDmg', 'enemy');
+                        spawnFloatingText(appRef.current, effectsContainerRef.current,
+                            { text, type: attackType || 'playerDmg', target: 'enemy' },
+                            positionsRef.current);
                     }
                     if (playerRef.current?.animController) {
                         // Try ready stance, fall back to idle if not available
