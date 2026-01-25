@@ -756,8 +756,9 @@ export class CombatSystem {
                 const currentZoneData = allZones[currentIndex];
                 const nextZone = allZones[currentIndex + 1];
                 const currentKills = state.zoneKills[currentZoneData.id] || 0;
-                // Check if we just reached the kill requirement for current zone
-                if (currentKills >= currentZoneData.killsRequired && currentZoneData.killsRequired > 0) {
+                // Check if we have enough kills in current zone to unlock next zone
+                // nextZone.killsRequired = kills needed in previous zone to unlock
+                if (currentKills >= nextZone.killsRequired) {
                     state.currentZone = nextZone.id;
                     state.enemyHp = nextZone.enemyHp;
                     state.enemyMaxHp = nextZone.enemyHp;
