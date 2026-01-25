@@ -221,7 +221,7 @@ export default function GameRenderer() {
             const charSpacing = Math.min(350, canvasWidth * 0.35);
             const playerX = centerX - charSpacing;
             const enemyX = centerX + charSpacing;
-            const characterY = groundY - 25;
+            const characterY = groundY - 55; // Moved up 30px for better framing
 
             // Store in ref for access throughout component
             positionsRef.current = {
@@ -1151,7 +1151,7 @@ export default function GameRenderer() {
                 const charSpacing = Math.min(350, containerWidth * 0.35);
                 const playerX = centerX - charSpacing;
                 const enemyX = centerX + charSpacing;
-                const characterY = groundY - 25;
+                const characterY = groundY - 55; // Moved up 30px for better framing
 
                 // Update positions ref
                 positionsRef.current = {
