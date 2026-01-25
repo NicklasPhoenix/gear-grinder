@@ -23,57 +23,62 @@ export default function BuffDisplay({ compact = false }) {
     // Collect active buffs
     const activeBuffs = [];
 
-    // Rage stacks
+    // Rage stacks - each stack gives +X% damage where X is the rage stat
     if (stats.rage > 0) {
         const stacks = combatState.rageStacks || 0;
         const bonusDmg = Math.floor(stats.rage * stacks);
+        const maxBonus = Math.floor(stats.rage * (stats.rageUncapped ? 999 : 10));
         activeBuffs.push({
             id: 'rage',
             name: 'Rage',
             icon: '/assets/ui-icons/buffs/rage.png',
             stacks: stacks,
             maxStacks: stats.rageUncapped ? null : 10,
-            value: bonusDmg > 0 ? `+${bonusDmg}%` : null,
+            value: `+${bonusDmg}% DMG`,
+            description: `+${stats.rage}% damage per stack (max ${maxBonus}%)`,
             color: '#b91c1c',
             bgColor: 'rgba(185, 28, 28, 0.3)',
-            active: true,
+            active: stacks > 0,
         });
     }
 
-    // Damage Shield
+    // Damage Shield - absorbs damage, refreshes on kill
     if (stats.damageShield > 0 || combatState.damageShield > 0) {
         activeBuffs.push({
             id: 'shield',
             name: 'Shield',
             icon: '/assets/ui-icons/buffs/shield.png',
-            value: combatState.damageShield > 0 ? combatState.damageShield : null,
+            value: combatState.damageShield > 0 ? `${combatState.damageShield} HP` : null,
             maxValue: stats.damageShield,
+            description: `Absorbs ${stats.damageShield} damage, refreshes on kill`,
             color: '#3b82f6',
             bgColor: 'rgba(59, 130, 246, 0.3)',
             active: combatState.damageShield > 0,
         });
     }
 
-    // Overheal Shield
+    // Overheal Shield - excess healing becomes shield
     if (stats.overheal > 0 || combatState.overhealShield > 0) {
         activeBuffs.push({
             id: 'overheal',
             name: 'Overheal',
             icon: '/assets/ui-icons/buffs/overheal.png',
-            value: combatState.overhealShield > 0 ? combatState.overhealShield : null,
+            value: combatState.overhealShield > 0 ? `${combatState.overhealShield} HP` : null,
+            description: `${stats.overheal}% of excess healing becomes shield`,
             color: '#22d3ee',
             bgColor: 'rgba(34, 211, 238, 0.3)',
             active: combatState.overhealShield > 0,
         });
     }
 
-    // Second Wind (show if available, not used)
+    // Second Wind - emergency heal when below 20% HP
     if (stats.secondWind > 0) {
         activeBuffs.push({
             id: 'secondWind',
             name: '2nd Wind',
             icon: '/assets/ui-icons/buffs/secondwind.png',
-            value: `${stats.secondWind}%`,
+            value: `${stats.secondWind}% heal`,
+            description: 'Heals when HP drops below 20% (once per fight)',
             color: '#34d399',
             bgColor: 'rgba(52, 211, 153, 0.3)',
             active: !combatState.secondWindUsed,
@@ -82,7 +87,7 @@ export default function BuffDisplay({ compact = false }) {
     }
 
     // DOT Effects on Enemy
-    // Bleed
+    // Bleed - damage over 3 seconds
     if (stats.bleed > 0) {
         const ticksRemaining = combatState.bleedTimer || 0;
         activeBuffs.push({
@@ -90,7 +95,8 @@ export default function BuffDisplay({ compact = false }) {
             name: 'Bleed',
             icon: '/assets/ui-icons/buffs/bleed.png',
             value: `${stats.bleed}%`,
-            timer: ticksRemaining > 0 ? Math.ceil(ticksRemaining / 4) : null, // ~4 ticks per second
+            description: `${stats.bleed}% weapon damage over 3 seconds`,
+            timer: ticksRemaining > 0 ? Math.ceil(ticksRemaining / 20) : null,
             color: '#dc2626',
             bgColor: 'rgba(220, 38, 38, 0.3)',
             active: ticksRemaining > 0,
@@ -98,7 +104,7 @@ export default function BuffDisplay({ compact = false }) {
         });
     }
 
-    // Burn
+    // Burn - damage over 3 seconds
     if (stats.burn > 0) {
         const ticksRemaining = combatState.burnTimer || 0;
         activeBuffs.push({
@@ -106,7 +112,8 @@ export default function BuffDisplay({ compact = false }) {
             name: 'Burn',
             icon: '/assets/ui-icons/buffs/burn.png',
             value: `${stats.burn}%`,
-            timer: ticksRemaining > 0 ? Math.ceil(ticksRemaining / 4) : null,
+            description: `${stats.burn}% weapon damage over 3 seconds`,
+            timer: ticksRemaining > 0 ? Math.ceil(ticksRemaining / 20) : null,
             color: '#f97316',
             bgColor: 'rgba(249, 115, 22, 0.3)',
             active: ticksRemaining > 0,
@@ -114,7 +121,7 @@ export default function BuffDisplay({ compact = false }) {
         });
     }
 
-    // Poison
+    // Poison - damage over 4 seconds
     if (stats.poison > 0) {
         const ticksRemaining = combatState.poisonTimer || 0;
         activeBuffs.push({
@@ -122,7 +129,8 @@ export default function BuffDisplay({ compact = false }) {
             name: 'Poison',
             icon: '/assets/ui-icons/buffs/poison.png',
             value: `${stats.poison}%`,
-            timer: ticksRemaining > 0 ? Math.ceil(ticksRemaining / 4) : null,
+            description: `${stats.poison}% weapon damage over 4 seconds`,
+            timer: ticksRemaining > 0 ? Math.ceil(ticksRemaining / 20) : null,
             color: '#22c55e',
             bgColor: 'rgba(34, 197, 94, 0.3)',
             active: ticksRemaining > 0,
@@ -168,7 +176,7 @@ function BuffIcon({ buff }) {
                 borderColor: buff.color,
                 borderWidth: '1px',
             }}
-            title={`${buff.name}${buff.value ? `: ${buff.value}` : ''}${buff.stacks !== undefined ? ` (${buff.stacks} stacks)` : ''}`}
+            title={`${buff.name}${buff.value ? `: ${buff.value}` : ''}${buff.stacks !== undefined ? ` (${buff.stacks}${buff.maxStacks ? '/' + buff.maxStacks : ''} stacks)` : ''}${buff.description ? '\n' + buff.description : ''}`}
         >
             {/* Icon */}
             <img
@@ -229,7 +237,7 @@ function BuffIconCompact({ buff }) {
                 borderColor: buff.color,
                 borderWidth: '1px',
             }}
-            title={`${buff.name}${buff.value ? `: ${buff.value}` : ''}${buff.stacks !== undefined ? ` (${buff.stacks} stacks)` : ''}`}
+            title={`${buff.name}${buff.value ? `: ${buff.value}` : ''}${buff.stacks !== undefined ? ` (${buff.stacks}${buff.maxStacks ? '/' + buff.maxStacks : ''} stacks)` : ''}${buff.description ? '\n' + buff.description : ''}`}
         >
             <img
                 src={buff.icon}
