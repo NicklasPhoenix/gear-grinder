@@ -168,7 +168,7 @@ function DesktopGameLayout() {
             setLevelUpAnimation({ level: currentLevel });
         }
         prevLevelRef.current = currentLevel;
-    }, [state?.level]);
+    }, [state]);
 
     // Music based on current zone
     useEffect(() => {
@@ -208,7 +208,7 @@ function DesktopGameLayout() {
             document.removeEventListener('click', handleFirstInteraction);
             document.removeEventListener('keydown', handleFirstInteraction);
         };
-    }, [state?.currentZone]);
+    }, [state]);
 
     const handleHover = (item, position, isInventoryItem = false) => {
         if (!item) {
@@ -218,7 +218,10 @@ function DesktopGameLayout() {
         }
     };
 
-    if (!state) return (
+    const currentZone = state ? getZoneById(state.currentZone) : null;
+    const playerStats = useMemo(() => state ? calculatePlayerStats(state) : null, [state]);
+
+    if (!state || !currentZone || !playerStats) return (
         <div className="w-screen h-screen bg-slate-950 flex items-center justify-center">
             <div className="text-center">
                 <div className="spinner mx-auto mb-4" />
@@ -226,9 +229,6 @@ function DesktopGameLayout() {
             </div>
         </div>
     );
-
-    const currentZone = getZoneById(state.currentZone);
-    const playerStats = useMemo(() => calculatePlayerStats(state), [state]);
 
     return (
         <div className="w-screen h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 overflow-hidden flex flex-col lg:flex-row">

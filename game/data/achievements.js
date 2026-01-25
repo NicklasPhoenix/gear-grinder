@@ -319,7 +319,7 @@ export function checkAchievements(state, unlockedAchievements = []) {
                 if (achievement.check(state)) {
                     newlyUnlocked.push(achievement);
                 }
-            } catch (e) {
+            } catch {
                 // Silently ignore check errors
             }
         }

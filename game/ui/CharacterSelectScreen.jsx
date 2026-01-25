@@ -98,7 +98,7 @@ export default function CharacterSelectScreen({ onSelectCharacter }) {
         setConfirmDelete(null);
     };
 
-    const formatPlayTime = (ms) => {
+    const _formatPlayTime = (ms) => {
         if (!ms) return '0h';
         const hours = Math.floor(ms / 3600000);
         const minutes = Math.floor((ms % 3600000) / 60000);

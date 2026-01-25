@@ -1,9 +1,6 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { useGame } from '../context/GameContext';
 import { getZoneById } from '../data/zones';
-import { calculatePlayerStats } from '../systems/PlayerSystem';
-import { formatWithCommas } from '../utils/format';
-import { MaterialIcon } from './MaterialIcons';
 
 // Import tab content views (reuse from desktop)
 import InventoryView from './InventoryView';
@@ -34,7 +31,7 @@ export default function MobileGameLayout() {
     const [tooltipData, setTooltipData] = useState(null);
     const [showDailyRewards, setShowDailyRewards] = useState(false);
     const [showGuide, setShowGuide] = useState(false);
-    const [showMoreMenu, setShowMoreMenu] = useState(false);
+    const [_showMoreMenu, setShowMoreMenu] = useState(false);
     const [moreSubTab, setMoreSubTab] = useState(null); // 'shop' | 'prestige' | 'achievements' | 'settings'
 
     const handleHover = (item, position, isInventoryItem = false) => {

@@ -31,7 +31,6 @@ export default function BuffDisplay({ compact = false }) {
         const stacks = combatState.rageStacks || 0;
         const maxStacks = stats.rageMax || 10;
         const bonusDmg = Math.floor(stats.rage * stacks);
-        const maxBonus = Math.floor(stats.rage * maxStacks);
         const decayTimer = combatState.rageDecayTimer || 0;
         const decaySeconds = stacks > 0 ? Math.ceil(decayTimer / 20) : null; // Convert ticks to seconds
         activeBuffs.push({

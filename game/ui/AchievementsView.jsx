@@ -133,7 +133,7 @@ function AchievementCard({ achievement, isUnlocked, state, isMobile }) {
     try {
         progress = achievement.getProgress(state);
         progressPercent = Math.min(100, (progress / achievement.target) * 100);
-    } catch (e) {
+    } catch {
         // Ignore progress errors
     }
 

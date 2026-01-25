@@ -2,7 +2,6 @@ import React from 'react';
 import { useGame } from '../context/GameContext';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { PRESTIGE_SKILLS } from '../data/skills';
-import { MATERIALS } from '../data/items';
 
 export default function PrestigeView() {
     const { state, gameManager } = useGame();
@@ -12,7 +11,7 @@ export default function PrestigeView() {
     const stoneReward = 10 + Math.floor((state.level || 1) / 2);
 
     const handlePrestige = () => {
-        if (confirm(`ASCEND NOW?\n\nThis will reset your level, silver, gear, and zone progress, but you will keep your Prestige Skills and earn ${stoneReward} Prestige Stones.`)) {
+        if (window.confirm(`ASCEND NOW?\n\nThis will reset your level, silver, gear, and zone progress, but you will keep your Prestige Skills and earn ${stoneReward} Prestige Stones.`)) {
             gameManager.performPrestige();
         }
     };

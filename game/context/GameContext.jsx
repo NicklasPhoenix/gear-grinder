@@ -195,7 +195,6 @@ function validateSave(parsed) {
 export function GameProvider({ children, initialCharacter = null, slotIndex = null, onSaveCharacter = null, onReturnToSelect = null }) {
     const gameManagerRef = useRef(null);
     const [gameState, setGameState] = useState(null);
-    const characterRef = useRef({ initialCharacter, slotIndex });
 
     // High-frequency state (HP values) - updated separately to prevent full tree re-renders
     const [hpState, setHpState] = useState({ playerHp: 100, playerMaxHp: 100, enemyHp: 20, enemyMaxHp: 20 });
@@ -453,6 +452,7 @@ export function GameProvider({ children, initialCharacter = null, slotIndex = nu
             saveGame(); // Save on unmount
             gm.stop();
         };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Handle tab visibility changes for offline progress when switching tabs
@@ -538,6 +538,7 @@ export function GameProvider({ children, initialCharacter = null, slotIndex = nu
                 return newState;
             });
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [gameState?.kills, gameState?.totalGold, gameState?.level, gameState?.prestigeLevel,
         gameState?.inventory?.length, gameState?.zoneKills, gameState?.gear]);
 

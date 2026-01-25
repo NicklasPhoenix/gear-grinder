@@ -339,7 +339,7 @@ export default function SettingsView() {
                             </div>
                             <button
                                 onClick={() => {
-                                    if (confirm('Switch character?\n\nYour progress will be saved.')) {
+                                    if (window.confirm('Switch character?\n\nYour progress will be saved.')) {
                                         onReturnToSelect();
                                     }
                                 }}
@@ -364,16 +364,16 @@ export default function SettingsView() {
                             </div>
                             <button
                                 onClick={() => {
-                                    if (confirm('⚠️ RESET GAME?\n\nThis will DELETE ALL your progress:\n• Level & Stats\n• Gear & Inventory\n• Silver & Materials\n• Prestige & Skills\n• Achievements\n\nThis CANNOT be undone!\n\nAre you absolutely sure?')) {
-                                        if (confirm('FINAL WARNING!\n\nYou are about to lose EVERYTHING.\n\nType "RESET" in the next prompt to confirm.') &&
-                                            prompt('Type RESET to confirm:')?.toUpperCase() === 'RESET') {
+                                    if (window.confirm('RESET GAME?\n\nThis will DELETE ALL your progress:\n• Level & Stats\n• Gear & Inventory\n• Silver & Materials\n• Prestige & Skills\n• Achievements\n\nThis CANNOT be undone!\n\nAre you absolutely sure?')) {
+                                        if (window.confirm('FINAL WARNING!\n\nYou are about to lose EVERYTHING.\n\nType "RESET" in the next prompt to confirm.') &&
+                                            window.prompt('Type RESET to confirm:')?.toUpperCase() === 'RESET') {
                                             gameManager?.resetGame();
                                         }
                                     }
                                 }}
                                 className="w-full py-3 bg-red-600/30 hover:bg-red-600/50 active:bg-red-600/60 active:scale-95 text-red-400 rounded-lg font-bold transition-all border border-red-600/50"
                             >
-                                🗑️ Reset Game
+                                Reset Game
                             </button>
                         </div>
                     </div>

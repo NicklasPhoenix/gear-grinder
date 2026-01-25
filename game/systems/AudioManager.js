@@ -238,7 +238,7 @@ class AudioManager {
         this.currentMusic.volume = this.getEffectiveMusicVolume();
         this.currentMusicTrack = trackUrl;
 
-        this.currentMusic.play().catch(e => {
+        this.currentMusic.play().catch(_e => {
             // Autoplay blocked - will play on next user interaction
             console.log('Music autoplay blocked, will play on interaction');
         });

@@ -63,6 +63,7 @@ function ObjectivesSection({ state, gameManager }) {
         if (updates) {
             gameManager.setState(prev => ({ ...prev, ...updates }));
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [state.dailyObjectiveDay, state.weeklyObjectiveWeek, gameManager]);
 
     const objectives = checkObjectives(state);

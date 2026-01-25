@@ -60,8 +60,6 @@ export default function StatsView() {
     const flatDR = (calculated.damageReduction || 0) / 100;
     const afterArmor = Math.floor(currentZone.enemyDmg * (1 - armorReduction));
     const reducedEnemyDmg = Math.max(1, Math.floor(afterArmor * (1 - flatDR)));
-    const totalReduction = 1 - (1 - armorReduction) * (1 - flatDR);
-    const effectiveHP = Math.floor(calculated.maxHp / (1 - totalReduction));
 
     const handlePrimaryStatUp = (key, amount = 1) => {
         const toAdd = Math.min(amount, state.statPoints);
@@ -115,7 +113,7 @@ export default function StatsView() {
 
         if (totalAllocated === 0) return;
 
-        if (confirm(`Reset all stat allocations?\n\nYou will get back ${totalAllocated} stat points.`)) {
+        if (window.confirm(`Reset all stat allocations?\n\nYou will get back ${totalAllocated} stat points.`)) {
             gameManager.setState(prev => ({
                 ...prev,
                 stats: { ...basePrimary },
@@ -126,7 +124,7 @@ export default function StatsView() {
     };
 
     // Render stat allocation button group
-    const StatButtons = ({ onStatUp, statKey, isPrimary = true, isMaxed = false }) => {
+    const StatButtons = ({ onStatUp, statKey, isMaxed = false }) => {
         const noPoints = state.statPoints <= 0;
         const disabled = noPoints || isMaxed;
 

@@ -22,6 +22,7 @@ export default function LevelUpModal({ level, onClose }) {
         if (pauseOnLevelUp && gameManager && !state?.combatPaused) {
             gameManager.setState(prev => ({ ...prev, combatPaused: true }));
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pauseOnLevelUp, gameManager]);
 
     // Animate knight idle
@@ -116,13 +117,13 @@ export default function LevelUpModal({ level, onClose }) {
 
                 {/* Knight Animation */}
                 <div
-                    className={`relative transition-all duration-500 delay-200 ${
+                    className={`relative flex items-center justify-center transition-all duration-500 delay-200 ${
                         showContent ? 'opacity-100 scale-100' : 'opacity-0 scale-50'
                     }`}
                 >
                     {/* Glow ring around character */}
                     <div
-                        className="absolute inset-0 rounded-full animate-ping"
+                        className="absolute w-48 h-48 md:w-64 md:h-64 rounded-full animate-ping"
                         style={{
                             background: 'radial-gradient(circle, rgba(147, 51, 234, 0.3) 0%, transparent 70%)',
                             animationDuration: '2s',
@@ -133,7 +134,7 @@ export default function LevelUpModal({ level, onClose }) {
                     <img
                         src={KNIGHT_IDLE_FRAMES[currentFrame]}
                         alt="Knight"
-                        className="w-48 h-48 md:w-64 md:h-64"
+                        className="w-48 h-48 md:w-64 md:h-64 object-contain"
                         style={{
                             imageRendering: 'pixelated',
                             filter: 'drop-shadow(0 0 20px rgba(147, 51, 234, 0.6))'

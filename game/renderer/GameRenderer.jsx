@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as PIXI from 'pixi.js';
 import { useGame } from '../context/GameContext';
-import { ASSET_BASE, ENEMY_SPRITES, SPRITE_CONFIG, ZONE_BACKGROUNDS } from '../../assets/gameAssets';
+import { ASSET_BASE, ENEMY_SPRITES, SPRITE_CONFIG } from '../../assets/gameAssets';
 import { getZoneById } from '../data/zones';
 import { audioManager } from '../systems/AudioManager';
 
@@ -289,9 +289,6 @@ export default function GameRenderer() {
     // Resize handler refs
     const resizeObserverRef = useRef(null);
     const uiContainerRef = useRef(null);
-    const mainContainerRef = useRef(null);
-    const groundRef = useRef(null);
-    const gridLinesRef = useRef(null);
 
     // Entities refs for updating
     const playerRef = useRef(null);
@@ -329,6 +326,8 @@ export default function GameRenderer() {
         playerDeathHold: 0,
         playerDead: false, // Stays true until player respawns
         playerSpawning: false, // True while spawn animation plays
+        // Pending damage - shown when attack animation reaches impact frame
+        pendingDamage: null, // { damage, attackType, impactFrame, attackAnim }
     });
 
     // Store calculated positions for access across the component
@@ -428,7 +427,6 @@ export default function GameRenderer() {
             // --- Load all character sprite sheets with progress tracking ---
             const spriteSheets = {};
             const sheetNames = ['player', 'humanoid', 'demon', 'undead', 'beast', 'reptile', 'elemental', 'avian', 'misc'];
-            const totalAssets = sheetNames.length + 2; // +2 for background and monster
 
             // Calculate total assets: sprite sheets + monster sprites + boss sprites
             const monsterSpriteNames = Object.values(ZONE_MONSTER_SPRITES);
@@ -827,7 +825,6 @@ export default function GameRenderer() {
 
             // --- Animation Loop ---
             app.ticker.add((ticker) => {
-                const time = ticker.lastTime;
                 const delta = ticker.deltaTime;
                 const animState = animStateRef.current;
 
@@ -845,8 +842,6 @@ export default function GameRenderer() {
 
                 // Player animation (animated sprite or fallback)
                 if (playerRef.current) {
-                    const pos = positionsRef.current;
-                    const playerBaseScale = playerRef.current.baseScale || (ANIMATED_SPRITES.player?.scale || 4) * (pos.scaleFactor || 1);
                     const gmState = gameManager.getState();
 
                     // Check for player death
@@ -909,9 +904,25 @@ export default function GameRenderer() {
                     else {
                         // Update animated sprite frames
                         if (playerRef.current.animController) {
-                            const newTexture = playerRef.current.animController.update(delta * 16.67);
+                            const ctrl = playerRef.current.animController;
+                            const newTexture = ctrl.update(delta * 16.67);
                             if (newTexture) {
                                 playerRef.current.texture = newTexture;
+                            }
+                            // Check for pending damage - show when animation reaches impact frame
+                            const pending = animState.pendingDamage;
+                            if (pending && ctrl.currentAnim === pending.attackAnim && ctrl.frameIndex >= pending.impactFrame) {
+                                // Show damage now - we've reached the impact point
+                                if (appRef.current && effectsContainerRef.current) {
+                                    let text = `${pending.damage}`;
+                                    if (pending.attackType === 'crit') text = `CRIT ${pending.damage}!`;
+                                    else if (pending.attackType === 'ascendedCrit') text = `ASCEND ${pending.damage}!`;
+                                    else if (pending.attackType === 'annihilate') text = `ANNIHILATE ${pending.damage}!`;
+                                    spawnFloatingText(appRef.current, effectsContainerRef.current,
+                                        { text, type: pending.attackType || 'playerDmg', target: 'enemy' },
+                                        positionsRef.current);
+                                }
+                                animState.pendingDamage = null;
                             }
                         }
                     }
@@ -931,6 +942,7 @@ export default function GameRenderer() {
                             playerXOffset = -fallDistance * deathProgress;
                         }
                     }
+                    const pos = positionsRef.current;
                     if (animState.playerSpawning) {
                         // Spawn: arc from left off-screen to landing position
                         const progress = animState.playerSpawnProgress || 0;
@@ -959,8 +971,6 @@ export default function GameRenderer() {
 
                     // Death animation - use sprite animation
                     if (animState.enemyDying) {
-                        const pos = positionsRef.current;
-                        const flipX = enemyRef.current.flipX || -1;
 
                         // Update sprite animation
                         if (enemyRef.current.animController) {
@@ -1170,7 +1180,6 @@ export default function GameRenderer() {
 
             // Note: Player attack animation is now triggered by 'playerAttack' event
             // Enemy hit flash on player damage types
-            const playerAttackTypes = ['playerDmg', 'crit', 'ascendedCrit', 'annihilate', 'frenzy', 'multiStrike', 'vengeance', 'retaliate', 'phantom', 'thorns'];
 
             // Visual effects per attack type
             if (data.type === 'playerDmg') {
@@ -1363,21 +1372,17 @@ export default function GameRenderer() {
             }
             // Use crit_attack animation for crits, normal attack otherwise
             const attackAnim = data?.isCrit ? 'crit_attack' : 'attack';
-            // Show damage after short delay (when attack "hits")
-            const damageToShow = data?.damage;
-            const attackType = data?.attackType;
-            if (damageToShow) {
-                setTimeout(() => {
-                    if (appRef.current && effectsContainerRef.current) {
-                        let text = `${damageToShow}`;
-                        if (attackType === 'crit') text = `CRIT ${damageToShow}!`;
-                        else if (attackType === 'ascendedCrit') text = `ASCEND ${damageToShow}!`;
-                        else if (attackType === 'annihilate') text = `ANNIHILATE ${damageToShow}!`;
-                        spawnFloatingText(appRef.current, effectsContainerRef.current,
-                            { text, type: attackType || 'playerDmg', target: 'enemy' },
-                            positionsRef.current);
-                    }
-                }, 150); // Delay to sync with attack animation impact
+            // Store pending damage to show when animation reaches impact frame
+            // Normal attack: 4 frames, impact at frame 2
+            // Crit attack: 8 frames, impact at frame 5
+            const impactFrame = attackAnim === 'crit_attack' ? 5 : 2;
+            if (data?.damage) {
+                animStateRef.current.pendingDamage = {
+                    damage: data.damage,
+                    attackType: data.attackType,
+                    impactFrame,
+                    attackAnim,
+                };
             }
             // Trigger attack animation - plays once, then returns to ready stance
             if (playerRef.current?.animController) {
@@ -1389,6 +1394,10 @@ export default function GameRenderer() {
                             texture = playerRef.current.animController.play('idle', true);
                         }
                         if (texture) playerRef.current.texture = texture;
+                    }
+                    // Clear any pending damage that wasn't shown (animation completed)
+                    if (animStateRef.current.pendingDamage?.attackAnim === attackAnim) {
+                        animStateRef.current.pendingDamage = null;
                     }
                 });
             }
@@ -1527,8 +1536,11 @@ export default function GameRenderer() {
                 resizeObserverRef.current.disconnect();
             }
             // Clean up graphics pool to prevent memory leaks
-            if (graphicsPoolRef.current) {
-                graphicsPoolRef.current.destroy();
+            // Copy ref to variable to avoid stale closure warning
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+            const graphicsPool = graphicsPoolRef.current;
+            if (graphicsPool) {
+                graphicsPool.destroy();
             }
             activeGraphicsRef.current = [];
             if (appRef.current) {
@@ -1538,6 +1550,7 @@ export default function GameRenderer() {
                 appRef.current = null;
             }
         };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Resize handling - runs after initialization is complete
@@ -1835,331 +1848,6 @@ export default function GameRenderer() {
         }
     }
 
-    // --- Create Procedural Character Graphics ---
-    function createCharacterGraphics(enemyType, isBoss) {
-        const g = new PIXI.Graphics();
-        const colors = ENEMY_COLORS[enemyType] || ENEMY_COLORS.Beast;
-        const primary = colors.primary;
-        const secondary = colors.secondary;
-        const accent = colors.accent;
-
-        // Map enemy type to visual type
-        const typeMap = {
-            Knight: 'humanoid', Undead: 'skeleton', Beast: 'beast', Humanoid: 'orc',
-            Dragon: 'dragon', Demon: 'demon', Elemental: 'elemental', Celestial: 'angel',
-            Abyssal: 'demon', Chaos: 'elemental', Void: 'wraith', Boss: 'dragon'
-        };
-        const type = typeMap[enemyType] || 'beast';
-
-        // Draw based on type - all centered around origin
-        switch (type) {
-            case 'humanoid':
-            case 'orc':
-                // Head
-                g.circle(0, -55, 18);
-                g.fill(secondary);
-                // Body
-                g.roundRect(-20, -38, 40, 50, 8);
-                g.fill(primary);
-                // Arms
-                g.roundRect(-30, -35, 12, 35, 4);
-                g.roundRect(18, -35, 12, 35, 4);
-                g.fill(secondary);
-                // Legs
-                g.roundRect(-16, 10, 14, 30, 4);
-                g.roundRect(2, 10, 14, 30, 4);
-                g.fill(primary);
-                // Weapon/accent
-                g.roundRect(24, -45, 6, 50, 2);
-                g.fill(accent);
-                // Eyes
-                g.circle(-6, -58, 3);
-                g.circle(6, -58, 3);
-                g.fill(0xffffff);
-                break;
-
-            case 'skeleton':
-                // Skull
-                g.circle(0, -55, 16);
-                g.fill(0xd1d5db);
-                // Eye sockets
-                g.circle(-5, -58, 4);
-                g.circle(5, -58, 4);
-                g.fill(0x1f2937);
-                // Jaw
-                g.rect(-10, -48, 20, 6);
-                g.fill(0xd1d5db);
-                // Ribcage
-                for (let i = 0; i < 4; i++) {
-                    g.roundRect(-18, -35 + i * 10, 36, 6, 2);
-                    g.fill(0xd1d5db);
-                }
-                // Spine
-                g.roundRect(-3, -38, 6, 50, 2);
-                g.fill(0x9ca3af);
-                // Arms
-                g.roundRect(-28, -35, 8, 35, 2);
-                g.roundRect(20, -35, 8, 35, 2);
-                g.fill(0xd1d5db);
-                // Legs
-                g.roundRect(-12, 10, 8, 30, 2);
-                g.roundRect(4, 10, 8, 30, 2);
-                g.fill(0xd1d5db);
-                // Glow
-                g.circle(-5, -58, 2);
-                g.circle(5, -58, 2);
-                g.fill(accent);
-                break;
-
-            case 'beast':
-                // Body (quadruped stance)
-                g.ellipse(0, -20, 35, 25);
-                g.fill(primary);
-                // Head
-                g.ellipse(-30, -30, 20, 18);
-                g.fill(primary);
-                // Snout
-                g.ellipse(-45, -28, 10, 8);
-                g.fill(secondary);
-                // Ears
-                g.moveTo(-25, -48);
-                g.lineTo(-35, -55);
-                g.lineTo(-30, -45);
-                g.fill(primary);
-                g.moveTo(-15, -45);
-                g.lineTo(-22, -55);
-                g.lineTo(-20, -42);
-                g.fill(primary);
-                // Legs
-                g.roundRect(-25, 0, 12, 25, 4);
-                g.roundRect(-5, 0, 12, 25, 4);
-                g.roundRect(15, 0, 12, 25, 4);
-                g.fill(secondary);
-                // Tail
-                g.moveTo(30, -25);
-                g.quadraticCurveTo(50, -30, 45, -10);
-                g.lineTo(42, -12);
-                g.quadraticCurveTo(45, -28, 28, -22);
-                g.fill(primary);
-                // Eye
-                g.circle(-38, -32, 4);
-                g.fill(accent);
-                break;
-
-            case 'dragon':
-                // Body (large, serpentine)
-                g.ellipse(0, -30, 50, 35);
-                g.fill(primary);
-                // Belly scales
-                g.ellipse(0, -20, 35, 20);
-                g.fill(secondary);
-                // Head
-                g.ellipse(-45, -45, 25, 20);
-                g.fill(primary);
-                // Snout
-                g.ellipse(-65, -42, 15, 10);
-                g.fill(secondary);
-                // Horns
-                g.moveTo(-35, -60);
-                g.lineTo(-25, -80);
-                g.lineTo(-30, -58);
-                g.fill(accent);
-                g.moveTo(-50, -58);
-                g.lineTo(-45, -78);
-                g.lineTo(-42, -55);
-                g.fill(accent);
-                // Wings
-                g.moveTo(10, -55);
-                g.lineTo(60, -90);
-                g.lineTo(70, -50);
-                g.lineTo(50, -55);
-                g.lineTo(40, -40);
-                g.fill(secondary);
-                // Legs
-                g.roundRect(-30, 0, 20, 35, 6);
-                g.roundRect(10, 0, 20, 35, 6);
-                g.fill(primary);
-                // Claws
-                g.moveTo(-25, 35);
-                g.lineTo(-30, 45);
-                g.lineTo(-20, 35);
-                g.fill(accent);
-                // Eye
-                g.circle(-55, -48, 5);
-                g.fill(accent);
-                // Tail
-                g.moveTo(45, -25);
-                g.quadraticCurveTo(80, -20, 85, -40);
-                g.lineTo(82, -38);
-                g.quadraticCurveTo(75, -22, 43, -22);
-                g.fill(primary);
-                break;
-
-            case 'demon':
-                // Body
-                g.roundRect(-25, -40, 50, 55, 10);
-                g.fill(primary);
-                // Head
-                g.circle(0, -55, 22);
-                g.fill(primary);
-                // Horns
-                g.moveTo(-18, -70);
-                g.lineTo(-25, -95);
-                g.lineTo(-12, -72);
-                g.fill(accent);
-                g.moveTo(18, -70);
-                g.lineTo(25, -95);
-                g.lineTo(12, -72);
-                g.fill(accent);
-                // Eyes (glowing)
-                g.circle(-8, -58, 5);
-                g.circle(8, -58, 5);
-                g.fill(accent);
-                g.circle(-8, -58, 2);
-                g.circle(8, -58, 2);
-                g.fill(0xffffff);
-                // Wings
-                g.moveTo(-25, -30);
-                g.lineTo(-55, -60);
-                g.lineTo(-60, -20);
-                g.lineTo(-30, -25);
-                g.fill(secondary);
-                g.moveTo(25, -30);
-                g.lineTo(55, -60);
-                g.lineTo(60, -20);
-                g.lineTo(30, -25);
-                g.fill(secondary);
-                // Arms
-                g.roundRect(-35, -30, 12, 40, 4);
-                g.roundRect(23, -30, 12, 40, 4);
-                g.fill(secondary);
-                // Legs
-                g.roundRect(-18, 12, 16, 28, 5);
-                g.roundRect(2, 12, 16, 28, 5);
-                g.fill(primary);
-                break;
-
-            case 'wraith':
-                // Ghostly body (wispy)
-                g.moveTo(0, -70);
-                g.quadraticCurveTo(30, -50, 25, -20);
-                g.quadraticCurveTo(30, 10, 15, 35);
-                g.lineTo(5, 30);
-                g.lineTo(-5, 40);
-                g.lineTo(-15, 30);
-                g.quadraticCurveTo(-30, 10, -25, -20);
-                g.quadraticCurveTo(-30, -50, 0, -70);
-                g.fill({ color: primary, alpha: 0.7 });
-                // Hood
-                g.ellipse(0, -55, 20, 25);
-                g.fill(secondary);
-                // Face void
-                g.ellipse(0, -50, 12, 15);
-                g.fill(0x000000);
-                // Eyes
-                g.circle(-5, -52, 3);
-                g.circle(5, -52, 3);
-                g.fill(accent);
-                // Wisps
-                g.moveTo(-20, -30);
-                g.quadraticCurveTo(-40, -40, -35, -20);
-                g.fill({ color: secondary, alpha: 0.5 });
-                g.moveTo(20, -30);
-                g.quadraticCurveTo(40, -40, 35, -20);
-                g.fill({ color: secondary, alpha: 0.5 });
-                break;
-
-            case 'elemental':
-                // Core
-                g.circle(0, -35, 30);
-                g.fill(primary);
-                // Inner glow
-                g.circle(0, -35, 20);
-                g.fill(secondary);
-                g.circle(0, -35, 10);
-                g.fill(accent);
-                // Orbiting fragments
-                for (let i = 0; i < 6; i++) {
-                    const angle = (i / 6) * Math.PI * 2;
-                    const ox = Math.cos(angle) * 40;
-                    const oy = Math.sin(angle) * 40 - 35;
-                    g.circle(ox, oy, 8);
-                    g.fill(primary);
-                }
-                // Energy streams
-                g.setStrokeStyle({ width: 3, color: accent, alpha: 0.7 });
-                g.moveTo(-30, -20);
-                g.quadraticCurveTo(-15, -50, 0, -35);
-                g.stroke();
-                g.moveTo(30, -20);
-                g.quadraticCurveTo(15, -50, 0, -35);
-                g.stroke();
-                break;
-
-            case 'angel':
-                // Body (robed)
-                g.moveTo(-20, -30);
-                g.lineTo(-30, 35);
-                g.lineTo(30, 35);
-                g.lineTo(20, -30);
-                g.fill(0xffffff);
-                // Head
-                g.circle(0, -45, 18);
-                g.fill(0xfef3c7);
-                // Halo
-                g.setStrokeStyle({ width: 4, color: accent });
-                g.circle(0, -70, 15);
-                g.stroke();
-                // Wings
-                g.moveTo(-18, -25);
-                g.quadraticCurveTo(-60, -50, -70, -15);
-                g.quadraticCurveTo(-65, -35, -55, -30);
-                g.quadraticCurveTo(-50, -45, -40, -35);
-                g.quadraticCurveTo(-35, -48, -18, -30);
-                g.fill(0xffffff);
-                g.moveTo(18, -25);
-                g.quadraticCurveTo(60, -50, 70, -15);
-                g.quadraticCurveTo(65, -35, 55, -30);
-                g.quadraticCurveTo(50, -45, 40, -35);
-                g.quadraticCurveTo(35, -48, 18, -30);
-                g.fill(0xffffff);
-                // Face
-                g.circle(-5, -48, 2);
-                g.circle(5, -48, 2);
-                g.fill(primary);
-                // Arms holding staff
-                g.roundRect(-8, -25, 6, 30, 2);
-                g.roundRect(2, -25, 6, 30, 2);
-                g.fill(0xfef3c7);
-                // Staff
-                g.roundRect(-2, -60, 4, 80, 2);
-                g.fill(accent);
-                g.circle(0, -65, 8);
-                g.fill(accent);
-                break;
-
-            default:
-                // Default blob enemy
-                g.ellipse(0, -25, 30, 35);
-                g.fill(primary);
-                g.circle(-10, -35, 5);
-                g.circle(10, -35, 5);
-                g.fill(0xffffff);
-                g.circle(-10, -35, 2);
-                g.circle(10, -35, 2);
-                g.fill(0x000000);
-        }
-
-        // Boss enhancement - add glowing outline
-        if (isBoss) {
-            g.setStrokeStyle({ width: 3, color: accent, alpha: 0.8 });
-            g.circle(0, -30, 50);
-            g.stroke();
-        }
-
-        return g;
-    }
-
     // --- Update HP Bars on State Change (separate from sprite updates) ---
     useEffect(() => {
         // Wait for PIXI to initialize and refs to be set
@@ -2176,6 +1864,7 @@ export default function GameRenderer() {
             const enemyMaxHp = state.enemyMaxHp || 20;
             updateHpBar(enemyHpBarRef.current, enemyHp, enemyMaxHp, false);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [state?.playerHp, state?.playerMaxHp, state?.enemyHp, state?.enemyMaxHp, isInitialized]);
 
     // --- Update Visuals on State Change ---
@@ -2185,7 +1874,7 @@ export default function GameRenderer() {
         const spriteSheets = spriteSheetRef.current;
 
         // Helper to get sprite texture from the appropriate sheet
-        const getSpriteTexture = (spriteData) => {
+        const _getSpriteTexture = (spriteData) => {
             const sheetName = spriteData.sheet || 'player';
             const sheet = spriteSheets[sheetName];
             if (!sheet) return null;
@@ -2301,6 +1990,7 @@ export default function GameRenderer() {
 
         // HP Bars are now updated in a separate useEffect above
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [state]);
 
     return (

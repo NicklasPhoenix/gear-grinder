@@ -1,5 +1,5 @@
 import React from 'react';
-import { ASSET_BASE, ITEM_SPRITES, ITEM_SPRITE_CONFIG } from '../../assets/gameAssets';
+import { ASSET_BASE, ITEM_SPRITE_CONFIG } from '../../assets/gameAssets';
 
 // Approximate row counts for each sheet
 const SHEET_ROWS = {

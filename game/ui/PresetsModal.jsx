@@ -86,7 +86,7 @@ export default function PresetsModal({ onClose }) {
             const newState = { ...prev };
             let newGear = { ...prev.gear };
             let newInventory = [...prev.inventory];
-            let equipped = 0;
+            let _equipped = 0;
 
             // First, unequip all current gear into inventory
             for (const [slot, item] of Object.entries(newGear)) {
@@ -112,7 +112,6 @@ export default function PresetsModal({ onClose }) {
                     newGear[slot] = { ...matchedItem };
                     delete newGear[slot].count;
                     newInventory.splice(matchIndex, 1);
-                    equipped++;
                 }
             }
 

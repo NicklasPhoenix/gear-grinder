@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useGame } from '../context/GameContext';
+// Mobile combat view is currently unused
 import { formatNumber } from '../utils/format';
 import { MaterialIcon, BossStoneIcon } from './MaterialIcons';
-import { BOSS_STONES } from '../data/items';
 import GameRenderer from '../renderer/GameRenderer';
 import BuffDisplay from './BuffDisplay';
 

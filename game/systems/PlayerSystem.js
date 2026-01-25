@@ -161,7 +161,7 @@ export const calculatePlayerStats = (gameState) => {
 
     // Calculate set bonuses
     const setBonuses = {};
-    Object.entries(gameState.gear).forEach(([slot, gear]) => {
+    Object.entries(gameState.gear).forEach(([_slot, gear]) => {
         if (gear && gear.bossSet) {
             setBonuses[gear.bossSet] = (setBonuses[gear.bossSet] || 0) + 1;
         }

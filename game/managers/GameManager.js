@@ -1,7 +1,7 @@
 import { initialState } from '../data/initialState';
 import { CombatSystem } from '../systems/CombatSystem';
-import { calculatePlayerStats } from '../systems/PlayerSystem';
 import { COMBAT } from '../data/constants';
+import { endEndlessRun } from '../data/endlessMode';
 
 export class GameManager {
     constructor() {
@@ -143,7 +143,6 @@ export class GameManager {
 
         if (secondsOffline < 5) return null;
 
-        const stats = calculatePlayerStats(savedState);
         const zone = savedState.currentZone;
 
         const kills = Math.floor(secondsOffline / 3);
@@ -295,8 +294,6 @@ export class GameManager {
 
         this.setState(prev => {
             const newState = { ...prev };
-            // Import and call endEndlessRun
-            const { endEndlessRun } = require('../data/endlessMode');
             endEndlessRun(newState);
             return newState;
         });

@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { GameProvider } from './game/context/GameContext';
 import GameLayout from './game/ui/GameLayout';
-import CharacterSelectScreen, { saveCharacterSlot, loadCharacterData } from './game/ui/CharacterSelectScreen';
+import CharacterSelectScreen, { saveCharacterSlot } from './game/ui/CharacterSelectScreen';
 
 // Error Boundary to catch crashes and prevent data loss
 class ErrorBoundary extends React.Component {
@@ -10,7 +10,7 @@ class ErrorBoundary extends React.Component {
         this.state = { hasError: false, error: null, errorInfo: null };
     }
 
-    static getDerivedStateFromError(error) {
+    static getDerivedStateFromError(_error) {
         return { hasError: true };
     }
 

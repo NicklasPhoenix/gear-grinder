@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { ASSET_BASE, ITEM_SPRITES, ITEM_SPRITE_CONFIG, generateMaterialIcon } from '../../assets/gameAssets';
+import { ASSET_BASE, ITEM_SPRITES, ITEM_SPRITE_CONFIG } from '../../assets/gameAssets';
 
 // Approximate row counts for each sheet (for background-position calculation)
 const SHEET_ROWS = {
@@ -201,6 +201,7 @@ export default function ItemIcon({ item, size = "full" }) {
         const spriteData = ITEM_SPRITES[spriteKey] || ITEM_SPRITES.sword;
 
         return { type: 'sprite', spriteData };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [item?.id, item?.slot, item?.weaponType, item?.tier, item?.type, item?.bossSet]);
 
     if (!item || !iconData) return null;

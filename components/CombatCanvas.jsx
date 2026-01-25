@@ -114,7 +114,7 @@ export default function CombatCanvas({
         img.onload = () => setSpriteLoaded(true);
       }
     }
-  }, [currentZone?.id]);
+  }, [currentZone]);
 
   // Add damage numbers
   useEffect(() => {
@@ -215,7 +215,7 @@ export default function CombatCanvas({
       ctx.restore();
     }
 
-    function drawEnemy(x, y, type, scale = 1, shake = 0) {
+    function drawEnemy(x, y, type, _scale, shake = 0) {
       ctx.save();
       ctx.translate(x + shake, y);
 

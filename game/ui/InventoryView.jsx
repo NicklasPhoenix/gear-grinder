@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { useGame } from '../context/GameContext';
 import ItemIcon from './ItemIcon';
 import { TIERS, GEAR_SLOTS, GEAR_BASES, WEAPON_TYPES, PRESTIGE_WEAPONS, getItemScore, getSalvageReturns, BOSS_SETS, PRESTIGE_BOSS_SETS, addItemToInventory, removeOneFromStack, getEnhanceStage, SPECIAL_EFFECTS } from '../data/items';
@@ -85,7 +85,7 @@ export default function InventoryView({ onHover }) {
     const sortedInventory = sortInventory(state.inventory, state.inventorySort || 'none', state.stats);
 
     // Long press handler for mobile salvage selection
-    const handleTouchStart = useCallback((itemId) => {
+    const _handleTouchStart = useCallback((itemId) => {
         longPressTimerRef.current = setTimeout(() => {
             // Haptic feedback if available
             if (navigator.vibrate) navigator.vibrate(50);
@@ -98,7 +98,7 @@ export default function InventoryView({ onHover }) {
         }, 500); // 500ms long press
     }, []);
 
-    const handleTouchEnd = useCallback(() => {
+    const _handleTouchEnd = useCallback(() => {
         if (longPressTimerRef.current) {
             clearTimeout(longPressTimerRef.current);
             longPressTimerRef.current = null;
@@ -393,7 +393,7 @@ export default function InventoryView({ onHover }) {
         }
         const tierInfo = TIERS[item.tier];
         const stats = calculateItemStats(item);
-        const setInfo = item.bossSet ? (BOSS_SETS[item.bossSet] || PRESTIGE_BOSS_SETS[item.bossSet]) : null;
+        const _setInfo = item.bossSet ? (BOSS_SETS[item.bossSet] || PRESTIGE_BOSS_SETS[item.bossSet]) : null;
         const stage = item.plus > 0 ? getEnhanceStage(item.plus) : null;
         const effects = item.effects || [];
 

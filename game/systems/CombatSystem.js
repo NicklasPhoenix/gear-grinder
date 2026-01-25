@@ -4,7 +4,7 @@ import { SKILLS } from '../data/skills';
 import { calculatePlayerStats } from './PlayerSystem';
 import { PLAYER_BASE, COMBAT, DEATH_PENALTY, BOSS_DROPS, LEVEL_UP, UI } from '../data/constants';
 import { updateCollectionProgress } from '../data/collections';
-import { getEndlessEnemyStats, processEndlessKill, endEndlessRun, startEndlessRun } from '../data/endlessMode';
+import { processEndlessKill, endEndlessRun, startEndlessRun } from '../data/endlessMode';
 
 /**
  * Handles all combat logic including damage calculation, enemy death, loot drops, and player death.
@@ -216,7 +216,7 @@ export class CombatSystem {
      * @param {number} deltaTime - Time since last tick in milliseconds
      * @returns {Object} Combat updates for visual feedback (lastDamage, isPlayerTurn, etc.)
      */
-    tick(deltaTime) {
+    tick(_deltaTime) {
         const state = this.stateManager.getState();
         const stats = calculatePlayerStats(state);
 
@@ -641,7 +641,7 @@ export class CombatSystem {
     /**
      * Process an enemy attack and return damage taken.
      */
-    processEnemyAttack(newState, stats, safeMaxHp, enemyDmg, enemyMaxHp) {
+    processEnemyAttack(newState, stats, safeMaxHp, enemyDmg, _enemyMaxHp) {
         let combatUpdates = {};
         const playerDmg = stats.damage || PLAYER_BASE.DEFAULT_DAMAGE;
 

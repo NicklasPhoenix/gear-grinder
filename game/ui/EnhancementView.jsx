@@ -44,8 +44,10 @@ export default function EnhancementView() {
                 setSelectedItem(updated);
             }
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [state.gear, state.inventory]);
 
+    // Auto-enhancing interval loop
     useEffect(() => {
         if (!autoEnhancing || !selectedItem || autoEnhanceTarget === null) {
             if (autoEnhanceRef.current) {
@@ -119,6 +121,7 @@ export default function EnhancementView() {
 
         autoEnhanceRef.current = setInterval(runAutoEnhance, 200);
         return () => { if (autoEnhanceRef.current) clearInterval(autoEnhanceRef.current); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [autoEnhancing, autoEnhanceTarget]); // Removed state dependencies - using refs instead
 
     const doEnhance = (item, costs) => {
@@ -542,7 +545,7 @@ export default function EnhancementView() {
                                     </div>
                                     {/* Milestone dots */}
                                     <div className="flex items-center justify-between mb-1">
-                                        {ENHANCE_MILESTONES.map((m, i) => {
+                                        {ENHANCE_MILESTONES.map((m, _i) => {
                                             const achieved = selectedItem.plus >= m;
                                             const isNext = m === nextMilestone;
                                             return (
