@@ -47,7 +47,7 @@ function VolumeSlider({ label, value, onChange, muted, onToggleMute, icon }) {
 }
 
 export default function SettingsView() {
-    const { state, gameManager } = useGame();
+    const { state, gameManager, onReturnToSelect } = useGame();
     const [masterVolume, setMasterVolume] = useState(audioManager.masterVolume);
     const [musicVolume, setMusicVolume] = useState(audioManager.musicVolume);
     const [sfxVolume, setSfxVolume] = useState(audioManager.sfxVolume);
@@ -282,6 +282,39 @@ export default function SettingsView() {
                         </div>
                     </div>
                 </div>
+
+                {/* Character */}
+                {onReturnToSelect && (
+                    <div className="game-panel">
+                        <div className="game-panel-header">Character</div>
+                        <div className="p-4">
+                            <div className="flex items-center gap-4 mb-4">
+                                {state.characterAvatar && (
+                                    <img
+                                        src={state.characterAvatar}
+                                        alt={state.characterName}
+                                        className="w-12 h-12 rounded-full border-2 border-amber-600"
+                                        style={{ imageRendering: 'pixelated' }}
+                                    />
+                                )}
+                                <div>
+                                    <div className="font-bold text-white">{state.characterName || 'Unknown'}</div>
+                                    <div className="text-sm text-slate-400">Level {state.level}</div>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => {
+                                    if (confirm('Switch character?\n\nYour progress will be saved.')) {
+                                        onReturnToSelect();
+                                    }
+                                }}
+                                className="w-full py-2 bg-amber-600/30 hover:bg-amber-600/50 active:bg-amber-600/60 active:scale-95 text-amber-400 rounded-lg font-bold transition-all border border-amber-600/50"
+                            >
+                                Switch Character
+                            </button>
+                        </div>
+                    </div>
+                )}
 
                 {/* Danger Zone */}
                 <div className="game-panel border-red-900/50">

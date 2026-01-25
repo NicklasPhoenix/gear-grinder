@@ -187,9 +187,10 @@ function validateSave(parsed) {
     return { validated: parsed, errors };
 }
 
-export function GameProvider({ children }) {
+export function GameProvider({ children, initialCharacter = null, slotIndex = null, onSaveCharacter = null, onReturnToSelect = null }) {
     const gameManagerRef = useRef(null);
     const [gameState, setGameState] = useState(null);
+    const characterRef = useRef({ initialCharacter, slotIndex });
 
     // High-frequency state (HP values) - updated separately to prevent full tree re-renders
     const [hpState, setHpState] = useState({ playerHp: 100, playerMaxHp: 100, enemyHp: 20, enemyMaxHp: 20 });
@@ -217,33 +218,41 @@ export function GameProvider({ children }) {
         // Load saved game (if any)
         const loadGame = async () => {
             try {
-                // Try main save first
-                const saved = await window.storage.get('gear-grinder-save');
                 let parsed = null;
 
-                if (saved && saved.value) {
-                    try {
-                        parsed = JSON.parse(saved.value);
-                    } catch (parseError) {
-                        console.error('Main save corrupted:', parseError);
-                    }
-                }
+                // If we have a character with saved gameState, use that
+                if (initialCharacter?.gameState) {
+                    parsed = initialCharacter.gameState;
+                    console.log('Loading character save:', initialCharacter.name);
+                } else {
+                    // Try main save first (legacy support)
+                    const saved = await window.storage.get('gear-grinder-save');
 
-                // Check backup save (from beforeunload)
-                try {
-                    const backup = localStorage.getItem('gear-grinder-save-backup');
-                    if (backup) {
-                        const backupParsed = JSON.parse(backup);
-                        // Use backup if it's newer than main save
-                        if (!parsed || (backupParsed.lastSaveTime && (!parsed.lastSaveTime || backupParsed.lastSaveTime > parsed.lastSaveTime))) {
-                            console.log('Using backup save (newer)');
-                            parsed = backupParsed;
+                    if (saved && saved.value) {
+                        try {
+                            parsed = JSON.parse(saved.value);
+                        } catch (parseError) {
+                            console.error('Main save corrupted:', parseError);
                         }
-                        // Clear backup after checking
-                        localStorage.removeItem('gear-grinder-save-backup');
                     }
-                } catch (e) {
-                    console.error('Backup save check failed:', e);
+
+                    // Check backup save (from beforeunload)
+                    try {
+                        const backupKey = slotIndex !== null ? `gear-grinder-slot${slotIndex}-backup` : 'gear-grinder-save-backup';
+                        const backup = localStorage.getItem(backupKey);
+                        if (backup) {
+                            const backupParsed = JSON.parse(backup);
+                            // Use backup if it's newer than main save
+                            if (!parsed || (backupParsed.lastSaveTime && (!parsed.lastSaveTime || backupParsed.lastSaveTime > parsed.lastSaveTime))) {
+                                console.log('Using backup save (newer)');
+                                parsed = backupParsed;
+                            }
+                            // Clear backup after checking
+                            localStorage.removeItem(backupKey);
+                        }
+                    } catch (e) {
+                        console.error('Backup save check failed:', e);
+                    }
                 }
 
                 if (parsed) {
@@ -264,6 +273,12 @@ export function GameProvider({ children }) {
 
                     // Merge with default state
                     gm.state = { ...gm.state, ...validated, combatLog: [], saveVersion: SAVE.SAVE_VERSION };
+                }
+
+                // Store character info in state for display
+                if (initialCharacter) {
+                    gm.state.characterName = initialCharacter.name;
+                    gm.state.characterAvatar = initialCharacter.avatar;
                 }
             } catch (e) {
                 console.error("Save load error, starting fresh:", e);
@@ -376,13 +391,27 @@ export function GameProvider({ children }) {
         const saveGame = async () => {
             if (!gameManagerRef.current) return;
             try {
-                const data = await gameManagerRef.current.save();
-                await window.storage.set('gear-grinder-save', data);
-                console.log('Auto-save:', {
-                    zone: gameManagerRef.current.state.currentZone,
-                    level: gameManagerRef.current.state.level,
-                    gold: gameManagerRef.current.state.gold
-                });
+                const gm = gameManagerRef.current;
+                gm.state.lastSaveTime = Date.now();
+
+                // If we have a character slot, save to that slot
+                if (onSaveCharacter && slotIndex !== null) {
+                    onSaveCharacter(gm.state);
+                    console.log('Auto-save to slot:', slotIndex + 1, {
+                        zone: gm.state.currentZone,
+                        level: gm.state.level,
+                        gold: gm.state.gold
+                    });
+                } else {
+                    // Legacy global save
+                    const data = await gm.save();
+                    await window.storage.set('gear-grinder-save', data);
+                    console.log('Auto-save:', {
+                        zone: gm.state.currentZone,
+                        level: gm.state.level,
+                        gold: gm.state.gold
+                    });
+                }
             } catch (err) {
                 console.error('Auto-save failed:', err);
             }
@@ -399,7 +428,12 @@ export function GameProvider({ children }) {
                 const data = JSON.stringify(gameManagerRef.current.state);
                 // Use synchronous localStorage as fallback for page close
                 try {
-                    localStorage.setItem('gear-grinder-save-backup', data);
+                    const backupKey = slotIndex !== null ? `gear-grinder-slot${slotIndex}-backup` : 'gear-grinder-save-backup';
+                    localStorage.setItem(backupKey, data);
+                    // Also save to character slot if available
+                    if (onSaveCharacter && slotIndex !== null) {
+                        onSaveCharacter(gameManagerRef.current.state);
+                    }
                 } catch (e) {
                     console.error('Backup save failed:', e);
                 }
@@ -529,8 +563,9 @@ export function GameProvider({ children }) {
         clearOfflineRewards: () => setOfflineRewards(null),
         toasts,
         addToast,
-        dismissToast
-    }), [gameState, offlineRewards, toasts, addToast, dismissToast]);
+        dismissToast,
+        onReturnToSelect,
+    }), [gameState, offlineRewards, toasts, addToast, dismissToast, onReturnToSelect]);
 
     if (!gameState || !gameManagerRef.current) {
         return (

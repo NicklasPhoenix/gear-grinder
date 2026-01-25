@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { GameProvider } from './game/context/GameContext';
 import GameLayout from './game/ui/GameLayout';
+import CharacterSelectScreen, { saveCharacterSlot, loadCharacterData } from './game/ui/CharacterSelectScreen';
 
 // Error Boundary to catch crashes and prevent data loss
 class ErrorBoundary extends React.Component {
@@ -116,9 +117,47 @@ class ErrorBoundary extends React.Component {
 }
 
 export default function App() {
+    const [currentScreen, setCurrentScreen] = useState('characterSelect');
+    const [selectedSlot, setSelectedSlot] = useState(null);
+    const [selectedCharacter, setSelectedCharacter] = useState(null);
+
+    const handleSelectCharacter = useCallback((slotIndex, character) => {
+        setSelectedSlot(slotIndex);
+        setSelectedCharacter(character);
+        setCurrentScreen('game');
+    }, []);
+
+    const handleReturnToCharacterSelect = useCallback(() => {
+        setCurrentScreen('characterSelect');
+        setSelectedSlot(null);
+        setSelectedCharacter(null);
+    }, []);
+
+    const handleSaveCharacter = useCallback((gameState) => {
+        if (selectedSlot !== null && selectedCharacter) {
+            saveCharacterSlot(selectedSlot, {
+                ...selectedCharacter,
+                gameState,
+            });
+        }
+    }, [selectedSlot, selectedCharacter]);
+
+    if (currentScreen === 'characterSelect') {
+        return (
+            <ErrorBoundary>
+                <CharacterSelectScreen onSelectCharacter={handleSelectCharacter} />
+            </ErrorBoundary>
+        );
+    }
+
     return (
         <ErrorBoundary>
-            <GameProvider>
+            <GameProvider
+                initialCharacter={selectedCharacter}
+                slotIndex={selectedSlot}
+                onSaveCharacter={handleSaveCharacter}
+                onReturnToSelect={handleReturnToCharacterSelect}
+            >
                 <GameLayout />
             </GameProvider>
         </ErrorBoundary>
