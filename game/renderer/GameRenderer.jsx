@@ -32,7 +32,7 @@ const ANIMATED_SPRITES = {
             death: { frames: 6, prefix: 'Death', fps: 8 },
         },
         scale: 2.0,
-        anchorY: 0.72,  // Lizard feet at 72% down in 256x256 sprite
+        anchorY: 0.78,  // Lizard feet at ~78% down in 256x256 sprite
         flipX: true,
     },
 };
