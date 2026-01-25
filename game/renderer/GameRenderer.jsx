@@ -812,18 +812,8 @@ export default function GameRenderer() {
                         if (newTexture) {
                             playerRef.current.texture = newTexture;
                         }
-
-                        // Manage animation state based on attack cooldown
-                        const isAttacking = animState.playerAttackCooldown > 0;
-                        const ctrl = playerRef.current.animController;
-
-                        if (isAttacking && ctrl.currentAnim !== 'attack') {
-                            // Start attack animation (don't loop, no callback)
-                            ctrl.play('attack', false);
-                        } else if (!isAttacking && ctrl.currentAnim === 'attack') {
-                            // Attack finished, return to idle
-                            ctrl.play('idle', true);
-                        }
+                        // Attack animation is triggered by playerAttack event, not here
+                        // Just let the animation controller run
                     }
 
                     // Position animation (bob + attack lunge)
@@ -1254,6 +1244,12 @@ export default function GameRenderer() {
         const cleanupPlayerAttack = gameManager.on('playerAttack', () => {
             animStateRef.current.playerAttackCooldown = 15;
             audioManager.playSfxHit();
+            // Trigger attack animation - plays once, then returns to idle
+            if (playerRef.current?.animController) {
+                playerRef.current.animController.play('attack', false, () => {
+                    playerRef.current?.animController?.play('idle', true);
+                });
+            }
         });
 
         // Listen for Enemy Attack - trigger enemy attack animation
