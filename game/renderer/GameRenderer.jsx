@@ -921,7 +921,7 @@ export default function GameRenderer() {
                     if (animState.playerDying) {
                         // Death sprites are 256x256 vs 128x128 - offset down to align
                         const scale = ANIMATED_SPRITES.player?.scale || 2.0;
-                        playerYOffset += 60 * scale * (pos.scaleFactor || 1);
+                        playerYOffset += 80 * scale * (pos.scaleFactor || 1);
                     }
                     if (animState.playerSpawning) {
                         // Spawn: arc from left off-screen to landing position
