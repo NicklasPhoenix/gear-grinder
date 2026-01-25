@@ -21,7 +21,7 @@ const ANIMATED_SPRITES = {
             crit_attack: { frames: 8, prefix: 'attack_extra', fps: 14, dir: 'crit_attack' },  // Crit attack animation
             hurt: { frames: 4, prefix: 'hurt', fps: 10 },
             death: { frames: 10, prefix: 'death', fps: 5 },  // 10 frames at 5 fps = 2 seconds
-            spawn: { frames: 12, prefix: 'high_jump', fps: 12 },  // Respawn animation
+            spawn: { frames: 12, prefix: 'high_jump', fps: 16 },  // Respawn animation (faster)
         },
         scale: 2.0,
         anchorY: 0.95,  // Knight feet at 95% down in 128x128 sprite
@@ -1363,14 +1363,12 @@ export default function GameRenderer() {
             }
             // Use crit_attack animation for crits, normal attack otherwise
             const attackAnim = data?.isCrit ? 'crit_attack' : 'attack';
-            // Store damage info to show at end of animation
+            // Show damage after short delay (when attack "hits")
             const damageToShow = data?.damage;
             const attackType = data?.attackType;
-            // Trigger attack animation - plays once, then returns to ready stance
-            if (playerRef.current?.animController) {
-                playerRef.current.animController.play(attackAnim, false, () => {
-                    // Show damage at end of attack animation
-                    if (damageToShow && appRef.current && effectsContainerRef.current) {
+            if (damageToShow) {
+                setTimeout(() => {
+                    if (appRef.current && effectsContainerRef.current) {
                         let text = `${damageToShow}`;
                         if (attackType === 'crit') text = `CRIT ${damageToShow}!`;
                         else if (attackType === 'ascendedCrit') text = `ASCEND ${damageToShow}!`;
@@ -1379,6 +1377,11 @@ export default function GameRenderer() {
                             { text, type: attackType || 'playerDmg', target: 'enemy' },
                             positionsRef.current);
                     }
+                }, 150); // Delay to sync with attack animation impact
+            }
+            // Trigger attack animation - plays once, then returns to ready stance
+            if (playerRef.current?.animController) {
+                playerRef.current.animController.play(attackAnim, false, () => {
                     if (playerRef.current?.animController) {
                         // Try ready stance, fall back to idle if not available
                         let texture = playerRef.current.animController.play('ready', true);
