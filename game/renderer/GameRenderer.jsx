@@ -1395,8 +1395,13 @@ export default function GameRenderer() {
                     playerRef.current.baseY = characterY;
                     playerRef.current.x = playerX;
                     playerRef.current.y = characterY - 25 * scaleFactor;
-                    const playerScale = (ENEMY_SPRITES['Knight'].scale || 4) * 1.5 * scaleFactor;
-                    playerRef.current.scale.set(-playerScale, playerScale);
+                    // Use animated sprite scale if available, otherwise fallback to old scale
+                    const playerScale = playerRef.current.animController
+                        ? (ANIMATED_SPRITES.player?.scale || 0.8) * scaleFactor
+                        : (ENEMY_SPRITES['Knight'].scale || 4) * 1.5 * scaleFactor;
+                    const flipX = playerRef.current.flipX || -1;
+                    playerRef.current.scale.set(playerScale * flipX, playerScale);
+                    playerRef.current.baseScale = playerScale;
 
                     // Update player shadow and glow
                     if (playerRef.current.shadow) {
@@ -1423,9 +1428,15 @@ export default function GameRenderer() {
                     enemyRef.current.auraY = characterY - 25;
 
                     const zone = getZoneById(gameManager.getState()?.currentZone || 0);
-                    const baseScale = (zone?.isBoss ? 6.5 : 5) * scaleFactor;
+                    // Use animated sprite scale if available
+                    const animSpriteKey = enemyRef.current.animatedSpriteKey;
+                    const animConfig = animSpriteKey ? ANIMATED_SPRITES[animSpriteKey] : null;
+                    const baseScale = enemyRef.current.animController && animConfig
+                        ? (animConfig.scale || 0.35) * scaleFactor
+                        : (zone?.isBoss ? 6.5 : 5) * scaleFactor;
+                    const flipX = enemyRef.current.flipX || -1;
                     enemyRef.current.baseScale = baseScale;
-                    enemyRef.current.scale.set(-baseScale, baseScale);
+                    enemyRef.current.scale.set(baseScale * flipX, baseScale);
 
                     if (enemyRef.current.shadow) {
                         enemyRef.current.shadow.clear();
