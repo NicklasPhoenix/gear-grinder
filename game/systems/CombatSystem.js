@@ -394,8 +394,8 @@ export class CombatSystem {
             // Reset player attack timer
             newState.combatState.playerAttackTimer = this.getPlayerAttackInterval(stats);
 
-            // Trigger player attack animation callback
-            this.callbacks.onPlayerAttack();
+            // Trigger player attack animation callback with crit info
+            this.callbacks.onPlayerAttack(playerAttackResult.isCrit);
         }
 
         // Check Enemy Death after player attack
@@ -633,6 +633,7 @@ export class CombatSystem {
             this.callbacks.onFloatingText(`+${bonusSilver}s`, 'silver', 'player');
         }
 
+        combatUpdates.isCrit = isCrit;
         return combatUpdates;
     }
 

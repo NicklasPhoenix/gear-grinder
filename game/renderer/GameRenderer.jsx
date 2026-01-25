@@ -18,6 +18,7 @@ const ANIMATED_SPRITES = {
             idle: { frames: 12, prefix: 'idle', fps: 10 },  // Bored animation for long inactivity
             ready: { frames: 1, prefix: 'ready', fps: 1, indices: [1], dir: 'idle' },  // Combat ready stance
             attack: { frames: 4, prefix: 'attack', fps: 12, indices: [0, 1, 2, 4] },
+            crit_attack: { frames: 8, prefix: 'attack_extra', fps: 14, dir: 'crit_attack' },  // Crit attack animation
             hurt: { frames: 4, prefix: 'hurt', fps: 10 },
             death: { frames: 10, prefix: 'death', fps: 5 },  // 10 frames at 5 fps = 2 seconds
             spawn: { frames: 12, prefix: 'high_jump', fps: 12 },  // Respawn animation
@@ -1356,15 +1357,17 @@ export default function GameRenderer() {
         });
 
         // Listen for Player Attack - trigger player attack animation
-        const cleanupPlayerAttack = gameManager.on('playerAttack', () => {
+        const cleanupPlayerAttack = gameManager.on('playerAttack', (data) => {
             // Don't play attack animation if player is dying/dead/spawning
             if (animStateRef.current.playerDying || animStateRef.current.playerDead || animStateRef.current.playerSpawning) return;
 
             animStateRef.current.playerAttackCooldown = 15;
             audioManager.playSfxHit();
+            // Use crit_attack animation for crits, normal attack otherwise
+            const attackAnim = data?.isCrit ? 'crit_attack' : 'attack';
             // Trigger attack animation - plays once, then returns to ready stance
             if (playerRef.current?.animController) {
-                playerRef.current.animController.play('attack', false, () => {
+                playerRef.current.animController.play(attackAnim, false, () => {
                     if (playerRef.current?.animController) {
                         // Try ready stance, fall back to idle if not available
                         let texture = playerRef.current.animController.play('ready', true);
