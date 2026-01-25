@@ -58,11 +58,14 @@ export default function ZoneView() {
                     {allZones.map((zone, index) => {
                         const kills = state.zoneKills?.[zone.id] || 0;
                         const prevZone = index > 0 ? allZones[index - 1] : null;
+                        const nextZone = index < allZones.length - 1 ? allZones[index + 1] : null;
                         // Zone is unlocked if: it's zone 0, OR kills in previous zone >= this zone's requirement
                         const isUnlocked = zone.id === 0 ||
                             (prevZone && (state.zoneKills?.[prevZone.id] || 0) >= zone.killsRequired);
                         const isCurrent = state.currentZone === zone.id;
-                        const progress = zone.killsRequired > 0 ? Math.min(100, (kills / zone.killsRequired) * 100) : 100;
+                        // Progress shows kills towards NEXT zone's requirement (not this zone's)
+                        const nextZoneReq = nextZone?.killsRequired || 0;
+                        const progress = nextZoneReq > 0 ? Math.min(100, (kills / nextZoneReq) * 100) : 100;
 
                         return (
                             <div
@@ -149,8 +152,8 @@ export default function ZoneView() {
                                     );
                                 })()}
 
-                                {/* Progress bar with requirements */}
-                                {zone.killsRequired > 0 && (
+                                {/* Progress bar with requirements - shows progress to unlock NEXT zone */}
+                                {nextZoneReq > 0 && (
                                     <div className="mt-2">
                                         <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
                                             <div
@@ -160,15 +163,15 @@ export default function ZoneView() {
                                         </div>
                                         <div className="flex justify-between items-center mt-1">
                                             <span className={`text-[10px] ${progress >= 100 ? 'text-green-400' : 'text-slate-500'}`}>
-                                                {kills}/{zone.killsRequired} kills
+                                                {kills}/{nextZoneReq} kills
                                             </span>
                                             {progress < 100 && (
                                                 <span className="text-[10px] text-slate-500">
-                                                    {zone.killsRequired - kills} to unlock next
+                                                    {nextZoneReq - kills} to unlock next
                                                 </span>
                                             )}
                                             {progress >= 100 && (
-                                                <span className="text-[10px] text-green-400">Completed</span>
+                                                <span className="text-[10px] text-green-400">Next unlocked!</span>
                                             )}
                                         </div>
                                     </div>
