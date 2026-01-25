@@ -346,7 +346,8 @@ export class CombatSystem {
             newState.combatState.burnTimer = 0;
             newState.combatState.poisonTimer = 0;
             newState.combatState.secondWindUsed = false;
-            newState.combatState.playerAttackTimer = 0;
+            // Don't reset playerAttackTimer - maintain attack rhythm between enemies
+            // Only reset enemy timer since it's a new enemy
             newState.combatState.enemyAttackTimer = 0;
             if (stats.damageShield > 0) {
                 newState.combatState.damageShield = stats.damageShield;
