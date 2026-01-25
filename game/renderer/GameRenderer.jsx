@@ -895,11 +895,9 @@ export default function GameRenderer() {
                     // Position - no programmatic movement, just use sprite animations
                     let playerYOffset = playerRef.current.animController ? 0 : -25 * (pos.scaleFactor || 1);
                     if (animState.playerDying) {
-                        // Death sprites are 256x256 vs 128x128 - calculate offset to align feet
-                        // Extra pixels above anchor: (256-128) * anchorY * scale * scaleFactor
-                        const anchorY = ANIMATED_SPRITES.player?.anchorY || 0.95;
+                        // Death sprites are 256x256 vs 128x128 - offset to align
                         const scale = ANIMATED_SPRITES.player?.scale || 2.0;
-                        playerYOffset += (256 - 128) * anchorY * scale * (pos.scaleFactor || 1);
+                        playerYOffset += 32 * scale * (pos.scaleFactor || 1);
                     }
                     playerRef.current.y = (playerRef.current.baseY || pos.characterY) + playerYOffset;
                     playerRef.current.x = playerRef.current.baseX || pos.playerX;
