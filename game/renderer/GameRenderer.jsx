@@ -865,8 +865,11 @@ export default function GameRenderer() {
                     // Player death animation
                     if (animState.playerDying) {
                         if (playerRef.current.animController) {
-                            const newTexture = playerRef.current.animController.update(delta * 16.67);
+                            const ctrl = playerRef.current.animController;
+                            console.log('Death update - playing:', ctrl.playing, 'anim:', ctrl.currentAnim, 'frame:', ctrl.frameIndex);
+                            const newTexture = ctrl.update(delta * 16.67);
                             if (newTexture) {
+                                console.log('Death frame advanced to:', ctrl.frameIndex);
                                 playerRef.current.texture = newTexture;
                             }
                             // Check if death animation finished - start hold timer
