@@ -17,7 +17,7 @@ const ANIMATED_SPRITES = {
             attack: { frames: 4, prefix: 'attack', fps: 12, indices: [0, 1, 2, 4] },
             hurt: { frames: 2, prefix: 'hurt', fps: 8 },
         },
-        scale: 0.8,  // 128px * 0.8 = ~100px (similar to old 16px * 6)
+        scale: 1.6,  // Doubled from 0.8
         anchorY: 1,
         flipX: false,  // Knight sprite already faces right toward enemy
     },
@@ -30,8 +30,8 @@ const ANIMATED_SPRITES = {
             hurt: { frames: 2, prefix: 'Hurt', fps: 8 },
             death: { frames: 6, prefix: 'Death', fps: 8 },
         },
-        scale: 1.2,  // Character is small in canvas, need larger scale
-        anchorY: 0.75,  // Adjust anchor since character is in upper portion
+        scale: 2.4,  // Doubled from 1.2
+        anchorY: 0.75,
         flipX: false,  // Lizard already faces left toward player
     },
 };
