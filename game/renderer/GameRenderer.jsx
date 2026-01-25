@@ -640,18 +640,50 @@ export default function GameRenderer() {
                         } else {
                             enemyRef.current.tint = 0xff4444;
                             enemyRef.current.alpha = 1 - ((progress - 0.2) / 0.8);
+                            // Fade shadow and aura with enemy
+                            if (enemyRef.current.shadow) {
+                                enemyRef.current.shadow.alpha = 1 - ((progress - 0.2) / 0.8);
+                            }
+                            if (enemyRef.current.aura) {
+                                enemyRef.current.aura.alpha = 0;
+                            }
                         }
 
-                        // When death completes, start spawn after brief pause
+                        // When death completes, wait for respawn timer
                         if (progress >= 1) {
                             animState.enemyDying = false;
                             animState.enemyDeathProgress = 0;
-                            animState.enemySpawning = true;
-                            animState.enemySpawnProgress = 0;
+                            animState.waitingForRespawn = true;
+                            enemyRef.current.alpha = 0; // Hide completely
                             enemyRef.current.rotation = 0;
                             // Reset position for spawn
                             enemyRef.current.x = baseX;
                             enemyRef.current.y = baseY - 25 * (pos.scaleFactor || 1);
+                        }
+                    }
+                    // Waiting for respawn timer - enemy stays hidden
+                    else if (animState.waitingForRespawn) {
+                        enemyRef.current.alpha = 0;
+                        // Hide shadow and aura too
+                        if (enemyRef.current.shadow) {
+                            enemyRef.current.shadow.alpha = 0;
+                        }
+                        if (enemyRef.current.aura) {
+                            enemyRef.current.aura.alpha = 0;
+                        }
+                        // Check if respawn timer completed (enemy HP restored)
+                        const respawnTimer = state.combatState?.enemyRespawnTimer || 0;
+                        if (respawnTimer === 0 && state.enemyHp > 0) {
+                            animState.waitingForRespawn = false;
+                            animState.enemySpawning = true;
+                            animState.enemySpawnProgress = 0;
+                            // Restore shadow and aura visibility
+                            if (enemyRef.current.shadow) {
+                                enemyRef.current.shadow.alpha = 1;
+                            }
+                            if (enemyRef.current.aura) {
+                                enemyRef.current.aura.alpha = 1;
+                            }
                         }
                     }
                     // Spawn animation - slide in from right
