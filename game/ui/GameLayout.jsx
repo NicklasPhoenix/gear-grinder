@@ -950,90 +950,55 @@ function KeyboardHelpModal({ onClose }) {
         { keys: ['Esc'], action: 'Close modals and menus' },
     ];
 
-    // Sprite sheet coordinates (256x256 sheet, scaled 2x for display)
-    // Wooden panel: x=4, y=46, w=78, h=90
-    // X button: x=64, y=176, w=16, h=16
-    const SPRITE = '/assets/ui-fantasy/freefantasy.png';
-
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
             onClick={onClose}
             role="dialog"
             aria-modal="true"
             aria-labelledby="keyboard-help-title"
         >
-            {/* Modal container */}
             <div
-                className="relative max-w-md w-full mx-4"
+                className="bg-slate-800 rounded-xl border-2 border-slate-700 p-6 max-w-md w-full mx-4 shadow-2xl"
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* Wooden panel background from sprite sheet - stretched to fit */}
-                <div
-                    className="absolute inset-0"
-                    style={{
-                        backgroundImage: `url(${SPRITE})`,
-                        backgroundPosition: '-8px -92px', // Panel position, scaled 2x
-                        backgroundSize: '512px 512px', // 256 * 2 for crisp pixels
-                        imageRendering: 'pixelated',
-                        borderRadius: '8px',
-                    }}
-                />
+                <div className="flex justify-between items-center mb-4">
+                    <h2 id="keyboard-help-title" className="text-xl font-bold text-white">
+                        Keyboard Shortcuts
+                    </h2>
+                    <button
+                        onClick={onClose}
+                        className="text-slate-400 hover:text-white transition-colors p-1"
+                        aria-label="Close"
+                    >
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
 
-                {/* Content overlay */}
-                <div className="relative p-6">
-                    {/* Header */}
-                    <div className="flex justify-between items-center mb-4">
-                        <h2
-                            id="keyboard-help-title"
-                            className="text-xl font-bold text-amber-100"
-                            style={{ textShadow: '2px 2px 2px #000' }}
-                        >
-                            Keyboard Shortcuts
-                        </h2>
-                        {/* X button from sprite sheet */}
-                        <button
-                            onClick={onClose}
-                            className="w-8 h-8 transition-transform hover:scale-110 active:scale-95"
-                            style={{
-                                backgroundImage: `url(${SPRITE})`,
-                                backgroundPosition: '-128px -352px', // X button position, scaled 2x
-                                backgroundSize: '512px 512px',
-                                imageRendering: 'pixelated',
-                            }}
-                            aria-label="Close"
-                        />
-                    </div>
-
-                    {/* Shortcuts list */}
-                    <div className="space-y-3">
-                        {shortcuts.map((shortcut, index) => (
-                            <div
-                                key={index}
-                                className="flex flex-col gap-1 p-2 rounded bg-black/30"
-                            >
-                                <div className="flex flex-wrap gap-1.5">
-                                    {shortcut.keys.map((key, i) => (
-                                        <kbd
-                                            key={i}
-                                            className="px-2 py-1 text-sm font-mono bg-amber-900/80 border-2 border-amber-950 rounded text-amber-100"
-                                            style={{ textShadow: '1px 1px 1px #000' }}
-                                        >
-                                            {key}
-                                        </kbd>
-                                    ))}
-                                </div>
-                                <span className="text-sm text-amber-200/80">{shortcut.action}</span>
+                <div className="space-y-4">
+                    {shortcuts.map((shortcut, index) => (
+                        <div key={index} className="flex flex-col gap-1.5">
+                            <div className="flex flex-wrap gap-1">
+                                {shortcut.keys.map((key, i) => (
+                                    <kbd
+                                        key={i}
+                                        className="px-2 py-1 bg-slate-900 border border-slate-600 rounded text-sm font-mono text-slate-300"
+                                    >
+                                        {key}
+                                    </kbd>
+                                ))}
                             </div>
-                        ))}
-                    </div>
+                            <span className="text-slate-400 text-sm">{shortcut.action}</span>
+                        </div>
+                    ))}
+                </div>
 
-                    {/* Footer */}
-                    <div className="mt-4 pt-3 border-t border-amber-900/50 text-center">
-                        <p className="text-xs text-amber-200/60">
-                            Press <kbd className="px-1.5 py-0.5 bg-black/30 rounded text-[10px] font-mono text-amber-200">?</kbd> or <kbd className="px-1.5 py-0.5 bg-black/30 rounded text-[10px] font-mono text-amber-200">Esc</kbd> to close
-                        </p>
-                    </div>
+                <div className="mt-6 pt-4 border-t border-slate-700 text-center">
+                    <p className="text-slate-500 text-xs">
+                        Press <kbd className="px-1.5 py-0.5 bg-slate-900 rounded text-[10px] font-mono">?</kbd> or <kbd className="px-1.5 py-0.5 bg-slate-900 rounded text-[10px] font-mono">Esc</kbd> to close
+                    </p>
                 </div>
             </div>
         </div>
