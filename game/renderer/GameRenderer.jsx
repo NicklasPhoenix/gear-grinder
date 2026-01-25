@@ -21,7 +21,7 @@ const ANIMATED_SPRITES = {
         anchorY: 1,
         flipX: false,  // Knight sprite already faces right toward enemy
     },
-    // Zone 0 enemy - Lizard warrior (256x256 sprite)
+    // Zone 0 enemy - Lizard warrior (256x256 canvas, character ~80px within)
     lizard: {
         basePath: '/assets/monsters/lizard',
         animations: {
@@ -30,9 +30,9 @@ const ANIMATED_SPRITES = {
             hurt: { frames: 2, prefix: 'Hurt', fps: 8 },
             death: { frames: 6, prefix: 'Death', fps: 8 },
         },
-        scale: 0.35,  // 256px * 0.35 = ~90px (similar to old 16px * 5)
-        anchorY: 0.9,
-        flipX: true,  // Lizard needs to be flipped to face left toward player
+        scale: 1.2,  // Character is small in canvas, need larger scale
+        anchorY: 0.75,  // Adjust anchor since character is in upper portion
+        flipX: false,  // Lizard already faces left toward player
     },
 };
 
