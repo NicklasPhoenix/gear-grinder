@@ -878,6 +878,7 @@ export default function GameRenderer() {
                         if (gmState?.playerHp > 0) {
                             animState.playerDead = false;
                             animState.playerSpawning = true;
+                            animState.playerSpawnProgress = 0;
                             playerRef.current.alpha = 1;
                             if (playerRef.current.animController) {
                                 const texture = playerRef.current.animController.play('spawn', false);
@@ -885,16 +886,19 @@ export default function GameRenderer() {
                             }
                         }
                     }
-                    // Player spawning - play spawn animation, no attacks/damage
+                    // Player spawning - play spawn animation with Y movement
                     else if (animState.playerSpawning) {
                         if (playerRef.current.animController) {
                             const newTexture = playerRef.current.animController.update(delta * 16.67);
                             if (newTexture) {
                                 playerRef.current.texture = newTexture;
                             }
+                            // Track spawn progress (0 to 1)
+                            animState.playerSpawnProgress = Math.min(1, (animState.playerSpawnProgress || 0) + delta * 0.8);
                             // When spawn animation finishes, go to ready
                             if (!playerRef.current.animController.playing) {
                                 animState.playerSpawning = false;
+                                animState.playerSpawnProgress = 1;
                                 playerRef.current.animController.play('ready', true);
                             }
                         }
@@ -912,10 +916,13 @@ export default function GameRenderer() {
 
                     // Position - no programmatic movement, just use sprite animations
                     let playerYOffset = playerRef.current.animController ? 0 : -25 * (pos.scaleFactor || 1);
-                    if (animState.playerDying) {
-                        // Death sprites are 256x256 vs 128x128 - offset to align
-                        const scale = ANIMATED_SPRITES.player?.scale || 2.0;
-                        playerYOffset += 16 * scale * (pos.scaleFactor || 1);
+                    if (animState.playerSpawning) {
+                        // Spawn: start off-screen (above) and land at normal position
+                        const spawnHeight = 400 * (pos.scaleFactor || 1);
+                        const progress = animState.playerSpawnProgress || 0;
+                        // Ease out - fast at start, slow at end (landing)
+                        const eased = 1 - Math.pow(1 - progress, 2);
+                        playerYOffset -= spawnHeight * (1 - eased);
                     }
                     playerRef.current.y = (playerRef.current.baseY || pos.characterY) + playerYOffset;
                     playerRef.current.x = playerRef.current.baseX || pos.playerX;
