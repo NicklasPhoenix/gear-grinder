@@ -929,6 +929,12 @@ export default function GameRenderer() {
 
                         // Enemy attack animation - lunge towards player
                         if (animState.enemyAttackCooldown > 0) {
+                            // Play attack animation for animated sprites (only at start)
+                            if (enemyRef.current.animController && animState.enemyAttackCooldown > 14) {
+                                enemyRef.current.animController.play('attack', false, () => {
+                                    enemyRef.current.animController.play('idle');
+                                });
+                            }
                             animState.enemyAttackCooldown -= delta;
                             const progress = animState.enemyAttackCooldown / 15;
                             // Lunge towards player (negative X direction)
