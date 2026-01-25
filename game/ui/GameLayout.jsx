@@ -966,7 +966,7 @@ function KeyboardHelpModal({ onClose }) {
             >
                 {/* Wooden sign background image */}
                 <img
-                    src="/assets/ui-elements/8.png"
+                    src="/assets/ui-elements/large_sign.png"
                     alt=""
                     className="w-full h-auto"
                     style={{ imageRendering: 'pixelated' }}
@@ -989,7 +989,7 @@ function KeyboardHelpModal({ onClose }) {
                             aria-label="Close"
                         >
                             <img
-                                src="/assets/ui-elements/1 (6).png"
+                                src="/assets/ui-elements/dark_X_button.png"
                                 alt="Close"
                                 className="w-6 h-6"
                                 style={{ imageRendering: 'pixelated' }}

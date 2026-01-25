@@ -137,7 +137,7 @@ export default function CharacterSelectScreen({ onSelectCharacter }) {
                         >
                             {/* Wooden panel background */}
                             <img
-                                src="/assets/ui-elements/8.png"
+                                src="/assets/ui-elements/large_sign.png"
                                 alt=""
                                 className="w-full h-auto"
                                 style={{ imageRendering: 'pixelated' }}
@@ -187,7 +187,7 @@ export default function CharacterSelectScreen({ onSelectCharacter }) {
                                                 className="px-3 py-1.5 bg-red-800/60 hover:bg-red-700 text-red-200 text-sm rounded transition-colors"
                                             >
                                                 <img
-                                                    src="/assets/ui-elements/1 (6).png"
+                                                    src="/assets/ui-elements/dark_X_button.png"
                                                     alt="Delete"
                                                     className="w-4 h-4"
                                                     style={{ imageRendering: 'pixelated' }}
@@ -212,7 +212,7 @@ export default function CharacterSelectScreen({ onSelectCharacter }) {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
                     <div className="relative max-w-md w-full mx-4">
                         <img
-                            src="/assets/ui-elements/8.png"
+                            src="/assets/ui-elements/large_sign.png"
                             alt=""
                             className="w-full h-auto"
                             style={{ imageRendering: 'pixelated' }}
@@ -229,7 +229,7 @@ export default function CharacterSelectScreen({ onSelectCharacter }) {
                                     className="transition-transform hover:scale-110 active:scale-95"
                                 >
                                     <img
-                                        src="/assets/ui-elements/1 (6).png"
+                                        src="/assets/ui-elements/dark_X_button.png"
                                         alt="Close"
                                         className="w-6 h-6"
                                         style={{ imageRendering: 'pixelated' }}

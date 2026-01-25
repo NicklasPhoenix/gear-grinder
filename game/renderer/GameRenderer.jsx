@@ -191,6 +191,11 @@ function createAnimatedSpriteController(animations, defaultAnim = 'idle') {
         },
 
         play(animName, loop = true, onComplete = null) {
+            // Guard: don't switch to non-existent animation
+            if (!this.animations[animName]) {
+                console.warn(`Animation '${animName}' not found, available:`, Object.keys(this.animations));
+                return null;
+            }
             if (this.currentAnim !== animName || !this.playing) {
                 // When returning to idle, resume from saved state
                 if (animName === 'idle') {
@@ -553,6 +558,7 @@ export default function GameRenderer() {
             // --- Create Player (Hero) using animated sprite ---
             const playerAnimConfig = ANIMATED_SPRITES.player;
             const playerAnims = await loadAnimatedSpriteTextures('player');
+            console.log('Player animations loaded:', playerAnims ? Object.keys(playerAnims) : 'none');
 
             let player;
             let playerAnimController = null;
@@ -843,11 +849,16 @@ export default function GameRenderer() {
 
                     // Check for player death
                     if (gmState?.playerHp <= 0 && !animState.playerDying && !animState.playerDead) {
+                        console.log('Player death triggered, HP:', gmState.playerHp);
                         animState.playerDying = true;
                         animState.playerDeathHold = 0;
                         if (playerRef.current.animController) {
+                            console.log('Playing death animation...');
                             const texture = playerRef.current.animController.play('death', false);
+                            console.log('Death texture:', texture ? 'got texture' : 'NO TEXTURE');
                             if (texture) playerRef.current.texture = texture;
+                        } else {
+                            console.log('No animController on player!');
                         }
                     }
 
