@@ -46,7 +46,7 @@ export default function DailyRewardsModal({ onClose }) {
         // Show floating text for each reward
         const reward = getDailyReward(claimDay);
         if (reward.rewards.gold) {
-            gameManager.emit('floatingText', { text: `+${formatWithCommas(reward.rewards.gold)}g`, type: 'heal', target: 'player' });
+            gameManager.emit('floatingText', { text: `+${formatWithCommas(reward.rewards.gold)}s`, type: 'silver', target: 'player' });
         }
 
         onClose();

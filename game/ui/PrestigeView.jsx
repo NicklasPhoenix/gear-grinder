@@ -12,7 +12,7 @@ export default function PrestigeView() {
     const stoneReward = 10 + Math.floor((state.level || 1) / 2);
 
     const handlePrestige = () => {
-        if (confirm(`ASCEND NOW?\n\nThis will reset your level, gold, gear, and zone progress, but you will keep your Prestige Skills and earn ${stoneReward} Prestige Stones.`)) {
+        if (confirm(`ASCEND NOW?\n\nThis will reset your level, silver, gear, and zone progress, but you will keep your Prestige Skills and earn ${stoneReward} Prestige Stones.`)) {
             gameManager.performPrestige();
         }
     };

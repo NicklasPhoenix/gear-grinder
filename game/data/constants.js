@@ -148,7 +148,7 @@ export const INVENTORY = {
     BASE_SLOTS: 50,           // Starting inventory slots
     MAX_SLOTS: 200,           // Maximum purchasable slots
     SLOTS_PER_UPGRADE: 10,    // Slots gained per upgrade
-    BASE_UPGRADE_COST: 500,   // Gold cost for first upgrade
+    BASE_UPGRADE_COST: 500,   // Silver cost for first upgrade
     COST_MULTIPLIER: 1.5,     // Cost multiplier per upgrade
 };
 

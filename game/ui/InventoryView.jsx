@@ -170,7 +170,7 @@ export default function InventoryView({ onHover }) {
             dailySalvaged: (prev.dailySalvaged || 0) + salvageCount, // Track for objectives
         }));
         setSelectedForSalvage(new Set());
-        gameManager.emit('floatingText', { text: `+${totalGold}g`, type: 'heal', target: 'player' });
+        gameManager.emit('floatingText', { text: `+${totalGold}s`, type: 'silver', target: 'player' });
     };
 
     const handleSalvageAll = () => {
@@ -192,7 +192,7 @@ export default function InventoryView({ onHover }) {
             dailySalvaged: (prev.dailySalvaged || 0) + salvageCount, // Track for objectives
         }));
         setSelectedForSalvage(new Set());
-        gameManager.emit('floatingText', { text: `+${totalGold}g`, type: 'heal', target: 'player' });
+        gameManager.emit('floatingText', { text: `+${totalGold}s`, type: 'silver', target: 'player' });
     };
 
     const toggleItemLock = (itemId) => {
@@ -525,9 +525,9 @@ export default function InventoryView({ onHover }) {
                                         ? 'bg-yellow-600/50 text-yellow-300 hover:bg-yellow-600/70'
                                         : 'bg-slate-700/30 text-slate-500 cursor-not-allowed'
                                 }`}
-                                title={`+${INVENTORY.SLOTS_PER_UPGRADE} slots for ${formatNumber(upgradeCost)}g`}
+                                title={`+${INVENTORY.SLOTS_PER_UPGRADE} slots for ${formatNumber(upgradeCost)}s`}
                             >
-                                +{INVENTORY.SLOTS_PER_UPGRADE} ({formatNumber(upgradeCost)}g)
+                                +{INVENTORY.SLOTS_PER_UPGRADE} ({formatNumber(upgradeCost)}s)
                             </button>
                         )}
                         {isMaxed && (

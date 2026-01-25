@@ -296,7 +296,7 @@ export default function SettingsView() {
                             </div>
                             <button
                                 onClick={() => {
-                                    if (confirm('⚠️ RESET GAME?\n\nThis will DELETE ALL your progress:\n• Level & Stats\n• Gear & Inventory\n• Gold & Materials\n• Prestige & Skills\n• Achievements\n\nThis CANNOT be undone!\n\nAre you absolutely sure?')) {
+                                    if (confirm('⚠️ RESET GAME?\n\nThis will DELETE ALL your progress:\n• Level & Stats\n• Gear & Inventory\n• Silver & Materials\n• Prestige & Skills\n• Achievements\n\nThis CANNOT be undone!\n\nAre you absolutely sure?')) {
                                         if (confirm('FINAL WARNING!\n\nYou are about to lose EVERYTHING.\n\nType "RESET" in the next prompt to confirm.') &&
                                             prompt('Type RESET to confirm:')?.toUpperCase() === 'RESET') {
                                             gameManager?.resetGame();
