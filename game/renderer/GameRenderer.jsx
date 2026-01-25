@@ -713,12 +713,30 @@ export default function GameRenderer() {
                     }
                 }
 
-                // Player hit flash
+                // Player hit flash with recoil
                 if (playerRef.current && animState.playerHitFlash > 0) {
                     animState.playerHitFlash -= delta;
-                    playerRef.current.tint = 0xff6666;
+                    const pos = positionsRef.current;
+                    const baseX = playerRef.current.baseX || pos.playerX;
+
+                    // Flash white first, then red
+                    if (animState.playerHitFlash > 12) {
+                        playerRef.current.tint = 0xffffff;
+                    } else {
+                        playerRef.current.tint = 0xff6666;
+                    }
+
+                    // Recoil backwards (away from enemy)
+                    const recoilProgress = animState.playerHitFlash / 15;
+                    const recoilDist = Math.sin(recoilProgress * Math.PI) * 25 * (pos.scaleFactor || 1);
+                    playerRef.current.x = baseX - recoilDist;
                 } else if (playerRef.current) {
                     playerRef.current.tint = 0xffffff;
+                    // Reset position when not in hit animation
+                    const pos = positionsRef.current;
+                    if (animState.playerAttackCooldown <= 0) {
+                        playerRef.current.x = playerRef.current.baseX || pos.playerX;
+                    }
                 }
 
                 // Update particles
@@ -889,13 +907,20 @@ export default function GameRenderer() {
                 spawnHitParticles(pos.enemyX, pos.characterY - 55, 0xeab308, 10);
             }
             if (data.type === 'enemyDmg') {
-                animStateRef.current.playerHitFlash = 8;
-                animStateRef.current.screenShake.intensity = 4;
-                spawnHitParticles(pos.playerX, pos.characterY - 55, 0xef4444, 8);
+                // Player taking damage - make it very noticeable
+                animStateRef.current.playerHitFlash = 15;
+                animStateRef.current.screenShake.intensity = 12;
+                animStateRef.current.enemyAttackCooldown = 15; // Enemy lunge animation
+                // More particles, spread wider for impact feel
+                spawnHitParticles(pos.playerX, pos.characterY - 55, 0xef4444, 20);
+                spawnHitParticles(pos.playerX - 20, pos.characterY - 40, 0xff6666, 8);
+                spawnHitParticles(pos.playerX + 20, pos.characterY - 70, 0xff6666, 8);
             }
             if (data.type === 'shield') {
-                // Blue shield absorb effect
-                spawnHitParticles(pos.playerX, pos.characterY - 55, 0x3b82f6, 6);
+                // Blue shield absorb effect - slightly more visible
+                animStateRef.current.playerHitFlash = 6;
+                animStateRef.current.enemyAttackCooldown = 15;
+                spawnHitParticles(pos.playerX, pos.characterY - 55, 0x3b82f6, 15);
             }
         });
 
