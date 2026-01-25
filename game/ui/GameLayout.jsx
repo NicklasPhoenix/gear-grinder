@@ -972,7 +972,7 @@ function KeyboardHelpModal({ onClose }) {
                 />
 
                 {/* Content overlay positioned on the wooden part (skip chain at top) */}
-                <div className="absolute inset-0 flex flex-col px-12 pt-[28%] pb-[12%]">
+                <div className="absolute inset-0 flex flex-col pl-[18%] pr-[14%] pt-[35%] pb-[10%]">
                     {/* Header */}
                     <div className="flex justify-between items-center mb-3">
                         <h2
