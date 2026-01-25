@@ -340,8 +340,8 @@ export class CombatSystem {
             } else {
                 this.handleEnemyDeath(newState, stats, zone, log, safeMaxHp);
             }
-            // Reset combat state on enemy death
-            newState.combatState.rageStacks = 0;
+            // Reset combat state on enemy death (rage persists between enemies)
+            // newState.combatState.rageStacks = 0; // Rage now persists!
             newState.combatState.bleedTimer = 0;
             newState.combatState.burnTimer = 0;
             newState.combatState.poisonTimer = 0;
