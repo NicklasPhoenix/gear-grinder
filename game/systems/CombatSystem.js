@@ -179,8 +179,10 @@ export class CombatSystem {
      * Calculate player attack interval in ticks based on speed stats.
      */
     getPlayerAttackInterval(stats) {
+        const speedMult = stats.speedMult || 1;
         const baseInterval = COMBAT.TICK_RATE / COMBAT.ATTACKS_PER_SECOND;
-        return Math.max(1, Math.floor(baseInterval / stats.speedMult));
+        const interval = Math.floor(baseInterval / speedMult);
+        return Math.max(1, isNaN(interval) ? 5 : interval);
     }
 
     /**
@@ -188,21 +190,22 @@ export class CombatSystem {
      */
     getEnemyAttackInterval(zoneId, isEndless, endlessWave) {
         // Base enemy attack speed scales with zone difficulty
-        let speedMult = COMBAT.BASE_ENEMY_ATTACK_SPEED;
+        let speedMult = COMBAT.BASE_ENEMY_ATTACK_SPEED || 1;
 
         if (isEndless) {
             // In endless mode, speed scales with wave
             speedMult += (endlessWave || 1) * 0.01;
         } else {
             // In normal zones, speed scales with zone ID
-            speedMult += zoneId * COMBAT.ENEMY_SPEED_SCALING;
+            speedMult += (zoneId || 0) * (COMBAT.ENEMY_SPEED_SCALING || 0.015);
         }
 
         // Cap at max speed
-        speedMult = Math.min(speedMult, COMBAT.MAX_ENEMY_ATTACK_SPEED);
+        speedMult = Math.min(speedMult, COMBAT.MAX_ENEMY_ATTACK_SPEED || 3);
 
         const baseInterval = COMBAT.TICK_RATE / speedMult;
-        return Math.max(2, Math.floor(baseInterval)); // Min 2 ticks between attacks
+        const interval = Math.floor(baseInterval);
+        return Math.max(2, isNaN(interval) ? 20 : interval);
     }
 
     /**
@@ -247,6 +250,14 @@ export class CombatSystem {
         } else {
             // Deep copy combatState to avoid mutating the original
             newState.combatState = { ...state.combatState };
+        }
+
+        // Ensure attack timers are valid numbers (fix corrupted saves)
+        if (typeof newState.combatState.playerAttackTimer !== 'number' || isNaN(newState.combatState.playerAttackTimer)) {
+            newState.combatState.playerAttackTimer = 0;
+        }
+        if (typeof newState.combatState.enemyAttackTimer !== 'number' || isNaN(newState.combatState.enemyAttackTimer)) {
+            newState.combatState.enemyAttackTimer = 0;
         }
 
         // Ensure HP values are valid

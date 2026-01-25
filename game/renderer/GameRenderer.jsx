@@ -253,9 +253,16 @@ export default function GameRenderer() {
 
             for (let i = 0; i < sheetNames.length; i++) {
                 const sheetName = sheetNames[i];
+                const assetPath = ASSET_BASE[sheetName];
                 try {
                     setLoadingProgress({ loaded: loadedCount, total: totalAssetsFinal, status: `Loading ${sheetName}...` });
-                    const sheet = await PIXI.Assets.load(ASSET_BASE[sheetName]);
+                    // Check if already cached to avoid duplicate key warnings
+                    let sheet;
+                    if (PIXI.Assets.cache.has(assetPath)) {
+                        sheet = PIXI.Assets.cache.get(assetPath);
+                    } else {
+                        sheet = await PIXI.Assets.load(assetPath);
+                    }
                     sheet.source.scaleMode = 'nearest';
                     spriteSheets[sheetName] = sheet;
                     loadedCount++;
@@ -272,7 +279,13 @@ export default function GameRenderer() {
                 const spritePath = `/assets/monsters/${spriteName}.png`;
                 try {
                     setLoadingProgress({ loaded: loadedCount, total: totalAssetsFinal, status: `Loading ${spriteName}...` });
-                    const texture = await PIXI.Assets.load(spritePath);
+                    // Check if already cached to avoid duplicate key warnings
+                    let texture;
+                    if (PIXI.Assets.cache.has(spritePath)) {
+                        texture = PIXI.Assets.cache.get(spritePath);
+                    } else {
+                        texture = await PIXI.Assets.load(spritePath);
+                    }
                     texture.source.scaleMode = 'nearest';
                     monsterTextureCache[spritePath] = texture;
                     loadedCount++;
@@ -288,7 +301,13 @@ export default function GameRenderer() {
                 const spritePath = `/assets/bosses/${spriteName}.png`;
                 try {
                     setLoadingProgress({ loaded: loadedCount, total: totalAssetsFinal, status: `Loading ${spriteName}...` });
-                    const texture = await PIXI.Assets.load(spritePath);
+                    // Check if already cached to avoid duplicate key warnings
+                    let texture;
+                    if (PIXI.Assets.cache.has(spritePath)) {
+                        texture = PIXI.Assets.cache.get(spritePath);
+                    } else {
+                        texture = await PIXI.Assets.load(spritePath);
+                    }
                     texture.source.scaleMode = 'nearest';
                     monsterTextureCache[spritePath] = texture;
                     loadedCount++;
@@ -1015,7 +1034,9 @@ export default function GameRenderer() {
             }
             activeGraphicsRef.current = [];
             if (appRef.current) {
-                appRef.current.destroy(true, { children: true, texture: true });
+                // Don't destroy textures - they're managed by PIXI.Assets cache
+                // Destroying them causes warnings on remount
+                appRef.current.destroy(true, { children: true, texture: false });
                 appRef.current = null;
             }
         };
@@ -1178,7 +1199,13 @@ export default function GameRenderer() {
         // Load forest background image based on zone
         const bgPath = getBackgroundForZone(zoneId);
         try {
-            const bgTexture = await PIXI.Assets.load(bgPath);
+            // Check if already cached to avoid duplicate key warnings
+            let bgTexture;
+            if (PIXI.Assets.cache.has(bgPath)) {
+                bgTexture = PIXI.Assets.cache.get(bgPath);
+            } else {
+                bgTexture = await PIXI.Assets.load(bgPath);
+            }
             const bgSprite = new PIXI.Sprite(bgTexture);
 
             // Calculate scale to cover canvas while maintaining aspect ratio (no stretching)
@@ -1249,7 +1276,13 @@ export default function GameRenderer() {
 
         const bgPath = getBackgroundForZone(zoneId);
         try {
-            const bgTexture = await PIXI.Assets.load(bgPath);
+            // Check if already cached to avoid duplicate key warnings
+            let bgTexture;
+            if (PIXI.Assets.cache.has(bgPath)) {
+                bgTexture = PIXI.Assets.cache.get(bgPath);
+            } else {
+                bgTexture = await PIXI.Assets.load(bgPath);
+            }
             bgSpriteRef.current.texture = bgTexture;
 
             // Recalculate scale to cover canvas
@@ -1652,13 +1685,23 @@ export default function GameRenderer() {
                 enemyRef.current.texture = monsterTextureCache[spritePath];
             } else {
                 // Fallback: load async if somehow not cached (shouldn't happen)
-                PIXI.Assets.load(spritePath).then((texture) => {
+                // Check PIXI cache first to avoid duplicate key warnings
+                if (PIXI.Assets.cache.has(spritePath)) {
+                    const texture = PIXI.Assets.cache.get(spritePath);
                     texture.source.scaleMode = 'nearest';
                     monsterTextureCache[spritePath] = texture;
                     if (enemyRef.current) {
                         enemyRef.current.texture = texture;
                     }
-                }).catch(err => console.warn('Failed to load monster sprite:', spritePath, err));
+                } else {
+                    PIXI.Assets.load(spritePath).then((texture) => {
+                        texture.source.scaleMode = 'nearest';
+                        monsterTextureCache[spritePath] = texture;
+                        if (enemyRef.current) {
+                            enemyRef.current.texture = texture;
+                        }
+                    }).catch(err => console.warn('Failed to load monster sprite:', spritePath, err));
+                }
             }
 
             // Scale for 32x32 sprites - larger for bosses (increased by 1.5x)
