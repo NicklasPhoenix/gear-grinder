@@ -15,7 +15,8 @@ const ANIMATED_SPRITES = {
     player: {
         basePath: '/assets/characters/knight',
         animations: {
-            idle: { frames: 12, prefix: 'idle', fps: 10 },
+            idle: { frames: 12, prefix: 'idle', fps: 10 },  // Bored animation for long inactivity
+            ready: { frames: 1, prefix: 'attack', fps: 1, indices: [0] },  // Combat ready stance (attack frame 0)
             attack: { frames: 4, prefix: 'attack', fps: 12, indices: [0, 1, 2, 4] },
             hurt: { frames: 2, prefix: 'hurt', fps: 8 },
         },
@@ -546,9 +547,9 @@ export default function GameRenderer() {
             const playerScale = (playerAnimConfig?.scale || 0.8) * scaleFactor;
 
             if (playerAnims && playerAnims.idle) {
-                // Use animated sprite
-                player = new PIXI.Sprite(playerAnims.idle.textures[0]);
-                playerAnimController = createAnimatedSpriteController(playerAnims, 'idle');
+                // Use animated sprite - start in ready stance
+                player = new PIXI.Sprite(playerAnims.ready?.textures[0] || playerAnims.idle.textures[0]);
+                playerAnimController = createAnimatedSpriteController(playerAnims, 'ready');
                 player.animController = playerAnimController;
             } else {
                 // Fallback to static sprite
@@ -1264,10 +1265,10 @@ export default function GameRenderer() {
         const cleanupPlayerAttack = gameManager.on('playerAttack', () => {
             animStateRef.current.playerAttackCooldown = 15;
             audioManager.playSfxHit();
-            // Trigger attack animation - plays once, then resumes idle smoothly
+            // Trigger attack animation - plays once, then returns to ready stance
             if (playerRef.current?.animController) {
                 playerRef.current.animController.play('attack', false, () => {
-                    playerRef.current?.animController?.play('idle', true);
+                    playerRef.current?.animController?.play('ready', true);
                 });
             }
         });
