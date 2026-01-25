@@ -146,7 +146,8 @@ function createAnimatedSpriteController(animations, defaultAnim = 'idle') {
         update(delta) {
             if (!this.playing || !this.animations[this.currentAnim]) return null;
 
-            const anim = this.animations[this.currentAnim];
+            const animName = this.currentAnim;
+            const anim = this.animations[animName];
             this.frameTimer += delta;
 
             // Keep updating saved idle state in background
@@ -171,6 +172,11 @@ function createAnimatedSpriteController(animations, defaultAnim = 'idle') {
                         this.frameIndex = anim.textures.length - 1;
                         this.playing = false;
                         if (this.onComplete) this.onComplete();
+                        // After callback, if a new animation started, return its texture
+                        // Otherwise the callback's texture assignment would be overwritten
+                        if (this.playing && this.currentAnim !== animName) {
+                            return this.getCurrentTexture();
+                        }
                     }
                 }
                 return anim.textures[this.frameIndex];
