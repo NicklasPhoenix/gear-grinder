@@ -952,53 +952,78 @@ function KeyboardHelpModal({ onClose }) {
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
             onClick={onClose}
             role="dialog"
             aria-modal="true"
             aria-labelledby="keyboard-help-title"
         >
+            {/* Wooden sign modal */}
             <div
-                className="bg-slate-800 rounded-xl border-2 border-slate-700 p-6 max-w-md w-full mx-4 shadow-2xl"
+                className="relative max-w-sm w-full mx-4"
                 onClick={(e) => e.stopPropagation()}
             >
-                <div className="flex justify-between items-center mb-4">
-                    <h2 id="keyboard-help-title" className="text-xl font-bold text-white">
-                        Keyboard Shortcuts
-                    </h2>
-                    <button
-                        onClick={onClose}
-                        className="text-slate-400 hover:text-white transition-colors p-1"
-                        aria-label="Close"
-                    >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
+                {/* Wooden sign background image */}
+                <img
+                    src="/assets/ui-elements/8.png"
+                    alt=""
+                    className="w-full h-auto"
+                    style={{ imageRendering: 'pixelated' }}
+                />
 
-                <div className="space-y-4">
-                    {shortcuts.map((shortcut, index) => (
-                        <div key={index} className="flex flex-col gap-1.5">
-                            <div className="flex flex-wrap gap-1">
-                                {shortcut.keys.map((key, i) => (
-                                    <kbd
-                                        key={i}
-                                        className="px-2 py-1 bg-slate-900 border border-slate-600 rounded text-sm font-mono text-slate-300"
-                                    >
-                                        {key}
-                                    </kbd>
-                                ))}
+                {/* Content overlay positioned on the wooden part */}
+                <div className="absolute inset-0 flex flex-col px-8 pt-16 pb-8">
+                    {/* Header */}
+                    <div className="flex justify-between items-center mb-3">
+                        <h2
+                            id="keyboard-help-title"
+                            className="text-lg font-bold text-amber-100"
+                            style={{ textShadow: '1px 1px 2px #000' }}
+                        >
+                            Keyboard Shortcuts
+                        </h2>
+                        <button
+                            onClick={onClose}
+                            className="text-amber-200 hover:text-white transition-colors"
+                            aria-label="Close"
+                        >
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ filter: 'drop-shadow(1px 1px 1px #000)' }}>
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    {/* Shortcuts list */}
+                    <div className="flex-1 overflow-y-auto space-y-2 custom-scrollbar">
+                        {shortcuts.map((shortcut, index) => (
+                            <div key={index} className="flex flex-col gap-1">
+                                <div className="flex flex-wrap gap-1">
+                                    {shortcut.keys.map((key, i) => (
+                                        <kbd
+                                            key={i}
+                                            className="px-1.5 py-0.5 bg-amber-900/60 border border-amber-800 rounded text-xs font-mono text-amber-100"
+                                            style={{ textShadow: '1px 1px 1px #000' }}
+                                        >
+                                            {key}
+                                        </kbd>
+                                    ))}
+                                </div>
+                                <span
+                                    className="text-amber-200/90 text-xs"
+                                    style={{ textShadow: '1px 1px 1px #000' }}
+                                >
+                                    {shortcut.action}
+                                </span>
                             </div>
-                            <span className="text-slate-400 text-sm">{shortcut.action}</span>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
 
-                <div className="mt-6 pt-4 border-t border-slate-700 text-center">
-                    <p className="text-slate-500 text-xs">
-                        Press <kbd className="px-1.5 py-0.5 bg-slate-900 rounded text-[10px] font-mono">?</kbd> or <kbd className="px-1.5 py-0.5 bg-slate-900 rounded text-[10px] font-mono">Esc</kbd> to close
-                    </p>
+                    {/* Footer */}
+                    <div className="mt-2 pt-2 border-t border-amber-900/30 text-center">
+                        <p className="text-amber-200/60 text-[10px]" style={{ textShadow: '1px 1px 1px #000' }}>
+                            Press <kbd className="px-1 py-0.5 bg-amber-900/40 rounded text-[9px] font-mono">?</kbd> or <kbd className="px-1 py-0.5 bg-amber-900/40 rounded text-[9px] font-mono">Esc</kbd> to close
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
