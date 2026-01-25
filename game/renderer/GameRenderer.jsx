@@ -19,7 +19,7 @@ const ANIMATED_SPRITES = {
             ready: { frames: 1, prefix: 'ready', fps: 1, indices: [1], dir: 'idle' },  // Combat ready stance
             attack: { frames: 4, prefix: 'attack', fps: 12, indices: [0, 1, 2, 4] },
             hurt: { frames: 4, prefix: 'hurt', fps: 10 },
-            death: { frames: 10, prefix: 'death', fps: 8 },  // 10 frames at 8 fps = 1.25 seconds
+            death: { frames: 10, prefix: 'death', fps: 5 },  // 10 frames at 5 fps = 2 seconds
         },
         scale: 2.0,
         anchorY: 0.95,  // Knight feet at 95% down in 128x128 sprite
@@ -840,7 +840,8 @@ export default function GameRenderer() {
                         animState.playerDying = true;
                         animState.playerDeathHold = 0;
                         if (playerRef.current.animController) {
-                            playerRef.current.animController.play('death', false);
+                            const texture = playerRef.current.animController.play('death', false);
+                            if (texture) playerRef.current.texture = texture;
                         }
                     }
 

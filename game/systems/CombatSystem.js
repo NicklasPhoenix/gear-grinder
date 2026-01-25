@@ -1005,8 +1005,8 @@ export class CombatSystem {
         // Track deaths on this zone - if too many, suggest going back
         state.deathsOnZone = (state.deathsOnZone || 0) + 1;
 
-        // Delay respawn to allow death animation to play (60 ticks = 3 seconds)
-        state.playerRespawnTimer = 60;
+        // Delay respawn to allow death animation to play (80 ticks = 4 seconds)
+        state.playerRespawnTimer = 80;
         state.playerRespawnHp = safeMaxHp;
         state.playerRespawnEnemyHp = zone.enemyHp;
     }
