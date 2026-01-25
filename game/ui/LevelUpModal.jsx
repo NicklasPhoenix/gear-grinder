@@ -130,14 +130,15 @@ export default function LevelUpModal({ level, onClose }) {
                         }}
                     />
 
-                    {/* Character sprite */}
+                    {/* Character sprite - offset to account for transparent padding in sprite */}
                     <img
                         src={KNIGHT_IDLE_FRAMES[currentFrame]}
                         alt="Knight"
                         className="w-48 h-48 md:w-64 md:h-64 object-contain"
                         style={{
                             imageRendering: 'pixelated',
-                            filter: 'drop-shadow(0 0 20px rgba(147, 51, 234, 0.6))'
+                            filter: 'drop-shadow(0 0 20px rgba(147, 51, 234, 0.6))',
+                            transform: 'translateX(8px)'
                         }}
                     />
                 </div>
