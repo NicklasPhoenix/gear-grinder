@@ -827,6 +827,7 @@ export default function GameRenderer() {
             app.ticker.add((ticker) => {
                 const delta = ticker.deltaTime;
                 const animState = animStateRef.current;
+                const gameSpeed = gameManager.gameSpeed || 1;
 
                 // Screen shake
                 if (animState.screenShake.intensity > 0) {
@@ -856,7 +857,7 @@ export default function GameRenderer() {
                     // Player death animation
                     if (animState.playerDying) {
                         if (playerRef.current.animController) {
-                            const newTexture = playerRef.current.animController.update(delta * 16.67);
+                            const newTexture = playerRef.current.animController.update(delta * 16.67 * gameSpeed);
                             if (newTexture) {
                                 playerRef.current.texture = newTexture;
                             }
@@ -886,7 +887,7 @@ export default function GameRenderer() {
                     else if (animState.playerSpawning) {
                         if (playerRef.current.animController) {
                             const ctrl = playerRef.current.animController;
-                            const newTexture = ctrl.update(delta * 16.67);
+                            const newTexture = ctrl.update(delta * 16.67 * gameSpeed);
                             if (newTexture) {
                                 playerRef.current.texture = newTexture;
                             }
@@ -905,7 +906,7 @@ export default function GameRenderer() {
                         // Update animated sprite frames
                         if (playerRef.current.animController) {
                             const ctrl = playerRef.current.animController;
-                            const newTexture = ctrl.update(delta * 16.67);
+                            const newTexture = ctrl.update(delta * 16.67 * gameSpeed);
                             if (newTexture) {
                                 playerRef.current.texture = newTexture;
                             }
@@ -959,7 +960,7 @@ export default function GameRenderer() {
 
                     // Track cooldown for state only
                     if (animState.playerAttackCooldown > 0) {
-                        animState.playerAttackCooldown -= delta;
+                        animState.playerAttackCooldown -= delta * gameSpeed;
                     }
                 }
 
@@ -974,7 +975,7 @@ export default function GameRenderer() {
 
                         // Update sprite animation
                         if (enemyRef.current.animController) {
-                            const newTexture = enemyRef.current.animController.update(delta * 16.67);
+                            const newTexture = enemyRef.current.animController.update(delta * 16.67 * gameSpeed);
                             if (newTexture) {
                                 enemyRef.current.texture = newTexture;
                             }
@@ -984,7 +985,7 @@ export default function GameRenderer() {
                             }
                             // Count down hold timer, then hide
                             if (animState.enemyDeathHold > 0) {
-                                animState.enemyDeathHold -= delta;
+                                animState.enemyDeathHold -= delta * gameSpeed;
                                 if (animState.enemyDeathHold <= 0) {
                                     animState.enemyDying = false;
                                     animState.enemyDeathHold = 0;
@@ -1043,7 +1044,7 @@ export default function GameRenderer() {
 
                         // Update animated sprite frames
                         if (enemyRef.current.animController) {
-                            const newTexture = enemyRef.current.animController.update(delta * 16.67);
+                            const newTexture = enemyRef.current.animController.update(delta * 16.67 * gameSpeed);
                             if (newTexture) {
                                 enemyRef.current.texture = newTexture;
                             }
@@ -1058,14 +1059,14 @@ export default function GameRenderer() {
 
                         // Track attack cooldown
                         if (animState.enemyAttackCooldown > 0) {
-                            animState.enemyAttackCooldown -= delta;
+                            animState.enemyAttackCooldown -= delta * gameSpeed;
                         } else {
                             enemyRef.current.x = enemyRef.current.baseX || pos.enemyX;
                         }
 
                         // Hit flash
                         if (animState.enemyHitFlash > 0) {
-                            animState.enemyHitFlash -= delta;
+                            animState.enemyHitFlash -= delta * gameSpeed;
                             enemyRef.current.tint = 0xff6666;
                         } else {
                             enemyRef.current.tint = 0xffffff;
@@ -1075,7 +1076,7 @@ export default function GameRenderer() {
 
                 // Player hit flash (no programmatic movement - sprite animation handles it)
                 if (playerRef.current && animState.playerHitFlash > 0) {
-                    animState.playerHitFlash -= delta;
+                    animState.playerHitFlash -= delta * gameSpeed;
                     // Flash white first, then red
                     if (animState.playerHitFlash > 12) {
                         playerRef.current.tint = 0xffffff;
