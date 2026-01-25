@@ -20,6 +20,7 @@ const ANIMATED_SPRITES = {
             attack: { frames: 4, prefix: 'attack', fps: 12, indices: [0, 1, 2, 4] },
             hurt: { frames: 4, prefix: 'hurt', fps: 10 },
             death: { frames: 10, prefix: 'death', fps: 5 },  // 10 frames at 5 fps = 2 seconds
+            spawn: { frames: 12, prefix: 'high_jump', fps: 12 },  // Respawn animation
         },
         scale: 2.0,
         anchorY: 0.95,  // Knight feet at 95% down in 128x128 sprite
@@ -326,6 +327,7 @@ export default function GameRenderer() {
         playerDying: false,
         playerDeathHold: 0,
         playerDead: false, // Stays true until player respawns
+        playerSpawning: false, // True while spawn animation plays
     });
 
     // Store calculated positions for access across the component
@@ -870,13 +872,29 @@ export default function GameRenderer() {
                             }
                         }
                     }
-                    // Player is dead - stay on last frame until respawn
+                    // Player is dead - stay hidden until respawn
                     else if (animState.playerDead) {
                         // Check if player respawned (HP > 0)
                         if (gmState?.playerHp > 0) {
                             animState.playerDead = false;
+                            animState.playerSpawning = true;
                             playerRef.current.alpha = 1;
                             if (playerRef.current.animController) {
+                                const texture = playerRef.current.animController.play('spawn', false);
+                                if (texture) playerRef.current.texture = texture;
+                            }
+                        }
+                    }
+                    // Player spawning - play spawn animation, no attacks/damage
+                    else if (animState.playerSpawning) {
+                        if (playerRef.current.animController) {
+                            const newTexture = playerRef.current.animController.update(delta * 16.67);
+                            if (newTexture) {
+                                playerRef.current.texture = newTexture;
+                            }
+                            // When spawn animation finishes, go to ready
+                            if (!playerRef.current.animController.playing) {
+                                animState.playerSpawning = false;
                                 playerRef.current.animController.play('ready', true);
                             }
                         }
@@ -897,7 +915,7 @@ export default function GameRenderer() {
                     if (animState.playerDying) {
                         // Death sprites are 256x256 vs 128x128 - offset to align
                         const scale = ANIMATED_SPRITES.player?.scale || 2.0;
-                        playerYOffset += 32 * scale * (pos.scaleFactor || 1);
+                        playerYOffset += 16 * scale * (pos.scaleFactor || 1);
                     }
                     playerRef.current.y = (playerRef.current.baseY || pos.characterY) + playerYOffset;
                     playerRef.current.x = playerRef.current.baseX || pos.playerX;
@@ -1254,8 +1272,8 @@ export default function GameRenderer() {
                 // Player taking damage - make it very noticeable
                 animStateRef.current.playerHitFlash = 15;
                 animStateRef.current.screenShake.intensity = 12;
-                // Trigger player hurt sprite animation (but not if dying)
-                if (playerRef.current?.animController && !animStateRef.current.playerDying && !animStateRef.current.playerDead) {
+                // Trigger player hurt sprite animation (but not if dying/spawning)
+                if (playerRef.current?.animController && !animStateRef.current.playerDying && !animStateRef.current.playerDead && !animStateRef.current.playerSpawning) {
                     playerRef.current.animController.play('hurt', false, () => {
                         playerRef.current?.animController?.play('ready', true);
                     });
@@ -1315,8 +1333,8 @@ export default function GameRenderer() {
 
         // Listen for Player Attack - trigger player attack animation
         const cleanupPlayerAttack = gameManager.on('playerAttack', () => {
-            // Don't play attack animation if player is dying/dead
-            if (animStateRef.current.playerDying || animStateRef.current.playerDead) return;
+            // Don't play attack animation if player is dying/dead/spawning
+            if (animStateRef.current.playerDying || animStateRef.current.playerDead || animStateRef.current.playerSpawning) return;
 
             animStateRef.current.playerAttackCooldown = 15;
             audioManager.playSfxHit();
