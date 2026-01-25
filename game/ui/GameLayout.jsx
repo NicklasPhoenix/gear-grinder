@@ -984,12 +984,15 @@ function KeyboardHelpModal({ onClose }) {
                         </h2>
                         <button
                             onClick={onClose}
-                            className="text-amber-200 hover:text-white transition-colors"
+                            className="transition-transform hover:scale-110 active:scale-95"
                             aria-label="Close"
                         >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ filter: 'drop-shadow(1px 1px 1px #000)' }}>
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
+                            <img
+                                src="/assets/ui-elements/1 (6).png"
+                                alt="Close"
+                                className="w-6 h-6"
+                                style={{ imageRendering: 'pixelated' }}
+                            />
                         </button>
                     </div>
 

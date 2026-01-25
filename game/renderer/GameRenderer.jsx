@@ -17,9 +17,10 @@ const ANIMATED_SPRITES = {
             attack: { frames: 4, prefix: 'attack', fps: 12, indices: [0, 1, 2, 4] },
             hurt: { frames: 2, prefix: 'hurt', fps: 8 },
         },
-        scale: 1.6,  // Doubled from 0.8
-        anchorY: 1,
-        flipX: false,  // Knight sprite already faces right toward enemy
+        scale: 1.6,
+        anchorY: 1,  // Bottom of sprite
+        yOffset: 0,  // No offset - feet at ground level
+        flipX: false,
     },
     // Zone 0 enemy - Lizard warrior (256x256 canvas, character ~80px within)
     lizard: {
@@ -31,8 +32,9 @@ const ANIMATED_SPRITES = {
             death: { frames: 6, prefix: 'Death', fps: 8 },
         },
         scale: 2.4,
-        anchorY: 0.75,
-        flipX: true,  // Lizard sprite faces right, flip to face player on left
+        anchorY: 0.85,  // Adjusted - feet closer to bottom
+        yOffset: 0,    // No offset - align with ground
+        flipX: true,
     },
 };
 
@@ -538,14 +540,17 @@ export default function GameRenderer() {
 
             player.anchor.set(0.5, playerAnimConfig?.anchorY || 1);
             player.x = playerX;
-            player.y = characterY;
+            // Animated sprites position at groundY (they have proper anchors), static fallback uses old offset
+            const playerGroundY = playerAnimController ? groundY : characterY;
+            player.y = playerGroundY;
             // Flip X if needed to face right (toward enemy)
             const playerFlipX = playerAnimConfig?.flipX ? -1 : 1;
             player.scale.set(playerScale * playerFlipX, playerScale);
             gameContainer.addChild(player);
             playerRef.current = player;
             player.baseX = playerX;
-            player.baseY = characterY;
+            player.baseY = playerGroundY;
+            player.groundY = groundY;  // Store for animation reference
             player.baseScale = playerScale;
             player.flipX = playerFlipX;
 
@@ -615,11 +620,14 @@ export default function GameRenderer() {
             }
 
             enemy.x = enemyX;
-            enemy.y = characterY;
+            // Animated sprites position at groundY (they have proper anchors), static sprites use old offset
+            const enemyGroundY = enemy.animController ? groundY : characterY;
+            enemy.y = enemyGroundY;
             gameContainer.addChild(enemy);
             enemyRef.current = enemy;
             enemy.baseX = enemyX;
-            enemy.baseY = characterY;
+            enemy.baseY = enemyGroundY;
+            enemy.groundY = groundY;  // Store for animation reference
             enemy.scaleFactor = scaleFactor;
 
             // --- Enemy Shadow (scaled for mobile) ---
@@ -812,8 +820,10 @@ export default function GameRenderer() {
                     }
 
                     // Position animation (bob + attack lunge)
+                    // Animated sprites use baseY directly (already at groundY), static sprites need -25 offset
                     const bob = Math.sin(time * 0.003) * 3 * (pos.scaleFactor || 1);
-                    playerRef.current.y = (playerRef.current.baseY || pos.characterY) - 25 * (pos.scaleFactor || 1) + bob;
+                    const playerYOffset = playerRef.current.animController ? 0 : -25 * (pos.scaleFactor || 1);
+                    playerRef.current.y = (playerRef.current.baseY || pos.characterY) + playerYOffset + bob;
 
                     // Attack cooldown movement
                     if (animState.playerAttackCooldown > 0) {
@@ -838,12 +848,14 @@ export default function GameRenderer() {
                         const pos = positionsRef.current;
                         const baseX = enemyRef.current.baseX || pos.enemyX;
                         const baseY = enemyRef.current.baseY || pos.characterY;
+                        // Animated sprites use baseY directly, static sprites need -25 offset
+                        const enemyYOffset = enemyRef.current.animController ? 0 : -25 * (pos.scaleFactor || 1);
 
                         // Knockback away from player + fall down
                         const knockbackDist = 80 * (pos.scaleFactor || 1);
                         const fallDist = 60 * (pos.scaleFactor || 1);
                         enemyRef.current.x = baseX + progress * knockbackDist;
-                        enemyRef.current.y = baseY - 25 * (pos.scaleFactor || 1) + progress * fallDist;
+                        enemyRef.current.y = baseY + enemyYOffset + progress * fallDist;
 
                         // Rotate as if falling backwards
                         enemyRef.current.rotation = progress * 1.2; // ~70 degrees rotation
@@ -878,7 +890,7 @@ export default function GameRenderer() {
                             enemyRef.current.rotation = 0;
                             // Reset position for spawn
                             enemyRef.current.x = baseX;
-                            enemyRef.current.y = baseY - 25 * (pos.scaleFactor || 1);
+                            enemyRef.current.y = baseY + enemyYOffset;
                         }
                     }
                     // Waiting for respawn timer - enemy stays hidden
@@ -948,8 +960,10 @@ export default function GameRenderer() {
                         const breathe = Math.sin(time * 0.0025 + 1) * 0.02;
                         const bob = Math.sin(time * 0.004 + 1) * 4 * (pos.scaleFactor || 1);
                         const flipX = enemyRef.current.flipX || -1;
+                        // Animated sprites use baseY directly, static sprites need -25 offset
+                        const enemyYOffset = enemyRef.current.animController ? 0 : -25 * (pos.scaleFactor || 1);
                         enemyRef.current.scale.set(enemyBaseScale * flipX, enemyBaseScale * (1.0 + breathe));
-                        enemyRef.current.y = (enemyRef.current.baseY || pos.characterY) - 25 * (pos.scaleFactor || 1) + bob;
+                        enemyRef.current.y = (enemyRef.current.baseY || pos.characterY) + enemyYOffset + bob;
                         enemyRef.current.alpha = 1;
                         enemyRef.current.rotation = 0;
 
@@ -1404,10 +1418,14 @@ export default function GameRenderer() {
 
                 // Update player position and base values
                 if (playerRef.current) {
+                    // Animated sprites position at groundY, static sprites at characterY
+                    const playerBaseY = playerRef.current.animController ? groundY : characterY;
+                    const playerYOffset = playerRef.current.animController ? 0 : -25 * scaleFactor;
                     playerRef.current.baseX = playerX;
-                    playerRef.current.baseY = characterY;
+                    playerRef.current.baseY = playerBaseY;
+                    playerRef.current.groundY = groundY;
                     playerRef.current.x = playerX;
-                    playerRef.current.y = characterY - 25 * scaleFactor;
+                    playerRef.current.y = playerBaseY + playerYOffset;
                     // Use animated sprite scale if available, otherwise fallback to old scale
                     const playerScale = playerRef.current.animController
                         ? (ANIMATED_SPRITES.player?.scale || 0.8) * scaleFactor
@@ -1431,10 +1449,14 @@ export default function GameRenderer() {
 
                 // Update enemy position
                 if (enemyRef.current) {
+                    // Animated sprites position at groundY, static sprites at characterY
+                    const enemyBaseY = enemyRef.current.animController ? groundY : characterY;
+                    const enemyYOffset = enemyRef.current.animController ? 0 : -25 * scaleFactor;
                     enemyRef.current.baseX = enemyX;
-                    enemyRef.current.baseY = characterY;
+                    enemyRef.current.baseY = enemyBaseY;
+                    enemyRef.current.groundY = groundY;
                     enemyRef.current.x = enemyX;
-                    enemyRef.current.y = characterY - 25 * scaleFactor;
+                    enemyRef.current.y = enemyBaseY + enemyYOffset;
                     enemyRef.current.scaleFactor = scaleFactor;
                     enemyRef.current.shadowX = enemyX;
                     enemyRef.current.auraX = enemyX;
