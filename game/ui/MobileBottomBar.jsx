@@ -1,5 +1,6 @@
 import React from 'react';
 import { formatWithCommas } from '../utils/format';
+import { LEVEL_UP } from '../data/constants';
 
 /**
  * MobileBottomBar - XP bar and level display for mobile
@@ -11,7 +12,7 @@ import { formatWithCommas } from '../utils/format';
  * └─────────────────────────────────┘
  */
 export default function MobileBottomBar({ level, xp }) {
-    const xpForLevel = (lvl) => Math.floor(50 * Math.pow(1.3, lvl - 1));
+    const xpForLevel = (lvl) => Math.floor(LEVEL_UP.BASE_XP * Math.pow(LEVEL_UP.XP_SCALING, lvl - 1));
     const xpNeeded = xpForLevel(level);
     const progress = Math.min(100, (xp / xpNeeded) * 100);
 

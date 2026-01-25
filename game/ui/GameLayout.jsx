@@ -18,6 +18,7 @@ import { ToastContainer } from './ToastNotification';
 import GameTooltip from './GameTooltip';
 import { MaterialIcon, BossStoneIcon } from './MaterialIcons';
 import { BOSS_STONES } from '../data/items';
+import { LEVEL_UP } from '../data/constants';
 import { getZoneById } from '../data/zones';
 import { calculatePlayerStats } from '../systems/PlayerSystem';
 import { formatWithCommas } from '../utils/format';
@@ -716,7 +717,7 @@ function GameSpeedControl({ vertical = false }) {
 }
 
 function XPBar({ level, xp }) {
-    const xpForLevel = (lvl) => Math.floor(50 * Math.pow(1.3, lvl - 1));
+    const xpForLevel = (lvl) => Math.floor(LEVEL_UP.BASE_XP * Math.pow(LEVEL_UP.XP_SCALING, lvl - 1));
     const xpNeeded = xpForLevel(level);
     const progress = Math.min(100, (xp / xpNeeded) * 100);
 
