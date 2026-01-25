@@ -40,6 +40,7 @@ export default [
                 HTMLAudioElement: 'readonly',
                 ResizeObserver: 'readonly',
                 alert: 'readonly',
+                queueMicrotask: 'readonly',
             },
         },
         settings: {
