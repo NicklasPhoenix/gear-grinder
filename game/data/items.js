@@ -554,21 +554,26 @@ export function getItemStackKey(item) {
 }
 
 // Add item to inventory with stacking
-export function addItemToInventory(inventory, newItem) {
+// Returns { inventory, added: true/false } - added is false if inventory is full
+export function addItemToInventory(inventory, newItem, maxSlots = 50) {
     const stackKey = getItemStackKey(newItem);
     const existingIndex = inventory.findIndex(item => getItemStackKey(item) === stackKey);
 
     if (existingIndex >= 0) {
-        // Stack with existing item
+        // Stack with existing item - always succeeds
         const updated = [...inventory];
         updated[existingIndex] = {
             ...updated[existingIndex],
             count: (updated[existingIndex].count || 1) + (newItem.count || 1)
         };
-        return updated;
+        return { inventory: updated, added: true };
     } else {
+        // Check if inventory is full before adding new stack
+        if (inventory.length >= maxSlots) {
+            return { inventory, added: false };
+        }
         // Add as new item with count 1
-        return [...inventory, { ...newItem, count: newItem.count || 1 }];
+        return { inventory: [...inventory, { ...newItem, count: newItem.count || 1 }], added: true };
     }
 }
 

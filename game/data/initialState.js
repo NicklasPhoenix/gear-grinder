@@ -10,6 +10,7 @@ export const initialState = {
     autoSalvageMaxEffectsOnly: false, // Only keep items with at least one max-rolled effect
     autoSalvageBossItems: false, // Include boss set items in auto-salvage (dangerous!)
     inventorySort: 'none', // Inventory sort: 'none', 'slot', 'tier', 'score'
+    inventorySlots: 50, // Max inventory slots (upgradable)
     combatPaused: false, // Pause combat to take a breather
     autoProgress: false, // Automatically advance to next zone when unlocked
     // Boss stones - dropped by bosses, needed to enhance boss gear past +10

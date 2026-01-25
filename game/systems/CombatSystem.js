@@ -756,8 +756,18 @@ export class CombatSystem {
                 state.enhanceStone += returns.enhanceStone;
                 log.push({ type: 'autoSalvage', msg: `${droppedGear.name} salvaged!` });
             } else {
-                state.inventory = addItemToInventory(state.inventory, droppedGear);
-                log.push({ type: 'gearDrop', msg: `${droppedGear.name} dropped!` });
+                const maxSlots = state.inventorySlots || 50;
+                const result = addItemToInventory(state.inventory, droppedGear, maxSlots);
+                if (result.added) {
+                    state.inventory = result.inventory;
+                    log.push({ type: 'gearDrop', msg: `${droppedGear.name} dropped!` });
+                } else {
+                    // Inventory full - auto-salvage the item
+                    const returns = getSalvageReturns(droppedGear, 1);
+                    state.gold += returns.gold;
+                    state.enhanceStone += returns.enhanceStone;
+                    log.push({ type: 'inventoryFull', msg: `Inventory full! ${droppedGear.name} salvaged.` });
+                }
             }
             // Track for collection progress regardless of salvage
             updateCollectionProgress(state, droppedGear);
@@ -873,8 +883,18 @@ export class CombatSystem {
                 state.enhanceStone += returns.enhanceStone;
                 log.push({ type: 'autoSalvage', msg: `${bossItem.name} salvaged!` });
             } else {
-                state.inventory = addItemToInventory(state.inventory, newBossItem);
-                log.push({ type: 'bossLoot', msg: `${bossItem.name} obtained!` });
+                const maxSlots = state.inventorySlots || 50;
+                const result = addItemToInventory(state.inventory, newBossItem, maxSlots);
+                if (result.added) {
+                    state.inventory = result.inventory;
+                    log.push({ type: 'bossLoot', msg: `${bossItem.name} obtained!` });
+                } else {
+                    // Inventory full - auto-salvage (boss items too valuable to just lose)
+                    const returns = getSalvageReturns(newBossItem, 1);
+                    state.gold += returns.gold;
+                    state.enhanceStone += returns.enhanceStone;
+                    log.push({ type: 'inventoryFull', msg: `Inventory full! ${bossItem.name} salvaged.` });
+                }
             }
             // Track for collection progress regardless of salvage
             updateCollectionProgress(state, newBossItem);

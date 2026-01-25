@@ -3,8 +3,10 @@ import { useGame } from '../context/GameContext';
 import ItemIcon from './ItemIcon';
 import { TIERS, GEAR_SLOTS, GEAR_BASES, WEAPON_TYPES, PRESTIGE_WEAPONS, getItemScore, getSalvageReturns, BOSS_SETS, PRESTIGE_BOSS_SETS, addItemToInventory, removeOneFromStack, getEnhanceStage, SPECIAL_EFFECTS } from '../data/items';
 import { getEnhanceBonus } from '../utils/formulas';
+import { INVENTORY } from '../data/constants';
 import PresetsModal from './PresetsModal';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { formatNumber } from '../utils/format';
 
 // Calculate item stats for display
 function calculateItemStats(item) {
@@ -206,18 +208,29 @@ export default function InventoryView({ onHover }) {
         delete equippedItem.count;
         newGear[item.slot] = equippedItem;
         if (oldItem) {
-            newInv = addItemToInventory(newInv, { ...oldItem, id: Date.now() });
+            const maxSlots = state.inventorySlots || 50;
+            const result = addItemToInventory(newInv, { ...oldItem, id: Date.now() }, maxSlots);
+            newInv = result.inventory; // Should succeed since we just removed an item
         }
         gameManager.setState(prev => ({ ...prev, gear: newGear, inventory: newInv }));
     };
 
     const handleUnequip = (item) => {
         if (!item) return;
-        gameManager.setState(prev => ({
-            ...prev,
-            gear: { ...prev.gear, [item.slot]: null },
-            inventory: addItemToInventory(prev.inventory, { ...item, id: Date.now() })
-        }));
+        const maxSlots = state.inventorySlots || 50;
+        if (state.inventory.length >= maxSlots) {
+            // Can't unequip - inventory full
+            return;
+        }
+        gameManager.setState(prev => {
+            const result = addItemToInventory(prev.inventory, { ...item, id: Date.now() }, prev.inventorySlots || 50);
+            if (!result.added) return prev; // Don't unequip if can't add to inventory
+            return {
+                ...prev,
+                gear: { ...prev.gear, [item.slot]: null },
+                inventory: result.inventory
+            };
+        });
     };
 
     const toggleAutoSalvage = () => {
@@ -234,6 +247,22 @@ export default function InventoryView({ onHover }) {
 
     const toggleSalvageBossItems = () => {
         gameManager.setState(prev => ({ ...prev, autoSalvageBossItems: !prev.autoSalvageBossItems }));
+    };
+
+    // Inventory upgrade calculations
+    const currentSlots = state.inventorySlots || INVENTORY.BASE_SLOTS;
+    const upgradesPurchased = Math.floor((currentSlots - INVENTORY.BASE_SLOTS) / INVENTORY.SLOTS_PER_UPGRADE);
+    const upgradeCost = Math.floor(INVENTORY.BASE_UPGRADE_COST * Math.pow(INVENTORY.COST_MULTIPLIER, upgradesPurchased));
+    const canUpgrade = currentSlots < INVENTORY.MAX_SLOTS && state.gold >= upgradeCost;
+    const isMaxed = currentSlots >= INVENTORY.MAX_SLOTS;
+
+    const handleUpgradeInventory = () => {
+        if (!canUpgrade) return;
+        gameManager.setState(prev => ({
+            ...prev,
+            gold: prev.gold - upgradeCost,
+            inventorySlots: (prev.inventorySlots || INVENTORY.BASE_SLOTS) + INVENTORY.SLOTS_PER_UPGRADE
+        }));
     };
 
     // Loot filter state
@@ -476,7 +505,26 @@ export default function InventoryView({ onHover }) {
             {/* Inventory Grid - Fixed height with internal scroll */}
             <div className="flex-1 game-panel flex flex-col min-h-0" onMouseLeave={() => onHover && onHover(null)}>
                 <div className="game-panel-header flex justify-between items-center">
-                    <span className="text-sm">Inventory ({state.inventory.length}/50)</span>
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm">Inventory ({state.inventory.length}/{currentSlots})</span>
+                        {!isMaxed && (
+                            <button
+                                onClick={handleUpgradeInventory}
+                                disabled={!canUpgrade}
+                                className={`px-1.5 py-0.5 text-[10px] rounded transition-colors ${
+                                    canUpgrade
+                                        ? 'bg-yellow-600/50 text-yellow-300 hover:bg-yellow-600/70'
+                                        : 'bg-slate-700/30 text-slate-500 cursor-not-allowed'
+                                }`}
+                                title={`+${INVENTORY.SLOTS_PER_UPGRADE} slots for ${formatNumber(upgradeCost)}g`}
+                            >
+                                +{INVENTORY.SLOTS_PER_UPGRADE} ({formatNumber(upgradeCost)}g)
+                            </button>
+                        )}
+                        {isMaxed && (
+                            <span className="text-[10px] text-green-400">MAX</span>
+                        )}
+                    </div>
                     <div className="flex items-center gap-1.5">
                         <button
                             onClick={toggleAutoSalvage}

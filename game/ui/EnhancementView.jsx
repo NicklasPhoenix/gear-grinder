@@ -171,8 +171,9 @@ export default function EnhancementView() {
 
         if (isInventoryItem) {
             let updatedInventory = removeOneFromStack(freshState.inventory, item.id);
-            updatedInventory = addItemToInventory(updatedInventory, newItem);
-            newState.inventory = updatedInventory;
+            const maxSlots = freshState.inventorySlots || 50;
+            const result = addItemToInventory(updatedInventory, newItem, maxSlots);
+            newState.inventory = result.inventory; // Should always succeed since we removed one first
         } else {
             newState.gear = { ...freshState.gear, [newItem.slot]: newItem };
         }
