@@ -282,19 +282,22 @@ function getObjectiveProgress(objective, state, startState, templates) {
 }
 
 /**
- * Check and update objective state
- * @param {Object} state - Game state
- * @returns {Object} { daily: { objective, progress, complete }, weekly: { ... } }
+ * Check if objectives need to be initialized or reset
+ * Returns state updates needed, or null if no updates needed
+ * @param {Object} state - Game state (read-only)
+ * @returns {Object|null} State updates to apply, or null
  */
-export function checkObjectives(state) {
+export function getObjectiveUpdates(state) {
     const currentDay = getCurrentDayNumber();
     const currentWeek = getCurrentWeekNumber();
+    const updates = {};
+    let needsUpdate = false;
 
-    // Initialize or reset daily objective
+    // Check if daily objective needs initialization or reset
     if (!state.dailyObjective || state.dailyObjectiveDay !== currentDay) {
-        state.dailyObjective = generateDailyObjective(currentDay);
-        state.dailyObjectiveDay = currentDay;
-        state.dailyObjectiveStartState = {
+        updates.dailyObjective = generateDailyObjective(currentDay);
+        updates.dailyObjectiveDay = currentDay;
+        updates.dailyObjectiveStartState = {
             kills: state.kills || 0,
             totalGold: state.totalGold || 0,
             level: state.level || 1,
@@ -306,21 +309,40 @@ export function checkObjectives(state) {
             dailyEnhanceSuccess: 0,
             dailyEquipped: 0
         };
-        state.dailyObjectiveClaimed = false;
+        updates.dailyObjectiveClaimed = false;
+        needsUpdate = true;
     }
 
-    // Initialize or reset weekly objective
+    // Check if weekly objective needs initialization or reset
     if (!state.weeklyObjective || state.weeklyObjectiveWeek !== currentWeek) {
-        state.weeklyObjective = generateWeeklyObjective(currentWeek);
-        state.weeklyObjectiveWeek = currentWeek;
-        state.weeklyObjectiveStartState = {
+        updates.weeklyObjective = generateWeeklyObjective(currentWeek);
+        updates.weeklyObjectiveWeek = currentWeek;
+        updates.weeklyObjectiveStartState = {
             kills: state.kills || 0,
             totalGold: state.totalGold || 0,
             totalPrestiges: state.totalPrestiges || 0,
             zoneKills: { ...(state.zoneKills || {}) },
             weeklyEnhanceSuccess: 0
         };
-        state.weeklyObjectiveClaimed = false;
+        updates.weeklyObjectiveClaimed = false;
+        needsUpdate = true;
+    }
+
+    return needsUpdate ? updates : null;
+}
+
+/**
+ * Check objective progress (read-only, doesn't modify state)
+ * @param {Object} state - Game state
+ * @returns {Object} { daily: { objective, progress, complete }, weekly: { ... } }
+ */
+export function checkObjectives(state) {
+    // If objectives aren't initialized, return empty progress
+    if (!state.dailyObjective || !state.weeklyObjective) {
+        return {
+            daily: { objective: null, progress: 0, target: 0, complete: false, claimed: false, timeRemaining: 0 },
+            weekly: { objective: null, progress: 0, target: 0, complete: false, claimed: false, timeRemaining: 0 }
+        };
     }
 
     // Calculate progress using template lookup (functions don't survive JSON save/load)

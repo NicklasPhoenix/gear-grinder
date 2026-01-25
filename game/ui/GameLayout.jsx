@@ -721,6 +721,24 @@ function XPBar({ level, xp }) {
     const xpNeeded = xpForLevel(level);
     const progress = Math.min(100, (xp / xpNeeded) * 100);
 
+    // Track XP gains for floating indicator
+    const prevXpRef = useRef(xp);
+    const [xpGains, setXpGains] = useState([]);
+
+    useEffect(() => {
+        const diff = xp - prevXpRef.current;
+        // Only show gain if positive and not the first render
+        if (diff > 0 && prevXpRef.current > 0) {
+            const id = Date.now();
+            setXpGains(prev => [...prev, { id, amount: diff }]);
+            // Remove after animation
+            setTimeout(() => {
+                setXpGains(prev => prev.filter(g => g.id !== id));
+            }, 1500);
+        }
+        prevXpRef.current = xp;
+    }, [xp]);
+
     return (
         <div className="bg-slate-950/90 backdrop-blur-sm border-t border-slate-800/50 px-4 py-2">
             <div className="flex items-center gap-4">
@@ -730,7 +748,7 @@ function XPBar({ level, xp }) {
                     <span className="text-2xl font-bold text-purple-400">{level}</span>
                 </div>
                 {/* XP bar */}
-                <div className="flex-1">
+                <div className="flex-1 relative">
                     <div className="flex justify-between text-sm text-slate-400 mb-1">
                         <span>XP</span>
                         <span className="font-semibold">{formatWithCommas(xp)} / {formatWithCommas(xpNeeded)}</span>
@@ -741,8 +759,27 @@ function XPBar({ level, xp }) {
                             style={{ width: `${progress}%` }}
                         />
                     </div>
+                    {/* Floating XP gain indicators */}
+                    {xpGains.map((gain) => (
+                        <div
+                            key={gain.id}
+                            className="absolute right-0 text-purple-300 font-bold text-sm pointer-events-none animate-xp-gain"
+                            style={{ bottom: '100%' }}
+                        >
+                            +{formatWithCommas(gain.amount)} XP
+                        </div>
+                    ))}
                 </div>
             </div>
+            <style>{`
+                @keyframes xp-gain {
+                    0% { opacity: 1; transform: translateY(0); }
+                    100% { opacity: 0; transform: translateY(-30px); }
+                }
+                .animate-xp-gain {
+                    animation: xp-gain 1.5s ease-out forwards;
+                }
+            `}</style>
         </div>
     );
 }

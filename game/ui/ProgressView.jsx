@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useGame } from '../context/GameContext';
 import { COLLECTION_CATEGORIES, getOverallCollectionProgress, getCategoryProgress } from '../data/collections';
-import { checkObjectives, formatTimeRemaining, applyObjectiveReward } from '../data/dailyObjectives';
+import { checkObjectives, getObjectiveUpdates, formatTimeRemaining, applyObjectiveReward } from '../data/dailyObjectives';
 import { getEndlessTitle, getNextMilestone, startEndlessRun, endEndlessRun, ENDLESS_CONFIG } from '../data/endlessMode';
 import { MaterialIcon } from './MaterialIcons';
 
