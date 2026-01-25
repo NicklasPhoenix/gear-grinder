@@ -253,11 +253,20 @@ export class CombatSystem {
         }
 
         // Ensure attack timers are valid numbers (fix corrupted saves)
-        if (typeof newState.combatState.playerAttackTimer !== 'number' || isNaN(newState.combatState.playerAttackTimer)) {
+        // Also reset if timers are unreasonably high (> 100 ticks = 5 seconds)
+        if (typeof newState.combatState.playerAttackTimer !== 'number' ||
+            isNaN(newState.combatState.playerAttackTimer) ||
+            newState.combatState.playerAttackTimer > 100) {
             newState.combatState.playerAttackTimer = 0;
         }
-        if (typeof newState.combatState.enemyAttackTimer !== 'number' || isNaN(newState.combatState.enemyAttackTimer)) {
+        if (typeof newState.combatState.enemyAttackTimer !== 'number' ||
+            isNaN(newState.combatState.enemyAttackTimer) ||
+            newState.combatState.enemyAttackTimer > 100) {
             newState.combatState.enemyAttackTimer = 0;
+        }
+        // Also validate rage stacks
+        if (typeof newState.combatState.rageStacks !== 'number' || isNaN(newState.combatState.rageStacks)) {
+            newState.combatState.rageStacks = 0;
         }
 
         // Ensure HP values are valid
