@@ -302,6 +302,18 @@ export class CombatSystem {
             }
         }
 
+        // Player respawn timer - wait for death animation before respawning
+        if (newState.playerRespawnTimer > 0) {
+            newState.playerRespawnTimer--;
+            if (newState.playerRespawnTimer <= 0) {
+                // Respawn player
+                newState.playerHp = newState.playerRespawnHp || stats.maxHp;
+                newState.enemyHp = newState.playerRespawnEnemyHp || zone.enemyHp;
+                newState.enemyMaxHp = newState.playerRespawnEnemyHp || zone.enemyHp;
+                newState.playerRespawnTimer = 0;
+            }
+        }
+
         // Rage decay system - lose stacks if not killing enemies fast enough
         // Decay timer only runs when you have rage stacks
         if (stats.rage > 0 && newState.combatState.rageStacks > 0) {
@@ -993,9 +1005,10 @@ export class CombatSystem {
         // Track deaths on this zone - if too many, suggest going back
         state.deathsOnZone = (state.deathsOnZone || 0) + 1;
 
-        state.playerHp = safeMaxHp;
-        state.enemyHp = zone.enemyHp;
-        state.enemyMaxHp = zone.enemyHp;
+        // Delay respawn to allow death animation to play (60 ticks = 3 seconds)
+        state.playerRespawnTimer = 60;
+        state.playerRespawnHp = safeMaxHp;
+        state.playerRespawnEnemyHp = zone.enemyHp;
     }
 
     /**
