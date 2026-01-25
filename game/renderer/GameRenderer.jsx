@@ -889,17 +889,18 @@ export default function GameRenderer() {
                     // Player spawning - play spawn animation with Y movement
                     else if (animState.playerSpawning) {
                         if (playerRef.current.animController) {
-                            const newTexture = playerRef.current.animController.update(delta * 16.67);
+                            const ctrl = playerRef.current.animController;
+                            const newTexture = ctrl.update(delta * 16.67);
                             if (newTexture) {
                                 playerRef.current.texture = newTexture;
                             }
-                            // Track spawn progress (0 to 1)
-                            animState.playerSpawnProgress = Math.min(1, (animState.playerSpawnProgress || 0) + delta * 0.8);
+                            // Sync progress with animation frames (12 frames total)
+                            animState.playerSpawnProgress = ctrl.frameIndex / 11;
                             // When spawn animation finishes, go to ready
-                            if (!playerRef.current.animController.playing) {
+                            if (!ctrl.playing) {
                                 animState.playerSpawning = false;
                                 animState.playerSpawnProgress = 1;
-                                playerRef.current.animController.play('ready', true);
+                                ctrl.play('ready', true);
                             }
                         }
                     }
@@ -917,6 +918,11 @@ export default function GameRenderer() {
                     // Position - no programmatic movement, just use sprite animations
                     let playerYOffset = playerRef.current.animController ? 0 : -25 * (pos.scaleFactor || 1);
                     let playerXOffset = 0;
+                    if (animState.playerDying) {
+                        // Death sprites are 256x256 vs 128x128 - offset down to align
+                        const scale = ANIMATED_SPRITES.player?.scale || 2.0;
+                        playerYOffset += 60 * scale * (pos.scaleFactor || 1);
+                    }
                     if (animState.playerSpawning) {
                         // Spawn: arc from left off-screen to landing position
                         const progress = animState.playerSpawnProgress || 0;
