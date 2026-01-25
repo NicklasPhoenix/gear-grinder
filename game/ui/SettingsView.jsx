@@ -283,8 +283,36 @@ export default function SettingsView() {
                     </div>
                 </div>
 
-                {/* Keyboard Shortcuts Hint */}
-                <div className="text-center text-slate-500 text-xs">
+                {/* Danger Zone */}
+                <div className="game-panel border-red-900/50">
+                    <div className="game-panel-header bg-red-900/30 text-red-400">Danger Zone</div>
+                    <div className="p-4 space-y-4">
+                        <div className="bg-red-950/30 rounded-lg p-4 border border-red-900/50">
+                            <div className="mb-3">
+                                <span className="font-bold text-red-400">Reset Game</span>
+                                <p className="text-xs text-slate-500 mt-1">
+                                    Permanently delete ALL progress and start fresh. This cannot be undone!
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => {
+                                    if (confirm('⚠️ RESET GAME?\n\nThis will DELETE ALL your progress:\n• Level & Stats\n• Gear & Inventory\n• Gold & Materials\n• Prestige & Skills\n• Achievements\n\nThis CANNOT be undone!\n\nAre you absolutely sure?')) {
+                                        if (confirm('FINAL WARNING!\n\nYou are about to lose EVERYTHING.\n\nType "RESET" in the next prompt to confirm.') &&
+                                            prompt('Type RESET to confirm:')?.toUpperCase() === 'RESET') {
+                                            gameManager?.resetGame();
+                                        }
+                                    }
+                                }}
+                                className="w-full py-3 bg-red-600/30 hover:bg-red-600/50 active:bg-red-600/60 active:scale-95 text-red-400 rounded-lg font-bold transition-all border border-red-600/50"
+                            >
+                                🗑️ Reset Game
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Keyboard Shortcuts Hint - hide on mobile */}
+                <div className="text-center text-slate-500 text-xs hidden sm:block">
                     Press <kbd className="px-1.5 py-0.5 bg-slate-800 rounded font-mono">?</kbd> for keyboard shortcuts
                 </div>
             </div>
