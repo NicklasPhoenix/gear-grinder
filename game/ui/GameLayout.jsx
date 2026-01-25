@@ -599,7 +599,7 @@ function ResetButton() {
     );
 }
 
-function CombatToggle() {
+function CombatToggle({ compact = false }) {
     const { gameManager, state } = useGame();
     const isPaused = state?.combatPaused || false;
 
@@ -608,6 +608,28 @@ function CombatToggle() {
             gameManager.toggleCombat();
         }
     };
+
+    if (compact) {
+        return (
+            <button
+                onClick={handleToggle}
+                className={`flex items-center justify-center w-full p-1.5 rounded font-bold text-xs transition-all ${
+                    isPaused
+                        ? 'bg-green-600 hover:bg-green-500 text-white'
+                        : 'bg-red-600/80 hover:bg-red-500 text-white'
+                }`}
+                title={isPaused ? 'Resume Combat' : 'Pause Combat'}
+            >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    {isPaused ? (
+                        <path d="M8 5v14l11-7z" />
+                    ) : (
+                        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                    )}
+                </svg>
+            </button>
+        );
+    }
 
     return (
         <button
@@ -638,7 +660,7 @@ function CombatToggle() {
     );
 }
 
-function GameSpeedControl() {
+function GameSpeedControl({ vertical = false }) {
     const { gameManager } = useGame();
     const [speed, setSpeed] = useState(1);
 
@@ -652,6 +674,26 @@ function GameSpeedControl() {
             gameManager.setSpeed(newSpeed);
         }
     };
+
+    if (vertical) {
+        return (
+            <div className="flex flex-col gap-1">
+                {SPEED_OPTIONS.map(s => (
+                    <button
+                        key={s}
+                        onClick={() => handleSpeedChange(s)}
+                        className={`px-2 py-1 rounded text-xs font-bold transition-all ${
+                            speed === s
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-slate-700 text-slate-400 hover:bg-slate-600'
+                        }`}
+                    >
+                        {s}x
+                    </button>
+                ))}
+            </div>
+        );
+    }
 
     return (
         <div className="flex items-center gap-1 px-3 py-2 rounded-lg bg-slate-800/90 shadow-lg">
