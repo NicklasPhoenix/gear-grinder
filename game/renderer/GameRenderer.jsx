@@ -1311,7 +1311,10 @@ export default function GameRenderer() {
             // Trigger attack animation - plays once, then returns to ready stance
             if (playerRef.current?.animController) {
                 playerRef.current.animController.play('attack', false, () => {
-                    playerRef.current?.animController?.play('ready', true);
+                    if (playerRef.current?.animController) {
+                        const texture = playerRef.current.animController.play('ready', true);
+                        if (texture) playerRef.current.texture = texture;
+                    }
                 });
             }
         });
@@ -1327,7 +1330,10 @@ export default function GameRenderer() {
             // Trigger attack sprite animation - plays once, then returns to idle
             if (enemyRef.current?.animController && !animStateRef.current.enemyDying) {
                 enemyRef.current.animController.play('attack', false, () => {
-                    enemyRef.current?.animController?.play('idle', true);
+                    if (enemyRef.current?.animController) {
+                        const texture = enemyRef.current.animController.play('idle', true);
+                        if (texture) enemyRef.current.texture = texture;
+                    }
                 });
             }
         });
