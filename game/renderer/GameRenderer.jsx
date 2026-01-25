@@ -124,6 +124,7 @@ async function loadAnimatedSpriteTextures(spriteKey) {
 
 /**
  * Create an animated sprite controller
+ * Saves idle animation state so it can resume smoothly after other animations
  */
 function createAnimatedSpriteController(animations, defaultAnim = 'idle') {
     return {
@@ -134,12 +135,25 @@ function createAnimatedSpriteController(animations, defaultAnim = 'idle') {
         playing: true,
         loop: true,
         onComplete: null,
+        // Save idle state to resume smoothly
+        savedIdleFrame: 0,
+        savedIdleTimer: 0,
 
         update(delta) {
             if (!this.playing || !this.animations[this.currentAnim]) return null;
 
             const anim = this.animations[this.currentAnim];
             this.frameTimer += delta;
+
+            // Keep updating saved idle state in background
+            if (this.currentAnim !== 'idle' && this.animations.idle) {
+                this.savedIdleTimer += delta;
+                const idleFrameTime = 1000 / this.animations.idle.fps;
+                while (this.savedIdleTimer >= idleFrameTime) {
+                    this.savedIdleTimer -= idleFrameTime;
+                    this.savedIdleFrame = (this.savedIdleFrame + 1) % this.animations.idle.textures.length;
+                }
+            }
 
             const frameTime = 1000 / anim.fps;
             if (this.frameTimer >= frameTime) {
@@ -168,9 +182,15 @@ function createAnimatedSpriteController(animations, defaultAnim = 'idle') {
 
         play(animName, loop = true, onComplete = null) {
             if (this.currentAnim !== animName || !this.playing) {
+                // When returning to idle, resume from saved state
+                if (animName === 'idle') {
+                    this.frameIndex = this.savedIdleFrame;
+                    this.frameTimer = this.savedIdleTimer;
+                } else {
+                    this.frameIndex = 0;
+                    this.frameTimer = 0;
+                }
                 this.currentAnim = animName;
-                this.frameIndex = 0;
-                this.frameTimer = 0;
                 this.loop = loop;
                 this.playing = true;
                 this.onComplete = onComplete;
@@ -1244,9 +1264,11 @@ export default function GameRenderer() {
         const cleanupPlayerAttack = gameManager.on('playerAttack', () => {
             animStateRef.current.playerAttackCooldown = 15;
             audioManager.playSfxHit();
-            // Trigger attack animation - loops so no jarring idle reset between attacks
+            // Trigger attack animation - plays once, then resumes idle smoothly
             if (playerRef.current?.animController) {
-                playerRef.current.animController.play('attack', true);
+                playerRef.current.animController.play('attack', false, () => {
+                    playerRef.current?.animController?.play('idle', true);
+                });
             }
         });
 
