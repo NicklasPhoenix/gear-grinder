@@ -1244,11 +1244,9 @@ export default function GameRenderer() {
         const cleanupPlayerAttack = gameManager.on('playerAttack', () => {
             animStateRef.current.playerAttackCooldown = 15;
             audioManager.playSfxHit();
-            // Trigger attack animation - plays once, then returns to idle
+            // Trigger attack animation - loops so no jarring idle reset between attacks
             if (playerRef.current?.animController) {
-                playerRef.current.animController.play('attack', false, () => {
-                    playerRef.current?.animController?.play('idle', true);
-                });
+                playerRef.current.animController.play('attack', true);
             }
         });
 
