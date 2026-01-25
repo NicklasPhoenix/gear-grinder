@@ -16,7 +16,7 @@ const ANIMATED_SPRITES = {
         basePath: '/assets/characters/knight',
         animations: {
             idle: { frames: 12, prefix: 'idle', fps: 10 },  // Bored animation for long inactivity
-            ready: { frames: 1, prefix: 'attack', fps: 1, indices: [0] },  // Combat ready stance (attack frame 0)
+            ready: { frames: 1, prefix: 'attack', fps: 1, indices: [0], dir: 'attack' },  // Combat ready (uses attack frame 0)
             attack: { frames: 4, prefix: 'attack', fps: 12, indices: [0, 1, 2, 4] },
             hurt: { frames: 2, prefix: 'hurt', fps: 8 },
         },
@@ -97,7 +97,9 @@ async function loadAnimatedSpriteTextures(spriteKey) {
         const indices = animConfig.indices || Array.from({ length: animConfig.frames }, (_, i) => i + 1);
 
         for (const idx of indices) {
-            const path = `${config.basePath}/${animName.toLowerCase()}/${animConfig.prefix}${idx}.png`;
+            // Use dir property if specified, otherwise use animation name as directory
+            const dir = animConfig.dir || animName.toLowerCase();
+            const path = `${config.basePath}/${dir}/${animConfig.prefix}${idx}.png`;
             try {
                 let texture;
                 if (PIXI.Assets.cache.has(path)) {
