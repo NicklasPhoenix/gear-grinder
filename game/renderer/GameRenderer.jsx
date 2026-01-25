@@ -18,7 +18,8 @@ const ANIMATED_SPRITES = {
             idle: { frames: 12, prefix: 'idle', fps: 10 },  // Bored animation for long inactivity
             ready: { frames: 1, prefix: 'attack', fps: 1, indices: [0], dir: 'attack' },  // Combat ready (uses attack frame 0)
             attack: { frames: 4, prefix: 'attack', fps: 12, indices: [0, 1, 2, 4] },
-            hurt: { frames: 2, prefix: 'hurt', fps: 8 },
+            hurt: { frames: 4, prefix: 'hurt', fps: 10 },
+            death: { frames: 10, prefix: 'death', fps: 8 },  // 10 frames at 8 fps = 1.25 seconds
         },
         scale: 2.0,
         anchorY: 0.95,  // Knight feet at 95% down in 128x128 sprite
@@ -311,6 +312,9 @@ export default function GameRenderer() {
         waitingForRespawn: false,
         enemySpawning: false,
         enemySpawnProgress: 0,
+        playerDying: false,
+        playerDeathHold: 0,
+        playerDead: false, // Stays true until player respawns
     });
 
     // Store calculated positions for access across the component
@@ -829,15 +833,60 @@ export default function GameRenderer() {
                 if (playerRef.current) {
                     const pos = positionsRef.current;
                     const playerBaseScale = playerRef.current.baseScale || (ANIMATED_SPRITES.player?.scale || 4) * (pos.scaleFactor || 1);
+                    const gmState = gameManager.getState();
 
-                    // Update animated sprite frames
-                    if (playerRef.current.animController) {
-                        const newTexture = playerRef.current.animController.update(delta * 16.67); // Convert to ms
-                        if (newTexture) {
-                            playerRef.current.texture = newTexture;
+                    // Check for player death
+                    if (gmState?.playerHp <= 0 && !animState.playerDying && !animState.playerDead) {
+                        animState.playerDying = true;
+                        animState.playerDeathHold = 0;
+                        // Trigger death animation
+                        if (playerRef.current.animController) {
+                            playerRef.current.animController.play('death', false);
                         }
-                        // Attack animation is triggered by playerAttack event, not here
-                        // Just let the animation controller run
+                    }
+
+                    // Player death animation
+                    if (animState.playerDying) {
+                        if (playerRef.current.animController) {
+                            const newTexture = playerRef.current.animController.update(delta * 16.67);
+                            if (newTexture) {
+                                playerRef.current.texture = newTexture;
+                            }
+                            // Check if death animation finished - start hold timer
+                            if (!playerRef.current.animController.playing && animState.playerDeathHold === 0) {
+                                animState.playerDeathHold = 90; // Hold death pose for ~1.5 seconds
+                            }
+                            // Count down hold timer
+                            if (animState.playerDeathHold > 0) {
+                                animState.playerDeathHold -= delta;
+                                if (animState.playerDeathHold <= 0) {
+                                    animState.playerDying = false;
+                                    animState.playerDeathHold = 0;
+                                    animState.playerDead = true;
+                                }
+                            }
+                        }
+                    }
+                    // Player is dead - stay on last frame until respawn
+                    else if (animState.playerDead) {
+                        // Check if player respawned (HP > 0)
+                        if (gmState?.playerHp > 0) {
+                            animState.playerDead = false;
+                            playerRef.current.alpha = 1;
+                            if (playerRef.current.animController) {
+                                playerRef.current.animController.play('ready', true);
+                            }
+                        }
+                    }
+                    // Normal state
+                    else {
+                        // Update animated sprite frames
+                        if (playerRef.current.animController) {
+                            const newTexture = playerRef.current.animController.update(delta * 16.67);
+                            if (newTexture) {
+                                playerRef.current.texture = newTexture;
+                            }
+                        }
                     }
 
                     // Position - no programmatic movement, just use sprite animations
