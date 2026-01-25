@@ -108,12 +108,16 @@ export default function CharacterSelectScreen({ onSelectCharacter }) {
 
     return (
         <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
-            {/* Background pattern */}
-            <div className="absolute inset-0 opacity-5" style={{
-                backgroundImage: 'url(/assets/ui-elements/8.png)',
-                backgroundSize: '200px',
-                backgroundRepeat: 'repeat',
-            }} />
+            {/* Background image */}
+            <div
+                className="absolute inset-0"
+                style={{
+                    backgroundImage: 'url(/assets/backgrounds/fight_forest_1.png)',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    filter: 'brightness(0.4)',
+                }}
+            />
 
             <div className="relative z-10 max-w-4xl w-full">
                 {/* Title */}
