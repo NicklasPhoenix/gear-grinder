@@ -950,6 +950,11 @@ function KeyboardHelpModal({ onClose }) {
         { keys: ['Esc'], action: 'Close modals and menus' },
     ];
 
+    // Sprite sheet coordinates (256x256 sheet, scaled 2x for display)
+    // Wooden panel: x=4, y=46, w=78, h=90
+    // X button: x=64, y=176, w=16, h=16
+    const SPRITE = '/assets/ui-fantasy/freefantasy.png';
+
     return (
         <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
@@ -958,61 +963,46 @@ function KeyboardHelpModal({ onClose }) {
             aria-modal="true"
             aria-labelledby="keyboard-help-title"
         >
-            {/* Fantasy wooden panel modal */}
+            {/* Modal container */}
             <div
                 className="relative max-w-md w-full mx-4"
                 onClick={(e) => e.stopPropagation()}
-                style={{
-                    backgroundImage: 'url(/assets/ui-fantasy/freefantasy.png)',
-                    backgroundPosition: '-4px -46px',
-                    backgroundSize: '512px 512px',
-                    imageRendering: 'pixelated',
-                }}
             >
-                {/* Wooden panel background - 9-slice style with padding */}
+                {/* Wooden panel background from sprite sheet - stretched to fit */}
                 <div
-                    className="relative p-8 pt-6"
+                    className="absolute inset-0"
                     style={{
-                        background: 'linear-gradient(180deg, #8B6914 0%, #5D4A1A 10%, #4A3A15 90%, #3D2F12 100%)',
+                        backgroundImage: `url(${SPRITE})`,
+                        backgroundPosition: '-8px -92px', // Panel position, scaled 2x
+                        backgroundSize: '512px 512px', // 256 * 2 for crisp pixels
+                        imageRendering: 'pixelated',
                         borderRadius: '8px',
-                        border: '4px solid #2D2410',
-                        boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.1), inset 0 -2px 4px rgba(0,0,0,0.3), 0 8px 32px rgba(0,0,0,0.5)',
                     }}
-                >
-                    {/* Decorative top trim */}
-                    <div
-                        className="absolute top-0 left-4 right-4 h-2"
-                        style={{
-                            background: 'linear-gradient(90deg, transparent 0%, #8B7355 20%, #A08060 50%, #8B7355 80%, transparent 100%)',
-                            borderRadius: '0 0 4px 4px',
-                        }}
-                    />
+                />
 
-                    {/* Header with close button */}
-                    <div className="flex justify-between items-center mb-5">
+                {/* Content overlay */}
+                <div className="relative p-6">
+                    {/* Header */}
+                    <div className="flex justify-between items-center mb-4">
                         <h2
                             id="keyboard-help-title"
-                            className="text-xl font-bold"
-                            style={{
-                                color: '#F5DEB3',
-                                textShadow: '2px 2px 2px #000, 0 0 8px rgba(139, 105, 20, 0.5)',
-                                fontFamily: 'serif',
-                            }}
+                            className="text-xl font-bold text-amber-100"
+                            style={{ textShadow: '2px 2px 2px #000' }}
                         >
-                            ⌨️ Keyboard Shortcuts
+                            Keyboard Shortcuts
                         </h2>
+                        {/* X button from sprite sheet */}
                         <button
                             onClick={onClose}
-                            className="w-8 h-8 flex items-center justify-center rounded transition-transform hover:scale-110 active:scale-95"
+                            className="w-8 h-8 transition-transform hover:scale-110 active:scale-95"
                             style={{
-                                background: 'linear-gradient(180deg, #8B4513 0%, #5D2906 100%)',
-                                border: '2px solid #3D1F04',
-                                boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.2)',
+                                backgroundImage: `url(${SPRITE})`,
+                                backgroundPosition: '-128px -352px', // X button position, scaled 2x
+                                backgroundSize: '512px 512px',
+                                imageRendering: 'pixelated',
                             }}
                             aria-label="Close"
-                        >
-                            <span className="text-amber-200 text-lg font-bold" style={{ textShadow: '1px 1px 1px #000' }}>✕</span>
-                        </button>
+                        />
                     </div>
 
                     {/* Shortcuts list */}
@@ -1020,56 +1010,31 @@ function KeyboardHelpModal({ onClose }) {
                         {shortcuts.map((shortcut, index) => (
                             <div
                                 key={index}
-                                className="flex flex-col gap-1 p-2 rounded"
-                                style={{
-                                    background: 'rgba(0,0,0,0.2)',
-                                    borderBottom: '1px solid rgba(139, 115, 85, 0.3)',
-                                }}
+                                className="flex flex-col gap-1 p-2 rounded bg-black/30"
                             >
                                 <div className="flex flex-wrap gap-1.5">
                                     {shortcut.keys.map((key, i) => (
                                         <kbd
                                             key={i}
-                                            className="px-2 py-1 text-sm font-mono"
-                                            style={{
-                                                background: 'linear-gradient(180deg, #6B5344 0%, #4A3A2E 100%)',
-                                                border: '2px solid #3D2F24',
-                                                borderRadius: '4px',
-                                                color: '#F5DEB3',
-                                                textShadow: '1px 1px 1px #000',
-                                                boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.1), 0 2px 2px rgba(0,0,0,0.3)',
-                                            }}
+                                            className="px-2 py-1 text-sm font-mono bg-amber-900/80 border-2 border-amber-950 rounded text-amber-100"
+                                            style={{ textShadow: '1px 1px 1px #000' }}
                                         >
                                             {key}
                                         </kbd>
                                     ))}
                                 </div>
-                                <span
-                                    className="text-sm"
-                                    style={{ color: '#C4A77D' }}
-                                >
-                                    {shortcut.action}
-                                </span>
+                                <span className="text-sm text-amber-200/80">{shortcut.action}</span>
                             </div>
                         ))}
                     </div>
 
                     {/* Footer */}
-                    <div
-                        className="mt-5 pt-3 text-center"
-                        style={{ borderTop: '1px solid rgba(139, 115, 85, 0.4)' }}
-                    >
-                        <p className="text-xs" style={{ color: '#8B7355' }}>
-                            Press <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono" style={{ background: 'rgba(0,0,0,0.3)', color: '#C4A77D' }}>?</kbd> or <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono" style={{ background: 'rgba(0,0,0,0.3)', color: '#C4A77D' }}>Esc</kbd> to close
+                    <div className="mt-4 pt-3 border-t border-amber-900/50 text-center">
+                        <p className="text-xs text-amber-200/60">
+                            Press <kbd className="px-1.5 py-0.5 bg-black/30 rounded text-[10px] font-mono text-amber-200">?</kbd> or <kbd className="px-1.5 py-0.5 bg-black/30 rounded text-[10px] font-mono text-amber-200">Esc</kbd> to close
                         </p>
                     </div>
                 </div>
-
-                {/* Corner rivets/decorations */}
-                <div className="absolute top-2 left-2 w-3 h-3 rounded-full" style={{ background: 'radial-gradient(circle at 30% 30%, #B8860B, #5D4A1A)', boxShadow: 'inset 0 -1px 2px rgba(0,0,0,0.5)' }} />
-                <div className="absolute top-2 right-2 w-3 h-3 rounded-full" style={{ background: 'radial-gradient(circle at 30% 30%, #B8860B, #5D4A1A)', boxShadow: 'inset 0 -1px 2px rgba(0,0,0,0.5)' }} />
-                <div className="absolute bottom-2 left-2 w-3 h-3 rounded-full" style={{ background: 'radial-gradient(circle at 30% 30%, #B8860B, #5D4A1A)', boxShadow: 'inset 0 -1px 2px rgba(0,0,0,0.5)' }} />
-                <div className="absolute bottom-2 right-2 w-3 h-3 rounded-full" style={{ background: 'radial-gradient(circle at 30% 30%, #B8860B, #5D4A1A)', boxShadow: 'inset 0 -1px 2px rgba(0,0,0,0.5)' }} />
             </div>
         </div>
     );
