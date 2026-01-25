@@ -30,9 +30,9 @@ const ANIMATED_SPRITES = {
             hurt: { frames: 2, prefix: 'Hurt', fps: 8 },
             death: { frames: 6, prefix: 'Death', fps: 8 },
         },
-        scale: 2.4,  // Doubled from 1.2
+        scale: 2.4,
         anchorY: 0.75,
-        flipX: false,  // Lizard already faces left toward player
+        flipX: true,  // Lizard sprite faces right, flip to face player on left
     },
 };
 
@@ -283,6 +283,7 @@ export default function GameRenderer() {
         lastZone: -1,
         enemyDying: false,
         enemyDeathProgress: 0,
+        waitingForRespawn: false,
         enemySpawning: false,
         enemySpawnProgress: 0,
     });
@@ -802,8 +803,8 @@ export default function GameRenderer() {
                             playerRef.current.texture = newTexture;
                         }
 
-                        // Switch to attack animation when attacking
-                        if (animState.playerAttackCooldown > 0) {
+                        // Switch to attack animation when attacking (only at start)
+                        if (animState.playerAttackCooldown > 14) {
                             playerRef.current.animController.play('attack', false, () => {
                                 playerRef.current.animController.play('idle');
                             });
