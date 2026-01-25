@@ -952,54 +952,124 @@ function KeyboardHelpModal({ onClose }) {
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
             onClick={onClose}
             role="dialog"
             aria-modal="true"
             aria-labelledby="keyboard-help-title"
         >
+            {/* Fantasy wooden panel modal */}
             <div
-                className="bg-slate-800 rounded-xl border-2 border-slate-700 p-6 max-w-md w-full mx-4 shadow-2xl"
+                className="relative max-w-md w-full mx-4"
                 onClick={(e) => e.stopPropagation()}
+                style={{
+                    backgroundImage: 'url(/assets/ui-fantasy/freefantasy.png)',
+                    backgroundPosition: '-4px -46px',
+                    backgroundSize: '512px 512px',
+                    imageRendering: 'pixelated',
+                }}
             >
-                <div className="flex justify-between items-center mb-4">
-                    <h2 id="keyboard-help-title" className="text-xl font-bold text-white">
-                        Keyboard Shortcuts
-                    </h2>
-                    <button
-                        onClick={onClose}
-                        className="text-slate-400 hover:text-white transition-colors p-1"
-                        aria-label="Close"
-                    >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
+                {/* Wooden panel background - 9-slice style with padding */}
+                <div
+                    className="relative p-8 pt-6"
+                    style={{
+                        background: 'linear-gradient(180deg, #8B6914 0%, #5D4A1A 10%, #4A3A15 90%, #3D2F12 100%)',
+                        borderRadius: '8px',
+                        border: '4px solid #2D2410',
+                        boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.1), inset 0 -2px 4px rgba(0,0,0,0.3), 0 8px 32px rgba(0,0,0,0.5)',
+                    }}
+                >
+                    {/* Decorative top trim */}
+                    <div
+                        className="absolute top-0 left-4 right-4 h-2"
+                        style={{
+                            background: 'linear-gradient(90deg, transparent 0%, #8B7355 20%, #A08060 50%, #8B7355 80%, transparent 100%)',
+                            borderRadius: '0 0 4px 4px',
+                        }}
+                    />
 
-                <div className="space-y-4">
-                    {shortcuts.map((shortcut, index) => (
-                        <div key={index} className="flex flex-col gap-1.5">
-                            <div className="flex flex-wrap gap-1">
-                                {shortcut.keys.map((key, i) => (
-                                    <kbd
-                                        key={i}
-                                        className="px-2 py-1 bg-slate-900 border border-slate-600 rounded text-sm font-mono text-slate-300"
-                                    >
-                                        {key}
-                                    </kbd>
-                                ))}
+                    {/* Header with close button */}
+                    <div className="flex justify-between items-center mb-5">
+                        <h2
+                            id="keyboard-help-title"
+                            className="text-xl font-bold"
+                            style={{
+                                color: '#F5DEB3',
+                                textShadow: '2px 2px 2px #000, 0 0 8px rgba(139, 105, 20, 0.5)',
+                                fontFamily: 'serif',
+                            }}
+                        >
+                            ⌨️ Keyboard Shortcuts
+                        </h2>
+                        <button
+                            onClick={onClose}
+                            className="w-8 h-8 flex items-center justify-center rounded transition-transform hover:scale-110 active:scale-95"
+                            style={{
+                                background: 'linear-gradient(180deg, #8B4513 0%, #5D2906 100%)',
+                                border: '2px solid #3D1F04',
+                                boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.2)',
+                            }}
+                            aria-label="Close"
+                        >
+                            <span className="text-amber-200 text-lg font-bold" style={{ textShadow: '1px 1px 1px #000' }}>✕</span>
+                        </button>
+                    </div>
+
+                    {/* Shortcuts list */}
+                    <div className="space-y-3">
+                        {shortcuts.map((shortcut, index) => (
+                            <div
+                                key={index}
+                                className="flex flex-col gap-1 p-2 rounded"
+                                style={{
+                                    background: 'rgba(0,0,0,0.2)',
+                                    borderBottom: '1px solid rgba(139, 115, 85, 0.3)',
+                                }}
+                            >
+                                <div className="flex flex-wrap gap-1.5">
+                                    {shortcut.keys.map((key, i) => (
+                                        <kbd
+                                            key={i}
+                                            className="px-2 py-1 text-sm font-mono"
+                                            style={{
+                                                background: 'linear-gradient(180deg, #6B5344 0%, #4A3A2E 100%)',
+                                                border: '2px solid #3D2F24',
+                                                borderRadius: '4px',
+                                                color: '#F5DEB3',
+                                                textShadow: '1px 1px 1px #000',
+                                                boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.1), 0 2px 2px rgba(0,0,0,0.3)',
+                                            }}
+                                        >
+                                            {key}
+                                        </kbd>
+                                    ))}
+                                </div>
+                                <span
+                                    className="text-sm"
+                                    style={{ color: '#C4A77D' }}
+                                >
+                                    {shortcut.action}
+                                </span>
                             </div>
-                            <span className="text-slate-400 text-sm">{shortcut.action}</span>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
+
+                    {/* Footer */}
+                    <div
+                        className="mt-5 pt-3 text-center"
+                        style={{ borderTop: '1px solid rgba(139, 115, 85, 0.4)' }}
+                    >
+                        <p className="text-xs" style={{ color: '#8B7355' }}>
+                            Press <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono" style={{ background: 'rgba(0,0,0,0.3)', color: '#C4A77D' }}>?</kbd> or <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono" style={{ background: 'rgba(0,0,0,0.3)', color: '#C4A77D' }}>Esc</kbd> to close
+                        </p>
+                    </div>
                 </div>
 
-                <div className="mt-6 pt-4 border-t border-slate-700 text-center">
-                    <p className="text-slate-500 text-xs">
-                        Press <kbd className="px-1.5 py-0.5 bg-slate-900 rounded text-[10px] font-mono">?</kbd> or <kbd className="px-1.5 py-0.5 bg-slate-900 rounded text-[10px] font-mono">Esc</kbd> to close
-                    </p>
-                </div>
+                {/* Corner rivets/decorations */}
+                <div className="absolute top-2 left-2 w-3 h-3 rounded-full" style={{ background: 'radial-gradient(circle at 30% 30%, #B8860B, #5D4A1A)', boxShadow: 'inset 0 -1px 2px rgba(0,0,0,0.5)' }} />
+                <div className="absolute top-2 right-2 w-3 h-3 rounded-full" style={{ background: 'radial-gradient(circle at 30% 30%, #B8860B, #5D4A1A)', boxShadow: 'inset 0 -1px 2px rgba(0,0,0,0.5)' }} />
+                <div className="absolute bottom-2 left-2 w-3 h-3 rounded-full" style={{ background: 'radial-gradient(circle at 30% 30%, #B8860B, #5D4A1A)', boxShadow: 'inset 0 -1px 2px rgba(0,0,0,0.5)' }} />
+                <div className="absolute bottom-2 right-2 w-3 h-3 rounded-full" style={{ background: 'radial-gradient(circle at 30% 30%, #B8860B, #5D4A1A)', boxShadow: 'inset 0 -1px 2px rgba(0,0,0,0.5)' }} />
             </div>
         </div>
     );
