@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TIERS, GEAR_BASES, WEAPON_TYPES, PRESTIGE_WEAPONS, BOSS_SETS, PRESTIGE_BOSS_SETS, SPECIAL_EFFECTS, getItemScore, getEnhanceStage, getEffectMaxForTier } from '../data/items';
+import { TIERS, GEAR_BASES, WEAPON_TYPES, PRESTIGE_WEAPONS, BOSS_SETS, PRESTIGE_BOSS_SETS, SPECIAL_EFFECTS, UNIQUE_EFFECTS, getItemScore, getEnhanceStage, getEffectMaxForTier } from '../data/items';
 import { getEnhanceBonus } from '../utils/formulas';
 import { formatBonus } from '../utils/format';
 
@@ -370,26 +370,31 @@ export default function GameTooltip({ tooltip }) {
                 const regularEffects = effects.filter(e => !e.isAwakened);
                 const awakenedEffects = effects.filter(e => e.isAwakened);
 
-                // Helper to get roll quality percentage (capped at 100)
-                // Returns null for effects not found in SPECIAL_EFFECTS (unique boss effects)
-                // Also returns null for boss fixed effects (marked with isBossEffect or unique)
+                // Helper to get roll quality percentage
+                // Checks both SPECIAL_EFFECTS (random gear) and UNIQUE_EFFECTS (boss effects)
                 const getRollQuality = (effect, index) => {
-                    // Skip boss fixed effects - they have intentionally high values
-                    // Check for new flag, legacy unique flag, or first effect on boss items
-                    if (effect.isBossEffect || effect.unique || (item.isBossItem && index === 0)) {
-                        return null;
+                    // Check SPECIAL_EFFECTS first (for random gear effects)
+                    let effectDef = SPECIAL_EFFECTS.find(e => e.id === effect.id);
+                    let isBossEffect = effect.isBossEffect || effect.unique || (item.isBossItem && index === 0);
+
+                    // If not found in SPECIAL_EFFECTS, check UNIQUE_EFFECTS (boss-specific effects)
+                    if (!effectDef) {
+                        effectDef = UNIQUE_EFFECTS[effect.id];
+                        if (effectDef) isBossEffect = true; // Effects from UNIQUE_EFFECTS are boss effects
                     }
 
-                    const effectDef = SPECIAL_EFFECTS.find(e => e.id === effect.id);
-                    if (!effectDef) return null;
-                    const maxForTier = getEffectMaxForTier(effectDef, item.tier);
+                    if (!effectDef || effectDef.minVal === undefined) return null;
+
+                    // For boss effects, use full range (not tier-capped) since they have their own balance
+                    // For regular effects, use tier-capped max
+                    const maxVal = isBossEffect ? effectDef.maxVal : getEffectMaxForTier(effectDef, item.tier);
                     const minVal = effectDef.minVal;
-                    const range = maxForTier - minVal;
-                    if (range <= 0) return { percent: 100, max: maxForTier };
+                    const range = maxVal - minVal;
+                    if (range <= 0) return { percent: 100, max: maxVal };
                     const rawPercent = Math.round(((effect.value - minVal) / range) * 100);
-                    // Cap at 100% - values exceeding tier max are legacy/boss items
-                    const percent = Math.min(100, rawPercent);
-                    return { percent, max: maxForTier, min: minVal, isMaxed: rawPercent >= 100 };
+                    // Cap at 100% for display
+                    const percent = Math.min(100, Math.max(0, rawPercent));
+                    return { percent, max: maxVal, min: minVal, isMaxed: rawPercent >= 95, isBossEffect };
                 };
 
                 // Get color based on roll quality

@@ -1,5 +1,5 @@
 import { getZoneById, ZONES, PRESTIGE_ZONES } from '../data/zones';
-import { BOSS_SETS, PRESTIGE_BOSS_SETS, BOSS_STONES, MATERIALS, getSalvageReturns, addItemToInventory, generateGearDrop, TIERS, SPECIAL_EFFECTS, getEffectMaxForTier } from '../data/items';
+import { BOSS_SETS, PRESTIGE_BOSS_SETS, BOSS_STONES, MATERIALS, getSalvageReturns, addItemToInventory, generateGearDrop, TIERS, SPECIAL_EFFECTS, UNIQUE_EFFECTS, getEffectMaxForTier } from '../data/items';
 import { SKILLS } from '../data/skills';
 import { calculatePlayerStats } from './PlayerSystem';
 import { PLAYER_BASE, COMBAT, DEATH_PENALTY, BOSS_DROPS, LEVEL_UP, UI } from '../data/constants';
@@ -120,18 +120,23 @@ export class CombatSystem {
             const effect = item.effects[i];
             // Skip awakening bonus effects - they use different scaling
             if (effect.isAwakened) continue;
-            // Skip boss fixed effects - they're not randomly rolled
-            if (effect.isBossEffect || effect.unique || (item.isBossItem && i === 0)) continue;
 
-            const effectDef = SPECIAL_EFFECTS.find(e => e.id === effect.id);
-            if (!effectDef) continue;
+            // Check both SPECIAL_EFFECTS and UNIQUE_EFFECTS for the effect definition
+            let effectDef = SPECIAL_EFFECTS.find(e => e.id === effect.id);
+            let isBossEffect = effect.isBossEffect || effect.unique || (item.isBossItem && i === 0);
 
-            // Get the max value for this effect at the item's tier
-            const maxForTier = getEffectMaxForTier(effectDef, item.tier);
+            if (!effectDef) {
+                effectDef = UNIQUE_EFFECTS[effect.id];
+                if (effectDef) isBossEffect = true;
+            }
 
-            // Consider it "max" if within 95% of the tier's max value
-            // This accounts for rounding and gives a bit of tolerance
-            const threshold = effectDef.minVal + (maxForTier - effectDef.minVal) * 0.95;
+            if (!effectDef || effectDef.minVal === undefined) continue;
+
+            // For boss effects use full max, for regular use tier-capped max
+            const maxVal = isBossEffect ? effectDef.maxVal : getEffectMaxForTier(effectDef, item.tier);
+
+            // Consider it "max" if within 95% of the max value
+            const threshold = effectDef.minVal + (maxVal - effectDef.minVal) * 0.95;
 
             if (effect.value >= threshold) {
                 return true;

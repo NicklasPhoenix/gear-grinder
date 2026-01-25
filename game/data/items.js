@@ -56,31 +56,32 @@ export const GEAR_NAMES = {
 };
 
 // Unique boss effects - gameplay-changing abilities beyond simple stat bonuses
+// minVal/maxVal define the range for roll quality display (based on values used across all boss sets)
 export const UNIQUE_EFFECTS = {
-    // Damage over time effects
-    bleed: { id: 'bleed', name: 'Bleed', desc: 'Attacks cause bleeding for {value}% weapon damage over 3s', isPercent: true, color: '#dc2626' },
-    burn: { id: 'burn', name: 'Burn', desc: 'Attacks ignite enemies for {value}% weapon damage over 3s', isPercent: true, color: '#f97316' },
-    poison: { id: 'poison', name: 'Poison', desc: 'Attacks poison enemies for {value}% weapon damage over 4s', isPercent: true, color: '#22c55e' },
+    // Damage over time effects (values range from early bosses ~15-25 to prestige bosses ~80-100)
+    bleed: { id: 'bleed', name: 'Bleed', desc: 'Attacks cause bleeding for {value}% weapon damage over 3s', isPercent: true, color: '#dc2626', minVal: 10, maxVal: 100 },
+    burn: { id: 'burn', name: 'Burn', desc: 'Attacks ignite enemies for {value}% weapon damage over 3s', isPercent: true, color: '#f97316', minVal: 10, maxVal: 100 },
+    poison: { id: 'poison', name: 'Poison', desc: 'Attacks poison enemies for {value}% weapon damage over 4s', isPercent: true, color: '#22c55e', minVal: 10, maxVal: 100 },
 
     // Attack modifiers
-    multiStrike: { id: 'multiStrike', name: 'Multi-Strike', desc: '{value}% chance to strike twice', isPercent: true, color: '#8b5cf6' },
-    executeChance: { id: 'executeChance', name: 'Execute', desc: '{value}% chance to instantly kill enemies below 15% HP', isPercent: true, color: '#ef4444' },
-    armorPen: { id: 'armorPen', name: 'Armor Pierce', desc: 'Attacks ignore {value}% of enemy armor', isPercent: true, color: '#6b7280' },
+    multiStrike: { id: 'multiStrike', name: 'Multi-Strike', desc: '{value}% chance to strike twice', isPercent: true, color: '#8b5cf6', minVal: 5, maxVal: 50 },
+    executeChance: { id: 'executeChance', name: 'Execute', desc: '{value}% chance to instantly kill enemies below 15% HP', isPercent: true, color: '#ef4444', minVal: 3, maxVal: 25 },
+    armorPen: { id: 'armorPen', name: 'Armor Pierce', desc: 'Attacks ignore {value}% of enemy armor', isPercent: true, color: '#6b7280', minVal: 10, maxVal: 80 },
 
     // Defensive effects
-    damageShield: { id: 'damageShield', name: 'Damage Shield', desc: 'Absorb {value} damage before taking HP damage', isPercent: false, color: '#3b82f6' },
-    retaliate: { id: 'retaliate', name: 'Retaliate', desc: '{value}% chance to counter-attack when hit', isPercent: true, color: '#eab308' },
-    lastStand: { id: 'lastStand', name: 'Last Stand', desc: 'Below 30% HP: +{value}% damage and lifesteal', isPercent: true, color: '#dc2626' },
+    damageShield: { id: 'damageShield', name: 'Damage Shield', desc: 'Absorb {value} damage before taking HP damage', isPercent: false, color: '#3b82f6', minVal: 30, maxVal: 500 },
+    retaliate: { id: 'retaliate', name: 'Retaliate', desc: '{value}% chance to counter-attack when hit', isPercent: true, color: '#eab308', minVal: 5, maxVal: 50 },
+    lastStand: { id: 'lastStand', name: 'Last Stand', desc: 'Below 30% HP: +{value}% damage and lifesteal', isPercent: true, color: '#dc2626', minVal: 10, maxVal: 60 },
 
     // Utility effects
-    silverOnHit: { id: 'silverOnHit', name: 'Silver Strike', desc: 'Attacks have {value}% chance to drop bonus silver', isPercent: true, color: '#fbbf24' },
-    xpBonus: { id: 'xpBonus', name: 'Wisdom', desc: '+{value}% XP gained from kills', isPercent: true, color: '#a855f7' },
-    itemFind: { id: 'itemFind', name: 'Treasure Hunter', desc: '+{value}% chance to find items', isPercent: true, color: '#22d3ee' },
+    silverOnHit: { id: 'silverOnHit', name: 'Silver Strike', desc: 'Attacks have {value}% chance to drop bonus silver', isPercent: true, color: '#fbbf24', minVal: 5, maxVal: 30 },
+    xpBonus: { id: 'xpBonus', name: 'Wisdom', desc: '+{value}% XP gained from kills', isPercent: true, color: '#a855f7', minVal: 5, maxVal: 50 },
+    itemFind: { id: 'itemFind', name: 'Treasure Hunter', desc: '+{value}% chance to find items', isPercent: true, color: '#22d3ee', minVal: 5, maxVal: 40 },
 
     // Special mechanics
-    rage: { id: 'rage', name: 'Rage', desc: 'Each hit increases damage by {value}%, stacks up to 10x', isPercent: true, color: '#b91c1c' },
-    vampiric: { id: 'vampiric', name: 'Vampiric', desc: 'Heal for {value}% of damage dealt (enhanced lifesteal)', isPercent: true, color: '#7f1d1d' },
-    frostbite: { id: 'frostbite', name: 'Frostbite', desc: 'Attacks slow enemy attacks by {value}%', isPercent: true, color: '#06b6d4' },
+    rage: { id: 'rage', name: 'Rage', desc: 'Each hit increases damage by {value}%, stacks up to 10x', isPercent: true, color: '#b91c1c', minVal: 2, maxVal: 15 },
+    vampiric: { id: 'vampiric', name: 'Vampiric', desc: 'Heal for {value}% of damage dealt (enhanced lifesteal)', isPercent: true, color: '#7f1d1d', minVal: 2, maxVal: 15 },
+    frostbite: { id: 'frostbite', name: 'Frostbite', desc: 'Attacks slow enemy attacks by {value}%', isPercent: true, color: '#06b6d4', minVal: 10, maxVal: 50 },
 };
 
 export const BOSS_SETS = {
