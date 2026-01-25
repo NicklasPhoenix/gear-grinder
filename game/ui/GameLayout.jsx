@@ -974,7 +974,7 @@ function KeyboardHelpModal({ onClose }) {
                 {/* Content overlay positioned on the wooden part (skip chain at top) */}
                 <div className="absolute inset-0 flex flex-col pl-[18%] pr-[14%] pt-[35%] pb-[10%]">
                     {/* Header */}
-                    <div className="flex justify-between items-center mb-3">
+                    <div className="flex justify-between items-center mb-3 -mt-[5px]">
                         <h2
                             id="keyboard-help-title"
                             className="text-lg font-bold text-amber-100"
@@ -1019,7 +1019,7 @@ function KeyboardHelpModal({ onClose }) {
                     </div>
 
                     {/* Footer */}
-                    <div className="mt-2 pt-2 border-t border-amber-900/30 text-center">
+                    <div className="pt-2 border-t border-amber-900/30 text-center relative -top-[10px]">
                         <p className="text-amber-200/60 text-[10px]" style={{ textShadow: '1px 1px 1px #000' }}>
                             Press <kbd className="px-1 py-0.5 bg-amber-900/40 rounded text-[9px] font-mono">?</kbd> or <kbd className="px-1 py-0.5 bg-amber-900/40 rounded text-[9px] font-mono">Esc</kbd> to close
                         </p>
