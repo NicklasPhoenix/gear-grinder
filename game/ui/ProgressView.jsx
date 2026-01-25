@@ -57,6 +57,14 @@ export default function ProgressView() {
 }
 
 function ObjectivesSection({ state, gameManager }) {
+    // Initialize objectives if needed (must be done through setState, not during render)
+    useEffect(() => {
+        const updates = getObjectiveUpdates(state);
+        if (updates) {
+            gameManager.setState(prev => ({ ...prev, ...updates }));
+        }
+    }, [state.dailyObjectiveDay, state.weeklyObjectiveWeek, gameManager]);
+
     const objectives = checkObjectives(state);
 
     const handleClaimDaily = () => {

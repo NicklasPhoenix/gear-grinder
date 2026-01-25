@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState, useRef, useMemo,
 import { GameManager } from '../managers/GameManager';
 import { SAVE, DEFAULTS } from '../data/constants';
 import { checkAchievements, applyAchievementReward } from '../data/achievements';
+import { getObjectiveUpdates } from '../data/dailyObjectives';
 const GameContext = createContext(null);
 
 // Separate context for high-frequency updates (HP bars) to prevent full tree re-renders
@@ -266,6 +267,12 @@ export function GameProvider({ children }) {
                 }
             } catch (e) {
                 console.error("Save load error, starting fresh:", e);
+            }
+
+            // Initialize daily/weekly objectives if needed
+            const objectiveUpdates = getObjectiveUpdates(gm.state);
+            if (objectiveUpdates) {
+                gm.state = { ...gm.state, ...objectiveUpdates };
             }
 
             // Subscribe React state to Game Manager state
