@@ -81,7 +81,7 @@ export const UNIQUE_EFFECTS = {
     // Special mechanics
     rage: { id: 'rage', name: 'Rage', desc: 'Each hit increases damage by {value}%, stacks up to 10x', isPercent: true, color: '#b91c1c', minVal: 2, maxVal: 15 },
     vampiric: { id: 'vampiric', name: 'Vampiric', desc: 'Heal for {value}% of damage dealt (enhanced lifesteal)', isPercent: true, color: '#7f1d1d', minVal: 2, maxVal: 15 },
-    frostbite: { id: 'frostbite', name: 'Frostbite', desc: 'Attacks slow enemy attacks by {value}%', isPercent: true, color: '#06b6d4', minVal: 10, maxVal: 50 },
+    frostbite: { id: 'frostbite', name: 'Frostbite', desc: 'Reduces enemy damage by {value}%', isPercent: true, color: '#06b6d4', minVal: 10, maxVal: 50 },
 };
 
 export const BOSS_SETS = {

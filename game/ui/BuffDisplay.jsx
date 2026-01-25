@@ -119,6 +119,34 @@ export default function BuffDisplay({ compact = false }) {
         });
     }
 
+    // Vampiric - enhanced lifesteal
+    if (stats.vampiric > 0) {
+        activeBuffs.push({
+            id: 'vampiric',
+            name: 'Vampiric',
+            icon: '/assets/ui-icons/buffs/bleed.png', // Reuse bleed icon (blood themed)
+            value: `+${stats.vampiric}% Steal`,
+            description: `Heal for ${stats.vampiric}% of damage dealt (enhanced lifesteal)`,
+            color: '#7f1d1d',
+            bgColor: 'rgba(127, 29, 29, 0.3)',
+            active: true,
+        });
+    }
+
+    // Retaliate - counter-attack chance
+    if (stats.retaliate > 0) {
+        activeBuffs.push({
+            id: 'retaliate',
+            name: 'Retaliate',
+            icon: '/assets/ui-icons/buffs/shield.png', // Reuse shield icon
+            value: `${stats.retaliate}% Counter`,
+            description: `${stats.retaliate}% chance to counter-attack when hit`,
+            color: '#eab308',
+            bgColor: 'rgba(234, 179, 8, 0.3)',
+            active: true,
+        });
+    }
+
     // DOT Effects on Enemy
     // Bleed - damage over 3 seconds
     if (stats.bleed > 0) {
