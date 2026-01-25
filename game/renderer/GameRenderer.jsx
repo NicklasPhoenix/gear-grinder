@@ -916,16 +916,20 @@ export default function GameRenderer() {
 
                     // Position - no programmatic movement, just use sprite animations
                     let playerYOffset = playerRef.current.animController ? 0 : -25 * (pos.scaleFactor || 1);
+                    let playerXOffset = 0;
                     if (animState.playerSpawning) {
-                        // Spawn: start off-screen (above) and land at normal position
-                        const spawnHeight = 400 * (pos.scaleFactor || 1);
+                        // Spawn: arc from left off-screen to landing position
                         const progress = animState.playerSpawnProgress || 0;
-                        // Ease out - fast at start, slow at end (landing)
-                        const eased = 1 - Math.pow(1 - progress, 2);
-                        playerYOffset -= spawnHeight * (1 - eased);
+                        const arcWidth = 300 * (pos.scaleFactor || 1);  // Horizontal distance
+                        const arcHeight = 200 * (pos.scaleFactor || 1); // Peak height of arc
+                        // X: linear from left to target
+                        playerXOffset = -arcWidth * (1 - progress);
+                        // Y: parabolic arc (peaks at progress=0.5)
+                        const arcY = 4 * progress * (1 - progress); // 0 -> 1 -> 0
+                        playerYOffset -= arcHeight * arcY;
                     }
                     playerRef.current.y = (playerRef.current.baseY || pos.characterY) + playerYOffset;
-                    playerRef.current.x = playerRef.current.baseX || pos.playerX;
+                    playerRef.current.x = (playerRef.current.baseX || pos.playerX) + playerXOffset;
 
                     // Track cooldown for state only
                     if (animState.playerAttackCooldown > 0) {
