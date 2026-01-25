@@ -109,7 +109,7 @@ export class GameManager {
             onFloatingText: (text, type, target) => this.emit('floatingText', { text, type, target }),
             onLootDrop: (items) => this.emit('lootDrop', { items }),
             onEnemyDeath: (isBoss) => this.emit('enemyDeath', { isBoss }),
-            onPlayerAttack: (isCrit) => this.emit('playerAttack', { isCrit }),
+            onPlayerAttack: (isCrit, damage, attackType) => this.emit('playerAttack', { isCrit, damage, attackType }),
             onEnemyAttack: () => this.emit('enemyAttack', {}),
             onEnemyAttackWindup: () => this.emit('enemyAttackWindup', {}),
         });

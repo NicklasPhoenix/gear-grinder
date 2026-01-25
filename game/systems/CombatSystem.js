@@ -387,15 +387,15 @@ export class CombatSystem {
         }
 
         // ========== PLAYER ATTACK ==========
-        if (newState.combatState.playerAttackTimer <= 0 && newState.enemyHp > 0) {
+        if (newState.combatState.playerAttackTimer <= 0 && newState.enemyHp > 0 && newState.playerHp > 0) {
             const playerAttackResult = this.processPlayerAttack(newState, stats, safeMaxHp, enemyMaxHp, zone);
             combatUpdates = { ...combatUpdates, ...playerAttackResult };
 
             // Reset player attack timer
             newState.combatState.playerAttackTimer = this.getPlayerAttackInterval(stats);
 
-            // Trigger player attack animation callback with crit info
-            this.callbacks.onPlayerAttack(playerAttackResult.isCrit);
+            // Trigger player attack animation callback with crit and damage info
+            this.callbacks.onPlayerAttack(playerAttackResult.isCrit, playerAttackResult.attackDamage, playerAttackResult.attackType);
         }
 
         // Check Enemy Death after player attack
@@ -531,8 +531,9 @@ export class CombatSystem {
         else if (isAnnihilate) mainAttackType = 'annihilate';
         else if (isCrit) mainAttackType = 'crit';
 
-        // Show player attack immediately
-        this.showPlayerAttack(playerDmg, mainAttackType);
+        // Store damage info to show at end of attack animation (passed via event)
+        combatUpdates.attackDamage = playerDmg;
+        combatUpdates.attackType = mainAttackType;
 
         // Frenzy extra attacks
         if (!isAscendedCrit && stats.frenzy > 0 && Math.random() * 100 < stats.frenzy) {

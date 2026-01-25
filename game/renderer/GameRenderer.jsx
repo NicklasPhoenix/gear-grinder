@@ -1175,7 +1175,6 @@ export default function GameRenderer() {
             // Visual effects per attack type
             if (data.type === 'playerDmg') {
                 animStateRef.current.enemyHitFlash = 8;
-                animStateRef.current.screenShake.intensity = 6;
                 spawnHitParticles(pos.enemyX, pos.characterY - 55, 0xffffff, 10);
                 // Trigger enemy hurt sprite animation
                 if (enemyRef.current?.animController && !animStateRef.current.enemyDying) {
@@ -1197,7 +1196,6 @@ export default function GameRenderer() {
             }
             if (data.type === 'multiStrike') {
                 animStateRef.current.enemyHitFlash = 10;
-                animStateRef.current.screenShake.intensity = 8;
                 spawnHitParticles(pos.enemyX, pos.characterY - 55, 0x8b5cf6, 15);
                 // Trigger enemy hurt sprite animation
                 if (enemyRef.current?.animController && !animStateRef.current.enemyDying) {
@@ -1242,7 +1240,6 @@ export default function GameRenderer() {
             if (data.type === 'frenzy') {
                 // Frenzy - purple rapid strikes
                 animStateRef.current.enemyHitFlash = 12;
-                animStateRef.current.screenShake.intensity = 10;
                 spawnHitParticles(pos.enemyX, pos.characterY - 55, 0xc084fc, 25);
                 // Trigger enemy hurt sprite animation
                 if (enemyRef.current?.animController && !animStateRef.current.enemyDying) {
@@ -1254,7 +1251,6 @@ export default function GameRenderer() {
             if (data.type === 'phantom') {
                 // Phantom counter - purple ghost strike
                 animStateRef.current.enemyHitFlash = 10;
-                animStateRef.current.screenShake.intensity = 8;
                 spawnHitParticles(pos.enemyX, pos.characterY - 55, 0xa78bfa, 20);
                 // Trigger enemy hurt sprite animation
                 if (enemyRef.current?.animController && !animStateRef.current.enemyDying) {
@@ -1266,7 +1262,6 @@ export default function GameRenderer() {
             if (data.type === 'vengeance') {
                 // Vengeance - red counter
                 animStateRef.current.enemyHitFlash = 15;
-                animStateRef.current.screenShake.intensity = 12;
                 spawnHitParticles(pos.enemyX, pos.characterY - 55, 0xf43f5e, 30);
                 // Trigger enemy hurt sprite animation
                 if (enemyRef.current?.animController && !animStateRef.current.enemyDying) {
@@ -1294,9 +1289,8 @@ export default function GameRenderer() {
                 spawnHitParticles(pos.playerX, pos.characterY - 55, 0xfcd34d, 15);
             }
             if (data.type === 'enemyDmg') {
-                // Player taking damage - make it very noticeable
+                // Player taking damage
                 animStateRef.current.playerHitFlash = 15;
-                animStateRef.current.screenShake.intensity = 12;
                 // Trigger player hurt sprite animation (but not if dying/spawning)
                 if (playerRef.current?.animController && !animStateRef.current.playerDying && !animStateRef.current.playerDead && !animStateRef.current.playerSpawning) {
                     playerRef.current.animController.play('hurt', false, () => {
@@ -1363,11 +1357,26 @@ export default function GameRenderer() {
 
             animStateRef.current.playerAttackCooldown = 15;
             audioManager.playSfxHit();
+            // Screen shake only for crits
+            if (data?.isCrit) {
+                animStateRef.current.screenShake.intensity = 8;
+            }
             // Use crit_attack animation for crits, normal attack otherwise
             const attackAnim = data?.isCrit ? 'crit_attack' : 'attack';
+            // Store damage info to show at end of animation
+            const damageToShow = data?.damage;
+            const attackType = data?.attackType;
             // Trigger attack animation - plays once, then returns to ready stance
             if (playerRef.current?.animController) {
                 playerRef.current.animController.play(attackAnim, false, () => {
+                    // Show damage at end of attack animation
+                    if (damageToShow) {
+                        let text = `${damageToShow}`;
+                        if (attackType === 'crit') text = `CRIT ${damageToShow}!`;
+                        else if (attackType === 'ascendedCrit') text = `ASCEND ${damageToShow}!`;
+                        else if (attackType === 'annihilate') text = `ANNIHILATE ${damageToShow}!`;
+                        spawnFloatingText(text, attackType || 'playerDmg', 'enemy');
+                    }
                     if (playerRef.current?.animController) {
                         // Try ready stance, fall back to idle if not available
                         let texture = playerRef.current.animController.play('ready', true);
