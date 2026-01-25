@@ -22,12 +22,12 @@ export class CombatSystem {
         };
 
         // Accumulator for batching floating text (reduces visual clutter)
-        this.accumulatedDamageToEnemy = 0;
+        // DOT damage is batched; main attacks are shown immediately
+        this.accumulatedDotDamage = 0;
         this.accumulatedHealToPlayer = 0;
         this.accumulatedDamageToPlayer = 0;
         this.ticksSinceLastDisplay = 0;
-        this.displayInterval = 2; // Show accumulated numbers every N ticks (2 = ~0.33s at 6 ticks/sec)
-        this.lastCritType = null; // Track if we had a crit for display
+        this.displayInterval = 3; // Show accumulated DOT/heal/dmg numbers every N ticks
     }
 
     /**
@@ -39,43 +39,15 @@ export class CombatSystem {
     }
 
     /**
-     * Display accumulated damage/healing numbers and reset accumulators.
+     * Display accumulated DOT/healing/damage numbers and reset accumulators.
      * Called periodically to batch floating text and reduce visual clutter.
+     * Note: Main player attacks are shown immediately in tick(), only DOT is batched here.
      */
     flushAccumulatedText() {
-        // Show accumulated damage dealt to enemy
-        if (this.accumulatedDamageToEnemy > 0) {
-            const type = this.lastCritType || 'playerDmg';
-            let text;
-            // Add label prefix for special attacks
-            switch (this.lastCritType) {
-                case 'crit':
-                    text = `CRIT ${this.accumulatedDamageToEnemy}!`;
-                    break;
-                case 'ascendedCrit':
-                    text = `ASCEND ${this.accumulatedDamageToEnemy}!`;
-                    break;
-                case 'annihilate':
-                    text = `ANNIHL ${this.accumulatedDamageToEnemy}!`;
-                    break;
-                case 'frenzy':
-                    text = `FRENZYx3 ${this.accumulatedDamageToEnemy}!`;
-                    break;
-                case 'multiStrike':
-                    text = `x2 ${this.accumulatedDamageToEnemy}!`;
-                    break;
-                case 'vengeance':
-                    text = `VENGE ${this.accumulatedDamageToEnemy}!`;
-                    break;
-                case 'retaliate':
-                    text = `COUNTER ${this.accumulatedDamageToEnemy}!`;
-                    break;
-                default:
-                    text = `${this.accumulatedDamageToEnemy}`;
-            }
-            this.callbacks.onFloatingText(text, type, 'enemy');
-            this.accumulatedDamageToEnemy = 0;
-            this.lastCritType = null;
+        // Show accumulated DOT damage dealt to enemy (bleed/burn/poison)
+        if (this.accumulatedDotDamage > 0) {
+            this.callbacks.onFloatingText(`${this.accumulatedDotDamage}`, 'burn', 'enemy');
+            this.accumulatedDotDamage = 0;
         }
 
         // Show accumulated healing to player
@@ -94,6 +66,43 @@ export class CombatSystem {
     }
 
     /**
+     * Show player attack damage immediately with appropriate type styling.
+     * @param {number} damage - Damage dealt
+     * @param {string} critType - Type of attack ('crit', 'ascendedCrit', 'annihilate', etc.)
+     */
+    showPlayerAttack(damage, critType) {
+        let text;
+        const type = critType || 'playerDmg';
+
+        switch (critType) {
+            case 'crit':
+                text = `CRIT ${damage}!`;
+                break;
+            case 'ascendedCrit':
+                text = `ASCEND ${damage}!`;
+                break;
+            case 'annihilate':
+                text = `ANNIHL ${damage}!`;
+                break;
+            case 'frenzy':
+                text = `FRENZYx3 ${damage}!`;
+                break;
+            case 'multiStrike':
+                text = `x2 ${damage}!`;
+                break;
+            case 'vengeance':
+                text = `VENGE ${damage}!`;
+                break;
+            case 'retaliate':
+                text = `COUNTER ${damage}!`;
+                break;
+            default:
+                text = `${damage}`;
+        }
+        this.callbacks.onFloatingText(text, type, 'enemy');
+    }
+
+    /**
      * Determines if an item should be auto-salvaged based on loot filter settings.
      * @param {Object} item - The dropped item
      * @param {Object} state - Current game state
@@ -107,9 +116,12 @@ export class CombatSystem {
     hasMaxEffect(item) {
         if (!item.effects || item.effects.length === 0) return false;
 
-        for (const effect of item.effects) {
+        for (let i = 0; i < item.effects.length; i++) {
+            const effect = item.effects[i];
             // Skip awakening bonus effects - they use different scaling
             if (effect.isAwakened) continue;
+            // Skip boss fixed effects - they're not randomly rolled
+            if (effect.isBossEffect || effect.unique || (item.isBossItem && i === 0)) continue;
 
             const effectDef = SPECIAL_EFFECTS.find(e => e.id === effect.id);
             if (!effectDef) continue;
@@ -277,34 +289,35 @@ export class CombatSystem {
         newState.enemyHp -= playerDmg;
         let totalDamageDealt = playerDmg;
 
+        // Determine crit type for main attack display
+        let mainAttackType = null;
+        if (isAscendedCrit) {
+            mainAttackType = 'ascendedCrit';
+        } else if (isAnnihilate) {
+            mainAttackType = 'annihilate';
+        } else if (isCrit) {
+            mainAttackType = 'crit';
+        }
+
+        // Show main player attack IMMEDIATELY (not batched)
+        this.showPlayerAttack(playerDmg, mainAttackType);
+
         // Frenzy: overflow speed becomes triple attack chance
         if (!isAscendedCrit && stats.frenzy > 0 && Math.random() * 100 < stats.frenzy) {
             // Triple attack - two extra hits at 60% damage each
-            const frenzyDmg = Math.floor(playerDmg * 0.6);
-            newState.enemyHp -= frenzyDmg * 2;
-            totalDamageDealt += frenzyDmg * 2;
-            this.accumulatedDamageToEnemy += frenzyDmg * 2;
-            this.lastCritType = 'frenzy';
+            const frenzyDmg = Math.floor(playerDmg * 0.6) * 2;
+            newState.enemyHp -= frenzyDmg;
+            totalDamageDealt += frenzyDmg;
+            // Show frenzy damage immediately as separate hit
+            this.showPlayerAttack(frenzyDmg, 'frenzy');
         }
         // Multi-Strike: chance to hit again (not on ascended crit or frenzy)
         else if (!isAscendedCrit && stats.multiStrike > 0 && Math.random() * 100 < stats.multiStrike) {
             const multiDmg = Math.floor(playerDmg * 0.75);
             newState.enemyHp -= multiDmg;
             totalDamageDealt += multiDmg;
-            this.accumulatedDamageToEnemy += multiDmg;
-            this.lastCritType = 'multiStrike';
-        }
-
-        // Accumulate damage to enemy (shown in batches to reduce clutter)
-        this.accumulatedDamageToEnemy += playerDmg;
-
-        // Track crit type for combined display with damage number
-        if (isAscendedCrit) {
-            this.lastCritType = 'ascendedCrit';
-        } else if (isAnnihilate) {
-            this.lastCritType = 'annihilate';
-        } else if (isCrit) {
-            this.lastCritType = 'crit';
+            // Show multi-strike damage immediately as separate hit
+            this.showPlayerAttack(multiDmg, 'multiStrike');
         }
 
         combatUpdates.lastDamage = playerDmg;
@@ -343,7 +356,7 @@ export class CombatSystem {
             newState.combatState.poisonTimer = poisonTicks;
         }
 
-        // Process DOT ticks (damage applied each tick) - accumulated with regular damage
+        // Process DOT ticks (damage applied each tick) - accumulated separately for batched display
         let dotDamage = 0;
         if (newState.combatState.bleedTimer > 0) {
             dotDamage += newState.combatState.bleedDamage;
@@ -359,7 +372,8 @@ export class CombatSystem {
         }
         newState.enemyHp -= dotDamage;
         totalDamageDealt += dotDamage;
-        this.accumulatedDamageToEnemy += dotDamage;
+        // DOT damage is batched to reduce visual clutter
+        this.accumulatedDotDamage += dotDamage;
 
         // Execute: instant kill enemies below 15% HP
         if (stats.executeChance > 0 && newState.enemyHp > 0 && newState.enemyHp < enemyMaxHp * 0.15) {
@@ -516,23 +530,24 @@ export class CombatSystem {
                     if (stats.vengeance > 0 && reducedDmg > 0 && Math.random() * 100 < stats.vengeance) {
                         const vengDmg = playerDmg; // Full player damage
                         newState.enemyHp -= vengDmg;
-                        this.accumulatedDamageToEnemy += vengDmg;
-                        this.lastCritType = 'vengeance';
+                        // Show vengeance damage immediately
+                        this.showPlayerAttack(vengDmg, 'vengeance');
                     }
 
-                    // Thorns (only if not vengeance) - accumulate with regular damage
+                    // Thorns (only if not vengeance) - show immediately
                     else if (stats.thorns > 0 && reducedDmg > 0) {
                         const thornsDmg = Math.floor(reducedDmg * stats.thorns / 100);
                         newState.enemyHp -= thornsDmg;
-                        this.accumulatedDamageToEnemy += thornsDmg;
+                        // Show thorns damage immediately
+                        this.callbacks.onFloatingText(`${thornsDmg}`, 'thorns', 'enemy');
                     }
 
                     // Retaliate: chance to counter-attack when hit
                     if (stats.retaliate > 0 && reducedDmg > 0 && Math.random() * 100 < stats.retaliate) {
                         const retaliateDmg = Math.floor(playerDmg * 0.5);
                         newState.enemyHp -= retaliateDmg;
-                        this.accumulatedDamageToEnemy += retaliateDmg;
-                        if (!this.lastCritType) this.lastCritType = 'retaliate';
+                        // Show retaliate damage immediately
+                        this.showPlayerAttack(retaliateDmg, 'retaliate');
                     }
                 }
             }
@@ -734,7 +749,8 @@ export class CombatSystem {
             const bossItem = bossSet.items[droppedSlot];
 
             // Boss items get their fixed effect + one random effect
-            const fixedEffect = bossItem.effect;
+            // Mark fixed effect as boss-specific so tooltip doesn't show misleading roll quality
+            const fixedEffect = { ...bossItem.effect, isBossEffect: true };
             const effects = [fixedEffect];
 
             // Add a random second effect (excluding the fixed effect's type)

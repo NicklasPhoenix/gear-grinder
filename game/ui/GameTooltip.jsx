@@ -371,15 +371,23 @@ export default function GameTooltip({ tooltip }) {
                 const awakenedEffects = effects.filter(e => e.isAwakened);
 
                 // Helper to get roll quality percentage (capped at 100)
-                const getRollQuality = (effectId, value) => {
-                    const effectDef = SPECIAL_EFFECTS.find(e => e.id === effectId);
+                // Returns null for effects not found in SPECIAL_EFFECTS (unique boss effects)
+                // Also returns null for boss fixed effects (marked with isBossEffect or unique)
+                const getRollQuality = (effect, index) => {
+                    // Skip boss fixed effects - they have intentionally high values
+                    // Check for new flag, legacy unique flag, or first effect on boss items
+                    if (effect.isBossEffect || effect.unique || (item.isBossItem && index === 0)) {
+                        return null;
+                    }
+
+                    const effectDef = SPECIAL_EFFECTS.find(e => e.id === effect.id);
                     if (!effectDef) return null;
                     const maxForTier = getEffectMaxForTier(effectDef, item.tier);
                     const minVal = effectDef.minVal;
                     const range = maxForTier - minVal;
                     if (range <= 0) return { percent: 100, max: maxForTier };
-                    const rawPercent = Math.round(((value - minVal) / range) * 100);
-                    // Cap at 100% - values exceeding tier max are legacy items
+                    const rawPercent = Math.round(((effect.value - minVal) / range) * 100);
+                    // Cap at 100% - values exceeding tier max are legacy/boss items
                     const percent = Math.min(100, rawPercent);
                     return { percent, max: maxForTier, min: minVal, isMaxed: rawPercent >= 100 };
                 };
@@ -405,7 +413,9 @@ export default function GameTooltip({ tooltip }) {
                             <div className="space-y-1.5 mb-2">
                                 {regularEffects.map((eff, i) => {
                                     const desc = EFFECT_DESCRIPTIONS[eff.id];
-                                    const quality = getRollQuality(eff.id, eff.value);
+                                    // Pass original index for boss item detection (first effect is always fixed)
+                                    const originalIndex = effects.indexOf(eff);
+                                    const quality = getRollQuality(eff, originalIndex);
                                     return (
                                         <div key={i}>
                                             <div className="flex justify-between items-center">

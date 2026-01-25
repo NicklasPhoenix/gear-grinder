@@ -704,8 +704,11 @@ export default function GameRenderer() {
         init();
 
         // Listen for effects
+        const MAX_FLOATING_TEXT = 30; // Limit concurrent floating texts to prevent spam
         const cleanupText = gameManager.on('floatingText', (data) => {
             if (!appRef.current || !effectsContainerRef.current) return;
+            // Limit floating text count to prevent memory issues at high attack speeds
+            if (effectsContainerRef.current.children.length >= MAX_FLOATING_TEXT) return;
             const pos = positionsRef.current;
             spawnFloatingText(appRef.current, effectsContainerRef.current, data, pos);
 
