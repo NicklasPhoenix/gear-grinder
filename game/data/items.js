@@ -249,7 +249,7 @@ export const BOSS_SETS = {
             { pieces: 2, desc: 'Titan\'s Strength: +30% HP', effect: { hpMult: 0.30 } },
             { pieces: 4, desc: 'Rampage: Rage stacks +50% faster, +40% DMG', effect: { rageBonus: 0.50, dmgMult: 0.40 } },
             { pieces: 6, desc: 'Unstoppable: +300 Shield, +30% Last Stand', effect: { damageShield: 300, lastStand: 30 } },
-            { pieces: 8, desc: 'CATACLYSM: -30% attack speed, +100% damage, Rage uncapped', effect: { speedMult: -0.30, dmgMult: 1.00, rageUncapped: true } },
+            { pieces: 8, desc: 'CATACLYSM: -30% attack speed, +100% damage, Rage stacks to 100', effect: { speedMult: -0.30, dmgMult: 1.00, rageMax: 100 } },
         ]
     },
 

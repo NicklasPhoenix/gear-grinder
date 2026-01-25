@@ -135,8 +135,8 @@ function validateSave(parsed) {
     if (typeof parsed.autoSalvageKeepEffects !== 'boolean') {
         parsed.autoSalvageKeepEffects = defaults.autoSalvageKeepEffects;
     }
-    if (typeof parsed.autoSalvageMaxEffectsOnly !== 'boolean') {
-        parsed.autoSalvageMaxEffectsOnly = false; // Default OFF
+    if (!Array.isArray(parsed.autoSalvageWantedStats)) {
+        parsed.autoSalvageWantedStats = []; // Default: keep all stats
     }
     if (typeof parsed.autoSalvageBossItems !== 'boolean') {
         parsed.autoSalvageBossItems = false; // Default OFF for safety

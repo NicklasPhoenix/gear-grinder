@@ -55,7 +55,7 @@ export const calculatePlayerStats = (gameState) => {
     let damageShield = 0, retaliate = 0, lastStand = 0;    // Defensive effects
     let silverOnHit = 0, itemFind = 0;             // Utility effects
     let rage = 0, vampiric = 0, frostbite = 0;     // Special mechanics
-    let rageUncapped = false;                      // Behemoth 8pc: no stack limit
+    let rageMax = 10;                              // Default 10 stacks, Behemoth 8pc increases to 100
     let killHeal = 0;                              // Set bonus: heal on kill
 
     // Gear contributions
@@ -206,7 +206,7 @@ export const calculatePlayerStats = (gameState) => {
                     if (bonus.effect.vampiric) vampiric += bonus.effect.vampiric;
                     if (bonus.effect.frostbite) frostbite += bonus.effect.frostbite;
                     if (bonus.effect.killHeal) killHeal += bonus.effect.killHeal;
-                    if (bonus.effect.rageUncapped) rageUncapped = true;
+                    if (bonus.effect.rageMax) rageMax = Math.max(rageMax, bonus.effect.rageMax);
                 }
             });
         }
@@ -374,8 +374,8 @@ export const calculatePlayerStats = (gameState) => {
         lastStand,
         silverOnHit,
         itemFind,
-        rage: rageUncapped ? rage : Math.min(15, rage),
-        rageUncapped,
+        rage: Math.min(15, rage),  // % damage per stack, capped at 15%
+        rageMax,                   // Max stacks (default 10, Behemoth 8pc gives 100)
         vampiric,
         frostbite: Math.min(50, frostbite),
         killHeal,

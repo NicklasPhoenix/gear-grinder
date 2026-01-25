@@ -152,18 +152,19 @@ export class CombatSystem {
 
         // Check if we should keep items with effects
         const keepEffects = state.autoSalvageKeepEffects ?? true;
-        const maxEffectsOnly = state.autoSalvageMaxEffectsOnly ?? false;
+        const wantedStats = state.autoSalvageWantedStats ?? [];
         const hasEffects = item.effects && item.effects.length > 0;
 
         // When keepEffects is ON, effects filter applies to ALL tiers consistently
         if (keepEffects) {
             if (hasEffects) {
-                // If maxEffectsOnly is ON, only keep items with at least one max-rolled effect
-                if (maxEffectsOnly) {
-                    if (this.hasMaxEffect(item)) return false; // Keep - has max effect
-                    return true; // Salvage - has effects but none are max
+                // If stat filter is set, only keep items with at least one wanted stat
+                if (wantedStats.length > 0) {
+                    const hasWantedStat = item.effects.some(effect => wantedStats.includes(effect.id));
+                    if (hasWantedStat) return false; // Keep - has a wanted stat
+                    return true; // Salvage - has effects but none are wanted
                 }
-                return false; // Keep - has effects (any tier)
+                return false; // Keep - has effects (any stat, no filter set)
             }
             // Salvage items without effects that are at or below threshold
             if (item.tier <= tierThreshold) return true;
@@ -480,9 +481,9 @@ export class CombatSystem {
         combatUpdates.lastDamage = playerDmg;
         combatUpdates.isPlayerTurn = true;
 
-        // Stack rage
+        // Stack rage (default max 10, can be increased by set bonuses)
         if (stats.rage > 0) {
-            const maxStacks = stats.rageUncapped ? 999 : 10;
+            const maxStacks = stats.rageMax || 10;
             newState.combatState.rageStacks = Math.min(maxStacks, newState.combatState.rageStacks + 1);
         }
 

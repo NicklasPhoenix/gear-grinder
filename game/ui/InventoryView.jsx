@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { useGame } from '../context/GameContext';
 import ItemIcon from './ItemIcon';
-import { TIERS, GEAR_SLOTS, GEAR_BASES, WEAPON_TYPES, PRESTIGE_WEAPONS, getItemScore, getSalvageReturns, BOSS_SETS, PRESTIGE_BOSS_SETS, addItemToInventory, removeOneFromStack, getEnhanceStage } from '../data/items';
+import { TIERS, GEAR_SLOTS, GEAR_BASES, WEAPON_TYPES, PRESTIGE_WEAPONS, getItemScore, getSalvageReturns, BOSS_SETS, PRESTIGE_BOSS_SETS, addItemToInventory, removeOneFromStack, getEnhanceStage, SPECIAL_EFFECTS } from '../data/items';
 import { getEnhanceBonus } from '../utils/formulas';
 import PresetsModal from './PresetsModal';
 import { useIsMobile } from '../hooks/useIsMobile';
@@ -232,10 +232,6 @@ export default function InventoryView({ onHover }) {
         gameManager.setState(prev => ({ ...prev, autoSalvageKeepEffects: !prev.autoSalvageKeepEffects }));
     };
 
-    const toggleMaxEffectsOnly = () => {
-        gameManager.setState(prev => ({ ...prev, autoSalvageMaxEffectsOnly: !prev.autoSalvageMaxEffectsOnly }));
-    };
-
     const toggleSalvageBossItems = () => {
         gameManager.setState(prev => ({ ...prev, autoSalvageBossItems: !prev.autoSalvageBossItems }));
     };
@@ -243,8 +239,25 @@ export default function InventoryView({ onHover }) {
     // Loot filter state
     const autoSalvageTier = state.autoSalvageTier ?? -1;
     const autoSalvageKeepEffects = state.autoSalvageKeepEffects ?? true;
-    const autoSalvageMaxEffectsOnly = state.autoSalvageMaxEffectsOnly ?? false;
     const autoSalvageBossItems = state.autoSalvageBossItems ?? false;
+    // Stat filter - array of effect IDs to keep (empty = keep all effects)
+    const autoSalvageWantedStats = state.autoSalvageWantedStats ?? [];
+    const [showStatFilter, setShowStatFilter] = useState(false);
+
+    const toggleStatFilter = (effectId) => {
+        gameManager.setState(prev => {
+            const current = prev.autoSalvageWantedStats ?? [];
+            if (current.includes(effectId)) {
+                return { ...prev, autoSalvageWantedStats: current.filter(id => id !== effectId) };
+            } else {
+                return { ...prev, autoSalvageWantedStats: [...current, effectId] };
+            }
+        });
+    };
+
+    const clearStatFilters = () => {
+        gameManager.setState(prev => ({ ...prev, autoSalvageWantedStats: [] }));
+    };
 
     // Equipment slot component for the paper doll
     const EquipSlot = ({ slot, className = '' }) => {
@@ -541,22 +554,61 @@ export default function InventoryView({ onHover }) {
                                 {autoSalvageKeepEffects ? 'ON' : 'OFF'}
                             </button>
                             {autoSalvageKeepEffects && (
-                                <>
-                                    <span className="text-xs text-slate-400 ml-2">Max only:</span>
+                                <div className="relative">
                                     <button
-                                        onClick={toggleMaxEffectsOnly}
+                                        onClick={() => setShowStatFilter(!showStatFilter)}
                                         className={`px-1.5 py-0.5 text-xs rounded transition-all ${
-                                            autoSalvageMaxEffectsOnly
+                                            autoSalvageWantedStats.length > 0
                                                 ? 'bg-purple-600/40 text-purple-300'
                                                 : 'bg-slate-600/40 text-slate-300'
                                         }`}
-                                        title="Only keep items with at least one max-rolled effect (95%+ of tier max)"
+                                        title="Filter: only keep items with these stats"
                                     >
-                                        {autoSalvageMaxEffectsOnly ? 'ON' : 'OFF'}
+                                        Stats: {autoSalvageWantedStats.length > 0 ? autoSalvageWantedStats.length : 'All'} ▾
                                     </button>
-                                </>
+                                    {showStatFilter && (
+                                        <div className="absolute top-full left-0 mt-1 z-50 bg-slate-800 border border-slate-600 rounded-lg p-2 shadow-xl min-w-[200px]">
+                                            <div className="flex justify-between items-center mb-2 pb-1 border-b border-slate-700">
+                                                <span className="text-xs text-slate-300 font-bold">Keep items with:</span>
+                                                <button
+                                                    onClick={clearStatFilters}
+                                                    className="text-[10px] text-slate-400 hover:text-white"
+                                                >
+                                                    Clear
+                                                </button>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-1">
+                                                {SPECIAL_EFFECTS.map(effect => {
+                                                    const isSelected = autoSalvageWantedStats.includes(effect.id);
+                                                    return (
+                                                        <button
+                                                            key={effect.id}
+                                                            onClick={() => toggleStatFilter(effect.id)}
+                                                            className={`px-2 py-1 text-[10px] rounded transition-all text-left ${
+                                                                isSelected
+                                                                    ? 'ring-1 ring-white'
+                                                                    : 'opacity-50 hover:opacity-80'
+                                                            }`}
+                                                            style={{
+                                                                backgroundColor: effect.color + '30',
+                                                                color: effect.color,
+                                                            }}
+                                                        >
+                                                            {effect.name}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                            <div className="text-[9px] text-slate-500 mt-2 pt-1 border-t border-slate-700">
+                                                {autoSalvageWantedStats.length === 0
+                                                    ? 'All items with effects are kept'
+                                                    : 'Only items with selected stats are kept'}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             )}
-                            <span className="text-xs text-slate-400 ml-2">Salvage boss items:</span>
+                            <span className="text-xs text-slate-400 ml-2">Salvage boss:</span>
                             <button
                                 onClick={toggleSalvageBossItems}
                                 className={`px-1.5 py-0.5 text-xs rounded transition-all ${

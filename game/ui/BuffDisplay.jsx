@@ -28,14 +28,15 @@ export default function BuffDisplay({ compact = false }) {
     // Rage stacks - each stack gives +X% damage where X is the rage stat
     if (stats.rage > 0) {
         const stacks = combatState.rageStacks || 0;
+        const maxStacks = stats.rageMax || 10;
         const bonusDmg = Math.floor(stats.rage * stacks);
-        const maxBonus = Math.floor(stats.rage * (stats.rageUncapped ? 999 : 10));
+        const maxBonus = Math.floor(stats.rage * maxStacks);
         activeBuffs.push({
             id: 'rage',
             name: 'Rage',
             icon: '/assets/ui-icons/buffs/rage.png',
             stacks: stacks,
-            maxStacks: stats.rageUncapped ? null : 10,
+            maxStacks: maxStacks,
             value: `+${bonusDmg}% DMG`,
             description: `+${stats.rage}% damage per stack (max ${maxBonus}%)`,
             color: '#b91c1c',
