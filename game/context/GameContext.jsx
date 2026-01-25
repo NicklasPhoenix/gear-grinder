@@ -309,7 +309,7 @@ export function GameProvider({ children }) {
                     newState.autoSalvage !== lastState?.autoSalvage ||
                     newState.autoSalvageTier !== lastState?.autoSalvageTier ||
                     newState.autoSalvageKeepEffects !== lastState?.autoSalvageKeepEffects ||
-                    newState.autoSalvageMaxEffectsOnly !== lastState?.autoSalvageMaxEffectsOnly ||
+                    JSON.stringify(newState.autoSalvageWantedStats) !== JSON.stringify(lastState?.autoSalvageWantedStats) ||
                     newState.autoSalvageBossItems !== lastState?.autoSalvageBossItems ||
                     newState.textSize !== lastState?.textSize ||
                     newState.inventorySort !== lastState?.inventorySort ||

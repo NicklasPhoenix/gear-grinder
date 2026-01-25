@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useGame } from '../context/GameContext';
 import ItemIcon from './ItemIcon';
 import { TIERS, GEAR_SLOTS, GEAR_BASES, WEAPON_TYPES, PRESTIGE_WEAPONS, getItemScore, getSalvageReturns, BOSS_SETS, PRESTIGE_BOSS_SETS, addItemToInventory, removeOneFromStack, getEnhanceStage, SPECIAL_EFFECTS } from '../data/items';
@@ -567,44 +567,51 @@ export default function InventoryView({ onHover }) {
                                         Stats: {autoSalvageWantedStats.length > 0 ? autoSalvageWantedStats.length : 'All'} ▾
                                     </button>
                                     {showStatFilter && (
-                                        <div className="absolute top-full left-0 mt-1 z-50 bg-slate-800 border border-slate-600 rounded-lg p-2 shadow-xl min-w-[200px]">
-                                            <div className="flex justify-between items-center mb-2 pb-1 border-b border-slate-700">
-                                                <span className="text-xs text-slate-300 font-bold">Keep items with:</span>
-                                                <button
-                                                    onClick={clearStatFilters}
-                                                    className="text-[10px] text-slate-400 hover:text-white"
-                                                >
-                                                    Clear
-                                                </button>
+                                        <>
+                                            {/* Backdrop to close dropdown */}
+                                            <div
+                                                className="fixed inset-0 z-40"
+                                                onClick={() => setShowStatFilter(false)}
+                                            />
+                                            <div className="absolute top-full left-0 mt-1 z-50 bg-slate-800 border border-slate-600 rounded-lg p-2 shadow-xl min-w-[200px]">
+                                                <div className="flex justify-between items-center mb-2 pb-1 border-b border-slate-700">
+                                                    <span className="text-xs text-slate-300 font-bold">Keep items with:</span>
+                                                    <button
+                                                        onClick={() => { clearStatFilters(); setShowStatFilter(false); }}
+                                                        className="text-[10px] text-slate-400 hover:text-white"
+                                                    >
+                                                        Clear
+                                                    </button>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-1">
+                                                    {SPECIAL_EFFECTS.map(effect => {
+                                                        const isSelected = autoSalvageWantedStats.includes(effect.id);
+                                                        return (
+                                                            <button
+                                                                key={effect.id}
+                                                                onClick={() => toggleStatFilter(effect.id)}
+                                                                className={`px-2 py-1 text-[10px] rounded transition-all text-left ${
+                                                                    isSelected
+                                                                        ? 'ring-1 ring-white'
+                                                                        : 'opacity-50 hover:opacity-80'
+                                                                }`}
+                                                                style={{
+                                                                    backgroundColor: effect.color + '30',
+                                                                    color: effect.color,
+                                                                }}
+                                                            >
+                                                                {effect.name}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                                <div className="text-[9px] text-slate-500 mt-2 pt-1 border-t border-slate-700">
+                                                    {autoSalvageWantedStats.length === 0
+                                                        ? 'All items with effects are kept'
+                                                        : 'Only items with selected stats are kept'}
+                                                </div>
                                             </div>
-                                            <div className="grid grid-cols-2 gap-1">
-                                                {SPECIAL_EFFECTS.map(effect => {
-                                                    const isSelected = autoSalvageWantedStats.includes(effect.id);
-                                                    return (
-                                                        <button
-                                                            key={effect.id}
-                                                            onClick={() => toggleStatFilter(effect.id)}
-                                                            className={`px-2 py-1 text-[10px] rounded transition-all text-left ${
-                                                                isSelected
-                                                                    ? 'ring-1 ring-white'
-                                                                    : 'opacity-50 hover:opacity-80'
-                                                            }`}
-                                                            style={{
-                                                                backgroundColor: effect.color + '30',
-                                                                color: effect.color,
-                                                            }}
-                                                        >
-                                                            {effect.name}
-                                                        </button>
-                                                    );
-                                                })}
-                                            </div>
-                                            <div className="text-[9px] text-slate-500 mt-2 pt-1 border-t border-slate-700">
-                                                {autoSalvageWantedStats.length === 0
-                                                    ? 'All items with effects are kept'
-                                                    : 'Only items with selected stats are kept'}
-                                            </div>
-                                        </div>
+                                        </>
                                     )}
                                 </div>
                             )}
