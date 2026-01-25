@@ -147,7 +147,7 @@ export class GameManager {
 
         const kills = Math.floor(secondsOffline / 3);
         const goldGain = kills * (10 + zone * 5);
-        const xpGain = kills * (20 + zone * 10);
+        const xpGain = kills * (5 + zone * 2); // Reduced XP gain (was 20 + zone * 10)
 
         // Calculate material gains based on zone and kills
         // Enhance stones: ~1 per 5 kills, scaling with zone
@@ -228,6 +228,17 @@ export class GameManager {
             xp: 0,
             currentZone: 0,
             stats: { str: 5, int: 5, vit: 5, agi: 5, lck: 5 },
+            secondaryStats: { // Reset secondary stats on prestige
+                critChance: 0,
+                critDamage: 0,
+                dodge: 0,
+                armor: 0,
+                hpRegen: 0,
+                dmgReduction: 0,
+                xpBonus: 0,
+                silverFind: 0,
+                dropRate: 0
+            },
             statPoints: achievementStatPoints, // Re-grant achievement stat points
             achievementStatPoints: achievementStatPoints, // Preserve the tracking value
             gear: { weapon: null, helmet: null, armor: null, boots: null, belt: null, shield: null, gloves: null, amulet: null },

@@ -708,7 +708,7 @@ export class CombatSystem {
      */
     handleEnemyDeath(state, stats, zone, log, safeMaxHp) {
         const goldEarned = Math.floor((zone.goldMin + Math.random() * (zone.goldMax - zone.goldMin)) * stats.goldMult);
-        const xpEarned = Math.floor(zone.enemyHp / 2 * (1 + stats.xpBonus / 100));
+        const xpEarned = Math.floor(zone.enemyHp / 20 * (1 + stats.xpBonus / 100));
         const drops = zone.drops;
         const zoneBonus = Math.floor(state.currentZone / 2) + 1;
 

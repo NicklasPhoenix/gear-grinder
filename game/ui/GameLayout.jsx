@@ -317,19 +317,22 @@ function DesktopGameLayout() {
                     <GameRenderer />
                 </div>
 
-                {/* Active Buffs Display - bottom left, above controls */}
-                {state?.combatState && (
-                    <div className="absolute bottom-28 left-4 z-10">
-                        <div className="glass-card rounded-lg p-2 min-w-[200px]">
-                            <BuffDisplay />
+                {/* Left Side Controls - vertical layout next to character */}
+                <div className="absolute left-2 top-1/2 -translate-y-1/2 z-10 flex flex-col gap-2">
+                    {/* Game Speed & Combat Controls */}
+                    <div className="glass-card rounded-lg p-1.5 flex flex-col gap-1">
+                        <GameSpeedControl vertical />
+                        <div className="border-t border-slate-700/50 pt-1">
+                            <CombatToggle compact />
                         </div>
                     </div>
-                )}
 
-                {/* Game Controls - bottom left overlay */}
-                <div className="absolute bottom-16 left-4 z-10 flex items-center gap-3">
-                    <CombatToggle />
-                    <GameSpeedControl />
+                    {/* Active Buffs Display */}
+                    {state?.combatState && (
+                        <div className="glass-card rounded-lg p-1.5 max-w-[80px]">
+                            <BuffDisplay compact />
+                        </div>
+                    )}
                 </div>
 
                 {/* Bottom XP Bar - full width footer */}

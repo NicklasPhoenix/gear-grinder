@@ -49,8 +49,8 @@ export const STAT_SCALING = {
 
 // === LEVEL UP ===
 export const LEVEL_UP = {
-    BASE_XP: 50,
-    XP_SCALING: 1.3,
+    BASE_XP: 100,      // XP needed for level 1→2 (was 50)
+    XP_SCALING: 1.25,  // Multiplier per level (was 1.3, slightly reduced for smoother curve)
     STAT_POINTS_PER_LEVEL: 3,
     DAMAGE_PER_LEVEL: 2,
     HP_PER_LEVEL: 8,
