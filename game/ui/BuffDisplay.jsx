@@ -26,11 +26,14 @@ export default function BuffDisplay({ compact = false }) {
     const activeBuffs = [];
 
     // Rage stacks - each stack gives +X% damage where X is the rage stat
+    // Rage decays over time - kill enemies to maintain stacks!
     if (stats.rage > 0) {
         const stacks = combatState.rageStacks || 0;
         const maxStacks = stats.rageMax || 10;
         const bonusDmg = Math.floor(stats.rage * stacks);
         const maxBonus = Math.floor(stats.rage * maxStacks);
+        const decayTimer = combatState.rageDecayTimer || 0;
+        const decaySeconds = stacks > 0 ? Math.ceil(decayTimer / 20) : null; // Convert ticks to seconds
         activeBuffs.push({
             id: 'rage',
             name: 'Rage',
@@ -38,10 +41,12 @@ export default function BuffDisplay({ compact = false }) {
             stacks: stacks,
             maxStacks: maxStacks,
             value: `+${bonusDmg}% DMG`,
-            description: `+${stats.rage}% damage per stack (max ${maxBonus}%)`,
+            timer: decaySeconds, // Show decay timer
+            description: `+${stats.rage}% damage per stack. Kill enemies to maintain! Decays if idle.`,
             color: '#b91c1c',
             bgColor: 'rgba(185, 28, 28, 0.3)',
             active: stacks > 0,
+            decaying: stacks > 0 && decayTimer < 20, // Warn when about to decay
         });
     }
 
@@ -229,16 +234,18 @@ function BuffIcon({ buff }) {
     const isInactive = !buff.active || buff.used;
     // Conditional buffs (like Last Stand) show as "ready" when not yet active
     const isConditionalWaiting = buff.conditional && !buff.active;
+    // Decaying buffs (like Rage about to lose stacks) pulse as warning
+    const isDecaying = buff.decaying && buff.active;
 
     return (
         <div
             className={`relative flex items-center gap-1 px-1.5 py-1 rounded-md border transition-all ${
                 isInactive && !isConditionalWaiting ? 'opacity-40 grayscale' : ''
-            } ${isConditionalWaiting ? 'opacity-60' : ''}`}
+            } ${isConditionalWaiting ? 'opacity-60' : ''} ${isDecaying ? 'animate-pulse' : ''}`}
             style={{
                 backgroundColor: buff.bgColor,
-                borderColor: buff.color,
-                borderWidth: '1px',
+                borderColor: isDecaying ? '#fbbf24' : buff.color, // Yellow border when decaying
+                borderWidth: isDecaying ? '2px' : '1px',
             }}
             title={`${buff.name}${buff.value ? `: ${buff.value}` : ''}${buff.stacks !== undefined ? ` (${buff.stacks}${buff.maxStacks ? '/' + buff.maxStacks : ''} stacks)` : ''}${buff.description ? '\n' + buff.description : ''}`}
         >

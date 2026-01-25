@@ -45,7 +45,7 @@ These effects come from boss set gear and appear in the buff display during comb
 
 | Effect | What it Does |
 |--------|--------------|
-| **Rage** | Each attack adds +1 stack (max 10, or unlimited with Behemoth 8pc). Each stack increases damage by your Rage stat %. Example: 5% Rage with 10 stacks = +50% damage |
+| **Rage** | Each attack adds +1 stack (max 10, or 100 with Behemoth 8pc). Each stack increases damage by your Rage stat %. **Rage decays over time!** Kill enemies within 3 seconds to maintain stacks. If no kill, lose 1 stack every 2 seconds. Example: 5% Rage with 10 stacks = +50% damage |
 
 ### Defensive Effects
 
@@ -83,10 +83,11 @@ During combat, active effects are shown with icons:
 - **Colored border**: Effect is active
 - **Grayed out**: Effect is inactive or used
 - **Stack count badge**: Shows current stacks (e.g., Rage)
-- **Timer**: Shows remaining duration for DOTs
+- **Timer**: Shows remaining duration for DOTs or decay timer for Rage
 - **"READY"**: Conditional effect waiting to trigger (e.g., Last Stand when HP > 30%)
 - **"ACTIVE!"**: Conditional effect currently triggered (e.g., Last Stand when HP < 30%)
 - **"USED"**: One-time effect already triggered (e.g., Second Wind)
+- **Pulsing yellow border**: Rage is about to decay - kill an enemy quickly!
 
 ---
 
@@ -106,4 +107,4 @@ Each boss drops a unique gear set with powerful effects. Collect more pieces for
 2. **Watch your buffs**: The buff display shows what's active and helping you
 3. **DOTs stack damage**: Bleed, Burn, and Poison add significant extra damage over time
 4. **Last Stand is powerful**: Consider staying at low HP intentionally if you have good lifesteal to benefit from the bonus
-5. **Rage builds up**: Keep attacking to maintain Rage stacks - they don't reset between enemies!
+5. **Maintain your Rage**: Rage stacks decay if you don't kill enemies fast enough. Watch for the pulsing yellow border warning and kill quickly to keep your damage bonus!

@@ -236,6 +236,7 @@ export class CombatSystem {
         if (!state.combatState) {
             newState.combatState = {
                 rageStacks: 0,
+                rageDecayTimer: 0,     // Ticks until rage decays (0 = no decay pending)
                 damageShield: 0,
                 overhealShield: 0,
                 bleedTimer: 0,
@@ -265,9 +266,12 @@ export class CombatSystem {
             newState.combatState.enemyAttackTimer > 100) {
             newState.combatState.enemyAttackTimer = 0;
         }
-        // Also validate rage stacks
+        // Also validate rage stacks and decay timer
         if (typeof newState.combatState.rageStacks !== 'number' || isNaN(newState.combatState.rageStacks)) {
             newState.combatState.rageStacks = 0;
+        }
+        if (typeof newState.combatState.rageDecayTimer !== 'number' || isNaN(newState.combatState.rageDecayTimer)) {
+            newState.combatState.rageDecayTimer = 0;
         }
 
         // Ensure HP values are valid
@@ -287,6 +291,21 @@ export class CombatSystem {
         }
         if (newState.combatState.enemyAttackTimer > 0) {
             newState.combatState.enemyAttackTimer--;
+        }
+
+        // Rage decay system - lose stacks if not killing enemies fast enough
+        // Decay timer only runs when you have rage stacks
+        if (stats.rage > 0 && newState.combatState.rageStacks > 0) {
+            if (newState.combatState.rageDecayTimer > 0) {
+                newState.combatState.rageDecayTimer--;
+            } else {
+                // Timer expired - lose 1 rage stack
+                newState.combatState.rageStacks = Math.max(0, newState.combatState.rageStacks - 1);
+                // Reset decay timer (40 ticks = 2 seconds between decays)
+                if (newState.combatState.rageStacks > 0) {
+                    newState.combatState.rageDecayTimer = 40;
+                }
+            }
         }
 
         // HP Regeneration (% of max HP per second, applied per tick)
@@ -343,6 +362,9 @@ export class CombatSystem {
             }
             // Reset combat state on enemy death (rage persists between enemies)
             // newState.combatState.rageStacks = 0; // Rage now persists!
+            // Reset rage decay timer on kill - reward for fast kills!
+            // Timer is 60 ticks (3 seconds) - kill within 3 seconds to maintain rage
+            newState.combatState.rageDecayTimer = 60;
             newState.combatState.bleedTimer = 0;
             newState.combatState.burnTimer = 0;
             newState.combatState.poisonTimer = 0;
