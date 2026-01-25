@@ -228,8 +228,8 @@ export class CombatSystem {
         const enemyMaxHp = isEndless ? state.endlessEnemyMaxHp : zone.enemyHp;
         const enemyDmg = isEndless ? state.endlessEnemyDmg : zone.enemyDmg;
 
-        // Initialize combat state tracking
-        if (!newState.combatState) {
+        // Initialize or deep copy combat state tracking
+        if (!state.combatState) {
             newState.combatState = {
                 rageStacks: 0,
                 damageShield: 0,
@@ -244,6 +244,9 @@ export class CombatSystem {
                 playerAttackTimer: 0,  // Ticks until player attacks
                 enemyAttackTimer: 0,   // Ticks until enemy attacks
             };
+        } else {
+            // Deep copy combatState to avoid mutating the original
+            newState.combatState = { ...state.combatState };
         }
 
         // Ensure HP values are valid
