@@ -147,8 +147,9 @@ function DesktopGameLayout() {
                 setShowKeyboardHelp(prev => !prev);
             }
 
-            // M key to toggle menu collapse
-            if (e.key === 'm' || e.key === 'M') {
+            // M key or Tab to toggle menu collapse
+            if (e.key === 'm' || e.key === 'M' || e.key === 'Tab') {
+                e.preventDefault(); // Prevent Tab from moving focus
                 setMenuCollapsed(prev => !prev);
             }
         };
@@ -943,7 +944,7 @@ function KeyboardHelpModal({ onClose }) {
     const shortcuts = [
         { keys: ['1', '2', '...', '0'], action: 'Switch tabs (1-9 for first 9 tabs, 0 for Settings)' },
         { keys: ['\u2190', '\u2192'], action: 'Navigate between tabs' },
-        { keys: ['M'], action: 'Toggle menu collapse (expand canvas)' },
+        { keys: ['Tab', 'M'], action: 'Toggle menu collapse (expand canvas)' },
         { keys: ['Shift'], action: 'Hold while hovering item to show max possible rolls' },
         { keys: ['Middle Click'], action: 'Lock/unlock item in inventory' },
         { keys: ['?'], action: 'Toggle this help menu' },

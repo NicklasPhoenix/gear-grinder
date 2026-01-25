@@ -839,10 +839,17 @@ export default function GameRenderer() {
                     if (gmState?.playerHp <= 0 && !animState.playerDying && !animState.playerDead) {
                         animState.playerDying = true;
                         animState.playerDeathHold = 0;
-                        // Trigger death animation
+                        // Trigger death animation (fall back to hurt if death doesn't exist)
                         if (playerRef.current.animController) {
-                            playerRef.current.animController.play('death', false);
+                            const hasDeathAnim = playerRef.current.animController.animations?.death;
+                            if (hasDeathAnim) {
+                                playerRef.current.animController.play('death', false);
+                            } else {
+                                // Fallback to hurt animation
+                                playerRef.current.animController.play('hurt', false);
+                            }
                         }
+                        animStateRef.current.screenShake.intensity = 15;
                     }
 
                     // Player death animation

@@ -61,7 +61,7 @@ export const COMBAT = {
     ARMOR_CONSTANT: 250,      // Armor / (Armor + CONSTANT) = damage reduction
     ATTACKS_PER_SECOND: 1,    // Base player attack speed (1 attack per second)
     TICK_RATE: 20,            // Combat ticks per second (50ms per tick)
-    BASE_ENEMY_ATTACK_SPEED: 1.0, // Base enemy attacks per second
+    BASE_ENEMY_ATTACK_SPEED: 0.5, // Base enemy attacks per second (halved for testing)
     ENEMY_SPEED_SCALING: 0.015,   // Enemy attack speed increase per zone
     MAX_ENEMY_ATTACK_SPEED: 3.0,  // Cap enemy attack speed
     HEAL_ON_KILL: 0.03,       // 3% max HP healed on enemy kill
