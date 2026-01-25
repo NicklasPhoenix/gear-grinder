@@ -407,6 +407,7 @@ export class CombatSystem {
             // Don't reset playerAttackTimer - maintain attack rhythm between enemies
             // Only reset enemy timer since it's a new enemy
             newState.combatState.enemyAttackTimer = 0;
+            this.enemyWindupFired = false; // Reset windup flag for new enemy
             if (stats.damageShield > 0) {
                 newState.combatState.damageShield = stats.damageShield;
             }

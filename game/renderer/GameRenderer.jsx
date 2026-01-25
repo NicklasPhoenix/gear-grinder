@@ -2064,37 +2064,41 @@ export default function GameRenderer() {
             const zone = getZoneById(state.currentZone);
             const zoneId = zone.id;
 
-            // Determine sprite path based on zone
-            let spritePath;
-            if (zone.isBoss) {
-                const spriteName = ZONE_BOSS_SPRITES[zoneId] || 'crow_demon';
-                spritePath = `/assets/bosses/${spriteName}.png`;
-            } else {
-                const spriteName = ZONE_MONSTER_SPRITES[zoneId] || 'spider_red';
-                spritePath = `/assets/monsters/${spriteName}.png`;
-            }
-
-            // Apply texture from cache (all sprites are pre-loaded during init)
-            if (monsterTextureCache[spritePath]) {
-                enemyRef.current.texture = monsterTextureCache[spritePath];
-            } else {
-                // Fallback: load async if somehow not cached (shouldn't happen)
-                // Check PIXI cache first to avoid duplicate key warnings
-                if (PIXI.Assets.cache.has(spritePath)) {
-                    const texture = PIXI.Assets.cache.get(spritePath);
-                    texture.source.scaleMode = 'nearest';
-                    monsterTextureCache[spritePath] = texture;
-                    if (enemyRef.current) {
-                        enemyRef.current.texture = texture;
-                    }
+            // Skip static sprite loading for zones that use animated sprites
+            const animatedSpriteKey = ANIMATED_ZONE_SPRITES[zoneId];
+            if (!animatedSpriteKey || zone.isBoss) {
+                // Determine sprite path based on zone
+                let spritePath;
+                if (zone.isBoss) {
+                    const spriteName = ZONE_BOSS_SPRITES[zoneId] || 'crow_demon';
+                    spritePath = `/assets/bosses/${spriteName}.png`;
                 } else {
-                    PIXI.Assets.load(spritePath).then((texture) => {
+                    const spriteName = ZONE_MONSTER_SPRITES[zoneId] || 'spider_red';
+                    spritePath = `/assets/monsters/${spriteName}.png`;
+                }
+
+                // Apply texture from cache (all sprites are pre-loaded during init)
+                if (monsterTextureCache[spritePath]) {
+                    enemyRef.current.texture = monsterTextureCache[spritePath];
+                } else {
+                    // Fallback: load async if somehow not cached (shouldn't happen)
+                    // Check PIXI cache first to avoid duplicate key warnings
+                    if (PIXI.Assets.cache.has(spritePath)) {
+                        const texture = PIXI.Assets.cache.get(spritePath);
                         texture.source.scaleMode = 'nearest';
                         monsterTextureCache[spritePath] = texture;
                         if (enemyRef.current) {
                             enemyRef.current.texture = texture;
                         }
-                    }).catch(err => console.warn('Failed to load monster sprite:', spritePath, err));
+                    } else {
+                        PIXI.Assets.load(spritePath).then((texture) => {
+                            texture.source.scaleMode = 'nearest';
+                            monsterTextureCache[spritePath] = texture;
+                            if (enemyRef.current) {
+                                enemyRef.current.texture = texture;
+                            }
+                        }).catch(err => console.warn('Failed to load monster sprite:', spritePath, err));
+                    }
                 }
             }
 
